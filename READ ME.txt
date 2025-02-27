@@ -1,0 +1,31 @@
+src/
+├── core/
+│   ├── __init__.py
+│   ├── character.py      			# Character class and management
+│   ├── combat.py         			# Combat system including IP
+│   ├── database.py       			# Firebase integration
+│   └── state.py         			# Game state management
+├── modules/
+│   ├── __init__.py
+│   ├── moves/
+│   │   ├── __init__.py
+│   │   ├── manager.py    			# Moveset management
+│   │   └── loader.py     			# Moveset import/export
+│   ├── spells/
+│   │   ├── __init__.py
+│   │   └── manager.py    			# Spell system
+│   ├── menu/
+│   │   ├── __init__.py
+│   │   ├── character_creation.py	# Character creation menu classes
+│   │   ├── views.py      			# Discord UI components
+│   │   └── handlers.py   			# Menu action handlers
+│   └── combat/
+│       ├── __init__.py
+│       ├── initiative.py  		# Initiative tracking
+│       └── actions.py     		# Combat actions/IP system
+├── utils/
+│   ├── __init__.py
+│   ├── dice.py          			# Dice rolling system
+│   ├── constants.py     			# Game constants
+│   └── formatting.py    			# Message formatting
+└── bot.py              			# Main bot file

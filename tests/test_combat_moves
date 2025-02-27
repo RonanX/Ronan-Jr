@@ -1,0 +1,340 @@
+"""
+Test harness for combat move functionality with initiative tracking.
+
+Tests:
+1. Phase transitions (cast -> active -> cooldown)
+2. Roll timing variants (instant/active/per-turn)
+3. Target processing and heat stacks 
+4. Resource cost handling
+5. Save throws and conditions
+
+
+import asyncio
+import sys
+import os
+from typing import Optional, List, Dict, Any, Tuple
+from dataclasses import dataclass, field
+import logging
+
+
+
+from core.character import Character, Stats, Resources, DefenseStats, StatType
+from modules.moves.data import MoveData, Moveset
+from core.effects.condition import ConditionType, ConditionEffect
+from core.effects.move import RollTiming, MoveEffect, MoveState
+from modules.moves.manager import MoveManager
+from utils.advanced_dice.attack_calculator import AttackCalculator
+from utils.advanced_dice.calculator import DiceCalculator
+
+"""
+
+###################################################################################
+
+"""
+Test harness for move system validation.
+Tests key functionality in isolation for easier debugging.
+"""
+
+import asyncio
+import sys
+import os
+import logging
+from typing import Dict, List, Optional
+from dataclasses import dataclass, field
+
+# Add src to path for imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from core.character import Character, Stats, Resources, DefenseStats, StatType
+from modules.moves.data import MoveData
+from core.effects.move import MoveEffect, RollTiming
+from modules.moves.manager import MoveManager
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(message)s'  # Simplified format for readability
+)
+logger = logging.getLogger(__name__)
+
+@dataclass
+class TestChar:
+    """Simplified character creation for testing"""
+    name: str
+    strength: int = 10
+    dexterity: int = 10
+    constitution: int = 10
+    intelligence: int = 10
+    wisdom: int = 10
+    charisma: int = 10
+    hp: int = 50
+    mp: int = 30
+    ac: int = 15
+    
+    def create(self) -> Character:
+        """Create a Character instance with these stats"""
+        base_stats = {
+            StatType.STRENGTH: self.strength,
+            StatType.DEXTERITY: self.dexterity,
+            StatType.CONSTITUTION: self.constitution,
+            StatType.INTELLIGENCE: self.intelligence,
+            StatType.WISDOM: self.wisdom,
+            StatType.CHARISMA: self.charisma
+        }
+        stats = Stats(base=base_stats, modified=base_stats.copy())
+        
+        resources = Resources(
+            current_hp=self.hp,
+            max_hp=self.hp,
+            current_mp=self.mp,
+            max_mp=self.mp
+        )
+        
+        defense = DefenseStats(
+            base_ac=self.ac,
+            current_ac=self.ac
+        )
+        
+        return Character(self.name, stats, resources, defense)
+
+class TestScenario:
+    """Base class for test scenarios"""
+    def __init__(self, name: str):
+        self.name = name
+        self.characters: Dict[str, Character] = {}
+        self.current_round = 1
+    
+    def setup(self):
+        """Setup test characters - override in subclasses"""
+        pass
+        
+    async def run(self):
+        """Run the test scenario - override in subclasses"""
+        pass
+        
+    def log_separator(self):
+        """Print a visual separator in logs"""
+        logger.info("\n" + "="*50)
+        logger.info(f"Testing: {self.name}")
+        logger.info("="*50)
+
+class BasicAttackTest(TestScenario):
+    """Test basic attack functionality"""
+    def setup(self):
+        # Create attacker with good STR
+        self.characters["Attacker"] = TestChar(
+            name="Attacker",
+            strength=16,  # +3 modifier
+            dexterity=14  # +2 modifier
+        ).create()
+        
+        # Create target with standard AC
+        self.characters["Target"] = TestChar(
+            name="Target",
+            constitution=14  # For save tests
+        ).create()
+        
+        # Create attack move
+        move = MoveData(
+            name="Test Strike",
+            description="Basic attack test",
+            attack_roll="1d20+str",
+            damage="1d6+str slashing",
+            star_cost=1
+        )
+        
+        self.characters["Attacker"].add_move(move)
+    
+    async def run(self):
+        self.log_separator()
+        
+        attacker = self.characters["Attacker"]
+        target = self.characters["Target"]
+        
+        # Get the move
+        move = attacker.get_move("Test Strike")
+        
+        # Create and apply effect
+        effect = MoveManager.create_effect_from_data(
+            move,
+            round_number=self.current_round,
+            targets=[target]
+        )
+        
+        # Log initial resources
+        logger.info(f"\nInitial state:")
+        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
+        logger.info(f"Target HP: {target.resources.current_hp}")
+        
+        # Apply effect
+        feedback = attacker.add_effect(effect)
+        logger.info(f"\nEffect feedback:\n{feedback}")
+        
+        # Process turn effects
+        messages = await effect.on_turn_start(attacker, self.current_round, attacker.name)
+        if messages:
+            logger.info("\nTurn effects:")
+            for msg in messages:
+                logger.info(msg)
+        
+        # Log final state
+        logger.info(f"\nFinal state:")
+        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
+        logger.info(f"Target HP: {target.resources.current_hp}")
+
+class MultiTargetTest(TestScenario):
+    """Test targeting multiple characters"""
+    def setup(self):
+        # Create attacker
+        self.characters["Attacker"] = TestChar(
+            name="Attacker",
+            strength=16,
+            intelligence=14  # For save DC
+        ).create()
+        
+        # Create multiple targets
+        self.characters["Target1"] = TestChar(name="Target1").create()
+        self.characters["Target2"] = TestChar(name="Target2").create()
+        
+        # Create AoE move
+        move = MoveData(
+            name="Fire Burst",
+            description="Multi-target fire attack",
+            damage="2d6 fire",
+            save_type="dex",
+            save_dc="8+prof+int",
+            half_on_save=True,
+            star_cost=2,
+            mp_cost=10
+        )
+        
+        self.characters["Attacker"].add_move(move)
+    
+    async def run(self):
+        self.log_separator()
+        
+        attacker = self.characters["Attacker"]
+        targets = [self.characters["Target1"], self.characters["Target2"]]
+        
+        # Get move
+        move = attacker.get_move("Fire Burst")
+        
+        # Create and apply effect
+        effect = MoveManager.create_effect_from_data(
+            move,
+            round_number=self.current_round,
+            targets=targets
+        )
+        
+        # Log initial states
+        logger.info(f"\nInitial state:")
+        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
+        for target in targets:
+            logger.info(f"{target.name} HP: {target.resources.current_hp}")
+        
+        # Apply effect
+        feedback = attacker.add_effect(effect)
+        logger.info(f"\nEffect feedback:\n{feedback}")
+        
+        # Process turn effects
+        messages = await effect.on_turn_start(attacker, self.current_round, attacker.name)
+        if messages:
+            logger.info("\nTurn effects:")
+            for msg in messages:
+                logger.info(msg)
+        
+        # Log final states
+        logger.info(f"\nFinal state:")
+        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
+        for target in targets:
+            logger.info(f"{target.name} HP: {target.resources.current_hp}")
+
+class PhaseTest(TestScenario):
+    """Test move phase transitions"""
+    def setup(self):
+        # Create caster with resources
+        self.characters["Caster"] = TestChar(
+            name="Caster",
+            intelligence=16,
+            mp=50
+        ).create()
+        
+        # Create target
+        self.characters["Target"] = TestChar(name="Target").create()
+        
+        # Create phased move
+        move = MoveData(
+            name="Power Beam",
+            description="Attack with cast time",
+            attack_roll="1d20+int",
+            damage="3d6+int force",
+            cast_time=1,
+            duration=2,
+            cooldown=2,
+            star_cost=3,
+            mp_cost=20
+        )
+        
+        self.characters["Caster"].add_move(move)
+    
+    async def run(self):
+        self.log_separator()
+        
+        caster = self.characters["Caster"]
+        target = self.characters["Target"]
+        
+        # Get move
+        move = caster.get_move("Power Beam")
+        
+        # Test through multiple rounds
+        for round_num in range(1, 6):
+            self.current_round = round_num
+            logger.info(f"\n=== Round {round_num} ===")
+            
+            if round_num == 1:
+                # Initial cast
+                effect = MoveManager.create_effect_from_data(
+                    move,
+                    round_number=round_num,
+                    targets=[target]
+                )
+                feedback = caster.add_effect(effect)
+                logger.info(f"Cast start:\n{feedback}")
+            
+            # Process turn
+            start_msgs = await effect.on_turn_start(caster, round_num, caster.name)
+            if start_msgs:
+                logger.info("\nTurn start:")
+                for msg in start_msgs:
+                    logger.info(msg)
+                    
+            end_msgs = effect.on_turn_end(caster, round_num, caster.name)
+            if end_msgs:
+                logger.info("\nTurn end:")
+                for msg in end_msgs:
+                    logger.info(msg)
+            
+            # Check state
+            logger.info(f"\nState: {effect.state.name}")
+            logger.info(f"MP: {caster.resources.current_mp}")
+
+async def main():
+    """Run all test scenarios"""
+    test_classes = [
+        BasicAttackTest("Basic Attack Functionality"),
+        MultiTargetTest("Multi-Target Attacks"),
+        PhaseTest("Phase Transitions")
+    ]
+    
+    for test_class in test_classes:
+        try:
+            test_class.setup()
+            await test_class.run()
+        except Exception as e:
+            logger.error(f"\nError in {test_class.name}:")
+            logger.error(f"  {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+
+if __name__ == "__main__":
+    asyncio.run(main())
