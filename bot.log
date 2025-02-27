@@ -5860,3 +5860,21 @@ AttributeError: 'Interaction' object has no attribute '__discord_app_commands_ch
 2025-02-26 23:12:32,234 - core.database - INFO - Character test saved successfully
 2025-02-26 23:14:49,314 - core.database - INFO - Character test saved successfully
 2025-02-26 23:15:09,688 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:16,828 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-26 23:24:16,838 - discord.client - INFO - logging in using static token
+2025-02-26 23:24:17,848 - core.database - INFO - No migration needed
+2025-02-26 23:24:17,848 - core.database - INFO - Database initialized successfully
+2025-02-26 23:24:17,944 - core.state - INFO - Loaded 5 characters into game state
+2025-02-26 23:24:18,429 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7bcc401005b4525e3d353691c072e487).
+2025-02-26 23:24:20,448 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-26 23:24:26,670 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:27,765 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:28,885 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:29,987 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:31,082 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:32,171 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:33,289 - core.database - INFO - Character test2 saved successfully
+2025-02-26 23:24:34,376 - core.database - INFO - Character test saved successfully
+2025-02-26 23:24:35,474 - core.database - INFO - Character test saved successfully
+2025-02-26 23:25:53,860 - core.database - INFO - Character test saved successfully
+2025-02-27 01:07:15,061 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7bcc401005b4525e3d353691c072e487.
