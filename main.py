@@ -168,7 +168,7 @@ class GameBot(commands.Bot):
         await self.load_extension("commands.combat")   # Load combat commands  
         await self.load_extension("commands.healing")  # Load healing commands  
         await self.load_extension("commands.advanced_roll") # Load dice roll commands  
-        await self.load_extension("commands.skillcheck")  # Load skill check commands  
+        await self.load_extension("commands.skillcheck")  # Load skill check commands
         await self.load_extension("modules.menu.skill_check_handler")  # Load skill check context menus  
         await self.load_extension("commands.initiative")  # Load initiative commands  
         await self.load_extension("commands.moves") # Load move commands

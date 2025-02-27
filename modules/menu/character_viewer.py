@@ -1,5 +1,8 @@
-# src/modules/menu/character_viewer.py
-"""Main class to handle character information display and interaction."""
+"""
+src/modules/menu/character_viewer.py
+
+Main class to handle character information display and interaction.
+"""
 
 from discord import Interaction, Embed, ButtonStyle, Color, SelectOption
 from discord.ui import View, Button, Select
@@ -14,6 +17,8 @@ class CharacterViewer:
         self.character = character
         self.current_view: Optional[View] = None
         self.current_page = "overview"
+        self.action_handler = None
+        self.bot = None
 
     def _get_attr(self, attr: str, default: Any = None) -> Any:
         """Safely get attribute from either Character object or dict"""
@@ -91,6 +96,13 @@ class CharacterViewer:
 
     async def show(self, interaction: Interaction) -> None:
         """Initialize and display the character viewer"""
+        # Set bot from interaction if available
+        if hasattr(interaction, 'client'):
+            self.bot = interaction.client
+            # Initialize action handler if bot is available
+            from .action_handler import ActionHandler
+            self.action_handler = ActionHandler(self.bot)
+            
         self.current_view = CharacterViewerUI(self)
         embed = await self.create_current_embed()
         await interaction.response.send_message(embed=embed, view=self.current_view)
@@ -148,6 +160,27 @@ class CharacterViewer:
             value=f"`{self._get_attr('spell_save_dc', 0)}`",
             inline=True
         )
+        
+        # Action stars (compact)
+        current_stars = self._get_attr('action_stars.current_stars', 5)
+        max_stars = self._get_attr('action_stars.max_stars', 5)
+        
+        embed.add_field(
+            name="Action Stars",
+            value=f"`{current_stars}/{max_stars}` {'⭐' * current_stars}{'⚫' * (max_stars - current_stars)}",
+            inline=True
+        )
+        
+        # Add active effects summary if any (instead of moveset info)
+        effects = self._get_attr('effects', [])
+        if effects:
+            effect_count = len(effects)
+            if effect_count > 0:
+                embed.add_field(
+                    name=f"Active Effects ({effect_count})",
+                    value="See Status Effects tab for details",
+                    inline=False
+                )
         
         return embed
 
@@ -233,16 +266,65 @@ class CharacterViewer:
 
     async def _create_actions_embed(self) -> Embed:
         """Create the actions page using ActionHandler"""
-        from modules.menu.action_handler import ActionHandler
+        if self.action_handler:
+            return self.action_handler.create_action_embed(self.character)
+        
+        # Fallback if ActionHandler not available
+        from .action_handler import ActionHandler
         return ActionHandler.create_action_embed(self.character)
 
     async def _create_moveset_embed(self) -> Embed:
-        """Placeholder for moveset page"""
+        """Create moveset page with ActionHandler"""
+        # If we have the action_handler, use it
+        if self.action_handler and hasattr(self.character, 'list_moves'):
+            # Check if there are any moves
+            if self.character.list_moves():
+                return self.action_handler.create_moves_embed(self.character)
+        
+        # Fallback for no moves or no action handler
         embed = Embed(
             title=f"{self._get_attr('name', 'Unknown')}'s Moveset",
-            description="Moveset system coming soon!",
             color=Color.greyple()
         )
+        
+        if hasattr(self.character, 'list_moves') and callable(getattr(self.character, 'list_moves')):
+            moves = self.character.list_moves()
+            if not moves:
+                embed.description = "No moves found. Use `/move create` to add moves to this character."
+            else:
+                # Basic move list without fancy pagination
+                moves_by_category = {}
+                for name in moves:
+                    move = self.character.get_move(name)
+                    if move:
+                        category = getattr(move, 'category', 'Other')
+                        if category not in moves_by_category:
+                            moves_by_category[category] = []
+                        moves_by_category[category].append(move)
+                
+                for category, category_moves in moves_by_category.items():
+                    move_lines = []
+                    for move in category_moves:
+                        cost_parts = []
+                        if getattr(move, 'star_cost', 0) > 0:
+                            cost_parts.append(f"⭐ {move.star_cost}")
+                        if getattr(move, 'mp_cost', 0) > 0:
+                            cost_parts.append(f"MP: {move.mp_cost}")
+                            
+                        cost_text = f" ({', '.join(cost_parts)})" if cost_parts else ""
+                        move_lines.append(f"• {move.name}{cost_text}")
+                        
+                    if move_lines:
+                        embed.add_field(
+                            name=f"{category} Moves ({len(move_lines)})",
+                            value="\n".join(move_lines),
+                            inline=False
+                        )
+                
+                embed.set_footer(text="Use '/move list' for interactive move management")
+        else:
+            embed.description = "Moveset system not available for this character."
+        
         return embed
 
     async def _create_inventory_embed(self) -> Embed:
@@ -264,15 +346,22 @@ class CharacterViewerUI(View):
     def _add_navigation(self) -> None:
         """Add navigation buttons"""
         # Row 1
-        self.add_item(NavButton("Overview", "overview", ButtonStyle.grey))
-        self.add_item(NavButton("Stats", "stats", ButtonStyle.grey))
-        self.add_item(NavButton("Defenses", "defenses", ButtonStyle.grey))
-        self.add_item(NavButton("Status Effects", "status", ButtonStyle.grey))
+        self.add_item(NavButton("Overview", "overview", 
+                                ButtonStyle.primary if self.viewer.current_page == "overview" else ButtonStyle.secondary))
+        self.add_item(NavButton("Stats", "stats", 
+                                ButtonStyle.primary if self.viewer.current_page == "stats" else ButtonStyle.secondary))
+        self.add_item(NavButton("Defenses", "defenses", 
+                                ButtonStyle.primary if self.viewer.current_page == "defenses" else ButtonStyle.secondary))
+        self.add_item(NavButton("Status Effects", "status", 
+                                ButtonStyle.primary if self.viewer.current_page == "status" else ButtonStyle.secondary))
         
         # Row 2
-        self.add_item(NavButton("Actions", "actions", ButtonStyle.blurple, row=1))  # New Actions button
-        self.add_item(NavButton("Moveset", "moveset", ButtonStyle.grey, row=1))
-        self.add_item(NavButton("Inventory", "inventory", ButtonStyle.grey, row=1))
+        self.add_item(NavButton("Actions", "actions", 
+                                ButtonStyle.primary if self.viewer.current_page == "actions" else ButtonStyle.secondary, row=1))
+        self.add_item(NavButton("Moveset", "moveset", 
+                                ButtonStyle.primary if self.viewer.current_page == "moveset" else ButtonStyle.secondary, row=1))
+        self.add_item(NavButton("Inventory", "inventory", 
+                                ButtonStyle.primary if self.viewer.current_page == "inventory" else ButtonStyle.secondary, row=1))
 
 class NavButton(Button):
     """Navigation button for character viewer"""
@@ -290,6 +379,30 @@ class NavButton(Button):
 
     async def callback(self, interaction: Interaction) -> None:
         viewer = self.view.viewer  # type: CharacterViewer
+        
+        # Special handling for moveset tab with ActionHandler
+        if self.page_id == "moveset" and viewer.action_handler and hasattr(viewer.character, 'list_moves'):
+            # Check if there are moves before showing the specialized view
+            has_moves = False
+            
+            if hasattr(viewer.character, 'moveset') and hasattr(viewer.character.moveset, 'moves'):
+                has_moves = bool(viewer.character.moveset.moves)
+            elif hasattr(viewer.character, 'list_moves') and callable(getattr(viewer.character, 'list_moves')):
+                has_moves = bool(viewer.character.list_moves())
+                
+            if has_moves:
+                # Create the embed
+                embed = viewer.action_handler.create_moves_embed(viewer.character)
+                
+                # Create the view
+                from .action_handler import MovesetView
+                view = MovesetView(viewer.character, handler=viewer.action_handler)
+                
+                # Update the message - use edit_message instead of sending a new message
+                await interaction.response.edit_message(embed=embed, view=view)
+                return
+        
+        # Default tab behavior
         viewer.current_page = self.page_id
         embed = await viewer.create_current_embed()
         await interaction.response.edit_message(embed=embed, view=self.view)

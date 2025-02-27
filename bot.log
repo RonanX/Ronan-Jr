@@ -5878,3 +5878,486 @@ AttributeError: 'Interaction' object has no attribute '__discord_app_commands_ch
 2025-02-26 23:24:35,474 - core.database - INFO - Character test saved successfully
 2025-02-26 23:25:53,860 - core.database - INFO - Character test saved successfully
 2025-02-27 01:07:15,061 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7bcc401005b4525e3d353691c072e487.
+2025-02-27 02:33:08,402 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 02:33:08,417 - discord.client - INFO - logging in using static token
+2025-02-27 02:33:09,331 - core.database - INFO - No migration needed
+2025-02-27 02:33:09,331 - core.database - INFO - Database initialized successfully
+2025-02-27 02:33:09,440 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 02:33:09,832 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 5f3baf703b416af200c4bf0e6c2598d9).
+2025-02-27 02:33:11,848 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 02:33:45,673 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:48,502 - core.database - INFO - Character test deleted successfully
+2025-02-27 02:33:48,672 - core.database - INFO - Character test2 deleted successfully
+2025-02-27 02:33:48,862 - core.database - INFO - Character test3 deleted successfully
+2025-02-27 02:33:49,037 - core.database - INFO - Character test4 deleted successfully
+2025-02-27 02:33:49,038 - core.state - INFO - Added character test to game state
+2025-02-27 02:33:49,133 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:49,133 - core.state - INFO - Added character test2 to game state
+2025-02-27 02:33:49,211 - core.database - INFO - Character test2 saved successfully
+2025-02-27 02:33:49,213 - core.state - INFO - Added character test3 to game state
+2025-02-27 02:33:49,303 - core.database - INFO - Character test3 saved successfully
+2025-02-27 02:33:49,304 - core.state - INFO - Added character test4 to game state
+2025-02-27 02:33:49,390 - core.database - INFO - Character test4 saved successfully
+2025-02-27 02:33:49,560 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:49,747 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:49,826 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:49,913 - core.database - INFO - Character test2 saved successfully
+2025-02-27 02:33:50,228 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:50,311 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:50,615 - core.database - INFO - Character test2 saved successfully
+2025-02-27 02:33:50,943 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:51,227 - core.database - INFO - Moveset test_global_moveset saved successfully
+2025-02-27 02:33:51,409 - core.database - INFO - Moveset test_global_moveset loaded successfully
+2025-02-27 02:33:51,574 - core.database - INFO - Character test2 saved successfully
+2025-02-27 02:33:51,757 - core.database - INFO - Character test saved successfully
+2025-02-27 02:33:51,942 - core.database - INFO - Character test saved successfully
+2025-02-27 02:34:12,532 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py:1149> exception=AttributeError("'Interaction' object has no attribute 'send'")>
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 588, in list_moves
+    await self.action_handler.show_moves(interaction, char)
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 822, in show_moves
+    await interaction.followup.send(embed=embed, view=view)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\webhook\async_.py", line 1843, in send
+    data = await adapter.execute_webhook(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\webhook\async_.py", line 221, in request
+    raise NotFound(response, data)
+discord.errors.NotFound: 404 Not Found (error code: 10015): Unknown Webhook
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 857, in _do_call
+    return await self._callback(self.binding, interaction, **params)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 592, in list_moves
+    await interaction.followup.send(error_msg, ephemeral=True)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\webhook\async_.py", line 1843, in send
+    data = await adapter.execute_webhook(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\webhook\async_.py", line 221, in request
+    raise NotFound(response, data)
+discord.errors.NotFound: 404 Not Found (error code: 10015): Unknown Webhook
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1310, in _call
+    await command._invoke_with_namespace(interaction, namespace)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 883, in _invoke_with_namespace
+    return await self._do_call(interaction, transformed_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 876, in _do_call
+    raise CommandInvokeError(self, e) from e
+discord.app_commands.errors.CommandInvokeError: Command 'list' raised an exception: NotFound: 404 Not Found (error code: 10015): Unknown Webhook
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1314, in _call
+    await self.on_error(interaction, e)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 281, in on_app_command_error
+    await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 272, in handle_command_error
+    await ctx.send(embed=error_embed)
+          ^^^^^^^^
+AttributeError: 'Interaction' object has no attribute 'send'
+2025-02-27 02:37:41,300 - core.database - INFO - Character test saved successfully
+2025-02-27 02:46:25,582 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 02:46:25,582 - discord.client - INFO - logging in using static token
+2025-02-27 02:46:26,950 - core.database - INFO - No migration needed
+2025-02-27 02:46:26,950 - core.database - INFO - Database initialized successfully
+2025-02-27 02:46:27,061 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 02:46:27,407 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a6f26e55e077748149ec06fe14786da5).
+2025-02-27 02:46:29,411 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 02:48:53,821 - core.database - INFO - Character test saved successfully
+2025-02-27 02:49:00,162 - core.database - INFO - Character test2 saved successfully
+2025-02-27 02:49:03,512 - core.database - INFO - Character test saved successfully
+2025-02-27 02:53:08,395 - core.database - INFO - Character test saved successfully
+2025-02-27 02:53:21,437 - modules.menu.action_handler - ERROR - Error showing moves: item would not fit at row 0 (9 > 5 width)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 785, in show_moves
+    view = MovePaginationView(
+           ^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 258, in __init__
+    self._build_view()
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 349, in _build_view
+    self.add_item(more_dropdown)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 329, in add_item
+    self.__weights.add_item(item)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 115, in add_item
+    raise ValueError(f'item would not fit at row {item.row} ({total} > 5 width)')
+ValueError: item would not fit at row 0 (9 > 5 width)
+2025-02-27 02:53:21,560 - discord.ui.view - ERROR - Ignoring exception in view <CharacterViewerUI timeout=None children=7> for item <NavButton style=<ButtonStyle.secondary: 2> url=None disabled=False label='Moveset' emoji=None row=1 sku_id=None>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 430, in _scheduled_task
+    await item.callback(interaction)
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\character_viewer.py", line 407, in callback
+    await viewer.action_handler.show_moves(interaction, viewer.character)
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 808, in show_moves
+    view = MovePaginationView(
+           ^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 258, in __init__
+    self._build_view()
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 349, in _build_view
+    self.add_item(more_dropdown)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 329, in add_item
+    self.__weights.add_item(item)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 115, in add_item
+    raise ValueError(f'item would not fit at row {item.row} ({total} > 5 width)')
+ValueError: item would not fit at row 0 (9 > 5 width)
+2025-02-27 03:02:28,290 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 03:02:28,292 - discord.client - INFO - logging in using static token
+2025-02-27 03:02:29,258 - core.database - INFO - No migration needed
+2025-02-27 03:02:29,258 - core.database - INFO - Database initialized successfully
+2025-02-27 03:02:29,366 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 03:02:29,774 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: abf8f1b924a0c976d9b596e32f8a017f).
+2025-02-27 03:02:31,782 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 03:04:12,390 - core.database - INFO - Character test saved successfully
+2025-02-27 03:04:12,500 - core.database - INFO - Character test2 saved successfully
+2025-02-27 03:04:14,432 - core.database - INFO - Character test saved successfully
+2025-02-27 03:06:15,711 - core.database - INFO - Character test saved successfully
+2025-02-27 03:06:23,047 - core.database - INFO - Character test saved successfully
+2025-02-27 03:06:29,533 - core.database - INFO - Character test saved successfully
+2025-02-27 03:30:15,466 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 03:30:15,481 - discord.client - INFO - logging in using static token
+2025-02-27 03:30:16,450 - core.database - INFO - No migration needed
+2025-02-27 03:30:16,450 - core.database - INFO - Database initialized successfully
+2025-02-27 03:30:16,550 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 03:30:16,991 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: df03c90fd14789163a22eac1115e543b).
+2025-02-27 03:30:18,995 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 03:32:58,961 - core.database - INFO - Character test saved successfully
+2025-02-27 03:32:59,042 - core.database - INFO - Character test2 saved successfully
+2025-02-27 03:33:37,078 - core.database - INFO - Character test saved successfully
+2025-02-27 03:33:52,939 - modules.menu.action_handler - ERROR - Error executing move: 'Command' object is not callable
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 177, in execute_move
+    await move_cog.use_move(**args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Command' object is not callable
+2025-02-27 03:37:35,325 - modules.menu.action_handler - ERROR - Error executing move: 'Command' object is not callable
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 177, in execute_move
+    await move_cog.use_move(**args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Command' object is not callable
+2025-02-27 03:46:36,903 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 03:46:36,903 - discord.client - INFO - logging in using static token
+2025-02-27 03:46:38,196 - core.database - INFO - No migration needed
+2025-02-27 03:46:38,196 - core.database - INFO - Database initialized successfully
+2025-02-27 03:46:38,298 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 03:46:38,681 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b6b8bc07ce200627da59285e0349f368).
+2025-02-27 03:46:40,686 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 03:47:01,532 - core.database - INFO - Character test saved successfully
+2025-02-27 03:47:01,626 - core.database - INFO - Character test2 saved successfully
+2025-02-27 03:47:04,522 - core.database - INFO - Character test2 saved successfully
+2025-02-27 03:47:10,054 - core.database - INFO - Character test saved successfully
+2025-02-27 03:55:07,902 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 03:55:07,906 - discord.client - INFO - logging in using static token
+2025-02-27 03:55:08,886 - core.database - INFO - No migration needed
+2025-02-27 03:55:08,886 - core.database - INFO - Database initialized successfully
+2025-02-27 03:55:09,034 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 03:55:10,746 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1ea214a9ce01fa0c75ffb45713dd523f).
+2025-02-27 03:55:12,770 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 03:55:24,254 - core.database - INFO - Character test saved successfully
+2025-02-27 03:55:24,344 - core.database - INFO - Character test2 saved successfully
+2025-02-27 03:55:27,424 - core.database - INFO - Character test2 saved successfully
+2025-02-27 03:55:30,425 - core.database - INFO - Character test saved successfully
+2025-02-27 11:37:06,002 - discord.client - ERROR - Attempting a reconnect in 0.29s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-02-27 11:37:06,794 - discord.client - ERROR - Attempting a reconnect in 2.32s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-02-27 11:37:09,145 - discord.client - ERROR - Attempting a reconnect in 4.08s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-02-27 11:37:13,497 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-02-27 11:37:19,005 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9c42947c28dd9cd2f94ce840d0477e8b).
+2025-02-27 11:37:21,042 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 12:14:34,635 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 12:14:34,635 - discord.client - INFO - logging in using static token
+2025-02-27 12:14:35,675 - core.database - INFO - No migration needed
+2025-02-27 12:14:35,675 - core.database - INFO - Database initialized successfully
+2025-02-27 12:14:35,765 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 12:14:36,161 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 815797d53360b44bb8b16476f04471da).
+2025-02-27 12:14:38,196 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 15:15:53,781 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 15:15:53,781 - discord.client - INFO - logging in using static token
+2025-02-27 15:15:54,854 - core.database - INFO - No migration needed
+2025-02-27 15:15:54,854 - core.database - INFO - Database initialized successfully
+2025-02-27 15:15:54,947 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 15:15:55,275 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 5b01f8b1b15f786c41d432f6c961aff2).
+2025-02-27 15:15:57,316 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 15:20:17,424 - core.database - INFO - Character test deleted successfully
+2025-02-27 15:20:17,630 - core.database - INFO - Character test2 deleted successfully
+2025-02-27 15:20:17,811 - core.database - INFO - Character test3 deleted successfully
+2025-02-27 15:20:17,985 - core.database - INFO - Character test4 deleted successfully
+2025-02-27 15:20:17,986 - core.state - INFO - Added character test to game state
+2025-02-27 15:20:18,074 - core.database - INFO - Character test saved successfully
+2025-02-27 15:20:18,075 - core.state - INFO - Added character test2 to game state
+2025-02-27 15:20:18,166 - core.database - INFO - Character test2 saved successfully
+2025-02-27 15:20:18,166 - core.state - INFO - Added character test3 to game state
+2025-02-27 15:20:18,256 - core.database - INFO - Character test3 saved successfully
+2025-02-27 15:20:18,257 - core.state - INFO - Added character test4 to game state
+2025-02-27 15:20:18,361 - core.database - INFO - Character test4 saved successfully
+2025-02-27 15:23:43,404 - core.database - INFO - Moveset test saved successfully
+2025-02-27 15:25:27,433 - core.database - INFO - Moveset test loaded successfully
+2025-02-27 15:25:27,525 - core.database - INFO - Character test saved successfully
+2025-02-27 15:32:05,684 - core.database - INFO - Character test saved successfully
+2025-02-27 15:32:05,777 - core.database - INFO - Character test2 saved successfully
+2025-02-27 15:32:12,068 - core.database - INFO - Character test2 saved successfully
+2025-02-27 15:32:14,061 - core.database - INFO - Character test saved successfully
+2025-02-27 15:33:20,364 - modules.menu.action_handler - ERROR - Error executing move via command: Could not execute command
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 203, in execute_move
+    raise ValueError("Could not execute command")
+ValueError: Could not execute command
+2025-02-27 15:48:09,123 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 15:48:09,123 - discord.client - INFO - logging in using static token
+2025-02-27 15:48:10,593 - core.database - INFO - No migration needed
+2025-02-27 15:48:10,593 - core.database - INFO - Database initialized successfully
+2025-02-27 15:48:10,712 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 15:48:11,100 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 83a604d0f633e0a60ea62503cb28a66d).
+2025-02-27 15:48:13,107 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 15:52:22,125 - core.database - INFO - Character test saved successfully
+2025-02-27 15:52:22,221 - core.database - INFO - Character test2 saved successfully
+2025-02-27 15:52:29,048 - core.database - INFO - Character test2 saved successfully
+2025-02-27 15:52:34,183 - core.database - INFO - Character test saved successfully
+2025-02-27 15:53:22,336 - core.database - INFO - Character test saved successfully
+2025-02-27 15:54:51,979 - core.database - INFO - Character test2 saved successfully
+2025-02-27 15:54:58,520 - core.database - INFO - Character test saved successfully
+2025-02-27 15:55:34,799 - core.database - INFO - Character test saved successfully
+2025-02-27 16:17:23,869 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 16:17:23,871 - discord.client - INFO - logging in using static token
+2025-02-27 16:17:24,952 - core.database - INFO - No migration needed
+2025-02-27 16:17:24,952 - core.database - INFO - Database initialized successfully
+2025-02-27 16:17:25,056 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 16:18:01,894 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 16:18:01,894 - discord.client - INFO - logging in using static token
+2025-02-27 16:18:02,978 - core.database - INFO - No migration needed
+2025-02-27 16:18:02,980 - core.database - INFO - Database initialized successfully
+2025-02-27 16:18:03,087 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 16:18:03,444 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6faf277559c18fba341c56211685cb83).
+2025-02-27 16:18:05,459 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 16:20:29,407 - modules.menu.action_handler - ERROR - Error executing move: MoveEffect.__init__() got an unexpected keyword argument '_silent_apply'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 208, in execute_move
+    move_effect = MoveEffect(
+                  ^^^^^^^^^^^
+TypeError: MoveEffect.__init__() got an unexpected keyword argument '_silent_apply'
+2025-02-27 16:24:50,117 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 16:24:50,117 - discord.client - INFO - logging in using static token
+2025-02-27 16:24:51,150 - core.database - INFO - No migration needed
+2025-02-27 16:24:51,150 - core.database - INFO - Database initialized successfully
+2025-02-27 16:24:51,259 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 16:24:51,627 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9cc4c450dd963c518dc9fc0d6511a258).
+2025-02-27 16:24:53,637 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 16:37:26,848 - core.database - INFO - Character test deleted successfully
+2025-02-27 16:37:27,041 - core.database - INFO - Character test2 deleted successfully
+2025-02-27 16:37:27,216 - core.database - INFO - Character test3 deleted successfully
+2025-02-27 16:37:27,401 - core.database - INFO - Character test4 deleted successfully
+2025-02-27 16:37:27,402 - core.state - INFO - Added character test to game state
+2025-02-27 16:37:27,487 - core.database - INFO - Character test saved successfully
+2025-02-27 16:37:27,487 - core.state - INFO - Added character test2 to game state
+2025-02-27 16:37:27,578 - core.database - INFO - Character test2 saved successfully
+2025-02-27 16:37:27,579 - core.state - INFO - Added character test3 to game state
+2025-02-27 16:37:27,669 - core.database - INFO - Character test3 saved successfully
+2025-02-27 16:37:27,671 - core.state - INFO - Added character test4 to game state
+2025-02-27 16:37:27,783 - core.database - INFO - Character test4 saved successfully
+2025-02-27 16:37:41,812 - core.database - INFO - Moveset test loaded successfully
+2025-02-27 16:37:41,904 - core.database - INFO - Character test saved successfully
+2025-02-27 16:38:09,242 - core.database - INFO - Character test saved successfully
+2025-02-27 16:39:07,983 - core.database - INFO - Character test saved successfully
+2025-02-27 16:40:39,724 - core.database - INFO - Character test saved successfully
+2025-02-27 16:40:39,811 - core.database - INFO - Character test2 saved successfully
+2025-02-27 16:40:47,144 - core.database - INFO - Character test2 saved successfully
+2025-02-27 16:41:09,226 - core.database - INFO - Character test saved successfully
+2025-02-27 16:41:26,878 - core.database - INFO - Character test saved successfully
+2025-02-27 16:41:34,233 - core.database - INFO - Character test2 saved successfully
+2025-02-27 16:41:38,094 - core.database - INFO - Character test saved successfully
+2025-02-27 17:02:23,727 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 17:02:23,729 - discord.client - INFO - logging in using static token
+2025-02-27 17:02:24,692 - core.database - INFO - No migration needed
+2025-02-27 17:02:24,693 - core.database - INFO - Database initialized successfully
+2025-02-27 17:02:24,796 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 17:02:25,147 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f638b50d53f5db61d39623aee0699826).
+2025-02-27 17:02:27,168 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 17:03:36,564 - core.database - INFO - Moveset lizzy saved successfully
+2025-02-27 17:05:54,935 - discord.ui.view - ERROR - Ignoring exception in view <View timeout=180.0 children=2> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=False label='Manual Proficiencies' emoji=None row=None sku_id=None>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 430, in _scheduled_task
+    await item.callback(interaction)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\character_creation.py", line 830, in <lambda>
+    manual_button.callback = lambda i: self.create_with_proficiencies(i, style, False)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'StatConfirmationView' object has no attribute 'create_with_proficiencies'
+2025-02-27 17:06:00,968 - discord.ui.view - ERROR - Ignoring exception in view <View timeout=180.0 children=2> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=False label='Quick Create' emoji=None row=None sku_id=None>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 430, in _scheduled_task
+    await item.callback(interaction)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\character_creation.py", line 829, in <lambda>
+    quick_button.callback = lambda i: self.create_with_proficiencies(i, style, True)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'StatConfirmationView' object has no attribute 'create_with_proficiencies'

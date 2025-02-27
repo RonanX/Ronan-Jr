@@ -28,8 +28,9 @@ class MoveData:
     3: Added basic attack parameters (attack_roll, damage)
     4: Added combat parameters (saves, conditions, roll timing)
     5: Added heat tracking support and target params
+    6: Added move category support
     """
-    CURRENT_VERSION = 5
+    CURRENT_VERSION = 6
 
     # Version 1 parameters (base)
     name: str
@@ -63,6 +64,9 @@ class MoveData:
     # Version 5 parameters (enhanced combat)
     enable_heat_tracking: bool = False  # Whether to track heat stacks
     target_selection: str = "manual"    # How targets are selected: "manual", "random", "closest"
+    
+    # Version 6 parameters (UI enhancements)
+    category: str = "Offense"    # Move category: "Offense", "Utility", "Defense", or custom
     
     version: int = CURRENT_VERSION
     custom_parameters: Dict[str, Any] = field(default_factory=dict)
@@ -102,6 +106,9 @@ class MoveData:
             # Version 5+
             "enable_heat_tracking": self.enable_heat_tracking,
             "target_selection": self.target_selection,
+            
+            # Version 6+
+            "category": self.category,
             
             "custom_parameters": self.custom_parameters
         }
@@ -159,13 +166,28 @@ class MoveData:
             move.enable_heat_tracking = data.get("enable_heat_tracking", False)
             move.target_selection = data.get("target_selection", "manual")
             
+        # Version 6+ parameters
+        if version >= 6:
+            move.category = data.get("category", "Offense")
+        else:
+            # Try to infer category from other fields for older versions
+            if move.attack_roll or (move.damage and not move.save_type):
+                move.category = "Offense"
+            elif move.save_type and move.save_type in ["str", "dex", "con", "int", "wis", "cha"]:
+                move.category = "Offense" 
+            elif move.hp_cost < 0:  # Healing moves
+                move.category = "Defense"
+            else:
+                # Default for older versions
+                move.category = "Utility"
+            
         # Store any unknown parameters for future versions
         known_keys = {
             "version", "name", "description", "mp_cost", "hp_cost", "star_cost",
             "cast_time", "duration", "cast_description", "uses", "uses_remaining",
             "cooldown", "last_used_round", "attack_roll", "damage", "crit_range",
             "targets", "save_type", "save_dc", "half_on_save", "conditions",
-            "roll_timing", "enable_heat_tracking", "target_selection",
+            "roll_timing", "enable_heat_tracking", "target_selection", "category",
             "custom_parameters"
         }
         
@@ -223,6 +245,11 @@ class MoveData:
         if self.uses is not None:
             self.uses_remaining = self.uses
         self.last_used_round = None
+        
+    @property
+    def needs_target(self) -> bool:
+        """Whether this move needs a target"""
+        return bool(self.attack_roll or (self.damage and not self.save_type))
 
 @dataclass
 class Moveset:
@@ -256,6 +283,16 @@ class Moveset:
     def list_moves(self) -> List[str]:
         """Get list of all move names"""
         return [move.name for move in self.moves.values()]
+    
+    def get_moves_by_category(self, category: Optional[str] = None) -> List[MoveData]:
+        """Get all moves in a specific category or all moves if category is None"""
+        if category is None:
+            return list(self.moves.values())
+        
+        return [
+            move for move in self.moves.values() 
+            if move.category.lower() == category.lower()
+        ]
     
     def refresh_all(self) -> None:
         """Refresh all moves"""

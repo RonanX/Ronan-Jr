@@ -1,0 +1,100 @@
+{
+  "reference": null,
+  "moves": {
+    "frost_blink": {
+      "name": "Frost Blink",
+      "description": "A quick burst of icy mist envelops Neva as she vanishes, reappearing a short distance away with frost trailing in her wake; Can be used as bonus action or reaction; As reaction: Make INT save vs incoming attack; Success: Teleport and avoid attack; Failure: Teleport but still take attack; Gain advantage on saves when used as reaction",
+      "mp_cost": 5,
+      "hp_cost": 0,
+      "star_cost": 1,
+      "cooldown": 2,
+      "save_type": "int",
+      "category": "Utility",
+      "version": 6
+    },
+    "glacial_recharge": {
+      "name": "Glacial Recharge",
+      "description": "Neva channels her connection to ice magic, drawing from her spiritual essence. Her body momentarily radiates intense cold as she replenishes her power, frost patterns spreading across her skin; Usable even at 0 MP; Creates small patches of ice around Neva; Minor temperature drop in immediate area",
+      "mp_cost": 0,
+      "hp_cost": 0,
+      "star_cost": 1,
+      "damage": "-2d8 mp",
+      "uses": 3,
+      "category": "Utility",
+      "version": 6
+    },
+    "shattered_ground": {
+      "name": "Shattered Ground",
+      "description": "Neva channels ice magic into the ground, creating improvised structures that match her aggressive style; Create during movement: Ramps (5 ft high, +5 ft to jumps), Walls (5 ft high, can be shattered), Spikes (1d4 cold damage on contact); +5 ft movement while active; Can wall-run on ice formations",
+      "mp_cost": 10,
+      "hp_cost": 0,
+      "star_cost": 1,
+      "duration": 3,
+      "category": "Utility",
+      "version": 6
+    },
+    "deadlock_chains": {
+      "name": "Deadlock Chains",
+      "description": "Manifesting chains of black ice from her hands, each link jagged and threatening; Pull herself to surfaces (15 ft); Grab and pull enemies (10 ft); Swing enemies in arc (1d4 to other targets); Grants advantage on next grapple; Special: Applies 1 Frostbite stack on grab",
+      "mp_cost": 8,
+      "hp_cost": 0,
+      "star_cost": 1,
+      "category": "Utility",
+      "version": 6
+    },
+    "rippers_guard": {
+      "name": "Ripper's Guard",
+      "description": "Ice shards swirl around Neva like a frozen mosh pit, becoming more intense with each hit she takes; Gain Spike counter when hit (max 3); Each Spike reduces damage by 1d4; Can shatter Spikes when landing wrestling moves: Each Spike: 1d6 cold damage in 5 ft radius; Applies 1 Frostbite stack per Spike; Creates difficult terrain",
+      "mp_cost": 15,
+      "hp_cost": 0,
+      "star_cost": 2,
+      "category": "Utility",
+      "version": 6
+    },
+    "breakdown": {
+      "name": "Breakdown",
+      "description": "Neva forms rough chunks of ice in her palms, then violently smashes them together. The impact creates a spray of jagged, glass-like shards that spray forward in an erratic pattern; Shattering nearby ice formations adds more shards; Special: Applies 1 Frostbite stack if at least half the shards hit",
+      "mp_cost": 0,
+      "hp_cost": 0,
+      "star_cost": 1,
+      "attack_roll": "6d20m(INT)",
+      "damage": "1d2 cold per hit",
+      "category": "Offense",
+      "version": 6
+    },
+    "frostborne_frenzy": {
+      "name": "Frostborne Frenzy",
+      "description": "A brutal combination of ice-enhanced strikes, mixing quick jabs with headbutts and knee strikes; Each hit applies 1 Frostbite stack; Final hit launches opponent if they have 2+ Frostbite stacks; Can be canceled into wrestling moves; Special: If all hits land, gain advantage on next wrestling move",
+      "mp_cost": 10,
+      "hp_cost": 0,
+      "star_cost": 1,
+      "attack_roll": "3d20m(DEX)",
+      "damage": "1d4+DEX per hit",
+      "category": "Offense",
+      "version": 6
+    },
+    "cheap_shot": {
+      "name": "Cheap Shot",
+      "description": "Neva creates a patch of black ice at her opponent's feet, causing them to slip and stumble forward; Target must make DEX save or be knocked prone; Creates difficult terrain in 5 ft radius; Can chain into heavy attacks against prone targets; Special: Applies 1 Frostbite stack on knockdown",
+      "mp_cost": 8,
+      "hp_cost": 0,
+      "star_cost": 2,
+      "attack_roll": "1d20+DEX",
+      "damage": "1d6+STR bludgeoning + 1d4 cold",
+      "save_type": "dex",
+      "category": "Offense",
+      "version": 6
+    },
+    "spike_breaker": {
+      "name": "Spike Breaker",
+      "description": "An angled pillar of jagged ice erupts from the ground, serving as both launcher and temporary platform; Creates temporary elevated platform; Can be shattered for area damage; Perfect setup for aerial wrestling moves; Special: Extra damage to airborne targets",
+      "mp_cost": 18,
+      "hp_cost": 0,
+      "star_cost": 3,
+      "attack_roll": "2d20kl1+INT",
+      "damage": "4d4+INT ice",
+      "category": "Offense",
+      "version": 6
+    }
+  }
+}

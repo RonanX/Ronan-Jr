@@ -690,5 +690,242 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
         except Exception:
             return []
 
+    @app_commands.command(name="import")
+    @app_commands.describe(
+        name="Name for the imported moveset",
+        description="Optional description for the moveset",
+        json_file="JSON file containing the moveset (optional)",
+        json_data="JSON data as text (optional if file provided)"
+    )
+    async def import_json(
+        self, 
+        interaction: discord.Interaction, 
+        name: str,
+        description: Optional[str] = None,
+        json_file: Optional[discord.Attachment] = None,
+        json_data: Optional[str] = None
+    ):
+        """Import a moveset from JSON file or text and save it globally"""
+        try:
+            await interaction.response.defer()
+            
+            # Check if we have either a file or text data
+            if not json_file and not json_data:
+                await interaction.followup.send(
+                    "❌ You must provide either a JSON file or paste JSON data.",
+                    ephemeral=True
+                )
+                return
+                
+            # If file is provided, read its contents
+            if json_file:
+                # Check if file is a JSON file
+                if not json_file.filename.endswith('.json'):
+                    await interaction.followup.send(
+                        "❌ File must be a JSON file (with .json extension).",
+                        ephemeral=True
+                    )
+                    return
+                    
+                # Check file size (10MB limit is reasonable)
+                if json_file.size > 10 * 1024 * 1024:  # 10MB
+                    await interaction.followup.send(
+                        "❌ File is too large. Maximum size is 10MB.",
+                        ephemeral=True
+                    )
+                    return
+                    
+                # Read file content
+                file_content = await json_file.read()
+                json_data = file_content.decode('utf-8')
+            
+            # Parse JSON
+            try:
+                moveset = MoveLoader.import_moveset(json_data)
+                if not moveset:
+                    await interaction.followup.send(
+                        "❌ Failed to parse moveset JSON. Please check your input and try again.",
+                        ephemeral=True
+                    )
+                    return
+            except json.JSONDecodeError as e:
+                # Provide more helpful error message for JSON syntax errors
+                line_col = f"line {e.lineno}, column {e.colno}"
+                await interaction.followup.send(
+                    f"❌ JSON syntax error at {line_col}: {e.msg}",
+                    ephemeral=True
+                )
+                return
+            except Exception as e:
+                await interaction.followup.send(
+                    f"❌ Error parsing JSON: {str(e)}",
+                    ephemeral=True
+                )
+                return
+
+            # Count moves
+            move_count = len(moveset.list_moves())
+            if move_count == 0:
+                await interaction.followup.send(
+                    "❌ The provided JSON doesn't contain any moves.",
+                    ephemeral=True
+                )
+                return
+                
+            # Save to database
+            result = await MoveLoader.save_global_moveset(
+                self.bot.db, 
+                name, 
+                moveset,
+                description
+            )
+            
+            if result:
+                # Create summary embed
+                embed = discord.Embed(
+                    title="Moveset Imported Successfully",
+                    description=f"Successfully imported **{name}** with {move_count} moves.",
+                    color=discord.Color.green()
+                )
+                
+                if json_file:
+                    embed.add_field(
+                        name="Source",
+                        value=f"Imported from file: `{json_file.filename}`",
+                        inline=False
+                    )
+                
+                # Add move list by category
+                moves_by_category = {}
+                for move_name in moveset.list_moves():
+                    move = moveset.get_move(move_name)
+                    if move:
+                        category = getattr(move, 'category', 'Other')
+                        if category not in moves_by_category:
+                            moves_by_category[category] = []
+                        moves_by_category[category].append(move)
+                
+                # Create a summary for each category
+                for category, moves in moves_by_category.items():
+                    move_lines = []
+                    for move in moves[:10]:  # Limit to 10 moves per category 
+                        cost_text = ""
+                        if move.star_cost > 0:
+                            cost_text += f" ⭐{move.star_cost}"
+                        if move.mp_cost != 0:
+                            cost_text += f" MP:{abs(move.mp_cost)}"
+                        move_lines.append(f"• {move.name}{cost_text}")
+                    
+                    if len(moves) > 10:
+                        move_lines.append(f"• ... and {len(moves) - 10} more")
+                        
+                    embed.add_field(
+                        name=f"{category} Moves ({len(moves)})",
+                        value="\n".join(move_lines),
+                        inline=False
+                    )
+                
+                embed.set_footer(text=f"Use /moveset load character:<name> name:{name} to add this moveset to a character")
+                
+                await interaction.followup.send(embed=embed)
+            else:
+                await interaction.followup.send(
+                    "❌ Failed to save moveset. Check logs for details.",
+                    ephemeral=True
+                )
+                
+        except Exception as e:
+            await handle_error(interaction, e)
+
+    @app_commands.command(name="export")
+    @app_commands.describe(
+        character="Character whose moveset to export",
+        pretty="Whether to format the JSON (default: true)"
+    )
+    async def export_moveset(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        pretty: Optional[bool] = True
+    ):
+        """Export a character's moveset as JSON file"""
+        await interaction.response.defer()
+
+        try:
+            # Get character
+            char = self.bot.game_state.get_character(character)
+            if not char:
+                await interaction.followup.send(
+                    f"❌ Character '{character}' not found.",
+                    ephemeral=True
+                )
+                return
+
+            # Check if they have moves
+            if not char.moveset or not char.list_moves():
+                await interaction.followup.send(
+                    f"❌ {character} has no moves to export.",
+                    ephemeral=True
+                )
+                return
+
+            # Export as JSON
+            json_str = MoveLoader.export_moveset(char.moveset, pretty)
+            
+            # Create metadata embed
+            embed = discord.Embed(
+                title=f"{character}'s Moveset Export",
+                description=f"Exported {len(char.list_moves())} moves as JSON.",
+                color=discord.Color.blue()
+            )
+            
+            # Add instructions
+            embed.add_field(
+                name="How to Use",
+                value=(
+                    "Upload this file with the command:\n"
+                    "`/moveset import_json name:<name> json_file:<file>`\n\n"
+                    "Or import it into another character:\n"
+                    "`/moveset load character:<name> name:<moveset_name>`"
+                ),
+                inline=False
+            )
+            
+            # Add categories breakdown
+            moves_by_category = {}
+            for move_name in char.list_moves():
+                move = char.get_move(move_name)
+                if move:
+                    category = getattr(move, 'category', 'Other')
+                    if category not in moves_by_category:
+                        moves_by_category[category] = []
+                    moves_by_category[category].append(move)
+            
+            category_summary = []
+            for category, moves in moves_by_category.items():
+                category_summary.append(f"{category}: {len(moves)} moves")
+                
+            if category_summary:
+                embed.add_field(
+                    name="Categories",
+                    value="\n".join(category_summary),
+                    inline=False
+                )
+
+            # Create file
+            file = discord.File(
+                fp=str.encode(json_str),
+                filename=f"{character}_moveset.json"
+            )
+
+            # Send file with embed
+            await interaction.followup.send(
+                embed=embed,
+                file=file
+            )
+
+        except Exception as e:
+            await handle_error(interaction, e)
+
 async def setup(bot):
     await bot.add_cog(MovesetCommands(bot))

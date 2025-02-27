@@ -16,12 +16,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import logging
-from typing import Optional, List
+from typing import Optional, List, Literal
 
 from core.effects.move import MoveEffect, MoveState, RollTiming
 from core.effects.condition import ConditionType
 from modules.moves.data import MoveData, Moveset
 from modules.moves.loader import MoveLoader
+from modules.menu.action_handler import ActionHandler
 from utils.error_handler import handle_error
 from utils.formatting import MessageFormatter
 
@@ -30,6 +31,7 @@ logger = logging.getLogger(__name__)
 class MoveCommands(commands.GroupCog, name="move"):
     def __init__(self, bot):
         self.bot = bot
+        self.action_handler = ActionHandler(bot)
         super().__init__()
         
     @app_commands.command(name="use")
@@ -174,7 +176,7 @@ class MoveCommands(commands.GroupCog, name="move"):
             elif move_data.hp_cost < 0:
                 costs.append(f"❤️ Healing: {abs(move_data.hp_cost)}")
             if move_data.star_cost > 0:
-                costs.append(f"⭐ Stars: {move_data.star_cost}")
+                costs.append(f"⭐ {move_data.star_cost}")
                 
             if costs:
                 details.append("• `" + " | ".join(costs) + "`")
@@ -234,7 +236,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         save_type="Required saving throw (str, dex, con, etc.)",
         save_dc="Difficulty class for saves (8+prof+stat)",
         roll_timing="When to apply rolls (instant, active, per_turn)",
-        track_heat="Whether to track heat stacks (default: False)"
+        track_heat="Whether to track heat stacks (default: False)",
+        category="Move category (default: Offense)"
     )
     async def temp_move(
         self, 
@@ -254,8 +257,9 @@ class MoveCommands(commands.GroupCog, name="move"):
         cooldown: Optional[int] = None,
         save_type: Optional[str] = None,
         save_dc: Optional[str] = None,
-        roll_timing: Optional[str] = "active",
-        track_heat: Optional[bool] = False
+        roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
+        track_heat: Optional[bool] = False,
+        category: Optional[Literal["Offense", "Utility", "Defense", "Other"]] = "Offense"
     ):
         """
         Create and use a temporary one-time move.
@@ -330,10 +334,13 @@ class MoveCommands(commands.GroupCog, name="move"):
             await self.bot.db.save_character(char, debug_paths=['effects', 'action_stars'])
             
             # Format response using single-line approach with bullets for details
-            primary_message = f"✨ `{char.name} uses {name} (Temporary)` ✨"
+            primary_message = f"✨ `{char.name} uses {name}` ✨"
             
             # Collect details
             details = []
+            
+            # Add category info
+            details.append(f"• `Category: {category}`")
             
             # Add cost info
             costs = []
@@ -344,7 +351,7 @@ class MoveCommands(commands.GroupCog, name="move"):
             elif hp_cost < 0:
                 costs.append(f"❤️ Healing: {abs(hp_cost)}")
             if star_cost > 0:
-                costs.append(f"⭐ Stars: {star_cost}")
+                costs.append(f"⭐ {star_cost}")
                 
             if costs:
                 details.append("• `" + " | ".join(costs) + "`")
@@ -416,7 +423,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         save_dc="Difficulty class for saves (8+prof+stat)",
         half_on_save="Whether save halves damage (default: False)",
         roll_timing="When to apply rolls (instant, active, per_turn)",
-        track_heat="Whether to track heat stacks (default: False)"
+        track_heat="Whether to track heat stacks (default: False)",
+        category="Move category (REQUIRED)"
     )
     async def create_move(
         self,
@@ -424,6 +432,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         character: str,
         name: str,
         description: str,
+        category: Literal["Offense", "Utility", "Defense", "Other"],
         mp_cost: Optional[int] = 0,
         hp_cost: Optional[int] = 0,
         star_cost: Optional[int] = 1,
@@ -437,12 +446,12 @@ class MoveCommands(commands.GroupCog, name="move"):
         save_type: Optional[str] = None,
         save_dc: Optional[str] = None,
         half_on_save: Optional[bool] = False,
-        roll_timing: Optional[str] = "active",
+        roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
         track_heat: Optional[bool] = False
     ):
         """
         Create and add a permanent move to a character's moveset.
-        This adds to character.moveset, not character.effects.
+        Moves are categorized as Offense, Utility, Defense, or Other.
         """
         try:
             await interaction.response.defer()
@@ -452,6 +461,16 @@ class MoveCommands(commands.GroupCog, name="move"):
             if not char:
                 await interaction.followup.send(f"Character '{character}' not found")
                 return
+                
+            # Auto-categorize if not explicitly provided
+            if not category:
+                # Default categorization based on move properties
+                if attack_roll or damage:
+                    category = "Offense"
+                elif hp_cost < 0:  # Healing
+                    category = "Defense"
+                else:
+                    category = "Utility"
             
             # Create move data (permanent, not an effect)
             move_data = MoveData(
@@ -471,7 +490,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 save_dc=save_dc,
                 half_on_save=half_on_save,
                 roll_timing=roll_timing,
-                enable_heat_tracking=track_heat
+                enable_heat_tracking=track_heat,
+                category=category
             )
             
             # Add to character's moveset
@@ -485,6 +505,9 @@ class MoveCommands(commands.GroupCog, name="move"):
             
             # Collect details
             details = []
+            
+            # Add category info prominently
+            details.append(f"• `Category: {category}`")
             
             # Add cost info
             costs = []
@@ -556,7 +579,7 @@ class MoveCommands(commands.GroupCog, name="move"):
     @app_commands.command(name="list")
     @app_commands.describe(character="Character whose moves to list")
     async def list_moves(self, interaction: discord.Interaction, character: str):
-        """List all moves in a character's moveset"""
+        """List all moves in a character's moveset with interactive UI"""
         try:
             await interaction.response.defer()
             
@@ -565,81 +588,44 @@ class MoveCommands(commands.GroupCog, name="move"):
             if not char:
                 await interaction.followup.send(f"Character '{character}' not found")
                 return
-                
-            # Get move list
-            move_names = char.list_moves()
             
-            if not move_names:
-                await interaction.followup.send(f"{char.name} has no moves in their moveset")
+            # Initialize action handler if needed
+            if not hasattr(self, 'action_handler') or not self.action_handler:
+                self.action_handler = ActionHandler(self.bot)
+            
+            # Get number of moves
+            move_count = len(char.list_moves())
+            
+            if move_count == 0:
+                # No moves found
+                embed = discord.Embed(
+                    title=f"{char.name}'s Moves",
+                    description=f"{char.name} has no moves. Use `/move create` to add moves.",
+                    color=discord.Color.blue()
+                )
+                await interaction.followup.send(embed=embed)
                 return
-                
-            # Create result embed
-            embed = discord.Embed(
-                title=f"{char.name}'s Moves",
-                description=f"Found {len(move_names)} moves",
-                color=discord.Color.blue()
-            )
             
-            # Add moves with details
-            for move_name in move_names:
-                move = char.get_move(move_name)
-                if move:
-                    details = [move.description] if move.description else []
-                    
-                    # Add costs
-                    costs = []
-                    if move.mp_cost:
-                        costs.append(f"💙 MP: {move.mp_cost}")
-                    if move.hp_cost > 0:
-                        costs.append(f"❤️ HP: {move.hp_cost}")
-                    elif move.hp_cost < 0:
-                        costs.append(f"❤️ Healing: {abs(move.hp_cost)}")
-                    if move.star_cost:
-                        costs.append(f"⭐ Stars: {move.star_cost}")
-                        
-                    if costs:
-                        details.append(" | ".join(costs))
-                        
-                    # Add usage
-                    usage = []
-                    if move.uses is not None:
-                        usage.append(f"Uses: {move.uses_remaining}/{move.uses}")
-                    if move.cooldown:
-                        if move.last_used_round:
-                            # Calculate cooldown remaining if in combat
-                            if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                                current_round = self.bot.initiative_tracker.round_number
-                                elapsed = current_round - move.last_used_round
-                                remaining = max(0, move.cooldown - elapsed)
-                                usage.append(f"Cooldown: {remaining}/{move.cooldown}")
-                            else:
-                                usage.append(f"Cooldown: {move.cooldown}")
-                        else:
-                            usage.append(f"Cooldown: {move.cooldown}")
-                            
-                    if usage:
-                        details.append(" | ".join(usage))
-                        
-                    # Add attack info
-                    if move.attack_roll or move.damage:
-                        attack = []
-                        if move.attack_roll:
-                            attack.append(f"Attack: {move.attack_roll}")
-                        if move.damage:
-                            attack.append(f"Damage: {move.damage}")
-                        details.append(" | ".join(attack))
-                        
-                    embed.add_field(
-                        name=move.name,
-                        value="\n".join(details) if details else "No details",
-                        inline=False
-                    )
-                
-            await interaction.followup.send(embed=embed)
+            # Use action handler to show moves with pagination and categories
+            await self.action_handler.show_moves(interaction, char)
             
         except Exception as e:
-            error_msg = handle_error(e, "Error listing moves")
-            await interaction.followup.send(error_msg, ephemeral=True)
+            # Safe error handling that won't crash
+            logger.error(f"Error in list_moves: {str(e)}", exc_info=True)
+            error_embed = discord.Embed(
+                title="Error Listing Moves",
+                description=f"An error occurred: {str(e)}",
+                color=discord.Color.red()
+            )
+            try:
+                await interaction.followup.send(embed=error_embed, ephemeral=True)
+            except:
+                # If followup fails, try response
+                try:
+                    await interaction.response.send_message(embed=error_embed, ephemeral=True)
+                except:
+                    # Last resort
+                    pass
             
     @app_commands.command(name="info")
     @app_commands.describe(
@@ -668,110 +654,9 @@ class MoveCommands(commands.GroupCog, name="move"):
                 await interaction.followup.send(f"Move '{move_name}' not found for {char.name}")
                 return
                 
-            # Create result embed
-            embed = discord.Embed(
-                title=move_data.name,
-                description=move_data.description,
-                color=discord.Color.blue()
-            )
-            
-            # Basic info
-            basic_info = []
-            if move_data.mp_cost:
-                basic_info.append(f"💙 MP Cost: {move_data.mp_cost}")
-            if move_data.hp_cost > 0:
-                basic_info.append(f"❤️ HP Cost: {move_data.hp_cost}")
-            elif move_data.hp_cost < 0:
-                basic_info.append(f"❤️ HP Healing: {abs(move_data.hp_cost)}")
-            if move_data.star_cost:
-                basic_info.append(f"⭐ Star Cost: {move_data.star_cost}")
-            if move_data.enable_heat_tracking:
-                basic_info.append("🔥 Tracks Heat")
-                
-            if basic_info:
-                embed.add_field(name="Basic Info", value="\n".join(basic_info), inline=False)
-                
-            # Timing info
-            timing_info = []
-            if move_data.cast_time:
-                timing_info.append(f"Cast Time: {move_data.cast_time} turns")
-            if move_data.duration:
-                timing_info.append(f"Duration: {move_data.duration} turns")
-            if move_data.cooldown:
-                timing_info.append(f"Cooldown: {move_data.cooldown} turns")
-                
-            if timing_info:
-                embed.add_field(name="Timing", value="\n".join(timing_info), inline=True)
-                
-            # Usage info
-            usage_info = []
-            if move_data.uses is not None:
-                usage_info.append(f"Uses: {move_data.uses_remaining}/{move_data.uses}")
-                
-            # Check if on cooldown
-            if move_data.last_used_round is not None and move_data.cooldown:
-                if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                    current_round = self.bot.initiative_tracker.round_number
-                    elapsed = current_round - move_data.last_used_round
-                    if elapsed < move_data.cooldown:
-                        remaining = move_data.cooldown - elapsed
-                        usage_info.append(f"On Cooldown: {remaining} turns remaining")
-                else:
-                    # Also check the cooldown in effects list
-                    cooldown_effect = None
-                    for effect in char.effects:
-                        if (hasattr(effect, 'name') and effect.name == move_data.name and 
-                            hasattr(effect, 'state') and effect.state == MoveState.COOLDOWN):
-                            cooldown_effect = effect
-                            break
-                            
-                    if cooldown_effect and hasattr(cooldown_effect, 'phases'):
-                        phase = cooldown_effect.phases.get(MoveState.COOLDOWN)
-                        if phase:
-                            remaining = phase.duration - phase.turns_completed
-                            if remaining > 0:
-                                usage_info.append(f"On Cooldown: {remaining} turns remaining")
-                    else:
-                        usage_info.append(f"Last Used: Round {move_data.last_used_round}")
-                
-            if usage_info:
-                embed.add_field(name="Usage", value="\n".join(usage_info), inline=True)
-                
-            # Combat info
-            combat_info = []
-            if move_data.attack_roll:
-                combat_info.append(f"Attack Roll: {move_data.attack_roll}")
-            if move_data.damage:
-                combat_info.append(f"Damage: {move_data.damage}")
-            if move_data.crit_range != 20:
-                combat_info.append(f"Crit Range: {move_data.crit_range}-20")
-            if move_data.save_type:
-                save_text = f"Save: {move_data.save_type.upper()}"
-                if move_data.save_dc:
-                    save_text += f" (DC: {move_data.save_dc})"
-                if move_data.half_on_save:
-                    save_text += " (Half damage on save)"
-                combat_info.append(save_text)
-            if move_data.roll_timing and move_data.roll_timing != "active":
-                roll_text = {
-                    "instant": "Rolls are made immediately on use",
-                    "active": "Rolls are made when active phase begins",
-                    "per_turn": "Rolls are made each turn during duration"
-                }.get(move_data.roll_timing, f"Roll Timing: {move_data.roll_timing}")
-                combat_info.append(roll_text)
-                
-            if combat_info:
-                embed.add_field(name="Combat", value="\n".join(combat_info), inline=False)
-                
-            # Custom parameters if any
-            if move_data.custom_parameters:
-                custom = []
-                for key, value in move_data.custom_parameters.items():
-                    custom.append(f"{key}: {value}")
-                if custom:
-                    embed.add_field(name="Custom Parameters", value="\n".join(custom), inline=False)
-                    
-            await interaction.followup.send(embed=embed)
+            # Create result embed using the ActionHandler
+            info_embed = self.action_handler.create_move_info_embed(char, move_data)
+            await interaction.followup.send(embed=info_embed)
             
         except Exception as e:
             error_msg = handle_error(e, "Error getting move info")
