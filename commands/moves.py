@@ -17,6 +17,7 @@ from discord import app_commands
 from discord.ext import commands
 import logging
 from typing import Optional, List, Literal
+import json
 
 from core.effects.move import MoveEffect, MoveState, RollTiming
 from core.effects.condition import ConditionType
@@ -149,7 +150,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 save_dc=move_data.save_dc,
                 half_on_save=move_data.half_on_save,
                 roll_timing=move_data.roll_timing,
-                targets=[target_char] if target_char else []
+                targets=[target_char] if target_char else [],
+                enable_heat_tracking=move_data.enable_heat_tracking
             )
             
             # Apply the effect
@@ -158,61 +160,16 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Use action stars
             char.use_move_stars(move_data.star_cost, move_data.name)
             
+            # Explicitly register cooldown if the move has one
+            if move_data.cooldown:
+                char.action_stars.start_cooldown(move_data.name, move_data.cooldown)
+            
             # Save character state
             await self.bot.db.save_character(char, debug_paths=['effects', 'action_stars', 'moveset'])
             
-            # Format response using single-line approach with bullets for details
-            primary_message = f"⚔️ `{char.name} uses {name}` ⚔️"
-            
-            # Collect details
-            details = []
-            
-            # Add cost info
-            costs = []
-            if move_data.mp_cost > 0:
-                costs.append(f"💙 MP: {move_data.mp_cost}")
-            if move_data.hp_cost > 0:
-                costs.append(f"❤️ HP: {move_data.hp_cost}")
-            elif move_data.hp_cost < 0:
-                costs.append(f"❤️ Healing: {abs(move_data.hp_cost)}")
-            if move_data.star_cost > 0:
-                costs.append(f"⭐ {move_data.star_cost}")
-                
-            if costs:
-                details.append("• `" + " | ".join(costs) + "`")
-                
-            # Add target info if applicable
-            if target_char:
-                details.append(f"• `Target: {target_char.name}`")
-                
-            # Add timing info
-            timing = []
-            if move_data.cast_time:
-                timing.append(f"Cast: {move_data.cast_time} turns")
-            if move_data.duration:
-                timing.append(f"Duration: {move_data.duration} turns")
-            if move_data.cooldown:
-                timing.append(f"Cooldown: {move_data.cooldown} turns")
-                
-            if timing:
-                details.append("• `" + " | ".join(timing) + "`")
-                
-            # Add description if available
-            if move_data.description:
-                # Split by semicolons if present
-                if ';' in move_data.description:
-                    for part in move_data.description.split(';'):
-                        if part := part.strip():
-                            details.append(f"• `{part}`")
-                else:
-                    details.append(f"• `{move_data.description}`")
-                    
-            # Combine message with details
-            response = primary_message
-            if details:
-                response += "\n" + "\n".join(details)
-                
-            await interaction.followup.send(response)
+            # Use the result directly since the new MoveEffect.on_apply 
+            # now formats the message in the desired way
+            await interaction.followup.send(result)
             
         except Exception as e:
             error_msg = handle_error(e, "Error using move")
@@ -222,22 +179,18 @@ class MoveCommands(commands.GroupCog, name="move"):
     @app_commands.describe(
         character="Character using the move",
         name="Name of the move to use",
-        description="Move description",
+        description="Move description (use semicolons for bullet points)",
+        category="Move category (Offense, Defense, Utility, Other)",
         target="Target character (optional)",
         mp_cost="MP cost (default: 0)",
         hp_cost="HP cost or healing if negative (default: 0)",
         star_cost="Star cost (default: 1)",
         attack_roll="Attack roll expression (e.g., '1d20+int')",
         damage="Damage expression (e.g., '2d6 fire')",
-        crit_range="Natural roll needed for critical hit (default: 20)",
         cast_time="Turns needed to cast (default: 0)",
         duration="Turns the effect lasts (default: 0)",
         cooldown="Turns before usable again (default: 0)",
-        save_type="Required saving throw (str, dex, con, etc.)",
-        save_dc="Difficulty class for saves (8+prof+stat)",
-        roll_timing="When to apply rolls (instant, active, per_turn)",
-        track_heat="Whether to track heat stacks (default: False)",
-        category="Move category (default: Offense)"
+        advanced_json="Optional JSON with advanced parameters (save_type, half_on_save, etc.)"
     )
     async def temp_move(
         self, 
@@ -245,25 +198,22 @@ class MoveCommands(commands.GroupCog, name="move"):
         character: str,
         name: str,
         description: str,
+        category: Literal["Offense", "Defense", "Utility", "Other"],
         target: Optional[str] = None,
         mp_cost: Optional[int] = 0,
         hp_cost: Optional[int] = 0, 
         star_cost: Optional[int] = 1,
         attack_roll: Optional[str] = None,
         damage: Optional[str] = None,
-        crit_range: Optional[int] = 20,
         cast_time: Optional[int] = None,
         duration: Optional[int] = None,
         cooldown: Optional[int] = None,
-        save_type: Optional[str] = None,
-        save_dc: Optional[str] = None,
-        roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
-        track_heat: Optional[bool] = False,
-        category: Optional[Literal["Offense", "Utility", "Defense", "Other"]] = "Offense"
+        advanced_json: Optional[str] = None
     ):
         """
         Create and use a temporary one-time move.
         This creates an effect but does NOT save to the moveset.
+        Use advanced_json for specialized parameters like save_type, half_on_save, etc.
         """
         try:
             await interaction.response.defer()
@@ -304,6 +254,18 @@ class MoveCommands(commands.GroupCog, name="move"):
             if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
                 current_round = self.bot.initiative_tracker.round_number
             
+            # Parse advanced JSON parameters if provided
+            advanced_params = {}
+            if advanced_json:
+                try:
+                    advanced_params = json.loads(advanced_json)
+                except json.JSONDecodeError as e:
+                    await interaction.followup.send(
+                        f"Error in advanced_json: {str(e)}. Please check your JSON syntax.",
+                        ephemeral=True
+                    )
+                    return
+            
             # Create move effect (temporary)
             move_effect = MoveEffect(
                 name=name,
@@ -316,12 +278,14 @@ class MoveCommands(commands.GroupCog, name="move"):
                 cooldown=cooldown,
                 attack_roll=attack_roll,
                 damage=damage,
-                crit_range=crit_range,
-                save_type=save_type,
-                save_dc=save_dc,
-                roll_timing=roll_timing,
                 targets=[target_char] if target_char else [],
-                enable_heat_tracking=track_heat
+                # Advanced parameters from JSON
+                crit_range=advanced_params.get('crit_range', 20),
+                save_type=advanced_params.get('save_type'),
+                save_dc=advanced_params.get('save_dc'),
+                half_on_save=advanced_params.get('half_on_save', False),
+                roll_timing=advanced_params.get('roll_timing', 'active'),
+                enable_heat_tracking=advanced_params.get('enable_heat_tracking', False)
             )
             
             # Apply the effect
@@ -333,72 +297,8 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Save character state
             await self.bot.db.save_character(char, debug_paths=['effects', 'action_stars'])
             
-            # Format response using single-line approach with bullets for details
-            primary_message = f"✨ `{char.name} uses {name}` ✨"
-            
-            # Collect details
-            details = []
-            
-            # Add category info
-            details.append(f"• `Category: {category}`")
-            
-            # Add cost info
-            costs = []
-            if mp_cost > 0:
-                costs.append(f"💙 MP: {mp_cost}")
-            if hp_cost > 0:
-                costs.append(f"❤️ HP: {hp_cost}")
-            elif hp_cost < 0:
-                costs.append(f"❤️ Healing: {abs(hp_cost)}")
-            if star_cost > 0:
-                costs.append(f"⭐ {star_cost}")
-                
-            if costs:
-                details.append("• `" + " | ".join(costs) + "`")
-                
-            # Add target info if applicable
-            if target_char:
-                details.append(f"• `Target: {target_char.name}`")
-                
-            # Add timing info
-            timing = []
-            if cast_time:
-                timing.append(f"Cast: {cast_time} turns")
-            if duration:
-                timing.append(f"Duration: {duration} turns")
-            if cooldown:
-                timing.append(f"Cooldown: {cooldown} turns")
-                
-            if timing:
-                details.append("• `" + " | ".join(timing) + "`")
-                
-            # Add attack info if applicable
-            attack_details = []
-            if attack_roll:
-                attack_details.append(f"Attack: {attack_roll}")
-            if damage:
-                attack_details.append(f"Damage: {damage}")
-            if crit_range != 20:
-                attack_details.append(f"Crit: {crit_range}-20")
-                
-            if attack_details:
-                details.append("• `" + " | ".join(attack_details) + "`")
-                    
-            # Add description with semicolon splitting
-            if description:
-                if ';' in description:
-                    for part in description.split(';'):
-                        if part := part.strip():
-                            details.append(f"• `{part}`")
-                else:
-                    details.append(f"• `{description}`")
-                    
-            # Combine message with details
-            response = primary_message
-            if details:
-                response += "\n" + "\n".join(details)
-                
-            await interaction.followup.send(response)
+            # Send the formatted message from MoveEffect.on_apply()
+            await interaction.followup.send(result)
             
         except Exception as e:
             error_msg = handle_error(e, "Error using temporary move")
@@ -408,23 +308,18 @@ class MoveCommands(commands.GroupCog, name="move"):
     @app_commands.describe(
         character="Character to add the move to",
         name="Name of the move",
-        description="Description of the move",
+        description="Description of the move (use semicolons for bullet points)",
+        category="Move category (REQUIRED)",
         mp_cost="MP cost (default: 0)",
         hp_cost="HP cost or healing if negative (default: 0)",
         star_cost="Star cost (default: 1)",
         attack_roll="Attack roll expression (e.g., '1d20+int')",
         damage="Damage expression (e.g., '2d6 fire')",
-        crit_range="Natural roll needed for critical hit (default: 20)",
         cast_time="Turns needed to cast (default: 0)",
         duration="Turns the effect lasts (default: 0)",
         cooldown="Turns before usable again (default: 0)",
         uses="Number of uses (-1 for unlimited)",
-        save_type="Required saving throw (str, dex, con, etc.)",
-        save_dc="Difficulty class for saves (8+prof+stat)",
-        half_on_save="Whether save halves damage (default: False)",
-        roll_timing="When to apply rolls (instant, active, per_turn)",
-        track_heat="Whether to track heat stacks (default: False)",
-        category="Move category (REQUIRED)"
+        advanced_json="Optional JSON with advanced parameters (save_type, half_on_save, etc.)"
     )
     async def create_move(
         self,
@@ -438,20 +333,15 @@ class MoveCommands(commands.GroupCog, name="move"):
         star_cost: Optional[int] = 1,
         attack_roll: Optional[str] = None,
         damage: Optional[str] = None,
-        crit_range: Optional[int] = 20,
         cast_time: Optional[int] = None,
         duration: Optional[int] = None,
         cooldown: Optional[int] = None,
         uses: Optional[int] = -1,
-        save_type: Optional[str] = None,
-        save_dc: Optional[str] = None,
-        half_on_save: Optional[bool] = False,
-        roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
-        track_heat: Optional[bool] = False
+        advanced_json: Optional[str] = None
     ):
         """
         Create and add a permanent move to a character's moveset.
-        Moves are categorized as Offense, Utility, Defense, or Other.
+        Use advanced_json for specialized parameters like save_type, half_on_save, etc.
         """
         try:
             await interaction.response.defer()
@@ -461,16 +351,18 @@ class MoveCommands(commands.GroupCog, name="move"):
             if not char:
                 await interaction.followup.send(f"Character '{character}' not found")
                 return
-                
-            # Auto-categorize if not explicitly provided
-            if not category:
-                # Default categorization based on move properties
-                if attack_roll or damage:
-                    category = "Offense"
-                elif hp_cost < 0:  # Healing
-                    category = "Defense"
-                else:
-                    category = "Utility"
+            
+            # Parse advanced JSON parameters if provided
+            advanced_params = {}
+            if advanced_json:
+                try:
+                    advanced_params = json.loads(advanced_json)
+                except json.JSONDecodeError as e:
+                    await interaction.followup.send(
+                        f"Error in advanced_json: {str(e)}. Please check your JSON syntax.",
+                        ephemeral=True
+                    )
+                    return
             
             # Create move data (permanent, not an effect)
             move_data = MoveData(
@@ -485,13 +377,16 @@ class MoveCommands(commands.GroupCog, name="move"):
                 uses=uses if uses and uses > 0 else None,
                 attack_roll=attack_roll,
                 damage=damage,
-                crit_range=crit_range,
-                save_type=save_type,
-                save_dc=save_dc,
-                half_on_save=half_on_save,
-                roll_timing=roll_timing,
-                enable_heat_tracking=track_heat,
-                category=category
+                category=category,
+                # Advanced parameters from JSON
+                crit_range=advanced_params.get('crit_range', 20),
+                save_type=advanced_params.get('save_type'),
+                save_dc=advanced_params.get('save_dc'),
+                half_on_save=advanced_params.get('half_on_save', False),
+                conditions=advanced_params.get('conditions', []),
+                roll_timing=advanced_params.get('roll_timing', 'active'),
+                enable_heat_tracking=advanced_params.get('enable_heat_tracking', False),
+                target_selection=advanced_params.get('target_selection', 'manual')
             )
             
             # Add to character's moveset
@@ -543,18 +438,29 @@ class MoveCommands(commands.GroupCog, name="move"):
                 attack_details.append(f"Attack: {attack_roll}")
             if damage:
                 attack_details.append(f"Damage: {damage}")
-            if crit_range != 20:
-                attack_details.append(f"Crit: {crit_range}-20")
-            if save_type:
-                save_text = f"{save_type.upper()} Save"
-                if save_dc:
-                    save_text += f" (DC: {save_dc})"
-                if half_on_save:
-                    save_text += " (Half on save)"
-                attack_details.append(save_text)
-                    
+                
             if attack_details:
                 details.append("• `" + " | ".join(attack_details) + "`")
+                
+            # Add advanced params summary if used
+            if advanced_json:
+                adv_summary = []
+                if advanced_params.get('save_type'):
+                    save_info = f"{advanced_params['save_type'].upper()} Save"
+                    if advanced_params.get('save_dc'):
+                        save_info += f" (DC: {advanced_params['save_dc']})"
+                    if advanced_params.get('half_on_save'):
+                        save_info += " (Half on save)"
+                    adv_summary.append(save_info)
+                
+                if advanced_params.get('crit_range', 20) != 20:
+                    adv_summary.append(f"Crit: {advanced_params['crit_range']}-20")
+                
+                if advanced_params.get('enable_heat_tracking'):
+                    adv_summary.append("Heat tracking enabled")
+                
+                if adv_summary:
+                    details.append("• `Advanced: " + " | ".join(adv_summary) + "`")
                 
             # Add description with semicolon splitting
             if description:

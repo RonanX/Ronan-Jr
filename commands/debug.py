@@ -31,6 +31,7 @@ from utils.error_handler import handle_error
 from utils.test_helper import process_turns
 from utils.test_helper import recreate_test_characters, run_move_effect_tests
 
+
 logger = logging.getLogger(__name__)
 
 class DebugCommands(commands.GroupCog, name="debug"):
@@ -1162,3 +1163,11 @@ async def setup(bot):
         print("Successfully added resource debug commands")
     except Exception as e:
         print(f"Failed to add resource debug commands: {e}")
+    
+    # Import and add moveset debug commands
+    try:
+        from commands.debug_extra.debug_movesets import add_moveset_debug_commands
+        add_moveset_debug_commands(debug_cog)
+        print("Successfully added moveset debug commands")
+    except Exception as e:
+        print(f"Failed to add moveset debug commands: {e}")

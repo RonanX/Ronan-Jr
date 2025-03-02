@@ -163,6 +163,95 @@ class StatusEffectHandler:
                         details.append(f"**Duration:** `{effect.duration} turn(s)`")
                         
         return details
+    
+    @staticmethod
+    def format_move_effect(effect: Any, character: Any) -> List[str]:
+        """Format move effect for status display"""
+        lines = []
+        
+        # Get state emoji
+        emoji = getattr(effect, '_get_emoji', lambda: "⚔️")()
+        
+        # Add header with name and state
+        state = getattr(effect, 'state', None)
+        if state:
+            state_name = state.value.title() if hasattr(state, 'value') else str(state)
+            lines.append(f"{emoji} **{effect.name}** ({state_name})")
+        else:
+            lines.append(f"{emoji} **{effect.name}**")
+        
+        # Split description into bullet points if it contains semicolons
+        description = getattr(effect, 'description', '')
+        if description:
+            if ';' in description:
+                for part in description.split(';'):
+                    if part := part.strip():
+                        lines.append(f"• `{part}`")
+            else:
+                lines.append(f"• `{description}`")
+        
+        # Add phase timing information
+        if state:
+            current_phase = None
+            remaining_turns = None
+            
+            # Try to get phase info from the effect
+            if hasattr(effect, 'phases') and effect.phases:
+                current_phase = effect.phases.get(state)
+                if current_phase:
+                    remaining_turns = current_phase.duration - current_phase.turns_completed
+            
+            # Add phase-specific details
+            if state.value == 'casting':
+                if remaining_turns is not None:
+                    lines.append(f"• `Cast Time: {remaining_turns} turn(s) remaining`")
+            elif state.value == 'active':
+                if remaining_turns is not None:
+                    lines.append(f"• `Duration: {remaining_turns} turn(s) remaining`")
+            elif state.value == 'cooldown':
+                if remaining_turns is not None:
+                    lines.append(f"• `Cooldown: {remaining_turns} turn(s) remaining`")
+        
+        # Add cost information
+        costs = []
+        if hasattr(effect, 'mp_cost') and effect.mp_cost:
+            if effect.mp_cost > 0:
+                costs.append(f"MP: {effect.mp_cost}")
+            else:
+                costs.append(f"MP Gain: {abs(effect.mp_cost)}")
+        
+        if hasattr(effect, 'hp_cost') and effect.hp_cost:
+            if effect.hp_cost > 0:
+                costs.append(f"HP: {effect.hp_cost}")
+            else:
+                costs.append(f"Healing: {abs(effect.hp_cost)}")
+        
+        if hasattr(effect, 'star_cost') and effect.star_cost:
+            costs.append(f"Stars: {effect.star_cost}")
+        
+        if costs:
+            lines.append(f"• `Costs: {', '.join(costs)}`")
+        
+        # Add combat information
+        combat_info = []
+        if hasattr(effect, 'attack_roll') and effect.attack_roll:
+            combat_info.append(f"Attack: {effect.attack_roll}")
+        
+        if hasattr(effect, 'damage') and effect.damage:
+            combat_info.append(f"Damage: {effect.damage}")
+            
+        if hasattr(effect, 'save_type') and effect.save_type:
+            save_info = f"Save: {effect.save_type.upper()}"
+            if hasattr(effect, 'save_dc') and effect.save_dc:
+                save_info += f" DC {effect.save_dc}"
+            if hasattr(effect, 'half_on_save') and effect.half_on_save:
+                save_info += " (Half on save)"
+            combat_info.append(save_info)
+            
+        if combat_info:
+            lines.append(f"• `{' | '.join(combat_info)}`")
+        
+        return lines
 
     @staticmethod
     def format_effects(effects: List[Any], character: Any = None) -> List[str]:
@@ -185,6 +274,13 @@ class StatusEffectHandler:
                 continue
 
             effect_name = getattr(effect, 'name', 'Unknown Effect')
+            
+            # Handle move effects specially
+            if hasattr(effect, 'state') and hasattr(effect, 'phases'):
+                move_details = StatusEffectHandler.format_move_effect(effect, character)
+                effect_texts.extend(move_details)
+                effect_texts.append("─" * 40)  # Separator line
+                continue
             
             # Handle conditions differently
             if hasattr(effect, 'conditions'):
@@ -278,4 +374,3 @@ class StatusEffectHandler:
             effect_texts.append("─" * 40)  # Separator line
                 
         return effect_texts[:-1]  # Remove last separator
-    

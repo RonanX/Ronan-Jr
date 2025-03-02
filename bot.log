@@ -6361,3 +6361,1323 @@ Traceback (most recent call last):
     quick_button.callback = lambda i: self.create_with_proficiencies(i, style, True)
                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'StatConfirmationView' object has no attribute 'create_with_proficiencies'
+2025-02-27 17:36:14,248 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 17:36:14,248 - discord.client - INFO - logging in using static token
+2025-02-27 17:36:15,192 - core.database - INFO - No migration needed
+2025-02-27 17:36:15,192 - core.database - INFO - Database initialized successfully
+2025-02-27 17:36:15,297 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 17:36:15,642 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3a92443208a0841c19e911c697467140).
+2025-02-27 17:36:17,669 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 17:36:53,297 - discord.ui.view - ERROR - Ignoring exception in view <StatConfirmationView timeout=180.0 children=2> for item <Button style=<ButtonStyle.success: 3> url=None disabled=False label='Accept Stats' emoji=None row=None sku_id=None>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 430, in _scheduled_task
+    await item.callback(interaction)
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\character_creation.py", line 692, in accept_stats
+    type_view = CharacterTypeView(
+                ^^^^^^^^^^^^^^^^^^
+TypeError: CharacterTypeView.__init__() missing 4 required positional arguments: 'base_proficiency', 'allowed_saves', 'allowed_skills', and 'can_expertise'
+2025-02-27 17:42:02,214 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 17:42:02,214 - discord.client - INFO - logging in using static token
+2025-02-27 17:42:04,482 - core.database - INFO - No migration needed
+2025-02-27 17:42:04,482 - core.database - INFO - Database initialized successfully
+2025-02-27 17:42:04,587 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 17:42:04,921 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 23d6a7aa0b6535053b54778641e4d1ce).
+2025-02-27 17:42:06,927 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 17:43:42,338 - modules.menu.character_creation - INFO - Quick creating character with style FairyType.ENERGY
+2025-02-27 17:43:42,339 - utils.proficiency_config - INFO - Getting preset proficiencies for type: FairyType.ENERGY
+2025-02-27 17:43:42,339 - utils.proficiency_config - INFO - Using preset proficiencies: {'saves': {'constitution': 1, 'charisma': 1}, 'skills': {'athletics': 1, 'arcana': 1, 'intimidation': 1}}
+2025-02-27 17:43:42,339 - modules.menu.character_creation - INFO - Creating character with proficiencies: {'saves': {'constitution': 1, 'charisma': 1}, 'skills': {'athletics': 1, 'arcana': 1, 'intimidation': 1}}
+2025-02-27 17:43:42,339 - modules.menu.character_creation - INFO - Creating character with style: FairyType.ENERGY, proficiency: 3
+2025-02-27 17:43:42,340 - modules.menu.character_creation - INFO - Proficiencies provided: {'saves': {'constitution': 1, 'charisma': 1}, 'skills': {'athletics': 1, 'arcana': 1, 'intimidation': 1}}
+2025-02-27 17:43:42,340 - modules.menu.character_creation - INFO - Character created successfully: Lizzy
+2025-02-27 17:43:42,341 - modules.menu.character_creation - INFO - Saving character to database
+2025-02-27 17:43:42,553 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:43:42,554 - modules.menu.character_creation - INFO - Character created successfully, showing results
+2025-02-27 17:43:50,609 - core.database - INFO - Character Lizzy loaded successfully
+2025-02-27 17:43:50,611 - core.state - INFO - Added character Lizzy to game state
+2025-02-27 17:44:01,420 - core.database - INFO - Character TestChar deleted successfully
+2025-02-27 17:44:01,421 - core.state - INFO - Removed character TestChar from game state
+2025-02-27 17:45:04,963 - core.database - INFO - Moveset lizzy loaded successfully
+2025-02-27 17:45:05,059 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:45:44,710 - core.database - INFO - Moveset lizzy deleted successfully
+2025-02-27 17:46:11,537 - core.database - INFO - Moveset lizzy saved successfully
+2025-02-27 17:46:47,612 - core.database - INFO - Moveset lizzy loaded successfully
+2025-02-27 17:46:50,421 - core.database - INFO - Moveset lizzy loaded successfully
+2025-02-27 17:46:50,422 - modules.moves.loader - ERROR - Error assigning moveset lizzy to lizzy: 'Database' object has no attribute 'bot'
+2025-02-27 17:52:30,200 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-27 17:52:30,200 - discord.client - INFO - logging in using static token
+2025-02-27 17:52:31,311 - core.database - INFO - No migration needed
+2025-02-27 17:52:31,311 - core.database - INFO - Database initialized successfully
+2025-02-27 17:52:31,426 - core.state - INFO - Loaded 5 characters into game state
+2025-02-27 17:52:31,780 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 52edfa3eda17c2c333594fccafafa222).
+2025-02-27 17:52:33,825 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-27 17:52:54,025 - core.database - INFO - Moveset lizzy loaded successfully
+2025-02-27 17:52:55,982 - core.database - INFO - Moveset lizzy loaded successfully
+2025-02-27 17:52:56,074 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:54:21,480 - core.database - INFO - Character test saved successfully
+2025-02-27 17:54:21,568 - core.database - INFO - Character test2 saved successfully
+2025-02-27 17:54:39,366 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:54:44,887 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:55:05,586 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:55:13,811 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:56:02,939 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:56:08,199 - core.database - INFO - Character Lizzy saved successfully
+2025-02-27 17:56:24,997 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py:1149> exception=AttributeError("'Interaction' object has no attribute 'send'")>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 857, in _do_call
+    return await self._callback(self.binding, interaction, **params)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\commands\effects.py", line 522, in remove
+    matches = fuzzy_match_effects(effect_name, char.effects)
+              ^^^^^^^^^^^^^^^^^^^
+NameError: name 'fuzzy_match_effects' is not defined. Did you mean: 'find_matching_effects'?
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1310, in _call
+    await command._invoke_with_namespace(interaction, namespace)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 883, in _invoke_with_namespace
+    return await self._do_call(interaction, transformed_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 876, in _do_call
+    raise CommandInvokeError(self, e) from e
+discord.app_commands.errors.CommandInvokeError: Command 'remove' raised an exception: NameError: name 'fuzzy_match_effects' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1314, in _call
+    await self.on_error(interaction, e)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 281, in on_app_command_error
+    await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 272, in handle_command_error
+    await ctx.send(embed=error_embed)
+          ^^^^^^^^
+AttributeError: 'Interaction' object has no attribute 'send'
+2025-02-27 18:07:14,704 - core.database - INFO - Character test saved successfully
+2025-02-27 18:07:14,803 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:07:14,898 - core.database - INFO - Character test3 saved successfully
+2025-02-27 18:07:14,989 - core.database - INFO - Character test4 saved successfully
+2025-02-27 18:07:15,292 - core.database - INFO - Character test saved successfully
+2025-02-27 18:07:15,388 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:07:15,493 - core.database - INFO - Character test3 saved successfully
+2025-02-27 18:07:15,593 - core.database - INFO - Character test4 saved successfully
+2025-02-27 18:07:16,718 - core.database - INFO - Character test saved successfully
+2025-02-27 18:07:17,837 - core.database - INFO - Character test saved successfully
+2025-02-27 18:07:17,933 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:07:25,101 - core.database - INFO - Character test saved successfully
+2025-02-27 18:07:25,200 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:07:25,293 - core.database - INFO - Character test3 saved successfully
+2025-02-27 18:07:25,389 - core.database - INFO - Character test4 saved successfully
+2025-02-27 18:07:57,925 - core.database - INFO - Character test deleted successfully
+2025-02-27 18:07:58,111 - core.database - INFO - Character test2 deleted successfully
+2025-02-27 18:07:58,289 - core.database - INFO - Character test3 deleted successfully
+2025-02-27 18:07:58,482 - core.database - INFO - Character test4 deleted successfully
+2025-02-27 18:07:58,482 - core.state - INFO - Added character test to game state
+2025-02-27 18:07:58,606 - core.database - INFO - Character test saved successfully
+2025-02-27 18:07:58,607 - core.state - INFO - Added character test2 to game state
+2025-02-27 18:07:58,690 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:07:58,691 - core.state - INFO - Added character test3 to game state
+2025-02-27 18:07:58,785 - core.database - INFO - Character test3 saved successfully
+2025-02-27 18:07:58,785 - core.state - INFO - Added character test4 to game state
+2025-02-27 18:07:58,884 - core.database - INFO - Character test4 saved successfully
+2025-02-27 18:07:59,063 - core.database - INFO - Character test deleted successfully
+2025-02-27 18:07:59,241 - core.database - INFO - Character test2 deleted successfully
+2025-02-27 18:07:59,422 - core.database - INFO - Character test3 deleted successfully
+2025-02-27 18:07:59,619 - core.database - INFO - Character test4 deleted successfully
+2025-02-27 18:07:59,619 - core.state - INFO - Added character test to game state
+2025-02-27 18:07:59,723 - core.database - INFO - Character test saved successfully
+2025-02-27 18:07:59,724 - core.state - INFO - Added character test2 to game state
+2025-02-27 18:07:59,837 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:07:59,839 - core.state - INFO - Added character test3 to game state
+2025-02-27 18:07:59,940 - core.database - INFO - Character test3 saved successfully
+2025-02-27 18:07:59,941 - core.state - INFO - Added character test4 to game state
+2025-02-27 18:08:00,042 - core.database - INFO - Character test4 saved successfully
+2025-02-27 18:08:02,673 - core.database - INFO - Character test saved successfully
+2025-02-27 18:08:04,013 - core.database - INFO - Character test saved successfully
+2025-02-27 18:08:04,101 - core.database - INFO - Character test saved successfully
+2025-02-27 18:08:04,187 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:08:04,702 - core.database - INFO - Character test saved successfully
+2025-02-27 18:08:05,011 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:08:05,312 - core.database - INFO - Character test saved successfully
+2025-02-27 18:08:05,736 - core.database - INFO - Character test saved successfully
+2025-02-27 18:08:05,836 - core.database - INFO - Moveset test_moveset saved successfully
+2025-02-27 18:08:06,063 - core.database - INFO - Moveset test_moveset loaded successfully
+2025-02-27 18:08:06,240 - core.database - INFO - Character test2 saved successfully
+2025-02-27 18:08:39,072 - core.database - INFO - Character test saved successfully
+2025-02-27 18:08:39,169 - core.database - INFO - Character test2 saved successfully
+2025-02-27 19:12:32,134 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 52edfa3eda17c2c333594fccafafa222.
+2025-02-27 20:53:56,995 - discord.gateway - WARNING - Can't keep up, shard ID None websocket is 19.9s behind.
+2025-02-27 20:54:14,868 - discord.gateway - WARNING - Can't keep up, shard ID None websocket is 37.8s behind.
+2025-02-27 21:55:02,094 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-02-27 21:55:02,430 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-02-27 21:55:07,822 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a6ca0647541ac6790eec343f73ea0a3d).
+2025-02-27 21:55:09,840 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 11:26:10,742 - discord.client - ERROR - Attempting a reconnect in 1.70s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-02-28 11:26:12,575 - discord.client - ERROR - Attempting a reconnect in 1.80s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-02-28 11:26:14,394 - discord.client - ERROR - Attempting a reconnect in 5.42s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-02-28 11:26:20,027 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-02-28 11:26:25,319 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1b71ddce7d6642a02d7f36a6ba464ace).
+2025-02-28 11:26:27,346 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 11:32:35,049 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 1b71ddce7d6642a02d7f36a6ba464ace.
+2025-02-28 12:24:54,671 - core.database - INFO - Moveset debug saved successfully
+2025-02-28 12:25:07,609 - core.database - INFO - Character test deleted successfully
+2025-02-28 12:25:07,803 - core.database - INFO - Character test2 deleted successfully
+2025-02-28 12:25:07,994 - core.database - INFO - Character test3 deleted successfully
+2025-02-28 12:25:08,181 - core.database - INFO - Character test4 deleted successfully
+2025-02-28 12:25:08,182 - core.state - INFO - Added character test to game state
+2025-02-28 12:25:08,301 - core.database - INFO - Character test saved successfully
+2025-02-28 12:25:08,301 - core.state - INFO - Added character test2 to game state
+2025-02-28 12:25:08,404 - core.database - INFO - Character test2 saved successfully
+2025-02-28 12:25:08,405 - core.state - INFO - Added character test3 to game state
+2025-02-28 12:25:08,504 - core.database - INFO - Character test3 saved successfully
+2025-02-28 12:25:08,504 - core.state - INFO - Added character test4 to game state
+2025-02-28 12:25:08,592 - core.database - INFO - Character test4 saved successfully
+2025-02-28 12:38:35,205 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 12:38:35,205 - discord.client - INFO - logging in using static token
+2025-02-28 12:38:36,153 - core.database - INFO - No migration needed
+2025-02-28 12:38:36,153 - core.database - INFO - Database initialized successfully
+2025-02-28 12:38:36,263 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 12:38:36,583 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7e8aaf2c78569cf0c491a6db82e71862).
+2025-02-28 12:38:38,634 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 12:39:16,533 - core.database - INFO - Moveset debug loaded successfully
+2025-02-28 12:39:16,619 - core.database - INFO - Moveset debug loaded successfully
+2025-02-28 12:39:16,718 - core.database - INFO - Character test saved successfully
+2025-02-28 12:55:08,756 - core.database - INFO - Character test saved successfully
+2025-02-28 12:55:08,851 - core.database - INFO - Character test2 saved successfully
+2025-02-28 12:55:11,134 - core.database - INFO - Character test2 saved successfully
+2025-02-28 12:55:14,804 - core.database - INFO - Character test saved successfully
+2025-02-28 12:55:44,806 - core.database - INFO - Character test saved successfully
+2025-02-28 12:57:59,045 - core.database - INFO - Character test saved successfully
+2025-02-28 12:58:30,865 - core.database - INFO - Character test2 saved successfully
+2025-02-28 12:58:34,933 - core.database - INFO - Character test saved successfully
+2025-02-28 12:58:42,781 - core.database - INFO - Character test2 saved successfully
+2025-02-28 12:59:10,766 - core.database - INFO - Character test saved successfully
+2025-02-28 12:59:15,603 - core.database - INFO - Character test2 saved successfully
+2025-02-28 12:59:18,194 - core.database - INFO - Character test saved successfully
+2025-02-28 13:05:05,969 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7e8aaf2c78569cf0c491a6db82e71862.
+2025-02-28 13:34:25,875 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7e8aaf2c78569cf0c491a6db82e71862.
+2025-02-28 13:59:43,222 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 13:59:43,222 - discord.client - INFO - logging in using static token
+2025-02-28 13:59:44,224 - core.database - INFO - No migration needed
+2025-02-28 13:59:44,224 - core.database - INFO - Database initialized successfully
+2025-02-28 13:59:44,338 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 13:59:44,742 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 8f3ca6d866aed18f6bc345c812decfc0).
+2025-02-28 13:59:46,746 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:01:28,197 - core.database - INFO - Character test deleted successfully
+2025-02-28 14:01:28,372 - core.database - INFO - Character test2 deleted successfully
+2025-02-28 14:01:28,557 - core.database - INFO - Character test3 deleted successfully
+2025-02-28 14:01:28,738 - core.database - INFO - Character test4 deleted successfully
+2025-02-28 14:01:28,739 - core.state - INFO - Added character test to game state
+2025-02-28 14:01:28,829 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:28,830 - core.state - INFO - Added character test2 to game state
+2025-02-28 14:01:28,926 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:01:28,926 - core.state - INFO - Added character test3 to game state
+2025-02-28 14:01:29,010 - core.database - INFO - Character test3 saved successfully
+2025-02-28 14:01:29,011 - core.state - INFO - Added character test4 to game state
+2025-02-28 14:01:29,097 - core.database - INFO - Character test4 saved successfully
+2025-02-28 14:01:29,181 - core.database - INFO - Moveset debug loaded successfully
+2025-02-28 14:01:29,280 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:29,384 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:01:29,478 - core.database - INFO - Character test3 saved successfully
+2025-02-28 14:01:29,575 - core.database - INFO - Character test4 saved successfully
+2025-02-28 14:01:29,671 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:29,763 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:29,861 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:01:29,955 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:30,053 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:01:30,361 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:30,452 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:30,548 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:01:30,647 - core.database - INFO - Character test saved successfully
+2025-02-28 14:01:30,765 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:11:17,828 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:11:17,831 - discord.client - INFO - logging in using static token
+2025-02-28 14:11:18,861 - core.database - INFO - No migration needed
+2025-02-28 14:11:18,861 - core.database - INFO - Database initialized successfully
+2025-02-28 14:11:18,997 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:11:19,330 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6f2428ec679a0b4a9bb00125ee5c03a0).
+2025-02-28 14:11:21,355 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:15:52,254 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:15:52,257 - discord.client - INFO - logging in using static token
+2025-02-28 14:15:53,140 - core.database - INFO - No migration needed
+2025-02-28 14:15:53,141 - core.database - INFO - Database initialized successfully
+2025-02-28 14:15:53,345 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:15:53,663 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1b7f2c1f1096d06a05dab9f92f6aff72).
+2025-02-28 14:15:55,686 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:18:12,769 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:18:12,769 - discord.client - INFO - logging in using static token
+2025-02-28 14:18:13,886 - core.database - INFO - No migration needed
+2025-02-28 14:18:13,886 - core.database - INFO - Database initialized successfully
+2025-02-28 14:18:14,024 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:29:02,624 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:29:02,624 - discord.client - INFO - logging in using static token
+2025-02-28 14:29:03,594 - core.database - INFO - No migration needed
+2025-02-28 14:29:03,594 - core.database - INFO - Database initialized successfully
+2025-02-28 14:29:03,736 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:29:04,121 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c322abe906fe20b7cc7f5aaadfb102be).
+2025-02-28 14:29:06,145 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:30:11,284 - core.database - INFO - Character test deleted successfully
+2025-02-28 14:30:11,460 - core.database - INFO - Character test2 deleted successfully
+2025-02-28 14:30:11,651 - core.database - INFO - Character test3 deleted successfully
+2025-02-28 14:30:11,860 - core.database - INFO - Character test4 deleted successfully
+2025-02-28 14:30:11,860 - core.state - INFO - Added character test to game state
+2025-02-28 14:30:11,951 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:11,952 - core.state - INFO - Added character test2 to game state
+2025-02-28 14:30:12,032 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:30:12,033 - core.state - INFO - Added character test3 to game state
+2025-02-28 14:30:12,117 - core.database - INFO - Character test3 saved successfully
+2025-02-28 14:30:12,117 - core.state - INFO - Added character test4 to game state
+2025-02-28 14:30:12,234 - core.database - INFO - Character test4 saved successfully
+2025-02-28 14:30:12,401 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:12,575 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:12,660 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:12,762 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:30:13,458 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:13,565 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:13,856 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:30:14,145 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:14,429 - core.database - INFO - Moveset test_global_moveset saved successfully
+2025-02-28 14:30:14,637 - core.database - INFO - Moveset test_global_moveset loaded successfully
+2025-02-28 14:30:14,810 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:30:14,992 - core.database - INFO - Character test saved successfully
+2025-02-28 14:30:15,159 - core.database - INFO - Character test saved successfully
+2025-02-28 14:31:44,158 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:31:44,160 - discord.client - INFO - logging in using static token
+2025-02-28 14:31:45,024 - core.database - INFO - No migration needed
+2025-02-28 14:31:45,024 - core.database - INFO - Database initialized successfully
+2025-02-28 14:31:45,168 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:31:45,527 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2cea59bf89a3662feacb02a15b760d11).
+2025-02-28 14:31:47,549 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:37:33,056 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:37:33,058 - discord.client - INFO - logging in using static token
+2025-02-28 14:37:34,149 - core.database - INFO - No migration needed
+2025-02-28 14:37:34,150 - core.database - INFO - Database initialized successfully
+2025-02-28 14:37:34,267 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:37:34,581 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 67aef8f75fc550a55c526953ed4135d9).
+2025-02-28 14:37:36,593 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:39:50,277 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:39:50,279 - discord.client - INFO - logging in using static token
+2025-02-28 14:39:51,264 - core.database - INFO - No migration needed
+2025-02-28 14:39:51,264 - core.database - INFO - Database initialized successfully
+2025-02-28 14:39:51,370 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:39:51,693 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 436fd733f2437b4dabc73f15ad6c97b9).
+2025-02-28 14:39:53,729 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:40:21,973 - core.database - INFO - Character test deleted successfully
+2025-02-28 14:40:22,154 - core.database - INFO - Character test2 deleted successfully
+2025-02-28 14:40:22,326 - core.database - INFO - Character test3 deleted successfully
+2025-02-28 14:40:22,514 - core.database - INFO - Character test4 deleted successfully
+2025-02-28 14:40:22,514 - core.state - INFO - Added character test to game state
+2025-02-28 14:40:22,597 - core.database - INFO - Character test saved successfully
+2025-02-28 14:40:22,597 - core.state - INFO - Added character test2 to game state
+2025-02-28 14:40:22,685 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:40:22,686 - core.state - INFO - Added character test3 to game state
+2025-02-28 14:40:22,778 - core.database - INFO - Character test3 saved successfully
+2025-02-28 14:40:22,778 - core.state - INFO - Added character test4 to game state
+2025-02-28 14:40:22,865 - core.database - INFO - Character test4 saved successfully
+2025-02-28 14:49:30,697 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 14:49:30,700 - discord.client - INFO - logging in using static token
+2025-02-28 14:49:31,710 - core.database - INFO - No migration needed
+2025-02-28 14:49:31,711 - core.database - INFO - Database initialized successfully
+2025-02-28 14:49:31,816 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 14:49:32,179 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 41f0e3acd3259d97b6b64004ace15141).
+2025-02-28 14:49:34,190 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 14:54:18,321 - core.database - INFO - Character test deleted successfully
+2025-02-28 14:54:18,542 - core.database - INFO - Character test2 deleted successfully
+2025-02-28 14:54:18,716 - core.database - INFO - Character test3 deleted successfully
+2025-02-28 14:54:18,894 - core.database - INFO - Character test4 deleted successfully
+2025-02-28 14:54:18,894 - core.state - INFO - Added character test to game state
+2025-02-28 14:54:18,981 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:18,981 - core.state - INFO - Added character test2 to game state
+2025-02-28 14:54:19,072 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:54:19,073 - core.state - INFO - Added character test3 to game state
+2025-02-28 14:54:19,164 - core.database - INFO - Character test3 saved successfully
+2025-02-28 14:54:19,165 - core.state - INFO - Added character test4 to game state
+2025-02-28 14:54:19,246 - core.database - INFO - Character test4 saved successfully
+2025-02-28 14:54:19,421 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:19,618 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:19,710 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:19,801 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:54:20,162 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:20,254 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:20,539 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:54:20,841 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:21,134 - core.database - INFO - Moveset test_global_moveset saved successfully
+2025-02-28 14:54:21,333 - core.database - INFO - Moveset test_global_moveset loaded successfully
+2025-02-28 14:54:21,515 - core.database - INFO - Character test2 saved successfully
+2025-02-28 14:54:21,693 - core.database - INFO - Character test saved successfully
+2025-02-28 14:54:21,866 - core.database - INFO - Character test saved successfully
+2025-02-28 15:07:47,845 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 15:07:47,845 - discord.client - INFO - logging in using static token
+2025-02-28 15:07:48,846 - core.database - INFO - No migration needed
+2025-02-28 15:07:48,861 - core.database - INFO - Database initialized successfully
+2025-02-28 15:07:48,974 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 15:07:49,348 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: d2e1de7c0b668dfe50f733acb4f12ac1).
+2025-02-28 15:07:51,369 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 15:13:18,451 - core.database - INFO - Character test deleted successfully
+2025-02-28 15:13:18,630 - core.database - INFO - Character test2 deleted successfully
+2025-02-28 15:13:18,796 - core.database - INFO - Character test3 deleted successfully
+2025-02-28 15:13:18,959 - core.database - INFO - Character test4 deleted successfully
+2025-02-28 15:13:18,960 - core.state - INFO - Added character test to game state
+2025-02-28 15:13:19,046 - core.database - INFO - Character test saved successfully
+2025-02-28 15:13:19,046 - core.state - INFO - Added character test2 to game state
+2025-02-28 15:13:19,129 - core.database - INFO - Character test2 saved successfully
+2025-02-28 15:13:19,130 - core.state - INFO - Added character test3 to game state
+2025-02-28 15:13:19,218 - core.database - INFO - Character test3 saved successfully
+2025-02-28 15:13:19,218 - core.state - INFO - Added character test4 to game state
+2025-02-28 15:13:19,312 - core.database - INFO - Character test4 saved successfully
+2025-02-28 17:20:47,371 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-02-28 17:20:47,552 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-02-28 17:20:52,875 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f26732aadc763aa22b72d7d7b916886f).
+2025-02-28 17:20:54,894 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 17:44:48,216 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f26732aadc763aa22b72d7d7b916886f.
+2025-02-28 18:51:31,447 - core.database - INFO - Moveset debug loaded successfully
+2025-02-28 18:51:31,533 - core.database - INFO - Moveset debug loaded successfully
+2025-02-28 18:51:31,633 - core.database - INFO - Character test saved successfully
+2025-02-28 18:52:04,682 - core.database - INFO - Character test saved successfully
+2025-02-28 18:52:08,814 - core.database - INFO - Character test saved successfully
+2025-02-28 18:52:49,639 - core.database - INFO - Character test saved successfully
+2025-02-28 18:53:13,765 - core.database - INFO - Character test saved successfully
+2025-02-28 18:53:55,133 - core.database - INFO - Character test saved successfully
+2025-02-28 18:54:38,609 - core.database - INFO - Character test saved successfully
+2025-02-28 18:54:57,392 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py:1149> exception=AttributeError("'Interaction' object has no attribute 'send'")>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 857, in _do_call
+    return await self._callback(self.binding, interaction, **params)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\commands\effects.py", line 522, in remove
+    matches = fuzzy_match_effects(effect_name, char.effects)
+              ^^^^^^^^^^^^^^^^^^^
+NameError: name 'fuzzy_match_effects' is not defined. Did you mean: 'find_matching_effects'?
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1310, in _call
+    await command._invoke_with_namespace(interaction, namespace)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 883, in _invoke_with_namespace
+    return await self._do_call(interaction, transformed_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 876, in _do_call
+    raise CommandInvokeError(self, e) from e
+discord.app_commands.errors.CommandInvokeError: Command 'remove' raised an exception: NameError: name 'fuzzy_match_effects' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1314, in _call
+    await self.on_error(interaction, e)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 281, in on_app_command_error
+    await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 272, in handle_command_error
+    await ctx.send(embed=error_embed)
+          ^^^^^^^^
+AttributeError: 'Interaction' object has no attribute 'send'
+2025-02-28 18:55:50,644 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f26732aadc763aa22b72d7d7b916886f.
+2025-02-28 18:56:08,606 - core.database - INFO - Character test saved successfully
+2025-02-28 18:56:26,379 - core.database - INFO - Character test saved successfully
+2025-02-28 18:56:32,770 - core.database - INFO - Character test saved successfully
+2025-02-28 18:57:04,042 - core.database - INFO - Character test saved successfully
+2025-02-28 18:57:06,882 - core.database - INFO - Character test saved successfully
+2025-02-28 19:03:44,715 - core.database - INFO - Character test saved successfully
+2025-02-28 19:03:57,424 - core.database - INFO - Character test saved successfully
+2025-02-28 19:04:06,420 - core.database - INFO - Character test saved successfully
+2025-02-28 19:06:27,999 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f26732aadc763aa22b72d7d7b916886f.
+2025-02-28 19:17:43,948 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 19:17:43,951 - discord.client - INFO - logging in using static token
+2025-02-28 19:17:47,346 - core.database - INFO - No migration needed
+2025-02-28 19:17:47,346 - core.database - INFO - Database initialized successfully
+2025-02-28 19:17:47,514 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 19:17:47,957 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 667d1cec201d8f706f7c1f29ff9dc82a).
+2025-02-28 19:17:49,969 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 19:18:34,349 - core.database - INFO - Character test saved successfully
+2025-02-28 19:18:44,341 - core.database - INFO - Character test saved successfully
+2025-02-28 19:20:34,565 - core.character - ERROR - Error adding effect to test: 'MoveEffect' object has no attribute 'cast_time'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\character.py", line 466, in add_effect
+    return effect.on_apply(self, current_round)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 521, in on_apply
+    if self.cast_time:
+       ^^^^^^^^^^^^^^
+AttributeError: 'MoveEffect' object has no attribute 'cast_time'
+2025-02-28 19:20:34,923 - core.database - INFO - Character test saved successfully
+2025-02-28 20:00:47,346 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 20:00:47,348 - discord.client - INFO - logging in using static token
+2025-02-28 20:00:48,663 - core.database - INFO - No migration needed
+2025-02-28 20:00:48,664 - core.database - INFO - Database initialized successfully
+2025-02-28 20:00:48,774 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 20:00:49,175 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9dc390ca12031a23587b6985c4fc0f2a).
+2025-02-28 20:00:51,179 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 20:01:18,244 - core.database - INFO - Character test saved successfully
+2025-02-28 20:01:20,788 - core.database - INFO - Character test saved successfully
+2025-02-28 20:01:36,650 - core.database - ERROR - Failed to save character: 'str' object has no attribute 'value'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 252, in save_character
+    char_dict = character.to_dict()
+                ^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\character.py", line 510, in to_dict
+    "effects": [effect.to_dict() for effect in self.effects],
+                ^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 997, in to_dict
+    **self.combat_processor.to_dict(),
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 422, in to_dict
+    combat_data["roll_timing"] = self.roll_timing.value
+                                 ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'value'
+2025-02-28 20:07:00,430 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 20:07:00,433 - discord.client - INFO - logging in using static token
+2025-02-28 20:07:01,536 - core.database - INFO - No migration needed
+2025-02-28 20:07:01,536 - core.database - INFO - Database initialized successfully
+2025-02-28 20:07:01,671 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 20:07:02,043 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 001899eca6b7e387fe5dcb30597a237f).
+2025-02-28 20:07:04,077 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 20:17:24,078 - core.database - INFO - Character test saved successfully
+2025-02-28 20:17:29,254 - core.database - INFO - Character test saved successfully
+2025-02-28 20:17:42,930 - core.database - INFO - Character test saved successfully
+2025-02-28 20:19:23,430 - core.database - INFO - Character test saved successfully
+2025-02-28 20:20:52,024 - core.database - INFO - Character test saved successfully
+2025-02-28 20:21:03,714 - core.database - INFO - Character test saved successfully
+2025-02-28 20:29:17,607 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 20:29:17,607 - discord.client - INFO - logging in using static token
+2025-02-28 20:29:18,637 - core.database - INFO - No migration needed
+2025-02-28 20:29:18,637 - core.database - INFO - Database initialized successfully
+2025-02-28 20:29:18,794 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 20:29:19,265 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 143e336f0071dd8c92179c0ee0fc47f3).
+2025-02-28 20:29:21,290 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 20:33:11,301 - core.database - INFO - Character test saved successfully
+2025-02-28 20:33:16,544 - core.database - INFO - Character test saved successfully
+2025-02-28 20:33:58,037 - core.database - INFO - Character test saved successfully
+2025-02-28 20:34:23,168 - core.database - INFO - Character test saved successfully
+2025-02-28 20:34:33,919 - core.database - INFO - Character test saved successfully
+2025-02-28 20:34:40,334 - core.database - INFO - Character test saved successfully
+2025-02-28 20:39:14,828 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 20:39:14,828 - discord.client - INFO - logging in using static token
+2025-02-28 20:39:16,082 - core.database - INFO - No migration needed
+2025-02-28 20:39:16,082 - core.database - INFO - Database initialized successfully
+2025-02-28 20:39:16,229 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 20:39:16,594 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: aed8223b8a4f10a38dc1dc039c7d6835).
+2025-02-28 20:39:18,628 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 20:39:52,413 - core.database - INFO - Character test saved successfully
+2025-02-28 20:39:58,057 - core.database - INFO - Character test saved successfully
+2025-02-28 20:40:03,402 - core.database - INFO - Character test saved successfully
+2025-02-28 20:40:32,986 - core.database - INFO - Character test saved successfully
+2025-02-28 20:40:47,232 - core.database - INFO - Character test saved successfully
+2025-02-28 20:41:00,522 - core.database - INFO - Character test saved successfully
+2025-02-28 20:41:11,519 - core.database - INFO - Character test saved successfully
+2025-02-28 20:41:14,882 - core.database - INFO - Character test saved successfully
+2025-02-28 20:46:35,244 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-02-28 20:46:35,246 - discord.client - INFO - logging in using static token
+2025-02-28 20:46:36,365 - core.database - INFO - No migration needed
+2025-02-28 20:46:36,366 - core.database - INFO - Database initialized successfully
+2025-02-28 20:46:36,476 - core.state - INFO - Loaded 5 characters into game state
+2025-02-28 20:46:36,842 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 171badb2ae3a10c23a5ee560efd4005d).
+2025-02-28 20:46:38,862 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-02-28 20:47:01,091 - core.database - INFO - Character test saved successfully
+2025-02-28 20:47:05,120 - core.database - INFO - Character test saved successfully
+2025-02-28 20:47:28,524 - core.database - INFO - Character test saved successfully
+2025-02-28 20:47:36,115 - core.database - INFO - Character test saved successfully
+2025-02-28 20:47:43,224 - core.database - INFO - Character test saved successfully
+2025-02-28 20:47:54,276 - core.database - INFO - Character test saved successfully
+2025-02-28 20:47:59,230 - core.database - INFO - Character test saved successfully
+2025-02-28 21:23:18,661 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 171badb2ae3a10c23a5ee560efd4005d.
+2025-03-01 17:25:08,239 - discord.client - ERROR - Attempting a reconnect in 1.76s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-01 17:25:11,188 - discord.client - ERROR - Attempting a reconnect in 3.49s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-01 17:25:15,117 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-01 17:25:20,616 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ed9ad584a126687bcc5acae829f845d7).
+2025-03-01 17:25:22,635 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-01 18:34:10,865 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ed9ad584a126687bcc5acae829f845d7.
+2025-03-01 20:40:19,852 - discord.client - ERROR - Attempting a reconnect in 1.52s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-01 20:40:21,963 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ed9ad584a126687bcc5acae829f845d7.
+2025-03-01 22:33:20,222 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ed9ad584a126687bcc5acae829f845d7.
+2025-03-01 23:26:46,515 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ed9ad584a126687bcc5acae829f845d7.
+2025-03-02 07:22:56,073 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-02 07:22:56,076 - discord.client - ERROR - Attempting a reconnect in 1.94s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:22:58,037 - discord.client - ERROR - Attempting a reconnect in 1.10s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:22:59,156 - discord.client - ERROR - Attempting a reconnect in 2.49s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:23:01,672 - discord.client - ERROR - Attempting a reconnect in 1.33s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:23:03,016 - discord.client - ERROR - Attempting a reconnect in 11.05s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:23:14,088 - discord.client - ERROR - Attempting a reconnect in 14.80s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:23:28,903 - discord.client - ERROR - Attempting a reconnect in 8.12s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:23:37,029 - discord.client - ERROR - Attempting a reconnect in 95.91s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-02 07:25:13,067 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-02 07:25:18,287 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3436866a37dfc9c8dc2cfa1e259d95cb).
+2025-03-02 07:25:20,301 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-02 07:26:31,697 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-02 07:26:31,700 - discord.client - INFO - logging in using static token
+2025-03-02 07:26:32,375 - core.database - INFO - No migration needed
+2025-03-02 07:26:32,375 - core.database - INFO - Database initialized successfully
+2025-03-02 07:26:32,474 - core.state - INFO - Loaded 5 characters into game state
+2025-03-02 07:26:32,807 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 991e90a9988cdc94a249a548d479e042).
+2025-03-02 07:26:35,051 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-02 07:31:28,572 - core.database - INFO - Character test saved successfully
+2025-03-02 07:31:33,237 - core.database - INFO - Character test saved successfully
+2025-03-02 07:31:45,486 - core.database - INFO - Character test saved successfully
+2025-03-02 07:32:14,209 - core.database - INFO - Character test saved successfully
+2025-03-02 07:32:20,454 - core.database - INFO - Character test saved successfully
+2025-03-02 07:32:24,787 - core.database - INFO - Character test saved successfully
+2025-03-02 07:33:54,145 - core.database - INFO - Character test saved successfully

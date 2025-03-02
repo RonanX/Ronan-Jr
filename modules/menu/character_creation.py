@@ -434,171 +434,6 @@ class ProficiencyLevelView(View):
                     ephemeral=True
                 )
 
-async def create_character(self, interaction: discord.Interaction, style: Enum, quick_create: bool):
-    """Create character with selected proficiencies"""
-    try:
-        # Show loading message
-        await interaction.response.edit_message(
-            embed=discord.Embed(
-                title="Creating Character",
-                description="Processing your selections...",
-                color=discord.Color.blue()
-            ),
-            view=None
-        )
-
-        if quick_create:
-            logger.info(f"Quick creating character with style {style}")
-            proficiencies = get_preset_proficiencies(style)
-        else:
-            logger.info(f"Starting manual proficiency selection for style {style}")
-            prof_view = ProficiencySelectionView(
-                style, 
-                quick_create=False,
-                allowed_saves=self.allowed_saves,
-                allowed_skills=self.allowed_skills,
-                can_expertise=self.can_expertise
-            )
-            await prof_view.start(interaction)
-            await prof_view.wait()
-            proficiencies = prof_view.value
-            
-            if not proficiencies:
-                logger.info("Proficiency selection cancelled or timed out")
-                await interaction.followup.send(
-                    "Character creation cancelled.",
-                    ephemeral=True
-                )
-                return
-        
-        logger.info(f"Creating character with proficiencies: {proficiencies}")
-        
-        # Create character with provided stats and proficiencies
-        character = create_character_with_stats(
-            name=self.name,
-            hp=self.hp,
-            mp=self.mp,
-            ac=self.ac,
-            base_stats=self.stats,
-            style=style,
-            proficiencies=proficiencies,
-            base_proficiency=self.base_proficiency
-        )
-        
-        logger.info("Saving character to database")
-        await interaction.client.db.save_character(character)
-        
-        logger.info("Character created successfully, showing results")
-        # Show completion message in channel
-        await interaction.channel.send(
-            embed=discord.Embed(
-                title="✨ Character Created!",
-                description=f"Character {self.name} has been created successfully.",
-                color=discord.Color.green()
-            )
-        )
-        await display_creation_result(interaction, character)
-        
-    except Exception as e:
-        logger.error(f"Error in character creation: {e}", exc_info=True)
-        error_embed = discord.Embed(
-            title="Error",
-            description="An error occurred during character creation. Please try again.",
-            color=discord.Color.red()
-        )
-        try:
-            if interaction.response.is_done():
-                await interaction.followup.send(embed=error_embed)
-            else:
-                await interaction.response.send_message(embed=error_embed)
-        except:
-            await interaction.channel.send(embed=error_embed)
-
-class PowerLevel:
-    """Defines stat ranges and proficiency for different power levels"""
-    NOVICE = {"min": 6, "max": 13, "bonus": -1, "proficiency": 2}
-    INTERMEDIATE = {"min": 8, "max": 15, "bonus": 0, "proficiency": 2}
-    ADVANCED = {"min": 10, "max": 16, "bonus": 1, "proficiency": 3}
-    EXCEPTIONAL = {"min": 12, "max": 17, "bonus": 2, "proficiency": 4}
-    SUPREME = {"min": 14, "max": 18, "bonus": 3, "proficiency": 5}
-
-    @staticmethod
-    def get_stats(level: dict) -> Dict[StatType, int]:
-        """Generate stats within the given power level range"""
-        stats = {}
-        for stat in StatType:
-            base = random.randint(level["min"], level["max"])
-            bonus = level["bonus"]
-            stats[stat] = min(20, max(3, base + bonus))
-        return stats
-
-def create_character_with_stats(*, 
-    name: str, 
-    hp: int, 
-    mp: int, 
-    ac: int,
-    base_stats: Dict[StatType, int], 
-    style: Optional[Union[Enum, str]] = None,  # Updated to allow string
-    proficiencies: Optional[Dict] = None,
-    base_proficiency: int = 2
-) -> Character:
-    """Helper function to create a character with given stats"""
-    stats = Stats(base=base_stats, modified=base_stats.copy())
-    resources = Resources(current_hp=hp, max_hp=hp, current_mp=mp, max_mp=mp)
-    defense = DefenseStats(base_ac=ac, current_ac=ac)
-    
-    logger.info(f"Creating character with style: {style}, proficiency: {base_proficiency}")
-    logger.info(f"Proficiencies provided: {proficiencies}")
-    
-    # Create character with specified base proficiency
-    character = Character(
-        name=name,
-        stats=stats,
-        resources=resources,
-        defense=defense,
-        base_proficiency=base_proficiency
-    )
-    
-    # Convert string style to enum if needed
-    if isinstance(style, str):
-        if hasattr(ChuaStyle, style.upper()):
-            style = ChuaStyle[style.upper()]
-        elif hasattr(FairyType, style.upper()):
-            style = FairyType[style.upper()]
-            
-    # Set style
-    character.style = style
-    
-    # Set proficiencies if provided
-    if proficiencies:
-        if 'saves' in proficiencies:
-            for stat_value, level_value in proficiencies['saves'].items():
-                if isinstance(stat_value, str):
-                    stat = StatType(stat_value)
-                else:
-                    stat = stat_value
-                character.set_save_proficiency(stat, ProficiencyLevel(level_value))
-        
-        if 'skills' in proficiencies:
-            for skill, level_value in proficiencies['skills'].items():
-                character.set_skill_proficiency(skill, ProficiencyLevel(level_value))
-
-    # Calculate spell save DC (8 + proficiency + highest of INT, WIS, CHA modifier + style bonus)
-    spellcasting_mods = [
-        (base_stats[StatType.INTELLIGENCE] - 10) // 2,
-        (base_stats[StatType.WISDOM] - 10) // 2,
-        (base_stats[StatType.CHARISMA] - 10) // 2
-    ]
-    highest_mod = max(spellcasting_mods)
-    
-    if style:
-        character.spell_save_dc = calculate_spell_save_dc(style, base_proficiency, highest_mod)
-    else:
-        character.spell_save_dc = 8 + base_proficiency + highest_mod
-    
-    logger.info(f"Character created successfully: {character.name}")
-    return character
-
 class StatInputModal(Modal):
     """Single modal for manual stat entry"""
     def __init__(self, name: str, hp: int, mp: int, ac: int) -> None:
@@ -687,175 +522,16 @@ class StatConfirmationView(View):
 
     @discord.ui.button(label="Accept Stats", style=discord.ButtonStyle.success)
     async def accept_stats(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """Start character type selection after accepting stats"""
-        type_view = CharacterTypeView(
+        """Start proficiency selection after accepting stats"""
+        # Direct to proficiency level selection first
+        prof_level_view = ProficiencyLevelView(
             name=self.name,
             hp=self.hp,
             mp=self.mp,
             ac=self.ac,
             stats=self.stats
         )
-        await type_view.start(interaction)
-
-    @discord.ui.button(label="Accept Stats", style=discord.ButtonStyle.success)
-    async def accept_stats(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(
-            title="Character Type Selection",
-            description="Choose your character type to proceed with proficiency selection",
-            color=discord.Color.blue()
-        )
-        
-        # Create type selection view
-        type_view = View()
-        
-        # Add creature type selection
-        creature_select = Select(
-            placeholder="Select Creature Type",
-            options=[
-                discord.SelectOption(
-                    label="Chua",
-                    value="chua",
-                    description="Essence-wielding warriors"
-                ),
-                discord.SelectOption(
-                    label="Fairy",
-                    value="fairy",
-                    description="Magical beings with diverse abilities"
-                )
-            ],
-            custom_id="creature_type"
-        )
-
-        async def on_creature_select(creature_interaction: discord.Interaction):
-            if creature_select.values[0] == "chua":
-                # Show Chua style options
-                style_select = Select(
-                    placeholder="Select Combat Style",
-                    options=[
-                        discord.SelectOption(
-                            label="Tank",
-                            value="tank",
-                            description="Durable physical fighters"
-                        ),
-                        discord.SelectOption(
-                            label="Rusher",
-                            value="rusher",
-                            description="Swift, agile combatants"
-                        ),
-                        discord.SelectOption(
-                            label="Elemental",
-                            value="elemental",
-                            description="Essence manipulation specialists"
-                        ),
-                        discord.SelectOption(
-                            label="Tank-Rusher Hybrid",
-                            value="hybrid_tank_rusher",
-                            description="Combines Tank and Rusher styles"
-                        ),
-                        discord.SelectOption(
-                            label="Tank-Elemental Hybrid",
-                            value="hybrid_tank_elemental",
-                            description="Combines Tank and Elemental styles"
-                        ),
-                        discord.SelectOption(
-                            label="Rusher-Elemental Hybrid",
-                            value="hybrid_rusher_elemental",
-                            description="Combines Rusher and Elemental styles"
-                        ),
-                        discord.SelectOption(
-                            label="Balancer",
-                            value="balancer",
-                            description="Adaptable fighter, learns multiple styles"
-                        )
-                    ]
-                )
-                style_enum = ChuaStyle
-            else:
-                # Show Fairy type options
-                style_select = Select(
-                    placeholder="Select Fairy Type",
-                    options=[
-                        discord.SelectOption(
-                            label="Energy",
-                            value="energy",
-                            description="Energy manipulation and teleportation"
-                        ),
-                        discord.SelectOption(
-                            label="Mind",
-                            value="mind",
-                            description="Telekinesis and mental abilities"
-                        ),
-                        discord.SelectOption(
-                            label="Spell",
-                            value="spell",
-                            description="Versatile spellcasting"
-                        ),
-                        discord.SelectOption(
-                            label="Fighting",
-                            value="fighting",
-                            description="Physical combat specialists"
-                        ),
-                        discord.SelectOption(
-                            label="Spirit",
-                            value="spirit",
-                            description="Spiritual and supernatural abilities"
-                        ),
-                        discord.SelectOption(
-                            label="Omni",
-                            value="omni",
-                            description="Access to multiple fairy abilities"
-                        )
-                    ]
-                )
-                style_enum = FairyType
-
-            async def on_style_select(style_interaction: discord.Interaction):
-                style = style_enum(style_select.values[0])
-                
-                # Create quick/manual selection buttons
-                quick_view = View()
-                
-                quick_button = Button(
-                    label="Quick Create",
-                    style=discord.ButtonStyle.primary,
-                    custom_id="quick"
-                )
-                manual_button = Button(
-                    label="Manual Proficiencies",
-                    style=discord.ButtonStyle.secondary,
-                    custom_id="manual"
-                )
-                
-                quick_button.callback = lambda i: self.create_with_proficiencies(i, style, True)
-                manual_button.callback = lambda i: self.create_with_proficiencies(i, style, False)
-                
-                quick_view.add_item(quick_button)
-                quick_view.add_item(manual_button)
-                
-                await style_interaction.response.edit_message(
-                    embed=discord.Embed(
-                        title="Proficiency Selection",
-                        description="Choose how to set proficiencies:",
-                        color=discord.Color.blue()
-                    ),
-                    view=quick_view
-                )
-
-            style_select.callback = on_style_select
-            style_view = View()
-            style_view.add_item(style_select)
-            await creature_interaction.response.edit_message(
-                embed=discord.Embed(
-                    title=f"Select {'Combat Style' if creature_select.values[0] == 'chua' else 'Fairy Type'}",
-                    description="Choose your specialization:",
-                    color=discord.Color.blue()
-                ),
-                view=style_view
-            )
-
-        creature_select.callback = on_creature_select
-        type_view.add_item(creature_select)
-        await interaction.response.edit_message(embed=embed, view=type_view)
+        await prof_level_view.start(interaction)
 
 class CharismaModal(Modal):
     def __init__(self, name: str, hp: int, mp: int, ac: int, stats: Dict[StatType, int]):
@@ -1005,6 +681,91 @@ class StatGenerationView(View):
         )
         await interaction.response.edit_message(view=view)
         await view.update_display(interaction)
+
+class PowerLevel:
+    """Defines stat ranges and proficiency for different power levels"""
+    NOVICE = {"min": 6, "max": 13, "bonus": -1, "proficiency": 2}
+    INTERMEDIATE = {"min": 8, "max": 15, "bonus": 0, "proficiency": 2}
+    ADVANCED = {"min": 10, "max": 16, "bonus": 1, "proficiency": 3}
+    EXCEPTIONAL = {"min": 12, "max": 17, "bonus": 2, "proficiency": 4}
+    SUPREME = {"min": 14, "max": 18, "bonus": 3, "proficiency": 5}
+
+    @staticmethod
+    def get_stats(level: dict) -> Dict[StatType, int]:
+        """Generate stats within the given power level range"""
+        stats = {}
+        for stat in StatType:
+            base = random.randint(level["min"], level["max"])
+            bonus = level["bonus"]
+            stats[stat] = min(20, max(3, base + bonus))
+        return stats
+
+def create_character_with_stats(*, 
+    name: str, 
+    hp: int, 
+    mp: int, 
+    ac: int,
+    base_stats: Dict[StatType, int], 
+    style: Optional[Union[Enum, str]] = None,  # Updated to allow string
+    proficiencies: Optional[Dict] = None,
+    base_proficiency: int = 2
+) -> Character:
+    """Helper function to create a character with given stats"""
+    stats = Stats(base=base_stats, modified=base_stats.copy())
+    resources = Resources(current_hp=hp, max_hp=hp, current_mp=mp, max_mp=mp)
+    defense = DefenseStats(base_ac=ac, current_ac=ac)
+    
+    logger.info(f"Creating character with style: {style}, proficiency: {base_proficiency}")
+    logger.info(f"Proficiencies provided: {proficiencies}")
+    
+    # Create character with specified base proficiency
+    character = Character(
+        name=name,
+        stats=stats,
+        resources=resources,
+        defense=defense,
+        base_proficiency=base_proficiency
+    )
+    
+    # Convert string style to enum if needed
+    if isinstance(style, str):
+        if hasattr(ChuaStyle, style.upper()):
+            style = ChuaStyle[style.upper()]
+        elif hasattr(FairyType, style.upper()):
+            style = FairyType[style.upper()]
+            
+    # Set style
+    character.style = style
+    
+    # Set proficiencies if provided
+    if proficiencies:
+        if 'saves' in proficiencies:
+            for stat_value, level_value in proficiencies['saves'].items():
+                if isinstance(stat_value, str):
+                    stat = StatType(stat_value)
+                else:
+                    stat = stat_value
+                character.set_save_proficiency(stat, ProficiencyLevel(level_value))
+        
+        if 'skills' in proficiencies:
+            for skill, level_value in proficiencies['skills'].items():
+                character.set_skill_proficiency(skill, ProficiencyLevel(level_value))
+
+    # Calculate spell save DC (8 + proficiency + highest of INT, WIS, CHA modifier + style bonus)
+    spellcasting_mods = [
+        (base_stats[StatType.INTELLIGENCE] - 10) // 2,
+        (base_stats[StatType.WISDOM] - 10) // 2,
+        (base_stats[StatType.CHARISMA] - 10) // 2
+    ]
+    highest_mod = max(spellcasting_mods)
+    
+    if style:
+        character.spell_save_dc = calculate_spell_save_dc(style, base_proficiency, highest_mod)
+    else:
+        character.spell_save_dc = 8 + base_proficiency + highest_mod
+    
+    logger.info(f"Character created successfully: {character.name}")
+    return character
 
 def preview_skills(stats: Dict[StatType, int]) -> str:
     """Generate a preview of key skills with these stats"""

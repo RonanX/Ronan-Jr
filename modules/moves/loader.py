@@ -224,7 +224,7 @@ class MoveLoader:
             return None
     
     @staticmethod
-    async def assign_global_moveset(database, character_name: str, moveset_name: str) -> bool:
+    async def assign_global_moveset(database, bot, character_name: str, moveset_name: str) -> bool:
         """
         Assign a global moveset to a character.
         
@@ -232,6 +232,12 @@ class MoveLoader:
         1. Check if the global moveset exists
         2. Update the character's moveset reference
         3. Clear any existing character-specific moves
+        
+        Args:
+            database: The database instance
+            bot: The bot instance (needed to access game_state)
+            character_name: Name of the character to receive the moveset
+            moveset_name: Name of the global moveset to assign
         """
         try:
             # Verify global moveset exists
@@ -240,8 +246,8 @@ class MoveLoader:
                 print(f"Loader: Global moveset '{moveset_name}' not found")
                 return False
             
-            # Get character
-            char = database.bot.game_state.get_character(character_name)
+            # Get character from the game state
+            char = bot.game_state.get_character(character_name)
             if not char:
                 print(f"Loader: Character '{character_name}' not found")
                 return False

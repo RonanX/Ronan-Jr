@@ -48,10 +48,10 @@ async def recreate_test_characters(bot) -> List[str]:
             )
             
             resources = Resources(
-                current_hp=20,
-                max_hp=20,
-                current_mp=10,
-                max_mp=10
+                current_hp=50,
+                max_hp=50,
+                current_mp=100,
+                max_mp=100
             )
             
             defense = DefenseStats(

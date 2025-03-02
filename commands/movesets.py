@@ -150,9 +150,10 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                     if btn_interaction.user != interaction.user:
                         return
                         
-                    # Assign moveset (sets reference)
+                    # Assign moveset (sets reference) - pass both db and bot
                     success = await MoveLoader.assign_global_moveset(
                         self.bot.db,
+                        self.bot,
                         character,
                         name
                     )
@@ -253,10 +254,21 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                     char.moveset.reference = name
                 else:
                     # Replace with new moveset
-                    char.moveset = moveset
-                
-                # Save character
-                await self.bot.db.save_character(char)
+                    result = await MoveLoader.assign_global_moveset(
+                        self.bot.db,
+                        self.bot,
+                        character,
+                        name
+                    )
+                    
+                    if not result:
+                        # If failed to load global moveset, just use the local one
+                        char.moveset = moveset
+                        await self.bot.db.save_character(char)
+                        
+                    # If success, the character is already saved by assign_global_moveset
+                    # No need to save again
+                    return
                 
                 # Create feedback embed
                 embed = discord.Embed(
