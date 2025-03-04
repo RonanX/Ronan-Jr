@@ -212,7 +212,7 @@ class InitiativeTracker:
         
         new_char = self.bot.game_state.get_character(self.current_turn.character_name)
         if new_char:
-            # IMPORTANT: Added await here
+            # Process effects - properly await the call
             was_skipped, start_msgs, end_msgs = await process_effects(
                 new_char,
                 self.round_number,
@@ -240,7 +240,7 @@ class InitiativeTracker:
         if self.logger:
             self.logger.snapshot_character_state(character)
         
-        # IMPORTANT: Added await here - properly await process_effects
+        # Process effects - properly await the call
         was_skipped, start_messages, end_messages = await process_effects(
             character, 
             self.round_number, 
@@ -453,10 +453,10 @@ class InitiativeTracker:
         if hasattr(character, 'heat_stacks'):
             delattr(character, 'heat_stacks')
             
-        # Clear all move cooldowns
+        # Clear all move cooldowns - FIXING THE VARIABLE NAME HERE
         if hasattr(character, 'moveset'):
             for move_name in character.list_moves():
-                move = character.get_move(move_name)
+                move = character.get_move(move_name)  # FIXED: changed 'char' to 'character'
                 if move:
                     move.last_used_round = None
                     if hasattr(move, 'uses') and move.uses is not None:
@@ -582,7 +582,7 @@ class InitiativeTracker:
                 # Process first turn
                 current_char = self.bot.game_state.get_character(self.current_turn.character_name)
                 if current_char:
-                    # IMPORTANT: Added await here
+                    # Process effects - properly await the call
                     was_skipped, start_msgs, end_msgs = await process_effects(
                         current_char,
                         self.round_number,
@@ -613,7 +613,7 @@ class InitiativeTracker:
             current_char = self.bot.game_state.get_character(self.current_turn.character_name)
             if current_char:
                 # Get end of turn effects
-                # IMPORTANT: Added await here
+                # Process effects - properly await the call
                 was_skipped, start_msgs, end_msgs = await process_effects(
                     current_char,
                     self.round_number,
@@ -652,8 +652,7 @@ class InitiativeTracker:
             # Process next character's turn
             new_char = self.bot.game_state.get_character(self.current_turn.character_name)
             if new_char:
-                # Process new turn
-                # IMPORTANT: Added await here
+                # Process new turn - properly await the call
                 was_skipped, start_msgs, end_msgs = await process_effects(
                     new_char,
                     self.round_number,

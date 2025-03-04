@@ -7749,3 +7749,490 @@ AttributeError: 'NoneType' object has no attribute 'duration'
 2025-03-03 22:23:12,140 - core.database - INFO - Character test saved successfully
 2025-03-03 22:23:12,244 - core.database - INFO - Character test2 saved successfully
 2025-03-03 22:23:12,582 - core.database - INFO - Character test saved successfully
+2025-03-03 22:40:58,581 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-03 22:40:58,584 - discord.client - INFO - logging in using static token
+2025-03-03 22:40:59,909 - core.database - INFO - No migration needed
+2025-03-03 22:40:59,910 - core.database - INFO - Database initialized successfully
+2025-03-03 22:41:00,087 - core.state - INFO - Loaded 5 characters into game state
+2025-03-03 22:41:00,522 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 358616a8d0ab4f8cd7dfbed2b1d8302b).
+2025-03-03 22:41:02,534 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-03 22:41:09,179 - core.database - INFO - Character test deleted successfully
+2025-03-03 22:41:09,369 - core.database - INFO - Character test2 deleted successfully
+2025-03-03 22:41:09,545 - core.database - INFO - Character test3 deleted successfully
+2025-03-03 22:41:09,740 - core.database - INFO - Character test4 deleted successfully
+2025-03-03 22:41:09,741 - core.state - INFO - Added character test to game state
+2025-03-03 22:41:09,886 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:09,887 - core.state - INFO - Added character test2 to game state
+2025-03-03 22:41:09,966 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:09,966 - core.state - INFO - Added character test3 to game state
+2025-03-03 22:41:10,054 - core.database - INFO - Character test3 saved successfully
+2025-03-03 22:41:10,055 - core.state - INFO - Added character test4 to game state
+2025-03-03 22:41:10,168 - core.database - INFO - Character test4 saved successfully
+2025-03-03 22:41:10,262 - core.database - INFO - Moveset debug loaded successfully
+2025-03-03 22:41:10,393 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:10,503 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:10,603 - core.database - INFO - Character test3 saved successfully
+2025-03-03 22:41:10,703 - core.database - INFO - Character test4 saved successfully
+2025-03-03 22:41:10,804 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:10,897 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:11,021 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:11,133 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:11,226 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:11,314 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:11,412 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:11,665 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:11,792 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:11,891 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:11,982 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:12,071 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:12,651 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:12,741 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:12,842 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:12,932 - core.database - INFO - Character test3 saved successfully
+2025-03-03 22:41:13,026 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:13,108 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:13,197 - core.database - INFO - Character test3 saved successfully
+2025-03-03 22:41:13,463 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:13,553 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:13,655 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:13,742 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:41:13,842 - core.database - INFO - Character test saved successfully
+2025-03-03 22:41:13,937 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:46:01,250 - core.database - INFO - Character test saved successfully
+2025-03-03 22:46:01,372 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:46:03,917 - core.database - INFO - Character test saved successfully
+2025-03-03 22:46:14,091 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:46:16,635 - core.effects.manager - ERROR - Error processing effects: Invalid dice component: d4
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 194, in process_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\combat.py", line 56, in on_turn_start
+    damage = self._roll_damage(character)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\combat.py", line 38, in _roll_damage
+    total, _ = DiceRoller.roll_dice(self.damage, character)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\dice.py", line 80, in roll_dice
+    raise ValueError(f"Invalid dice component: {comp}")
+ValueError: Invalid dice component: d4
+2025-03-03 22:46:17,141 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:46:21,405 - core.effects.manager - ERROR - Error processing effects: Invalid dice component: d4
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 194, in process_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\combat.py", line 56, in on_turn_start
+    damage = self._roll_damage(character)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\combat.py", line 38, in _roll_damage
+    total, _ = DiceRoller.roll_dice(self.damage, character)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\dice.py", line 80, in roll_dice
+    raise ValueError(f"Invalid dice component: {comp}")
+ValueError: Invalid dice component: d4
+2025-03-03 22:46:21,651 - core.database - INFO - Character test saved successfully
+2025-03-03 22:46:28,462 - core.effects.manager - ERROR - Error processing effects: Invalid dice component: d4
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 194, in process_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\combat.py", line 56, in on_turn_start
+    damage = self._roll_damage(character)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\combat.py", line 38, in _roll_damage
+    total, _ = DiceRoller.roll_dice(self.damage, character)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\dice.py", line 80, in roll_dice
+    raise ValueError(f"Invalid dice component: {comp}")
+ValueError: Invalid dice component: d4
+2025-03-03 22:46:28,575 - core.database - INFO - Character test2 saved successfully
+2025-03-03 22:46:44,163 - core.database - INFO - Character test saved successfully
+2025-03-03 23:50:37,188 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-03 23:50:37,192 - discord.client - INFO - logging in using static token
+2025-03-03 23:50:38,284 - core.database - INFO - No migration needed
+2025-03-03 23:50:38,284 - core.database - INFO - Database initialized successfully
+2025-03-03 23:50:38,428 - core.effects.base - ERROR - Failed to reconstruct effect BurnEffect: BurnEffect.__init__() missing 1 required positional argument: 'damage'
+2025-03-03 23:50:38,430 - core.state - INFO - Loaded 5 characters into game state
+2025-03-03 23:50:38,938 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6894ebb023e77fccf63445c804e518d1).
+2025-03-03 23:50:40,948 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-03 23:51:26,869 - modules.combat.initiative - ERROR - Error starting combat: name 'char' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 291, in start_combat
+    msgs = await self.clear_combat_effects(char)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 459, in clear_combat_effects
+    move = char.get_move(move_name)
+           ^^^^
+NameError: name 'char' is not defined. Did you mean: 'chr'?
+2025-03-04 00:05:10,287 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 00:05:10,289 - discord.client - INFO - logging in using static token
+2025-03-04 00:05:11,377 - core.database - INFO - No migration needed
+2025-03-04 00:05:11,378 - core.database - INFO - Database initialized successfully
+2025-03-04 00:05:11,539 - core.effects.base - ERROR - Failed to reconstruct effect BurnEffect: BurnEffect.__init__() missing 1 required positional argument: 'damage'
+2025-03-04 00:05:11,546 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 00:05:12,019 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3170641dcb7d46ff72d9119c4c3d786d).
+2025-03-04 00:05:14,035 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 00:05:20,207 - core.database - INFO - Character test deleted successfully
+2025-03-04 00:05:20,426 - core.database - INFO - Character test2 deleted successfully
+2025-03-04 00:05:20,665 - core.database - INFO - Character test3 deleted successfully
+2025-03-04 00:05:20,898 - core.database - INFO - Character test4 deleted successfully
+2025-03-04 00:05:20,899 - core.state - INFO - Added character test to game state
+2025-03-04 00:05:20,991 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:20,992 - core.state - INFO - Added character test2 to game state
+2025-03-04 00:05:21,091 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:05:21,091 - core.state - INFO - Added character test3 to game state
+2025-03-04 00:05:21,178 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:05:21,179 - core.state - INFO - Added character test4 to game state
+2025-03-04 00:05:21,269 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:05:21,357 - core.database - INFO - Moveset debug loaded successfully
+2025-03-04 00:05:21,454 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:21,541 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:05:21,642 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:05:21,765 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:05:21,884 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:21,974 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:05:22,068 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:22,192 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:22,291 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:05:22,293 - modules.combat.initiative - ERROR - Error setting battle: name 'char' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 508, in set_battle
+    msgs = await self.clear_combat_effects(char)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 459, in clear_combat_effects
+    move = char.get_move(move_name)
+           ^^^^
+NameError: name 'char' is not defined. Did you mean: 'chr'?
+2025-03-04 00:05:22,392 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:22,472 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:05:22,474 - modules.combat.initiative - ERROR - Error setting battle: name 'char' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 508, in set_battle
+    msgs = await self.clear_combat_effects(char)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 459, in clear_combat_effects
+    move = char.get_move(move_name)
+           ^^^^
+NameError: name 'char' is not defined. Did you mean: 'chr'?
+2025-03-04 00:05:22,583 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:22,670 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:05:22,765 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:05:22,767 - modules.combat.initiative - ERROR - Error setting battle: name 'char' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 508, in set_battle
+    msgs = await self.clear_combat_effects(char)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 459, in clear_combat_effects
+    move = char.get_move(move_name)
+           ^^^^
+NameError: name 'char' is not defined. Did you mean: 'chr'?
+2025-03-04 00:05:22,879 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:22,981 - core.database - INFO - Character test saved successfully
+2025-03-04 00:05:23,068 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:05:23,071 - modules.combat.initiative - ERROR - Error setting battle: name 'char' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 508, in set_battle
+    msgs = await self.clear_combat_effects(char)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 459, in clear_combat_effects
+    move = char.get_move(move_name)
+           ^^^^
+NameError: name 'char' is not defined. Did you mean: 'chr'?
+2025-03-04 00:05:35,992 - modules.combat.initiative - ERROR - Error starting combat: name 'char' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 291, in start_combat
+    msgs = await self.clear_combat_effects(char)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\modules\combat\initiative.py", line 459, in clear_combat_effects
+    move = char.get_move(move_name)
+           ^^^^
+NameError: name 'char' is not defined. Did you mean: 'chr'?
+2025-03-04 00:20:26,367 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 00:20:26,369 - discord.client - INFO - logging in using static token
+2025-03-04 00:20:27,756 - core.database - INFO - No migration needed
+2025-03-04 00:20:27,756 - core.database - INFO - Database initialized successfully
+2025-03-04 00:20:27,891 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 00:20:28,385 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c98ee579b67ab3f81910a9fa68da76f2).
+2025-03-04 00:20:30,405 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 00:21:05,175 - core.database - INFO - Character test deleted successfully
+2025-03-04 00:21:05,353 - core.database - INFO - Character test2 deleted successfully
+2025-03-04 00:21:05,551 - core.database - INFO - Character test3 deleted successfully
+2025-03-04 00:21:05,737 - core.database - INFO - Character test4 deleted successfully
+2025-03-04 00:21:05,738 - core.state - INFO - Added character test to game state
+2025-03-04 00:21:05,825 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:05,826 - core.state - INFO - Added character test2 to game state
+2025-03-04 00:21:05,906 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:05,907 - core.state - INFO - Added character test3 to game state
+2025-03-04 00:21:06,003 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:21:06,004 - core.state - INFO - Added character test4 to game state
+2025-03-04 00:21:06,102 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:21:06,183 - core.database - INFO - Moveset debug loaded successfully
+2025-03-04 00:21:06,281 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:06,385 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:06,490 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:21:06,580 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:21:06,677 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:06,765 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:06,864 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:06,952 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:07,048 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:07,139 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:07,228 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:07,502 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:07,594 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:07,903 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:08,203 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:08,503 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:08,790 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:09,095 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:09,392 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:09,484 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:09,581 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:09,669 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:09,956 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:10,040 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:10,329 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:10,624 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:10,713 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:10,816 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:21:10,900 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:10,984 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:11,070 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:21:11,366 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:11,453 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:11,764 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:11,861 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:11,961 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:21:12,049 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:12,151 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:12,243 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:21:12,327 - core.database - INFO - Character test saved successfully
+2025-03-04 00:21:12,409 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:08,207 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 00:36:08,210 - discord.client - INFO - logging in using static token
+2025-03-04 00:36:09,217 - core.database - INFO - No migration needed
+2025-03-04 00:36:09,217 - core.database - INFO - Database initialized successfully
+2025-03-04 00:36:09,368 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 00:36:09,814 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 65b94d06f90fa0150f648956ee4f49aa).
+2025-03-04 00:36:11,826 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 00:36:21,972 - core.database - INFO - Character test deleted successfully
+2025-03-04 00:36:22,185 - core.database - INFO - Character test2 deleted successfully
+2025-03-04 00:36:22,360 - core.database - INFO - Character test3 deleted successfully
+2025-03-04 00:36:22,545 - core.database - INFO - Character test4 deleted successfully
+2025-03-04 00:36:22,546 - core.state - INFO - Added character test to game state
+2025-03-04 00:36:22,651 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:22,651 - core.state - INFO - Added character test2 to game state
+2025-03-04 00:36:22,740 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:22,741 - core.state - INFO - Added character test3 to game state
+2025-03-04 00:36:22,823 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:36:22,823 - core.state - INFO - Added character test4 to game state
+2025-03-04 00:36:22,917 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:36:23,015 - core.database - INFO - Moveset debug loaded successfully
+2025-03-04 00:36:23,116 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:23,216 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:23,314 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:36:23,410 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:36:23,507 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:23,597 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:23,694 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:23,787 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:23,880 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:23,983 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:24,085 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:24,341 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:24,435 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:24,737 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:25,050 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:25,347 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:25,658 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:25,974 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:26,279 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:26,384 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:26,472 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:26,564 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:26,862 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:26,958 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:27,267 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:27,575 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:27,675 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:27,775 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:36:27,871 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:27,970 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:28,053 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:36:28,411 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:28,514 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:28,813 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:28,910 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:29,006 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:36:29,113 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:29,215 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:29,319 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:36:29,418 - core.database - INFO - Character test saved successfully
+2025-03-04 00:36:29,507 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:41:22,504 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 00:41:22,506 - discord.client - INFO - logging in using static token
+2025-03-04 00:41:23,523 - core.database - INFO - No migration needed
+2025-03-04 00:41:23,523 - core.database - INFO - Database initialized successfully
+2025-03-04 00:41:23,663 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 00:41:24,014 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1d582d85288a51be15088aab997be2af).
+2025-03-04 00:41:26,021 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 00:41:43,001 - core.database - INFO - Character test saved successfully
+2025-03-04 00:41:45,412 - core.database - INFO - Character test saved successfully
+2025-03-04 00:42:05,989 - core.database - INFO - Character test saved successfully
+2025-03-04 00:51:04,614 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 00:51:04,616 - discord.client - INFO - logging in using static token
+2025-03-04 00:51:05,614 - core.database - INFO - No migration needed
+2025-03-04 00:51:05,614 - core.database - INFO - Database initialized successfully
+2025-03-04 00:51:05,759 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 00:51:06,289 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f9e155e3e5042886f0a57a063ffeec18).
+2025-03-04 00:51:08,338 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 00:51:21,846 - core.database - INFO - Character test saved successfully
+2025-03-04 00:51:24,443 - core.database - INFO - Character test saved successfully
+2025-03-04 00:51:30,220 - core.database - INFO - Character test saved successfully
+2025-03-04 00:51:35,787 - core.database - INFO - Character test saved successfully
+2025-03-04 00:51:45,593 - core.database - INFO - Character test saved successfully
+2025-03-04 00:52:26,743 - core.database - INFO - Character test saved successfully
+2025-03-04 00:52:46,156 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:12,027 - core.database - INFO - Character test deleted successfully
+2025-03-04 00:53:12,225 - core.database - INFO - Character test2 deleted successfully
+2025-03-04 00:53:12,415 - core.database - INFO - Character test3 deleted successfully
+2025-03-04 00:53:12,607 - core.database - INFO - Character test4 deleted successfully
+2025-03-04 00:53:12,607 - core.state - INFO - Added character test to game state
+2025-03-04 00:53:12,690 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:12,691 - core.state - INFO - Added character test2 to game state
+2025-03-04 00:53:12,775 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:12,776 - core.state - INFO - Added character test3 to game state
+2025-03-04 00:53:12,864 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:53:12,865 - core.state - INFO - Added character test4 to game state
+2025-03-04 00:53:12,954 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:53:13,045 - core.database - INFO - Moveset debug loaded successfully
+2025-03-04 00:53:13,145 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:13,231 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:13,331 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:53:13,419 - core.database - INFO - Character test4 saved successfully
+2025-03-04 00:53:13,518 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:13,616 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:13,703 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:13,809 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:13,899 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:13,984 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:14,068 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:14,306 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:14,403 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:14,693 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:14,991 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:15,283 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:15,571 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:15,869 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:16,163 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:16,281 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:16,391 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:16,473 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:16,755 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:16,839 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:17,135 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:17,433 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:17,720 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:17,801 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:53:17,893 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:17,983 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:18,068 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:53:18,325 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:18,424 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:18,721 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:18,816 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:18,920 - core.database - INFO - Character test3 saved successfully
+2025-03-04 00:53:19,018 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:19,104 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:19,210 - core.database - INFO - Character test2 saved successfully
+2025-03-04 00:53:19,314 - core.database - INFO - Character test saved successfully
+2025-03-04 00:53:19,394 - core.database - INFO - Character test2 saved successfully
+2025-03-04 01:41:51,719 - core.database - INFO - Character test deleted successfully
+2025-03-04 01:41:51,898 - core.database - INFO - Character test2 deleted successfully
+2025-03-04 01:41:52,077 - core.database - INFO - Character test3 deleted successfully
+2025-03-04 01:41:52,263 - core.database - INFO - Character test4 deleted successfully
+2025-03-04 01:41:52,264 - core.state - INFO - Added character test to game state
+2025-03-04 01:41:52,359 - core.database - INFO - Character test saved successfully
+2025-03-04 01:41:52,359 - core.state - INFO - Added character test2 to game state
+2025-03-04 01:41:52,442 - core.database - INFO - Character test2 saved successfully
+2025-03-04 01:41:52,442 - core.state - INFO - Added character test3 to game state
+2025-03-04 01:41:52,535 - core.database - INFO - Character test3 saved successfully
+2025-03-04 01:41:52,536 - core.state - INFO - Added character test4 to game state
+2025-03-04 01:41:52,618 - core.database - INFO - Character test4 saved successfully
+2025-03-04 01:41:55,274 - core.database - INFO - Character test saved successfully
+2025-03-04 01:42:09,631 - core.database - INFO - Character test deleted successfully
+2025-03-04 01:42:09,810 - core.database - INFO - Character test2 deleted successfully
+2025-03-04 01:42:09,992 - core.database - INFO - Character test3 deleted successfully
+2025-03-04 01:42:10,158 - core.database - INFO - Character test4 deleted successfully
+2025-03-04 01:42:10,159 - core.state - INFO - Added character test to game state
+2025-03-04 01:42:10,242 - core.database - INFO - Character test saved successfully
+2025-03-04 01:42:10,243 - core.state - INFO - Added character test2 to game state
+2025-03-04 01:42:10,325 - core.database - INFO - Character test2 saved successfully
+2025-03-04 01:42:10,326 - core.state - INFO - Added character test3 to game state
+2025-03-04 01:42:10,407 - core.database - INFO - Character test3 saved successfully
+2025-03-04 01:42:10,407 - core.state - INFO - Added character test4 to game state
+2025-03-04 01:42:10,491 - core.database - INFO - Character test4 saved successfully
+2025-03-04 01:42:13,611 - core.database - INFO - Character test saved successfully
+2025-03-04 04:26:35,740 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-04 04:26:36,000 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-04 04:26:41,332 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 522136f46cb767c5b3ba706090002f7b).
+2025-03-04 04:26:43,347 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 13:16:23,756 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-04 13:16:23,958 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-04 13:16:29,273 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 826573504dc90118a56b006d141e679f).
+2025-03-04 13:16:31,285 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 13:26:25,736 - core.database - INFO - Character test deleted successfully
+2025-03-04 13:26:25,926 - core.database - INFO - Character test2 deleted successfully
+2025-03-04 13:26:26,101 - core.database - INFO - Character test3 deleted successfully
+2025-03-04 13:26:26,295 - core.database - INFO - Character test4 deleted successfully
+2025-03-04 13:26:26,296 - core.state - INFO - Added character test to game state
+2025-03-04 13:26:26,384 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:26,385 - core.state - INFO - Added character test2 to game state
+2025-03-04 13:26:26,472 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:26,473 - core.state - INFO - Added character test3 to game state
+2025-03-04 13:26:26,568 - core.database - INFO - Character test3 saved successfully
+2025-03-04 13:26:26,568 - core.state - INFO - Added character test4 to game state
+2025-03-04 13:26:26,657 - core.database - INFO - Character test4 saved successfully
+2025-03-04 13:26:26,754 - core.database - INFO - Moveset debug loaded successfully
+2025-03-04 13:26:26,853 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:26,959 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:27,057 - core.database - INFO - Character test3 saved successfully
+2025-03-04 13:26:27,153 - core.database - INFO - Character test4 saved successfully
+2025-03-04 13:26:27,261 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:27,366 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:27,471 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:27,577 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:27,671 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:27,774 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:27,865 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:28,146 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:28,245 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:28,551 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:28,877 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:29,174 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:29,503 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:29,804 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:30,120 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:30,216 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:30,324 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:30,421 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:30,773 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:30,871 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:31,186 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:31,499 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:31,600 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:31,701 - core.database - INFO - Character test3 saved successfully
+2025-03-04 13:26:31,808 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:31,907 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:31,993 - core.database - INFO - Character test3 saved successfully
+2025-03-04 13:26:32,396 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:32,498 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:32,803 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:32,908 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:33,001 - core.database - INFO - Character test3 saved successfully
+2025-03-04 13:26:33,106 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:33,206 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:33,309 - core.database - INFO - Character test2 saved successfully
+2025-03-04 13:26:33,399 - core.database - INFO - Character test saved successfully
+2025-03-04 13:26:33,494 - core.database - INFO - Character test2 saved successfully

@@ -174,7 +174,7 @@ class MoveCommands(commands.GroupCog, name="move"):
             if move_data.cooldown:
                 char.action_stars.start_cooldown(move_data.name, move_data.cooldown)
             
-            # Apply the effect
+            # Apply the effect - now properly awaited
             result = await apply_effect(char, move_effect, current_round)
             
             # Save character state
@@ -314,7 +314,7 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Use action stars
             char.use_move_stars(star_cost, name)
             
-            # Apply the effect
+            # Apply the effect - now properly awaited
             result = await apply_effect(char, move_effect, current_round)
             
             # Save character state with debug paths enabled

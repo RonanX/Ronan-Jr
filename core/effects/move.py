@@ -1,16 +1,17 @@
 """
 ## src/core/effects/move.py
 
-Move Effect System Implementation - Simplified Version
+Move Effect System Implementation - Fixed Async Version
 
 Features:
 - Phase-based duration tracking (cast -> active -> cooldown)
 - Resource cost handling
 - Attack roll processing with stat mods
 - Multi-target support
+- Fixed async/await patterns
 
 Implementation Notes:
-- Simplified async handling
+- Proper async/await handling
 - Clear state transitions
 - Consistent message formatting
 - Streamlined combat handling
@@ -255,7 +256,10 @@ class MoveEffect(BaseEffect):
         return messages
 
     def can_use(self, round_number: Optional[int] = None) -> tuple[bool, Optional[str]]:
-        """Check if move can be used based on cooldown and uses"""
+        """
+        Check if move can be used.
+        Returns (can_use, reason) tuple.
+        """
         # Check if currently in cooldown phase
         if self.state == MoveState.COOLDOWN:
             if phase := self.get_current_phase():
@@ -333,7 +337,7 @@ class MoveEffect(BaseEffect):
             aoe_mode=self.aoe_mode,
             reason=reason
         )
-        
+
         # Process attack with all targets
         message, hit_results = await AttackCalculator.process_attack(params)
         messages.append(message)

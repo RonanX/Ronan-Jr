@@ -180,8 +180,8 @@ async def process_turns(bot, interaction, char_names: list, turns: int):
                 print(f"Current Character: {current_char_name}")
                 print(f"Round: {tracker.round_number}")
                 
-                # Process effects manually
-                was_skipped, start_msgs, end_msgs = process_effects(
+                # Process effects manually - IMPORTANT: Added await here
+                was_skipped, start_msgs, end_msgs = await process_effects(
                     current_char,
                     tracker.round_number,
                     current_char_name,
@@ -279,7 +279,7 @@ async def test_instant_move(bot, interaction):
     
     print("\nApplying instant move...")
     # Use current round 1 for non-combat testing
-    result = char.add_effect(move, 1)
+    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Apply star cost manually (this should now be handled in the MoveEffect)
@@ -299,7 +299,7 @@ async def test_instant_move(bot, interaction):
     for effect in char.effects[:]:
         if effect.name == move.name:
             print("Manually cleaning up instant move effect (should happen automatically)")
-            effect.on_expire(char)
+            expire_result = await effect.on_expire(char)  # IMPORTANT: Added await here
             char.effects.remove(effect)
     
     # Save character
@@ -337,7 +337,7 @@ async def test_cast_time_move(bot, interaction):
     )
     
     print("\nApplying cast time move...")
-    result = char.add_effect(move, 1)
+    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Apply star cost manually (should be handled by the effect now)
@@ -375,7 +375,7 @@ async def test_cast_time_move(bot, interaction):
         print("Manually cleaning up cast time move effect")
         for effect in char.effects[:]:
             if effect.name == move.name:
-                effect.on_expire(char)
+                await effect.on_expire(char)  # IMPORTANT: Added await here
                 char.effects.remove(effect)
         await bot.db.save_character(char)
     
@@ -411,7 +411,7 @@ async def test_duration_move(bot, interaction):
     )
     
     print("\nApplying duration move...")
-    result = char.add_effect(move, 1)
+    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Apply star cost manually
@@ -449,7 +449,7 @@ async def test_duration_move(bot, interaction):
         print("Manually cleaning up duration move effect")
         for effect in char.effects[:]:
             if effect.name == move.name:
-                effect.on_expire(char)
+                await effect.on_expire(char)  # IMPORTANT: Added await here
                 char.effects.remove(effect)
         await bot.db.save_character(char)
     
@@ -485,7 +485,7 @@ async def test_cooldown_move(bot, interaction):
     )
     
     print("\nApplying cooldown move...")
-    result = char.add_effect(move, 1)
+    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Apply star cost manually
@@ -541,7 +541,7 @@ async def test_cooldown_move(bot, interaction):
     )
     
     print("\nAttempting to use move again after cooldown...")
-    result = char.add_effect(move2, 4)  # Using round 4 now
+    result = await move2.on_apply(char, 4)  # Using round 4 now, IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Apply star cost manually
@@ -584,7 +584,7 @@ async def test_full_phase_move(bot, interaction):
     )
     
     print("\nApplying full phase move...")
-    result = char.add_effect(move, 1)
+    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Check post-application state
@@ -654,7 +654,7 @@ async def test_resource_costs(bot, interaction):
     
     print("\nApplying MP cost move...")
     initial_mp = char.resources.current_mp
-    result = char.add_effect(move_mp, 1)
+    result = await move_mp.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     print(f"MP change: {initial_mp} → {char.resources.current_mp} (expected: -{move_mp.mp_cost})")
     
@@ -668,7 +668,7 @@ async def test_resource_costs(bot, interaction):
     
     print("\nApplying HP cost move...")
     initial_hp = char.resources.current_hp
-    result = char.add_effect(move_hp, 1)
+    result = await move_hp.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     print(f"HP change: {initial_hp} → {char.resources.current_hp} (expected: -{move_hp.hp_cost})")
     
@@ -682,7 +682,7 @@ async def test_resource_costs(bot, interaction):
     
     print("\nApplying star cost move...")
     initial_stars = char.action_stars.current_stars
-    result = char.add_effect(move_star, 1)
+    result = await move_star.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     print(f"Stars change: {initial_stars} → {char.action_stars.current_stars} (expected: -{move_star.star_cost})")
     
@@ -701,7 +701,7 @@ async def test_resource_costs(bot, interaction):
     initial_mp = char.resources.current_mp
     initial_stars = char.action_stars.current_stars
     
-    result = char.add_effect(move_all, 1)
+    result = await move_all.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     print(f"Resource changes:")
@@ -729,7 +729,7 @@ async def test_resource_costs(bot, interaction):
     
     # Should still work since MoveEffect doesn't validate resources directly
     # In the real command, validation would happen first
-    result = char.add_effect(move_expensive, 1)
+    result = await move_expensive.on_apply(char, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Save character
@@ -773,7 +773,7 @@ async def test_attack_move(bot, interaction):
     )
     
     print("\nApplying instant attack move...")
-    result = source.add_effect(instant_attack, 1)
+    result = await instant_attack.on_apply(source, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Test Active Phase Attack
@@ -791,7 +791,7 @@ async def test_attack_move(bot, interaction):
     )
     
     print("\nApplying active attack move (with cast time)...")
-    result = source.add_effect(active_attack, 1)
+    result = await active_attack.on_apply(source, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Save characters
@@ -825,7 +825,7 @@ async def test_attack_move(bot, interaction):
     )
     
     print("\nApplying per-turn attack move...")
-    result = source.add_effect(per_turn_attack, 1)
+    result = await per_turn_attack.on_apply(source, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Save characters
@@ -878,7 +878,7 @@ async def test_multi_target_move(bot, interaction):
     )
     
     print("\nApplying multi-target move...")
-    result = source.add_effect(move, 1)
+    result = await move.on_apply(source, 1)  # IMPORTANT: Added await here
     print(f"Apply result: {result}")
     
     # Check if targets were affected (they should be when passed to the constructor)
@@ -936,7 +936,7 @@ async def test_cleanup(bot, interaction):
                 duration=2,
                 cooldown=1
             )
-            char.add_effect(move, 1)
+            await move.on_apply(char, 1)  # IMPORTANT: Added await here
             print(f"Applied full-phase move to {char.name}")
             
         elif i == 1:
@@ -947,7 +947,7 @@ async def test_cleanup(bot, interaction):
                 mp_cost=5,
                 duration=3
             )
-            char.add_effect(move, 1)
+            await move.on_apply(char, 1)  # IMPORTANT: Added await here
             print(f"Applied duration-only move to {char.name}")
             
         elif i == 2:
@@ -959,7 +959,7 @@ async def test_cleanup(bot, interaction):
                 hp_cost=5,
                 star_cost=2
             )
-            char.add_effect(move, 1)
+            await move.on_apply(char, 1)  # IMPORTANT: Added await here
             print(f"Applied resource-cost move to {char.name}")
             
         else:
@@ -968,7 +968,7 @@ async def test_cleanup(bot, interaction):
                 name="Instant Test Move",
                 description="An instant move for cleanup testing"
             )
-            char.add_effect(move, 1)
+            await move.on_apply(char, 1)  # IMPORTANT: Added await here
             print(f"Applied instant move to {char.name}")
     
     # Save characters with effects
@@ -996,7 +996,13 @@ async def test_cleanup(bot, interaction):
         # Process cleanup
         cleanup_msgs = []
         for effect in char.effects[:]:  # Copy list since we're modifying it
-            if msg := effect.on_expire(char):
+            # Handle async or sync on_expire
+            if hasattr(effect.on_expire, '__await__'):
+                msg = await effect.on_expire(char)  # IMPORTANT: Added await here
+            else:
+                msg = effect.on_expire(char)
+                
+            if msg:
                 cleanup_msgs.append(msg)
             char.effects.remove(effect)
         

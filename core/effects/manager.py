@@ -17,6 +17,7 @@ from .combat import (
 )
 from .status import ACEffect, FrostbiteEffect, SkipEffect
 from .move import MoveEffect  # Add MoveEffect import
+import inspect
 import logging
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,7 @@ async def apply_effect(
                 # Find matching effect types for stacking
                 if isinstance(existing, type(effect)) and getattr(existing, 'name', '') == effect.name:
                     # Handle async or sync add_stacks method
-                    if hasattr(existing.add_stacks, '__await__'):
+                    if inspect.iscoroutinefunction(existing.add_stacks):
                         result = await existing.add_stacks(getattr(effect, 'stacks', 1), character)
                     else:
                         result = existing.add_stacks(getattr(effect, 'stacks', 1), character)
@@ -80,7 +81,7 @@ async def apply_effect(
         # No existing stacking effect found, apply new effect
         
         # Call on_apply method - handle async or sync
-        if hasattr(effect.on_apply, '__await__'):
+        if inspect.iscoroutinefunction(effect.on_apply):
             message = await effect.on_apply(character, round_number)
         else:
             message = effect.on_apply(character, round_number)
@@ -122,7 +123,7 @@ async def remove_effect(
         for effect in character.effects[:]:  # Copy list since we're modifying it
             if effect.name.lower() == effect_name.lower():
                 # Call on_expire method - handle async or sync
-                if hasattr(effect.on_expire, '__await__'):
+                if inspect.iscoroutinefunction(effect.on_expire):
                     message = await effect.on_expire(character)
                 else:
                     message = effect.on_expire(character)
@@ -187,8 +188,8 @@ async def process_effects(
             for effect in character.effects[:]:  # Copy to avoid modification issues
                 # Call on_turn_start if it exists
                 if hasattr(effect, 'on_turn_start'):
-                    # Handle async or sync method
-                    if hasattr(effect.on_turn_start, '__await__'):
+                    # Handle async or sync method using inspect
+                    if inspect.iscoroutinefunction(effect.on_turn_start):
                         start_result = await effect.on_turn_start(character, round_number, turn_name)
                     else:
                         start_result = effect.on_turn_start(character, round_number, turn_name)
@@ -208,8 +209,8 @@ async def process_effects(
             for effect in character.effects[:]:  # Copy to avoid modification issues
                 # Call on_turn_end if it exists
                 if hasattr(effect, 'on_turn_end'):
-                    # Handle async or sync method
-                    if hasattr(effect.on_turn_end, '__await__'):
+                    # Handle async or sync method using inspect
+                    if inspect.iscoroutinefunction(effect.on_turn_end):
                         end_result = await effect.on_turn_end(character, round_number, turn_name)
                     else:
                         end_result = effect.on_turn_end(character, round_number, turn_name)
@@ -233,14 +234,14 @@ async def process_effects(
                     # For effects that handle their own expiry (like moves)
                     if hasattr(effect, 'is_expired'):
                         if callable(getattr(effect, 'is_expired')):
-                            should_expire = effect.is_expired
+                            should_expire = effect.is_expired()
                         else:
                             should_expire = effect.is_expired
                 
                 # Handle expiry if needed
                 if should_expire:
                     # Call on_expire - handle async or sync
-                    if hasattr(effect.on_expire, '__await__'):
+                    if inspect.iscoroutinefunction(effect.on_expire):
                         expire_msg = await effect.on_expire(character)
                     else:
                         expire_msg = effect.on_expire(character)
