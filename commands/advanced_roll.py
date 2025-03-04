@@ -23,13 +23,13 @@ class RollCommands(commands.Cog):
 
     @app_commands.command(name="roll")
     @app_commands.describe(
-        expression="Dice expression with optional modifiers (e.g., 2d6, d20k1 advantage)",
-        character="Character name for stat modifiers like (str) or (dex)",
-        targets="Target(s) to check against (comma-separated)",
-        aoe="AoE mode: 'single' (one roll) or 'multi' (roll per target)",
+        expression="Dice expression (e.g., 2d6+3, d20+str, 3d20 multihit, d20 advantage)",
+        character="Character name for stat modifiers (for +str, +dex, etc.)",
+        targets="Target(s) to check against (comma-separated names)",
+        aoe="AoE mode: 'single' (one roll against all) or 'multi' (roll per target)",
         crit_range="Natural roll required for critical hit (default: 20)",
-        damage="Damage roll(s) with type (e.g., 'd8 slashing, 2d6 fire')",
-        reason="Optional note to display with the roll",
+        damage="Damage formula with type (e.g., '2d6 fire', '1d8+str slashing, 2d4 cold')",
+        reason="Optional note to display with the roll result",
         detailed="Show detailed roll breakdown (for non-target rolls)",
     )
     async def roll(
@@ -47,16 +47,16 @@ class RollCommands(commands.Cog):
         """
         Roll dice with advanced options
         
-        Basic Formats:
-        - Basic roll: 2d6, d20
-        - With modifiers: d20+str, 2d6+3
-        - Multihit: 3d20 multihit 2
-        - With advantage: 2d20 advantage 1
+        BASIC FORMAT:
+        • Simple roll: 2d6, d20
+        • With modifiers: d20+str, 2d6+3
+        • Advantage/disadvantage: d20 advantage, d20 disadvantage
+        • Multihit: 3d20 multihit 2
         
-        Attack Examples:
-        /roll d20+str targets:Goblin damage:2d6 slashing  (Single target)
-        /roll d20+dex targets:Goblin,Orc damage:2d6 fire  (Multiple targets)
-        /roll 3d20 multihit 2 targets:Boss damage:1d6  (Multiple hits)
+        ATTACK EXAMPLES:
+        • Single target: /roll d20+str targets:Goblin damage:2d6 slashing
+        • Multiple targets: /roll d20+dex targets:Goblin,Orc damage:2d6 fire
+        • Multiple hits: /roll 3d20 multihit 2 targets:Boss damage:1d6
         """
         try:
             # Simple command logging
@@ -375,5 +375,86 @@ class RollCommands(commands.Cog):
         print("\n=== Roll Debug Complete ===")
         await interaction.followup.send("Roll debug complete - check console for results")
 
+    @app_commands.command(name="rollhelp")
+    async def roll_help(self, interaction: discord.Interaction):
+        """Show detailed help for dice rolling commands"""
+        embed = discord.Embed(
+            title="📊 Dice Rolling Guide",
+            description="Guide to using the advanced dice rolling system",
+            color=discord.Color.blue()
+        )
+        
+        # Basic Rolls
+        embed.add_field(
+            name="Basic Rolls",
+            value=(
+                "• `2d6` - Roll two six-sided dice\n"
+                "• `d20+5` - Roll d20 and add 5\n"
+                "• `4d6+2` - Roll four d6 and add 2\n"
+                "• `3d8-1` - Roll three d8 and subtract 1"
+            ),
+            inline=False
+        )
+        
+        # Stat Modifiers
+        embed.add_field(
+            name="Character Stats",
+            value=(
+                "• `d20+str` - Roll d20 and add strength modifier\n"
+                "• `2d6+dex` - Roll 2d6 and add dexterity modifier\n"
+                "• `d20+str+2` - Roll d20 and add strength modifier plus 2\n"
+                "• `d20+proficiency` - Roll d20 and add proficiency bonus"
+            ),
+            inline=False
+        )
+        
+        # Advanced Options
+        embed.add_field(
+            name="Advanced Options",
+            value=(
+                "• `d20 advantage` - Roll with advantage (2d20, take highest)\n"
+                "• `d20 disadvantage` - Roll with disadvantage (2d20, take lowest)\n"
+                "• `3d20 multihit 2` - Roll 3d20 as separate attacks with +2 to each\n"
+                "• `3d20 multihit dex` - Roll 3d20 with dexterity bonus to each hit"
+            ),
+            inline=False
+        )
+        
+        # Attack Examples
+        embed.add_field(
+            name="Attack Examples",
+            value=(
+                "• `/roll d20+str targets:Goblin damage:1d8+str slashing`\n"
+                "• `/roll d20+dex targets:Orc,Goblin damage:1d6+dex piercing`\n"
+                "• `/roll d20+int targets:Dragon damage:8d6 fire aoe:single`\n"
+                "• `/roll 3d20 multihit targets:Boss damage:2d6+str slashing`"
+            ),
+            inline=False
+        )
+        
+        # AoE Modes
+        embed.add_field(
+            name="AoE Modes",
+            value=(
+                "• `single` - One roll applied to all targets\n"
+                "• `multi` - Separate roll for each target"
+            ),
+            inline=False
+        )
+        
+        # Tips and Tricks
+        embed.add_field(
+            name="Tips and Tricks",
+            value=(
+                "• Use `reason` to add context to your roll\n"
+                "• Set `crit_range` for critical hits below 20\n"
+                "• For damage types, just add the type after the formula\n"
+                "• Comma-separate damage types: `2d6 fire, 1d8 cold`"
+            ),
+            inline=False
+        )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        
 async def setup(bot):
     await bot.add_cog(RollCommands(bot))

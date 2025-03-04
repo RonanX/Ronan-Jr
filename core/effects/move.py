@@ -1,33 +1,28 @@
 """
 ## src/core/effects/move.py
 
-Move Effect System Implementation - Refactored Version
+Move Effect System Implementation - Simplified Version
 
 Features:
 - Phase-based duration tracking (cast -> active -> cooldown)
-- Resource cost validation
+- Resource cost handling
 - Attack roll processing with stat mods
 - Multi-target support
-- Heat stack generation
 
 Implementation Notes:
-- Always maintain phase order: cast -> active -> cooldown
-- Resource costs apply on initial cast
-- Combat rolls integrated with phase system
-- Clear message formatting with consistent backticks
+- Simplified async handling
+- Clear state transitions
+- Consistent message formatting
+- Streamlined combat handling
 """
 
-import re
 from typing import Optional, List, Dict, Any, Tuple, Set
 from enum import Enum
-from dataclasses import dataclass, field
 import logging
 
 from core.effects.base import BaseEffect, EffectCategory, EffectTiming
-from core.effects.condition import ConditionType, ConditionEffect
-from utils.advanced_dice.attack_calculator import AttackCalculator, AttackParameters
+from core.effects.condition import ConditionType
 from utils.advanced_dice.calculator import DiceCalculator
-from core.character import StatType
 
 logger = logging.getLogger(__name__)
 
@@ -44,573 +39,10 @@ class RollTiming(Enum):
     ACTIVE = "active"     # Roll when active phase starts
     PER_TURN = "per_turn" # Roll each turn during duration
 
-@dataclass
-class PhaseInfo:
-    """Tracks state and timing for a single move phase"""
-    duration: int
-    turns_completed: int = 0
-    
-    def start(self, round_number: int):
-        """Reset phase tracking"""
-        self.turns_completed = 0
-    
-    def complete_turn(self, turn_name: str, effect_owner: str) -> bool:
-        """
-        Complete a turn if it belongs to effect owner.
-        Returns True if the phase is complete.
-        
-        Fixed: Only count a turn if it's the effect owner's turn
-        """
-        if turn_name == effect_owner:
-            self.turns_completed += 1
-            
-        # A phase is complete when we've finished the correct number of turns
-        return self.turns_completed >= self.duration
-
-class PhaseManager:
-    """
-    Handles phase transitions and duration tracking for moves.
-    This extracts the state management logic from MoveEffect.
-    """
-    def __init__(
-        self,
-        cast_time: Optional[int] = None,
-        duration: Optional[int] = None,
-        cooldown: Optional[int] = None,
-    ):
-        # Initialize phases
-        self.phases = {
-            MoveState.CASTING: PhaseInfo(cast_time) if cast_time else None,
-            MoveState.ACTIVE: PhaseInfo(duration) if duration else None,
-            MoveState.COOLDOWN: PhaseInfo(cooldown) if cooldown else None
-        }
-        
-        # Set initial state
-        if cast_time:
-            self.state = MoveState.CASTING
-        elif duration:
-            self.state = MoveState.ACTIVE
-        elif cooldown:
-            self.state = MoveState.COOLDOWN
-        else:
-            self.state = MoveState.INSTANT
-            
-        self.marked_for_removal = False
-        
-    def get_current_phase(self) -> Optional[PhaseInfo]:
-        """Get the current phase info"""
-        return self.phases.get(self.state)
-    
-    def start_phase(self, round_number: int):
-        """Start current phase tracking"""
-        if phase := self.get_current_phase():
-            phase.start(round_number)
-    
-    def complete_turn(self, turn_name: str, effect_owner: str) -> bool:
-        """
-        Process a completed turn for the current phase.
-        Returns True if the phase is complete.
-        
-        Fixed: Ensure we're properly tracking turn completion
-        """
-        phase = self.get_current_phase()
-        if not phase:
-            return False
-            
-        # Delegate to PhaseInfo and return result
-        return phase.complete_turn(turn_name, effect_owner)
-    
-    def transition_state(self) -> Optional[str]:
-        """
-        Handle state transitions between phases.
-        Returns a message if the state changes, None otherwise.
-        
-        Fixed: Only transition when phase is actually complete
-        """
-        if self.state == MoveState.INSTANT:
-            return None
-
-        next_state = None
-        message = None
-        
-        # Find next valid state
-        if self.state == MoveState.CASTING:
-            if self.phases.get(MoveState.ACTIVE):
-                next_state = MoveState.ACTIVE
-                message = "activates!"
-            elif self.phases.get(MoveState.COOLDOWN):
-                next_state = MoveState.COOLDOWN
-                message = "enters cooldown"
-            else:
-                message = "completes"
-                self.marked_for_removal = True
-                
-        elif self.state == MoveState.ACTIVE:
-            if self.phases.get(MoveState.COOLDOWN):
-                next_state = MoveState.COOLDOWN
-                message = "enters cooldown"
-            else:
-                message = "wears off"
-                self.marked_for_removal = True
-                
-        elif self.state == MoveState.COOLDOWN:
-            message = "cooldown ended"
-            self.marked_for_removal = True
-        
-        # Update state if transitioning
-        if next_state:
-            # Store old state for logging
-            old_state = self.state
-            
-            # Update state
-            self.state = next_state
-            
-            # Reset phase tracking for the new phase
-            if phase := self.phases.get(next_state):
-                phase.turns_completed = 0
-            
-            # Log transition for debugging
-            logger.debug(f"Move transitioned from {old_state} to {next_state}")
-        
-        return message
-
-    def is_expired(self) -> bool:
-        """
-        Check if move effect is fully expired.
-        A move is expired when marked for removal or all phases complete.
-        """
-        if self.marked_for_removal:
-            return True
-            
-        if self.state == MoveState.INSTANT:
-            return True
-            
-        current_phase = self.phases.get(self.state)
-        if not current_phase:
-            return True
-            
-        # Check if we're in the final phase with no more transitions available
-        if self.state == MoveState.COOLDOWN:
-            return current_phase.turns_completed >= current_phase.duration
-        elif self.state == MoveState.ACTIVE and not self.phases.get(MoveState.COOLDOWN):
-            return current_phase.turns_completed >= current_phase.duration
-        elif self.state == MoveState.CASTING and not self.phases.get(MoveState.ACTIVE) and not self.phases.get(MoveState.COOLDOWN):
-            return current_phase.turns_completed >= current_phase.duration
-            
-        return False
-    
-    def get_remaining_turns(self) -> int:
-        """Get the number of turns remaining in the current phase"""
-        phase = self.get_current_phase()
-        if not phase:
-            return 0
-        return max(0, phase.duration - phase.turns_completed)
-    
-    def to_dict(self) -> dict:
-        """Convert phase manager to dictionary for storage"""
-        phase_data = {}
-        for state, phase in self.phases.items():
-            if phase:
-                phase_data[state.value] = {
-                    "duration": phase.duration,
-                    "turns_completed": phase.turns_completed
-                }
-                
-        return {
-            "state": self.state.value,
-            "phases": phase_data,
-            "marked_for_removal": self.marked_for_removal
-        }
-    
-    @classmethod
-    def from_dict(cls, data: dict, cast_time=None, duration=None, cooldown=None) -> 'PhaseManager':
-        """Create from dictionary data"""
-        manager = cls(cast_time, duration, cooldown)
-        
-        # Restore state
-        if state_value := data.get('state'):
-            manager.state = MoveState(state_value)
-            
-        # Restore phase progress
-        phase_data = data.get('phases', {})
-        for state_str, phase_info in phase_data.items():
-            state = MoveState(state_str)
-            if phase := manager.phases.get(state):
-                phase.turns_completed = phase_info.get('turns_completed', 0)
-                
-        # Restore removal state
-        manager.marked_for_removal = data.get('marked_for_removal', False)
-        
-        return manager
-
-class CombatProcessor:
-    """
-    Handles attack rolls, damage processing, and target tracking.
-    This extracts combat mechanics from MoveEffect.
-    """
-    def __init__(
-        self,
-        attack_roll: Optional[str] = None,
-        damage: Optional[str] = None,
-        crit_range: int = 20,
-        save_type: Optional[str] = None,
-        save_dc: Optional[str] = None,
-        half_on_save: bool = False,
-        conditions: Optional[List[ConditionType]] = None,
-        roll_timing = RollTiming.ACTIVE,
-        enable_heat_tracking: bool = False
-    ):
-        # Combat parameters
-        self.attack_roll = attack_roll
-        self.damage = damage
-        self.crit_range = crit_range
-        self.save_type = save_type
-        self.save_dc = save_dc
-        self.half_on_save = half_on_save
-        self.conditions = conditions or []
-        
-        # Handle roll timing enum or string
-        if isinstance(roll_timing, str):
-            try:
-                self.roll_timing = RollTiming(roll_timing)
-            except ValueError:
-                self.roll_timing = RollTiming.ACTIVE
-        else:
-            self.roll_timing = roll_timing
-        
-        # Target tracking
-        self.targets: List['Character'] = []
-        self.targets_hit: Set[str] = set()
-        self.attacks_this_turn = 0
-        self.last_roll_result = None
-        
-        # Heat tracking
-        self.enable_heat_tracking = enable_heat_tracking
-        self.heat_stacks = 0
-    
-    def set_targets(self, targets: List['Character']):
-        """Set the targets for this combat processor"""
-        self.targets = targets or []
-    
-    def should_roll(self, state: MoveState, force_roll: bool = False) -> bool:
-        """Determine if we should roll based on timing and state"""
-        if force_roll:
-            return True
-            
-        if self.roll_timing == RollTiming.INSTANT:
-            return state == MoveState.INSTANT
-        elif self.roll_timing == RollTiming.ACTIVE:
-            return state == MoveState.ACTIVE
-        elif self.roll_timing == RollTiming.PER_TURN:
-            return True
-            
-        return False
-    
-    def process_attack(self, source: 'Character', move_name: str, state: MoveState, force_roll: bool = False) -> List[str]:
-        """
-        Process attack roll and damage if needed.
-        Returns list of messages for each target.
-        """
-        # Skip if no attack roll defined
-        if not self.attack_roll:
-            return []
-            
-        # Check if we should roll based on timing
-        if not self.should_roll(state, force_roll):
-            return []
-
-        # Track attack count
-        self.attacks_this_turn += 1
-
-        messages = []
-        
-        # Log the attack attempt for combat log
-        if hasattr(source, 'combat_logger') and source.combat_logger:
-            source.combat_logger.add_event(
-                "ATTACK_ATTEMPTED",
-                f"{source.name} attacks with {move_name}",
-                source.name,
-                {
-                    "move_name": move_name,
-                    "targets": [t.name for t in self.targets] if self.targets else [],
-                    "attack_roll": self.attack_roll,
-                    "damage": self.damage
-                }
-            )
-        
-        # Handle no targets case
-        if not self.targets:
-            # Set up attack parameters
-            params = AttackParameters(
-                roll_expression=self.attack_roll,
-                character=source,
-                targets=None,
-                damage_str=self.damage,
-                crit_range=self.crit_range,
-                reason=move_name
-            )
-            
-            # Process attack
-            message, _ = AttackCalculator.process_attack(params)
-            messages.append(message)
-            return messages
-        
-        # Process each target separately
-        for target in self.targets:
-            # Set up attack parameters
-            params = AttackParameters(
-                roll_expression=self.attack_roll,
-                character=source,
-                targets=[target],  # Single target for this roll
-                damage_str=self.damage,
-                crit_range=self.crit_range,
-                reason=move_name
-            )
-            
-            # Process attack
-            message, result = AttackCalculator.process_attack(params)
-            
-            # Handle hit tracking
-            hit = False
-            if "**HIT!**" in message or "**CRITICAL HIT!**" in message:
-                hit = True
-                self.targets_hit.add(target.name)
-                
-                # Log hit for combat log
-                if hasattr(source, 'combat_logger') and source.combat_logger:
-                    source.combat_logger.add_event(
-                        "ATTACK_HIT",
-                        f"{source.name} hits {target.name} with {move_name}",
-                        target.name,
-                        {
-                            "move_name": move_name,
-                            "damage_dealt": result.get("damage_dealt", 0),
-                            "is_critical": "**CRITICAL HIT!**" in message,
-                            "attack_roll_value": result.get("attack_roll_value", 0)
-                        }
-                    )
-            else:
-                # Log miss for combat log
-                if hasattr(source, 'combat_logger') and source.combat_logger:
-                    source.combat_logger.add_event(
-                        "ATTACK_MISS",
-                        f"{source.name} misses {target.name} with {move_name}",
-                        target.name,
-                        {
-                            "move_name": move_name,
-                            "attack_roll_value": result.get("attack_roll_value", 0),
-                            "target_ac": target.defense.current_ac
-                        }
-                    )
-            
-            # Handle heat tracking if enabled
-            if self.enable_heat_tracking and hit:
-                # Source heat (attunement)
-                if not hasattr(source, 'heat_stacks'):
-                    source.heat_stacks = 0
-                source.heat_stacks += 1
-                
-                # Target heat (vulnerability)
-                if not hasattr(target, 'heat_stacks'):
-                    target.heat_stacks = 0
-                target.heat_stacks += 1
-            
-            messages.append(message)
-        
-        return messages
-    
-    def clear_targets(self):
-        """Clear all targets"""
-        self.targets = []
-    
-    def to_dict(self) -> dict:
-        """Convert combat processor to dictionary for storage"""
-        combat_data = {}
-        if self.attack_roll:
-            combat_data["attack_roll"] = self.attack_roll
-        if self.damage:
-            combat_data["damage"] = self.damage
-        if self.crit_range != 20:
-            combat_data["crit_range"] = self.crit_range
-        if self.save_type:
-            combat_data["save_type"] = self.save_type
-            combat_data["save_dc"] = self.save_dc
-            combat_data["half_on_save"] = self.half_on_save
-        if self.conditions:
-            combat_data["conditions"] = [c.value for c in self.conditions]
-        if self.roll_timing != RollTiming.ACTIVE:
-            combat_data["roll_timing"] = self.roll_timing.value
-            
-        # Save heat and target state
-        state_data = {}
-        if self.heat_stacks:
-            state_data["heat_stacks"] = self.heat_stacks
-        state_data["attacks_this_turn"] = self.attacks_this_turn
-        
-        # Target names for storage
-        target_names = [t.name for t in self.targets] if self.targets else []
-        
-        return {
-            "combat": combat_data,
-            "state_data": state_data,
-            "target_names": target_names,
-            "targets_hit": list(self.targets_hit),
-            "enable_heat_tracking": self.enable_heat_tracking
-        }
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> 'CombatProcessor':
-        """Create from dictionary data"""
-        # Extract combat data
-        combat_data = data.get('combat', {})
-        attack_roll = combat_data.get('attack_roll')
-        damage = combat_data.get('damage')
-        crit_range = combat_data.get('crit_range', 20)
-        save_type = combat_data.get('save_type')
-        save_dc = combat_data.get('save_dc')
-        half_on_save = combat_data.get('half_on_save', False)
-        conditions = combat_data.get('conditions', [])
-        roll_timing_str = combat_data.get('roll_timing', RollTiming.ACTIVE.value)
-        enable_heat_tracking = data.get('enable_heat_tracking', False)
-        
-        # Normalize roll timing to handle both string and enum values
-        if isinstance(roll_timing_str, str):
-            # Already a string, processor constructor will convert it
-            normalized_roll_timing = roll_timing_str
-        else:  
-            # This might happen if it was saved as a dict or something else
-            try:
-                normalized_roll_timing = RollTiming(str(roll_timing_str))
-            except (ValueError, TypeError):
-                normalized_roll_timing = RollTiming.ACTIVE
-        
-        # Create processor
-        processor = cls(
-            attack_roll=attack_roll,
-            damage=damage,
-            crit_range=crit_range,
-            save_type=save_type,
-            save_dc=save_dc,
-            half_on_save=half_on_save,
-            conditions=[ConditionType(c) for c in conditions] if conditions else [],
-            roll_timing=normalized_roll_timing,
-            enable_heat_tracking=enable_heat_tracking
-        )
-        
-        # Restore state data
-        if state_data := data.get('state_data', {}):
-            processor.heat_stacks = state_data.get('heat_stacks', 0)
-            processor.attacks_this_turn = state_data.get('attacks_this_turn', 0)
-            
-        # Restore targets hit
-        processor.targets_hit = set(data.get('targets_hit', []))
-        
-        # Note: targets themselves will need to be restored at runtime
-        return processor
-
-class ResourceManager:
-    """
-    Handles resource costs and usage tracking for moves.
-    This extracts resource management from MoveEffect.
-    """
-    def __init__(
-        self,
-        star_cost: int = 0,
-        mp_cost: int = 0,
-        hp_cost: int = 0,
-        uses: Optional[int] = None,
-    ):
-        self.star_cost = max(0, star_cost)
-        self.mp_cost = mp_cost
-        self.hp_cost = hp_cost
-        self.uses = uses
-        self.uses_remaining = uses
-        self.initial_resources_applied = False
-    
-    def apply_costs(self, character) -> List[str]:
-        """Apply resource costs and return messages"""
-        messages = []
-        
-        # Apply MP cost
-        if self.mp_cost != 0:
-            # Handle MP gain or loss
-            if self.mp_cost > 0:
-                character.resources.current_mp = max(0, character.resources.current_mp - self.mp_cost)
-                messages.append(f"💙 Uses {self.mp_cost} MP")
-            else:
-                character.resources.current_mp = min(
-                    character.resources.max_mp, 
-                    character.resources.current_mp - self.mp_cost  # Negative cost = gain
-                )
-                messages.append(f"💙 Gains {abs(self.mp_cost)} MP")
-        
-        # Apply HP cost
-        if self.hp_cost != 0:
-            # Handle HP gain or loss
-            if self.hp_cost > 0:
-                character.resources.current_hp = max(0, character.resources.current_hp - self.hp_cost)
-                messages.append(f"❤️ Uses {self.hp_cost} HP")
-            else:
-                character.resources.current_hp = min(
-                    character.resources.max_hp, 
-                    character.resources.current_hp - self.hp_cost  # Negative cost = gain
-                )
-                messages.append(f"❤️ Heals {abs(self.hp_cost)} HP")
-        
-        # Track that resources have been applied
-        self.initial_resources_applied = True
-        
-        return messages
-    
-    def use_move(self) -> bool:
-        """
-        Mark a move as used, tracking uses if applicable.
-        Returns True if the move could be used, False if out of uses.
-        """
-        if self.uses is not None:
-            if self.uses_remaining is None:
-                self.uses_remaining = self.uses
-                
-            if self.uses_remaining <= 0:
-                return False
-                
-            self.uses_remaining -= 1
-            
-        return True
-    
-    def to_dict(self) -> dict:
-        """Convert resource manager to dictionary for storage"""
-        return {
-            "star_cost": self.star_cost,
-            "mp_cost": self.mp_cost,
-            "hp_cost": self.hp_cost,
-            "uses": self.uses,
-            "uses_remaining": self.uses_remaining,
-            "initial_resources_applied": self.initial_resources_applied
-        }
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> 'ResourceManager':
-        """Create from dictionary data"""
-        manager = cls(
-            star_cost=data.get('star_cost', 0),
-            mp_cost=data.get('mp_cost', 0),
-            hp_cost=data.get('hp_cost', 0),
-            uses=data.get('uses'),
-        )
-        manager.uses_remaining = data.get('uses_remaining')
-        manager.initial_resources_applied = data.get('initial_resources_applied', True)
-        return manager
-
 class MoveEffect(BaseEffect):
     """
     Handles move execution with phase-based state tracking.
     Each state (cast/active/cooldown) is a separate phase with its own timing.
-    
-    This is a refactored version that uses helper classes to manage different aspects:
-    - PhaseManager: Handles state transitions and phases
-    - CombatProcessor: Handles attack rolls and targets
-    - ResourceManager: Handles costs and usage
     """
     def __init__(
             self,
@@ -630,20 +62,38 @@ class MoveEffect(BaseEffect):
             save_dc: Optional[str] = None,
             half_on_save: bool = False,
             conditions: Optional[List[ConditionType]] = None,
-            roll_timing: RollTiming = RollTiming.ACTIVE,
+            roll_timing: str = "active",
             uses: Optional[int] = None,
             targets: Optional[List['Character']] = None,
             enable_heat_tracking: bool = False
         ):
-            # Initialize the phase manager first
-            self.phase_manager = PhaseManager(cast_time, duration, cooldown)
+            # Set up initial phases and state
+            self.phases = {}
             
-            # Set initial duration based on first phase
+            if cast_time:
+                self.phases[MoveState.CASTING] = {"duration": cast_time, "turns_completed": 0}
+                self.state = MoveState.CASTING
+            elif duration:
+                self.phases[MoveState.ACTIVE] = {"duration": duration, "turns_completed": 0}
+                self.state = MoveState.ACTIVE
+            elif cooldown:
+                self.phases[MoveState.COOLDOWN] = {"duration": cooldown, "turns_completed": 0}
+                self.state = MoveState.COOLDOWN
+            else:
+                self.state = MoveState.INSTANT
+                
+            # Set up other phases if needed
+            if duration and self.state != MoveState.ACTIVE:
+                self.phases[MoveState.ACTIVE] = {"duration": duration, "turns_completed": 0}
+            if cooldown and self.state != MoveState.COOLDOWN:
+                self.phases[MoveState.COOLDOWN] = {"duration": cooldown, "turns_completed": 0}
+            
+            # Initial duration is based on first phase
             initial_duration = cast_time if cast_time else duration
             if initial_duration is None:
                 initial_duration = cooldown if cooldown else 1  # Default to 1 for INSTANT
-                
-            # Initialize base effect using the duration from phase manager
+            
+            # Initialize base effect
             super().__init__(
                 name=name,
                 duration=initial_duration,
@@ -653,210 +103,310 @@ class MoveEffect(BaseEffect):
                 handles_own_expiry=True
             )
             
-            # Initialize helper components
-            self.resource_manager = ResourceManager(star_cost, mp_cost, hp_cost, uses)
-            self.combat_processor = CombatProcessor(
-                attack_roll, damage, crit_range, save_type, save_dc, half_on_save,
-                conditions, roll_timing, enable_heat_tracking
-            )
-            self.combat_processor.set_targets(targets)
+            # Resource costs
+            self.star_cost = star_cost
+            self.mp_cost = mp_cost
+            self.hp_cost = hp_cost
+            
+            # Usage tracking
+            self.uses = uses
+            self.uses_remaining = uses
+            
+            # Combat parameters
+            self.attack_roll = attack_roll
+            self.damage = damage
+            self.crit_range = crit_range
+            self.save_type = save_type
+            self.save_dc = save_dc
+            self.half_on_save = half_on_save
+            self.conditions = conditions or []
+            
+            # Set roll timing
+            if isinstance(roll_timing, str):
+                try:
+                    self.roll_timing = RollTiming(roll_timing)
+                except ValueError:
+                    self.roll_timing = RollTiming.ACTIVE
+            else:
+                self.roll_timing = roll_timing
             
             # Additional properties
             self.cast_description = cast_description
+            self.targets = targets or []
+            self.enable_heat_tracking = enable_heat_tracking
             
             # Tracking variables
             self.last_processed_round = None
             self.last_processed_turn = None
-            
-            # For convenience/backward compatibility
-            self.state = self.phase_manager.state
-            self.phases = self.phase_manager.phases
+            self.targets_hit = set()
+            self.attacks_this_turn = 0
+            self.aoe_mode = 'single'
+            self.heat_stacks = 0
+            self.marked_for_removal = False
 
-    def _get_emoji(self) -> str:
+    def get_emoji(self) -> str:
         """Get state-specific emoji"""
         return {
             MoveState.INSTANT: "⚡",
             MoveState.CASTING: "✨",
-            MoveState.ACTIVE: "🌟",
+            MoveState.ACTIVE: "✨",
             MoveState.COOLDOWN: "⏳"
         }.get(self.state, "✨")
 
-    def _transition_state(self) -> Optional[str]:
+    def get_current_phase(self) -> Optional[Dict]:
+        """Get the current phase info"""
+        return self.phases.get(self.state)
+    
+    def get_remaining_turns(self) -> int:
+        """Get the number of turns remaining in the current phase"""
+        phase = self.get_current_phase()
+        if not phase:
+            return 0
+        return max(0, phase["duration"] - phase["turns_completed"])
+    
+    def transition_state(self) -> Optional[str]:
         """
-        Handle state transitions and phase duration resets.
+        Handle state transitions between phases.
         Returns a message if the state changes, None otherwise.
-        
-        This improved version ensures:
-        1. Proper phase reset when transitioning
-        2. Correct duration tracking between phases
-        3. Clear messaging for state changes
-        """
-        # Get the transition message from the phase manager
-        message = self.phase_manager.transition_state()
-        
-        # Update our reference to the current state
-        self.state = self.phase_manager.state
-        
-        # If we're transitioning to a new phase, update timing
-        if message:
-            # If transitioning to COOLDOWN, remove targets
-            if self.state == MoveState.COOLDOWN:
-                self.combat_processor.clear_targets()
-                
-            # If marked for removal, set timing duration to 0
-            if self.phase_manager.marked_for_removal:
-                if hasattr(self, 'timing'):
-                    self.timing.duration = 0
-                    
-            # Return the transition message with the move name
-            return f"{self.name} {message}"
-            
-        return None
-
-    def get_turn_start_text(self, character) -> str:
-        """
-        Get status text for turn announcement embed.
-        Shows current state and relevant details.
         """
         if self.state == MoveState.INSTANT:
             return None
-            
-        # Don't show cooldowns in turn announcement
-        if self.state == MoveState.COOLDOWN:
+
+        # Get current phase and check if we should transition
+        phase = self.get_current_phase()
+        if not phase or phase["turns_completed"] < phase["duration"]:
             return None
-            
-        lines = []
-        phase = self.phases.get(self.state)
+
+        # Determine next state and message
+        next_state = None
+        message = None
         
-        # Build status message
+        # Find next valid state
         if self.state == MoveState.CASTING:
-            lines.append(f"Casting {self.name}")
-            if phase:
-                remaining = max(0, phase.duration - phase.turns_completed)
-                lines.append(f"{remaining} turns remaining")
-                
-                # Check if this is the last turn of casting
-                if remaining == 0:
-                    # We should transition immediately
-                    transition_msg = self._transition_state()
-                    if transition_msg:
-                        return self.format_effect_message(transition_msg)
+            if MoveState.ACTIVE in self.phases:
+                next_state = MoveState.ACTIVE
+                message = "activates!"
+            elif MoveState.COOLDOWN in self.phases:
+                next_state = MoveState.COOLDOWN
+                message = "enters cooldown"
+            else:
+                message = "completes"
+                self.marked_for_removal = True
                 
         elif self.state == MoveState.ACTIVE:
-            lines.append(f"{self.name} active")
-            
-            # Add description as bullet points
-            if self.description and lines:
-                # Split description by semicolons for bullet points
-                if ';' in self.description:
-                    for part in self.description.split(';'):
-                        part = part.strip()
-                        if part:
-                            lines.append(part)
-                else:
-                    lines.append(self.description)
-                
-        return self.format_effect_message(
-            lines[0],
-            lines[1:] if len(lines) > 1 else None
-        )
-
-    def get_turn_end_text(self, character) -> Optional[str]:
-        """
-        Get update text for turn end embed.
-        Shows state transitions and important changes.
-        """
-        if self.state == MoveState.INSTANT:
-            return None
-            
-        phase = self.phases.get(self.state)
-        if not phase:
-            return None
-            
-        remaining = phase.duration - phase.turns_completed
-        
-        # Show cooldown status for entire duration
-        if self.state == MoveState.COOLDOWN:
-            if remaining > 0:
-                return self.format_effect_message(
-                    f"{self.name} cooldown",
-                    [f"{remaining} turn{'s' if remaining != 1 else ''} remaining"]
-                )
+            if MoveState.COOLDOWN in self.phases:
+                next_state = MoveState.COOLDOWN
+                message = "enters cooldown"
             else:
-                return self.format_effect_message(f"{self.name} cooldown has ended")
+                message = "wears off"
+                self.marked_for_removal = True
                 
-        # Handle phase transitions
-        if remaining <= 0:
-            msg = self._transition_state()
-            if msg:
-                return self.format_effect_message(msg)
-                
-        return None
+        elif self.state == MoveState.COOLDOWN:
+            message = "cooldown has ended"
+            self.marked_for_removal = True
+        
+        # Update state if transitioning
+        if next_state:
+            # Store old state for logging
+            old_state = self.state
+            
+            # Update state
+            self.state = next_state
+            
+            # Reset phase tracking for the new phase
+            if phase := self.phases.get(next_state):
+                phase["turns_completed"] = 0
+            
+            # Log transition for debugging
+            logger.debug(f"Move transitioned from {old_state} to {next_state}")
+        
+        return message
+
+    async def apply_costs(self, character) -> List[str]:
+        """Apply resource costs and return messages"""
+        messages = []
+        
+        # Apply MP cost
+        if self.mp_cost != 0:
+            # Handle MP gain or loss
+            if self.mp_cost > 0:
+                character.resources.current_mp = max(0, character.resources.current_mp - self.mp_cost)
+                messages.append(f"Uses {self.mp_cost} MP")
+            else:
+                character.resources.current_mp = min(
+                    character.resources.max_mp, 
+                    character.resources.current_mp - self.mp_cost  # Negative cost = gain
+                )
+                messages.append(f"Gains {abs(self.mp_cost)} MP")
+        
+        # Apply HP cost
+        if self.hp_cost != 0:
+            # Handle HP gain or loss
+            if self.hp_cost > 0:
+                character.resources.current_hp = max(0, character.resources.current_hp - self.hp_cost)
+                messages.append(f"Uses {self.hp_cost} HP")
+            else:
+                character.resources.current_hp = min(
+                    character.resources.max_hp, 
+                    character.resources.current_hp - self.hp_cost  # Negative cost = gain
+                )
+                messages.append(f"Heals {abs(self.hp_cost)} HP")
+        
+        return messages
 
     def can_use(self, round_number: Optional[int] = None) -> tuple[bool, Optional[str]]:
         """Check if move can be used based on cooldown and uses"""
         # Check if currently in cooldown phase
         if self.state == MoveState.COOLDOWN:
-            if phase := self.phases.get(self.state):
-                remaining = phase.duration - phase.turns_completed
+            if phase := self.get_current_phase():
+                remaining = phase["duration"] - phase["turns_completed"]
                 return False, f"On cooldown ({remaining} turns remaining)"
         
         # Check uses if tracked
-        if self.resource_manager.uses is not None:
-            if self.resource_manager.uses_remaining is None:
-                self.resource_manager.uses_remaining = self.resource_manager.uses
-            if self.resource_manager.uses_remaining <= 0:
-                return False, "No uses remaining"
+        if self.uses is not None:
+            if self.uses_remaining is None:
+                self.uses_remaining = self.uses
+            if self.uses_remaining <= 0:
+                return False, f"No uses remaining (0/{self.uses})"
         
         return True, None
 
-    def on_apply(self, character, round_number: int) -> str:
+    async def should_roll(self, state: MoveState, force_roll: bool = False) -> bool:
+        """Determine if we should roll based on timing and state"""
+        if force_roll:
+            return True
+            
+        if self.roll_timing == RollTiming.INSTANT:
+            return state == MoveState.INSTANT
+        elif self.roll_timing == RollTiming.ACTIVE:
+            return state == MoveState.ACTIVE
+        elif self.roll_timing == RollTiming.PER_TURN:
+            return state == MoveState.ACTIVE
+            
+        return False
+
+    async def process_attack(self, source: 'Character', reason: str, force_roll: bool = False) -> List[str]:
+        """
+        Process attack roll and damage if needed.
+        Returns list of messages for each target.
+        """
+        # Skip if no attack roll defined
+        if not self.attack_roll:
+            return []
+            
+        # Check if we should roll based on timing
+        if not await self.should_roll(self.state, force_roll):
+            return []
+
+        # Track attack count
+        self.attacks_this_turn += 1
+
+        messages = []
+        
+        # Import here to avoid circular import
+        from utils.advanced_dice.attack_calculator import AttackCalculator, AttackParameters
+        
+        # Handle no targets case
+        if not self.targets:
+            # Set up attack parameters
+            params = AttackParameters(
+                roll_expression=self.attack_roll,
+                character=source,
+                targets=None,
+                damage_str=self.damage,
+                crit_range=self.crit_range,
+                reason=reason
+            )
+            
+            # Process attack
+            message, _ = await AttackCalculator.process_attack(params)
+            messages.append(message)
+            return messages
+        
+        # Set up attack parameters for all targets
+        params = AttackParameters(
+            roll_expression=self.attack_roll,
+            character=source,
+            targets=self.targets,
+            damage_str=self.damage,
+            crit_range=self.crit_range,
+            aoe_mode=self.aoe_mode,
+            reason=reason
+        )
+        
+        # Process attack with all targets
+        message, hit_results = await AttackCalculator.process_attack(params)
+        messages.append(message)
+        
+        # Process hit tracking for heat mechanic
+        if hit_results:
+            # Extract hit targets
+            for target_name, hit_data in hit_results.items():
+                if hit_data.get('hit', False):
+                    self.targets_hit.add(target_name)
+        
+        # Handle heat tracking if enabled
+        if self.enable_heat_tracking and self.targets_hit:
+            # Source heat (attunement)
+            if not hasattr(source, 'heat_stacks'):
+                source.heat_stacks = 0
+            
+            source.heat_stacks += 1
+            
+            # Target heat (vulnerability) for each hit target
+            for target_name in self.targets_hit:
+                target = next((t for t in self.targets if t.name == target_name), None)
+                if target:
+                    if not hasattr(target, 'heat_stacks'):
+                        target.heat_stacks = 0
+                    target.heat_stacks += 1
+        
+        return messages
+
+    async def on_apply(self, character, round_number: int) -> str:
         """Initial effect application"""
         self.initialize_timing(round_number, character.name)
-        self.phase_manager.start_phase(round_number)
         
-        # First part: Process costs and apply initial effect
+        # Apply costs and format messages
         costs = []
         details = []
         timing_info = []
         
         # Apply resource costs
-        resource_messages = self.resource_manager.apply_costs(character)
-        for msg in resource_messages:
+        cost_messages = await self.apply_costs(character)
+        for msg in cost_messages:
             if "MP" in msg:
-                costs.append(f"💙 MP: {self.resource_manager.mp_cost if self.resource_manager.mp_cost > 0 else '-' + str(abs(self.resource_manager.mp_cost))}")
-            elif "HP" in msg:
-                if self.resource_manager.hp_cost > 0:
-                    costs.append(f"❤️ HP: {self.resource_manager.hp_cost}")
-                else:
-                    costs.append(f"❤️ Heal: {abs(self.resource_manager.hp_cost)}")
+                costs.append(f"💙 MP: {self.mp_cost}")
+            elif "HP" in msg and "Heal" not in msg:
+                costs.append(f"❤️ HP: {self.hp_cost}")
+            elif "Heal" in msg:
+                costs.append(f"❤️ Heal: {abs(self.hp_cost)}")
         
         # Add star cost
-        if self.resource_manager.star_cost > 0:
-            costs.append(f"⭐ {self.resource_manager.star_cost}")
+        if self.star_cost > 0:
+            costs.append(f"⭐ {self.star_cost}")
             
         # Add timing info
-        if self.phases.get(MoveState.CASTING):
-            cast_time = self.phases[MoveState.CASTING].duration
+        if MoveState.CASTING in self.phases:
+            cast_time = self.phases[MoveState.CASTING]["duration"]
             timing_info.append(f"🔄 {cast_time}T Cast")
-        if self.phases.get(MoveState.ACTIVE):
-            duration = self.phases[MoveState.ACTIVE].duration
+        if MoveState.ACTIVE in self.phases:
+            duration = self.phases[MoveState.ACTIVE]["duration"]
             timing_info.append(f"⏳ {duration}T Duration")
-        if self.phases.get(MoveState.COOLDOWN):
-            cooldown = self.phases[MoveState.COOLDOWN].duration
+        if MoveState.COOLDOWN in self.phases:
+            cooldown = self.phases[MoveState.COOLDOWN]["duration"]
             timing_info.append(f"⌛ {cooldown}T Cooldown")
             
         # Format target info if any
-        if self.combat_processor.targets:
-            target_names = ", ".join(t.name for t in self.combat_processor.targets)
-            details.append(f"Target{'s' if len(self.combat_processor.targets) > 1 else ''}: {target_names}")
+        if self.targets:
+            target_names = ", ".join(t.name for t in self.targets)
+            details.append(f"Target{'s' if len(self.targets) > 1 else ''}: {target_names}")
             
-        # Process attack based on timing
-        if self.combat_processor.attack_roll and self.combat_processor.roll_timing == RollTiming.INSTANT:
-            attack_messages = self.combat_processor.process_attack(character, self.name, self.state, force_roll=True)
-            if attack_messages:
-                details.extend(attack_messages)
-                
+        # Process instant attack rolls here if needed
+        attack_messages = []
+        if self.attack_roll and self.roll_timing == RollTiming.INSTANT:
+            attack_messages = await self.process_attack(character, self.name, force_roll=True)
+                    
         # Build the primary message
         if self.cast_description:
             main_message = f"{character.name} {self.cast_description} {self.name}"
@@ -893,11 +443,20 @@ class MoveEffect(BaseEffect):
                 else:
                     detail_strings.append(detail)
                     
-            return formatted_message + "\n" + "\n".join(detail_strings)
-        else:
-            return formatted_message
+            formatted_message += "\n" + "\n".join(detail_strings)
+        
+        # Now add any attack roll messages as separate bullets
+        if attack_messages:
+            for msg in attack_messages:
+                # Format the attack message as a bullet point if it isn't already
+                if not msg.startswith("•") and not msg.startswith("`"):
+                    formatted_message += f"\n• {msg}"
+                else:
+                    formatted_message += f"\n{msg}"
+        
+        return formatted_message
 
-    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+    async def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
         """Process start of turn effects including resource costs and state updates"""
         # Store these values for debugging and state tracking
         self.last_processed_round = round_number
@@ -911,65 +470,72 @@ class MoveEffect(BaseEffect):
         
         # First, check if we need to transition phases BEFORE showing any messages
         # This ensures we start the turn in the proper phase
-        current_phase = self.phases.get(self.state)
-        if current_phase and current_phase.turns_completed >= current_phase.duration:
-            # We've already completed enough turns, transition immediately
-            transition_msg = self._transition_state()
-            if transition_msg:
-                messages.append(self.format_effect_message(transition_msg))
-                
-                # If we transitioned to active, process attack
-                if self.state == MoveState.ACTIVE and self.combat_processor.attack_roll and self.combat_processor.roll_timing == RollTiming.ACTIVE:
-                    attack_msgs = self.combat_processor.process_attack(character, self.name, self.state, force_roll=True)
-                    if attack_msgs:
-                        messages.extend(attack_msgs)
-                        
-        # Now handle the current state (which might have just changed)
-        if self.state == MoveState.ACTIVE:
-            if self.description:
-                # Only add active message if we didn't just transition
-                if not messages:
-                    remaining = 0
-                    if phase := self.phases.get(self.state):
-                        remaining = max(0, phase.duration - phase.turns_completed)
-                    
-                    active_msg = self.format_effect_message(
-                        f"{self.name} active",
-                        [self.description, f"{remaining} turns remaining"]
-                    )
-                    messages.append(active_msg)
+        transition_msg = self.transition_state()
+        if transition_msg:
+            messages.append(self.format_effect_message(f"{self.name} {transition_msg}"))
             
-            # Process per-turn resource costs - TODO: Add config for per-turn costs
-            
-            # Process attack if timing is per_turn
-            if self.combat_processor.attack_roll and self.combat_processor.roll_timing == RollTiming.PER_TURN:
-                attack_msgs = self.combat_processor.process_attack(character, self.name, self.state, force_roll=True)
+            # If we transitioned to active, process attack roll if timing is ACTIVE
+            if self.state == MoveState.ACTIVE and self.attack_roll and self.roll_timing == RollTiming.ACTIVE:
+                attack_msgs = await self.process_attack(character, self.name, force_roll=True)
                 if attack_msgs:
                     messages.extend(attack_msgs)
-                    
-        elif self.state == MoveState.CASTING:
-            current_phase = self.phases.get(self.state)
-            if current_phase:
-                remaining = max(0, current_phase.duration - current_phase.turns_completed)
-                # Only add casting message if we didn't just transition
-                if not messages:
-                    cast_msg = self.format_effect_message(
-                        f"Casting {self.name}",
-                        [f"{remaining} turns remaining"]
-                    )
-                    messages.append(cast_msg)
+    
+        # Now handle the current state (which might have just changed)
+        if self.state == MoveState.CASTING:
+            # Show casting message with turns remaining
+            remaining = self.get_remaining_turns()
+            if not any("activates" in msg for msg in messages):  # Don't show if we just activated
+                cast_msg = self.format_effect_message(
+                    f"Casting {self.name}",
+                    [f"{remaining} turns remaining"]
+                )
+                messages.append(cast_msg)
+                
+        elif self.state == MoveState.ACTIVE:
+            # Process attack if timing is ACTIVE and we didn't just transition
+            # This handles the case where we were already in ACTIVE state
+            if self.attack_roll and self.roll_timing == RollTiming.ACTIVE and not any("activates" in msg for msg in messages):
+                attack_msgs = await self.process_attack(character, self.name, force_roll=True)
+                if attack_msgs:
+                    messages.extend(attack_msgs)
+            
+            # Only add active message if we didn't just transition
+            if not any("activates" in msg for msg in messages):
+                # Show active message with description and turns remaining
+                remaining = self.get_remaining_turns()
+                
+                details = []
+                # Add description
+                if self.description:
+                    # Split description by semicolons for bullet points
+                    if ';' in self.description:
+                        for part in self.description.split(';'):
+                            part = part.strip()
+                            if part:
+                                details.append(part)
+                    else:
+                        details.append(self.description)
+                
+                # Add remaining turns
+                details.append(f"{remaining} turns remaining")
+                
+                active_msg = self.format_effect_message(
+                    f"{self.name} active",
+                    details
+                )
+                messages.append(active_msg)
+            
+            # Process per-turn attack rolls
+            if self.attack_roll and self.roll_timing == RollTiming.PER_TURN:
+                attack_msgs = await self.process_attack(character, self.name, force_roll=True)
+                if attack_msgs:
+                    messages.extend(attack_msgs)
             
         return messages
 
-    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+    async def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """
         Handle phase transitions and duration tracking.
-        Improved version with better cooldown message handling.
-        
-        Fixed version makes sure:
-        1. Turn counting is correct (only on character's own turn)
-        2. Phase transitions happen at the right time
-        3. Duration is properly tracked
         """
         # Store these values for debugging and state tracking
         self.last_processed_round = round_number
@@ -981,61 +547,51 @@ class MoveEffect(BaseEffect):
             
         messages = []
         
-        # Get current phase info
-        current_phase = self.phases.get(self.state)
-        if not current_phase:
-            return []
-            
         # Complete this turn for the current phase
-        phase_complete = self.phase_manager.complete_turn(turn_name, character.name)
+        phase = self.get_current_phase()
+        if phase:
+            phase["turns_completed"] += 1
+        
+        # Get remaining turns for messaging
+        remaining = self.get_remaining_turns()
         
         # Handle phase transitions if the phase is complete
-        if phase_complete:
-            # Process attacks on transition to ACTIVE if needed
-            if self.state == MoveState.CASTING and self.phases.get(MoveState.ACTIVE):
-                # Check if we should process attack roll on transition
-                if self.combat_processor.attack_roll and self.combat_processor.roll_timing == RollTiming.ACTIVE:
-                    attack_msgs = self.combat_processor.process_attack(character, self.name, MoveState.ACTIVE, force_roll=True)
-                    if attack_msgs:
-                        messages.extend(attack_msgs)
-            
-            # Transition to next phase
-            transition_msg = self._transition_state()
-            if transition_msg:
-                messages.append(self.format_effect_message(transition_msg))
-            
+        transition_msg = self.transition_state()
+        if transition_msg:
+            messages.append(self.format_effect_message(f"{self.name} {transition_msg}"))
+        
             # If marked for removal, ensure it gets removed
-            if self.phase_manager.marked_for_removal:
+            if self.marked_for_removal:
                 if hasattr(self, 'timing'):
                     self.timing.duration = 0
         else:
             # If phase not complete, show appropriate progress message
-            remaining = current_phase.duration - current_phase.turns_completed
-            
             if self.state == MoveState.CASTING:
-                messages.append(self.format_effect_message(
-                    f"Casting {self.name}",
-                    [f"{remaining} turns remaining"]
-                ))
+                if remaining > 0:
+                    messages.append(self.format_effect_message(
+                        f"Casting {self.name}",
+                        [f"{remaining} turns remaining"]
+                    ))
                     
             elif self.state == MoveState.ACTIVE:
-                messages.append(self.format_effect_message(
-                    f"{self.name} continues",
-                    [f"{remaining} turns remaining"]
-                ))
+                if remaining > 0:
+                    messages.append(self.format_effect_message(
+                        f"{self.name} continues",
+                        [f"{remaining} turns remaining"]
+                    ))
                     
             elif self.state == MoveState.COOLDOWN:
-                if remaining > 0:  # Only show cooldown message if turns remaining
+                if remaining > 0:
                     messages.append(self.format_effect_message(
                         f"{self.name} cooldown",
                         [f"{remaining} turns remaining"]
                     ))
                 else:
                     # If this is the last turn of cooldown, mark for removal
-                    self.phase_manager.marked_for_removal = True
+                    self.marked_for_removal = True
                     if hasattr(self, 'timing'):
                         self.timing.duration = 0
-                    messages.append(self.format_effect_message(f"{self.name} cooldown ended"))
+                    messages.append(self.format_effect_message(f"{self.name} cooldown has ended"))
         
         return messages
         
@@ -1045,18 +601,36 @@ class MoveEffect(BaseEffect):
         Check if move effect is fully expired.
         A move is expired when marked for removal or all phases complete.
         """
-        return self.phase_manager.is_expired()
+        if self.marked_for_removal:
+            return True
+            
+        if self.state == MoveState.INSTANT:
+            return True
+            
+        current_phase = self.get_current_phase()
+        if not current_phase:
+            return True
+            
+        # Check if we're in the final phase with no more transitions available
+        if self.state == MoveState.COOLDOWN:
+            return current_phase["turns_completed"] >= current_phase["duration"]
+        elif self.state == MoveState.ACTIVE and MoveState.COOLDOWN not in self.phases:
+            return current_phase["turns_completed"] >= current_phase["duration"]
+        elif self.state == MoveState.CASTING and MoveState.ACTIVE not in self.phases and MoveState.COOLDOWN not in self.phases:
+            return current_phase["turns_completed"] >= current_phase["duration"]
+            
+        return False
 
-    def on_expire(self, character) -> Optional[str]:
+    async def on_expire(self, character) -> Optional[str]:
         """Handle move expiry and ensure complete removal"""
         if self.state == MoveState.INSTANT:
             return None
             
         # Clear targets list
-        self.combat_processor.clear_targets()
+        self.targets = []
         
         # Mark for removal to ensure it gets deleted
-        self.phase_manager.marked_for_removal = True
+        self.marked_for_removal = True
         
         # Set duration to 0 to ensure it gets removed
         if hasattr(self, 'timing'):
@@ -1068,46 +642,59 @@ class MoveEffect(BaseEffect):
         """Convert to dictionary for storage with state preservation"""
         data = super().to_dict()
         
-        # Add data from components
+        # Add phase data
+        phase_data = {state.value: phase for state, phase in self.phases.items()}
+        
+        # Add move-specific data
         data.update({
-            **self.phase_manager.to_dict(),
-            **self.combat_processor.to_dict(),
-            **self.resource_manager.to_dict(),
+            "state": self.state.value,
+            "phases": phase_data,
+            "star_cost": self.star_cost,
+            "mp_cost": self.mp_cost,
+            "hp_cost": self.hp_cost,
             "cast_description": self.cast_description,
+            "uses": self.uses,
+            "uses_remaining": self.uses_remaining,
+            "attack_roll": self.attack_roll,
+            "damage": self.damage, 
+            "crit_range": self.crit_range,
+            "save_type": self.save_type,
+            "save_dc": self.save_dc,
+            "half_on_save": self.half_on_save,
+            "conditions": [c.value if hasattr(c, 'value') else str(c) for c in self.conditions] if self.conditions else [],
+            "roll_timing": self.roll_timing.value,
+            "targets_hit": list(self.targets_hit),
+            "aoe_mode": self.aoe_mode,
+            "enable_heat_tracking": self.enable_heat_tracking,
+            "marked_for_removal": self.marked_for_removal,
             "last_processed_round": self.last_processed_round,
-            "last_processed_turn": self.last_processed_turn,
+            "last_processed_turn": self.last_processed_turn
         })
         
-        # Remove any None values to save space
+        # Remove None values to save space
         return {k: v for k, v in data.items() if v is not None}
 
     @classmethod
     def from_dict(cls, data: dict) -> 'MoveEffect':
         """Create from dictionary data"""
         try:
-            # Extract phase durations first
-            phase_data = data.get('phases', {})
-            cast_time = None
-            duration = None
-            cooldown = None
-            
-            if cast_phase := phase_data.get(MoveState.CASTING.value, {}):
-                cast_time = cast_phase.get('duration')
-            if active_phase := phase_data.get(MoveState.ACTIVE.value, {}):
-                duration = active_phase.get('duration')
-            if cooldown_phase := phase_data.get(MoveState.COOLDOWN.value, {}):
-                cooldown = cooldown_phase.get('duration')
+            # Extract phase durations
+            phases = data.get('phases', {})
+            cast_time = phases.get(MoveState.CASTING.value, {}).get('duration')
+            duration = phases.get(MoveState.ACTIVE.value, {}).get('duration')
+            cooldown = phases.get(MoveState.COOLDOWN.value, {}).get('duration')
             
             # Extract combat data
-            combat_data = data.get('combat', {})
-            attack_roll = combat_data.get('attack_roll')
-            damage = combat_data.get('damage')
-            crit_range = combat_data.get('crit_range', 20)
-            save_type = combat_data.get('save_type')
-            save_dc = combat_data.get('save_dc')
-            half_on_save = combat_data.get('half_on_save', False)
-            conditions = combat_data.get('conditions', [])
-            roll_timing_str = combat_data.get('roll_timing', RollTiming.ACTIVE.value)
+            attack_roll = data.get('attack_roll')
+            damage = data.get('damage')
+            crit_range = data.get('crit_range', 20)
+            save_type = data.get('save_type')
+            save_dc = data.get('save_dc')
+            half_on_save = data.get('half_on_save', False)
+            conditions = data.get('conditions', [])
+            
+            # Normalize roll timing
+            roll_timing_str = data.get('roll_timing', RollTiming.ACTIVE.value)
             
             # Create base effect
             effect = cls(
@@ -1126,41 +713,36 @@ class MoveEffect(BaseEffect):
                 save_type=save_type,
                 save_dc=save_dc,
                 half_on_save=half_on_save,
-                conditions=[ConditionType(c) for c in conditions] if conditions else [],
+                conditions=[ConditionType(c) if isinstance(c, str) else c for c in conditions] if conditions else [],
                 roll_timing=roll_timing_str,
                 uses=data.get('uses'),
                 enable_heat_tracking=data.get('enable_heat_tracking', False)
             )
             
-            # Restore phase manager state directly
+            # Restore state
             if state_value := data.get('state'):
                 effect.state = MoveState(state_value)
-                effect.phase_manager.state = effect.state
                 
             # Restore phase progress
-            for state_str, phase_info in phase_data.items():
+            for state_str, phase_info in phases.items():
                 state = MoveState(state_str)
-                if phase := effect.phases.get(state):
-                    phase.turns_completed = phase_info.get('turns_completed', 0)
+                if state in effect.phases:
+                    effect.phases[state]["turns_completed"] = phase_info.get('turns_completed', 0)
             
-            # Restore resource manager state
-            effect.resource_manager.uses_remaining = data.get('uses_remaining')
-            effect.resource_manager.initial_resources_applied = data.get('initial_resources_applied', True)
+            # Restore usage tracking
+            effect.uses_remaining = data.get('uses_remaining')
             
-            # Restore combat processor state
-            if state_data := data.get('state_data', {}):
-                effect.combat_processor.heat_stacks = state_data.get('heat_stacks', 0)
-                effect.combat_processor.attacks_this_turn = state_data.get('attacks_this_turn', 0)
-            effect.combat_processor.targets_hit = set(data.get('targets_hit', []))
+            # Restore combat state
+            effect.targets_hit = set(data.get('targets_hit', []))
+            effect.aoe_mode = data.get('aoe_mode', 'single')
             
-            # Restore timing information
+            # Restore tracking information
             if timing_data := data.get('timing'):
                 effect.timing = EffectTiming(**timing_data)
                 
-            # Restore processing tracking
             effect.last_processed_round = data.get('last_processed_round')
             effect.last_processed_turn = data.get('last_processed_turn')
-            effect.phase_manager.marked_for_removal = data.get('marked_for_removal', False)
+            effect.marked_for_removal = data.get('marked_for_removal', False)
                 
             return effect
             

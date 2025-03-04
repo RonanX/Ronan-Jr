@@ -5,11 +5,12 @@ Commands for creating and using character moves.
 Handles creating MoveData for character movesets and applying MoveEffects.
 
 Commands:
-- /move use: Use a one-off move (added as effect)
-- /move temp: Create a temporary effect-based move (stored in character.effects)
-- /move create: Create a permanent move (stored in character.moveset)
+- /move use: Use a move from character's moveset (applies as effect)
+- /move temp: Create and use a temporary move (not saved to moveset)
+- /move create: Create a permanent move (saved to character.moveset)
 - /move list: List a character's available moves
 - /move info: Show detailed information about a move
+- /move delete: Delete a move from a character's moveset
 """
 
 import discord
@@ -20,6 +21,7 @@ from typing import Optional, List, Literal
 import json
 
 from core.effects.move import MoveEffect, MoveState, RollTiming
+from core.effects.manager import apply_effect  # Import apply_effect directly
 from core.effects.condition import ConditionType
 from modules.moves.data import MoveData, Moveset
 from modules.moves.loader import MoveLoader
@@ -39,14 +41,18 @@ class MoveCommands(commands.GroupCog, name="move"):
     @app_commands.describe(
         character="Character using the move",
         name="Name of the move to use",
-        target="Target character (optional)"
+        target="Target character(s) (comma-separated for multiple targets)",
+        roll_timing="When to process attack roll (instant, active, per_turn)",
+        aoe_mode="AoE mode: 'single' (one roll) or 'multi' (roll per target)"
     )
     async def use_move(
         self, 
         interaction: discord.Interaction,
         character: str,
         name: str,
-        target: Optional[str] = None
+        target: Optional[str] = None,
+        roll_timing: Optional[Literal["instant", "active", "per_turn"]] = None,
+        aoe_mode: Optional[Literal["single", "multi"]] = "single"
     ):
         """
         Use a move that is stored in a character's moveset.
@@ -61,13 +67,16 @@ class MoveCommands(commands.GroupCog, name="move"):
                 await interaction.followup.send(f"Character '{character}' not found")
                 return
             
-            # Get target if specified
-            target_char = None
+            # Get targets if specified (supports multiple targets)
+            target_chars = []
             if target:
-                target_char = self.bot.game_state.get_character(target)
-                if not target_char:
-                    await interaction.followup.send(f"Target '{target}' not found")
-                    return
+                target_names = [t.strip() for t in target.split(',')]
+                for target_name in target_names:
+                    target_char = self.bot.game_state.get_character(target_name)
+                    if not target_char:
+                        await interaction.followup.send(f"Target '{target_name}' not found")
+                        return
+                    target_chars.append(target_char)
             
             # Get current round number for accurate cooldown checking
             current_round = 1
@@ -92,22 +101,20 @@ class MoveCommands(commands.GroupCog, name="move"):
                 )
                 return
             
-            # First check if there's an existing move effect in cooldown
+            # Check for existing move effects with this name
             existing_cooldown = False
             for effect in char.effects:
                 if hasattr(effect, 'name') and effect.name == name and hasattr(effect, 'state'):
                     if effect.state == MoveState.COOLDOWN:
                         # There's already a cooldown effect for this move
-                        phase = effect.phases.get(MoveState.COOLDOWN)
-                        if phase:
-                            remaining = phase.duration - phase.turns_completed
-                            await interaction.followup.send(
-                                f"{char.name} can't use {name}: On cooldown ({remaining} turns remaining)",
-                                ephemeral=True
-                            )
-                            return
-                        existing_cooldown = True
-                        break
+                        remaining = effect.get_remaining_turns()
+                        await interaction.followup.send(
+                            f"{char.name} can't use {name}: On cooldown ({remaining} turns remaining)",
+                            ephemeral=True
+                        )
+                        return
+                    existing_cooldown = True
+                    break
             
             # Only check moveset cooldown if no active cooldown effect
             if not existing_cooldown:
@@ -132,6 +139,9 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Mark the move as used (for cooldown tracking in moveset)
             move_data.use(current_round)
             
+            # Override roll_timing if specified in command
+            actual_roll_timing = roll_timing if roll_timing else move_data.roll_timing
+            
             # Create move effect from the move data
             move_effect = MoveEffect(
                 name=move_data.name,
@@ -149,13 +159,13 @@ class MoveCommands(commands.GroupCog, name="move"):
                 save_type=move_data.save_type,
                 save_dc=move_data.save_dc,
                 half_on_save=move_data.half_on_save,
-                roll_timing=move_data.roll_timing,
-                targets=[target_char] if target_char else [],
+                roll_timing=actual_roll_timing,  # Use potentially overridden value
+                targets=target_chars,
                 enable_heat_tracking=move_data.enable_heat_tracking
             )
             
-            # Apply the effect
-            result = char.add_effect(move_effect, current_round)
+            # Set the AoE mode if specified
+            move_effect.aoe_mode = aoe_mode
             
             # Use action stars
             char.use_move_stars(move_data.star_cost, move_data.name)
@@ -164,15 +174,18 @@ class MoveCommands(commands.GroupCog, name="move"):
             if move_data.cooldown:
                 char.action_stars.start_cooldown(move_data.name, move_data.cooldown)
             
+            # Apply the effect
+            result = await apply_effect(char, move_effect, current_round)
+            
             # Save character state
             await self.bot.db.save_character(char, debug_paths=['effects', 'action_stars', 'moveset'])
             
-            # Use the result directly since the new MoveEffect.on_apply 
-            # now formats the message in the desired way
+            # Send response
             await interaction.followup.send(result)
             
         except Exception as e:
             error_msg = handle_error(e, "Error using move")
+            logger.error(f"Error in use_move: {str(e)}", exc_info=True)
             await interaction.followup.send(error_msg, ephemeral=True)
             
     @app_commands.command(name="temp")
@@ -181,7 +194,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         name="Name of the move to use",
         description="Move description (use semicolons for bullet points)",
         category="Move category (Offense, Defense, Utility, Other)",
-        target="Target character (optional)",
+        target="Target character(s) (comma-separated for multiple targets)",
         mp_cost="MP cost (default: 0)",
         hp_cost="HP cost or healing if negative (default: 0)",
         star_cost="Star cost (default: 1)",
@@ -190,6 +203,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         cast_time="Turns needed to cast (default: 0)",
         duration="Turns the effect lasts (default: 0)",
         cooldown="Turns before usable again (default: 0)",
+        roll_timing="When to process attack roll (instant, active, per_turn)",
+        aoe_mode="AoE mode: 'single' (one roll) or 'multi' (roll per target)",
         advanced_json="Optional JSON with advanced parameters (save_type, half_on_save, etc.)"
     )
     async def temp_move(
@@ -208,6 +223,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         cast_time: Optional[int] = None,
         duration: Optional[int] = None,
         cooldown: Optional[int] = None,
+        roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
+        aoe_mode: Optional[Literal["single", "multi"]] = "single",
         advanced_json: Optional[str] = None
     ):
         """
@@ -224,13 +241,16 @@ class MoveCommands(commands.GroupCog, name="move"):
                 await interaction.followup.send(f"Character '{character}' not found")
                 return
                 
-            # Get target if specified
-            target_char = None
+            # Get targets if specified (supports multiple targets)
+            target_chars = []
             if target:
-                target_char = self.bot.game_state.get_character(target)
-                if not target_char:
-                    await interaction.followup.send(f"Target '{target}' not found")
-                    return
+                target_names = [t.strip() for t in target.split(',')]
+                for target_name in target_names:
+                    target_char = self.bot.game_state.get_character(target_name)
+                    if not target_char:
+                        await interaction.followup.send(f"Target '{target_name}' not found")
+                        return
+                    target_chars.append(target_char)
             
             # Check resource costs
             if char.resources.current_mp < mp_cost:
@@ -278,30 +298,34 @@ class MoveCommands(commands.GroupCog, name="move"):
                 cooldown=cooldown,
                 attack_roll=attack_roll,
                 damage=damage,
-                targets=[target_char] if target_char else [],
+                targets=target_chars,
+                roll_timing=roll_timing,
                 # Advanced parameters from JSON
                 crit_range=advanced_params.get('crit_range', 20),
                 save_type=advanced_params.get('save_type'),
                 save_dc=advanced_params.get('save_dc'),
                 half_on_save=advanced_params.get('half_on_save', False),
-                roll_timing=advanced_params.get('roll_timing', 'active'),
                 enable_heat_tracking=advanced_params.get('enable_heat_tracking', False)
             )
             
-            # Apply the effect
-            result = char.add_effect(move_effect, current_round)
+            # Set the AoE mode if specified
+            move_effect.aoe_mode = aoe_mode
             
             # Use action stars
             char.use_move_stars(star_cost, name)
             
-            # Save character state
+            # Apply the effect
+            result = await apply_effect(char, move_effect, current_round)
+            
+            # Save character state with debug paths enabled
             await self.bot.db.save_character(char, debug_paths=['effects', 'action_stars'])
             
-            # Send the formatted message from MoveEffect.on_apply()
+            # Send response
             await interaction.followup.send(result)
             
         except Exception as e:
             error_msg = handle_error(e, "Error using temporary move")
+            logger.error(f"Error in temp_move: {str(e)}", exc_info=True)
             await interaction.followup.send(error_msg, ephemeral=True)
     
     @app_commands.command(name="create")
@@ -318,6 +342,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         cast_time="Turns needed to cast (default: 0)",
         duration="Turns the effect lasts (default: 0)",
         cooldown="Turns before usable again (default: 0)",
+        roll_timing="When to process attack roll (instant, active, per_turn)",
         uses="Number of uses (-1 for unlimited)",
         advanced_json="Optional JSON with advanced parameters (save_type, half_on_save, etc.)"
     )
@@ -336,6 +361,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         cast_time: Optional[int] = None,
         duration: Optional[int] = None,
         cooldown: Optional[int] = None,
+        roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
         uses: Optional[int] = -1,
         advanced_json: Optional[str] = None
     ):
@@ -378,13 +404,13 @@ class MoveCommands(commands.GroupCog, name="move"):
                 attack_roll=attack_roll,
                 damage=damage,
                 category=category,
+                roll_timing=roll_timing,  # Added roll_timing parameter
                 # Advanced parameters from JSON
                 crit_range=advanced_params.get('crit_range', 20),
                 save_type=advanced_params.get('save_type'),
                 save_dc=advanced_params.get('save_dc'),
                 half_on_save=advanced_params.get('half_on_save', False),
                 conditions=advanced_params.get('conditions', []),
-                roll_timing=advanced_params.get('roll_timing', 'active'),
                 enable_heat_tracking=advanced_params.get('enable_heat_tracking', False),
                 target_selection=advanced_params.get('target_selection', 'manual')
             )
@@ -438,6 +464,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 attack_details.append(f"Attack: {attack_roll}")
             if damage:
                 attack_details.append(f"Damage: {damage}")
+            if roll_timing and roll_timing != "active":
+                attack_details.append(f"Roll Timing: {roll_timing}")
                 
             if attack_details:
                 details.append("• `" + " | ".join(attack_details) + "`")
@@ -598,7 +626,11 @@ class MoveCommands(commands.GroupCog, name="move"):
             for effect in char.effects[:]:  # Use copy since we're modifying the list
                 if hasattr(effect, 'name') and effect.name == move_name:
                     if hasattr(effect, 'on_expire'):
-                        effect.on_expire(char)
+                        # Handle async or sync on_expire
+                        if hasattr(effect.on_expire, '__await__'):
+                            await effect.on_expire(char)
+                        else:
+                            effect.on_expire(char)
                     char.effects.remove(effect)
                 
             # Save character state
@@ -617,36 +649,62 @@ class MoveCommands(commands.GroupCog, name="move"):
         chars = list(self.bot.game_state.characters.keys())
         matches = [c for c in chars if current.lower() in c.lower()]
         return [app_commands.Choice(name=char, value=char) for char in matches[:25]]
-        
+            
     # Move name autocomplete
     async def move_name_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         """Autocomplete move names for a character"""
-        # Try to find character in previous options
-        options = interaction.data.get('options', [])
-        character = None
-        for option in options:
-            if option.get('name') == 'character':
-                character = option.get('value')
-                break
+        try:
+            # Try to find character in previous options
+            character_name = None
+            
+            # Extract the options from the interaction data
+            if hasattr(interaction, 'data') and 'options' in interaction.data:
+                options = interaction.data['options']
+                for option in options:
+                    if option.get('name') == 'character':
+                        character_name = option.get('value')
+                        break
+                    
+            if not character_name:
+                return []
                 
-        if not character:
-            return []
+            # Get character's moves
+            char = self.bot.game_state.get_character(character_name)
+            if not char:
+                # Try to load from database if not in game state
+                char_data = await self.bot.db.load_character(character_name)
+                if not char_data or 'moveset' not in char_data:
+                    return []
+                    
+                # Extract move names directly from database data
+                moves_data = char_data.get('moveset', {}).get('moves', {})
+                move_names = list(moves_data.keys())
+            else:
+                # Get from character object
+                move_names = char.list_moves()
             
-        # Get character's moves
-        char = self.bot.game_state.get_character(character)
-        if not char:
-            return []
+            # Filter by current input (case insensitive)
+            current_lower = current.lower()
+            matches = [m for m in move_names if current_lower in m.lower()]
             
-        move_names = char.list_moves()
-        matches = [m for m in move_names if current.lower() in m.lower()]
-        return [app_commands.Choice(name=move, value=move) for move in matches[:25]]
+            # Sort matches for consistency
+            matches.sort()
+            
+            # Return as choices (limited to 25 as per Discord API)
+            return [
+                app_commands.Choice(name=move, value=move) 
+                for move in matches[:25]
+            ]
+        except Exception as e:
+            # Log error but don't crash
+            logger.error(f"Error in move_name_autocomplete: {str(e)}", exc_info=True)
+            return []
             
     # Add autocompletes to commands
     list_moves.autocomplete('character')(character_autocomplete)
     use_move.autocomplete('character')(character_autocomplete)
-    use_move.autocomplete('target')(character_autocomplete)
+    use_move.autocomplete('name')(move_name_autocomplete)
     temp_move.autocomplete('character')(character_autocomplete)
-    temp_move.autocomplete('target')(character_autocomplete)
     create_move.autocomplete('character')(character_autocomplete)
     move_info.autocomplete('character')(character_autocomplete)
     move_info.autocomplete('move_name')(move_name_autocomplete)

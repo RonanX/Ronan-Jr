@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from core.character import Character, StatType
-from core.effects.manager import process_effects
+from core.effects.manager import process_effects  # Import the async function
 from core.effects.status import FrostbiteEffect, SkipEffect
 from utils.dice import DiceRoller
 from utils.error_handler import handle_error
@@ -212,7 +212,8 @@ class InitiativeTracker:
         
         new_char = self.bot.game_state.get_character(self.current_turn.character_name)
         if new_char:
-            was_skipped, start_msgs, end_msgs = process_effects(
+            # IMPORTANT: Added await here
+            was_skipped, start_msgs, end_msgs = await process_effects(
                 new_char,
                 self.round_number,
                 new_char.name,
@@ -239,54 +240,39 @@ class InitiativeTracker:
         if self.logger:
             self.logger.snapshot_character_state(character)
         
-        # Process each effect
-        for effect in character.effects[:]:  # Copy list since we're modifying it
-            # Process start of turn effects
-            if start_msgs := effect.on_turn_start(
-                character,
-                round_number=self.round_number,
-                turn_name=character.name
-            ):
-                if isinstance(start_msgs, list):
-                    messages.extend(start_msgs)
-                elif isinstance(start_msgs, str):
-                    messages.append(start_msgs)
-                    
-            # Check for frozen/skipped turn
-            if isinstance(effect, FrostbiteEffect) and effect.stacks >= 5:
-                was_skipped = True
-                skip_reason = "❄️ `Frozen solid - Cannot act`"
-                self.debug_print(f"Turn skipped: {skip_reason}")
+        # IMPORTANT: Added await here - properly await process_effects
+        was_skipped, start_messages, end_messages = await process_effects(
+            character, 
+            self.round_number, 
+            character.name,
+            self.logger
+        )
+        
+        # Update skip reason if we were skipped
+        if was_skipped:
+            # Look for skip effects to get reason
+            for effect in character.effects:
+                if isinstance(effect, SkipEffect):
+                    skip_reason = effect.reason
+                    break
+                elif isinstance(effect, FrostbiteEffect) and effect.stacks >= 5:
+                    skip_reason = "❄️ `Frozen solid - Cannot act`"
+                    break
+            
+            # Set default reason if none found
+            if not skip_reason:
+                skip_reason = "Turn skipped"
                 
-            # Check for expired effects at start of turn
-            if (not hasattr(effect, '_handles_own_expiry') or not effect._handles_own_expiry) and \
-            effect.timing and effect.timing.should_expire(self.round_number, character.name):
-                if expired_msg := effect.on_expire(character):
-                    messages.append(expired_msg)
-                    self.debug_print(f"Effect expired: {effect.name}")
-                character.effects.remove(effect)
-
-        # Update turn data with skip reason if needed
-        if was_skipped and skip_reason:
+            # Update turn data
             self.current_turn.skip_reason = skip_reason
-
+            self.debug_print(f"Turn skipped: {skip_reason}")
+        
         # Take another snapshot after processing
         if self.logger:
             self.logger.snapshot_character_state(character)
-
-        # Format messages
-        formatted_messages = []
-        for msg in messages:
-            if not msg or not isinstance(msg, str):
-                continue
-            if not (msg.startswith('`') and msg.endswith('`')):
-                msg = f"`{msg}`"
-            formatted_messages.append(msg)
-
-        self.debug_print(f"Final state: {[e.name for e in character.effects]}")
-        self.debug_print(f"Effect messages: {formatted_messages}")
         
-        return was_skipped, formatted_messages
+        # Return start messages for turn announcement
+        return was_skipped, start_messages
 
     async def start_combat(self, characters: List[Character], interaction: discord.Interaction) -> Tuple[bool, str]:
         """Start combat with initiative contest"""
@@ -419,7 +405,7 @@ class InitiativeTracker:
         # Handle effects
         for effect in character.effects[:]:  # Copy list since we're modifying it
             # Skip permanent effects if they're marked as such
-            if effect.permanent:
+            if hasattr(effect, 'permanent') and effect.permanent:
                 self.debug_print(f"Keeping permanent effect: {effect.name}")
                 continue
                 
@@ -428,7 +414,12 @@ class InitiativeTracker:
             
             # A move effect in cooldown phase should be removed entirely
             if hasattr(effect, 'state') and effect_type == 'MoveEffect':
-                msg = effect.on_expire(character)
+                # Check if on_expire is async
+                if hasattr(effect.on_expire, '__await__'):
+                    msg = await effect.on_expire(character)
+                else:
+                    msg = effect.on_expire(character)
+                    
                 if msg:
                     cleanup_messages.append(msg)
                     
@@ -436,7 +427,12 @@ class InitiativeTracker:
                 continue
                 
             # For non-permanent effects, clean them up
-            msg = effect.on_expire(character)
+            # Check if on_expire is async
+            if hasattr(effect.on_expire, '__await__'):
+                msg = await effect.on_expire(character)
+            else:
+                msg = effect.on_expire(character)
+                
             if msg:
                 cleanup_messages.append(msg)
                 
@@ -586,7 +582,8 @@ class InitiativeTracker:
                 # Process first turn
                 current_char = self.bot.game_state.get_character(self.current_turn.character_name)
                 if current_char:
-                    was_skipped, start_msgs, end_msgs = process_effects(
+                    # IMPORTANT: Added await here
+                    was_skipped, start_msgs, end_msgs = await process_effects(
                         current_char,
                         self.round_number,
                         current_char.name,
@@ -616,7 +613,8 @@ class InitiativeTracker:
             current_char = self.bot.game_state.get_character(self.current_turn.character_name)
             if current_char:
                 # Get end of turn effects
-                was_skipped, start_msgs, end_msgs = process_effects(
+                # IMPORTANT: Added await here
+                was_skipped, start_msgs, end_msgs = await process_effects(
                     current_char,
                     self.round_number,
                     current_char.name,
@@ -655,7 +653,8 @@ class InitiativeTracker:
             new_char = self.bot.game_state.get_character(self.current_turn.character_name)
             if new_char:
                 # Process new turn
-                was_skipped, start_msgs, end_msgs = process_effects(
+                # IMPORTANT: Added await here
+                was_skipped, start_msgs, end_msgs = await process_effects(
                     new_char,
                     self.round_number,
                     new_char.name,

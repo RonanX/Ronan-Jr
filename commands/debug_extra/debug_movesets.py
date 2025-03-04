@@ -30,20 +30,26 @@ logger = logging.getLogger(__name__)
 # Name of the debug moveset in Firebase
 DEBUG_MOVESET_NAME = "debug"
 
-# This is the style used in debug_resources.py
+# This is the style used in debug files - add functions to the cog
 def add_moveset_debug_commands(cog):
     """Register debug commands on the provided cog"""
     print("Registering moveset debug commands...")
     
-    # Add commands directly to the cog
-    cog.debug_movesets = debug_movesets
+    # Add functions directly to the cog
+    cog.debug_movesets = debug_movesets  # Main test command
     cog.create_debug_moveset = create_debug_moveset
     cog.test_move_basics = test_move_basics
     cog.test_move_initiative = test_move_initiative
     cog.test_move_cooldowns = test_move_cooldowns
     cog.test_move_targeting = test_move_targeting
     cog.test_move_ui = test_move_ui
-    cog.test_phase_durations = test_phase_durations  # New test specifically for phases
+    cog.test_phase_durations = test_phase_durations  # Test for phases
+    
+    # Also add helper functions
+    cog.load_debug_moveset = load_debug_moveset
+    cog.apply_moveset_to_characters = apply_moveset_to_characters
+    cog.setup_initiative = setup_initiative
+    cog.reset_character_state = reset_character_state
     
     print("Moveset debug commands registered!")
 
@@ -155,24 +161,32 @@ async def reset_character_state(bot, character_names: List[str]):
         await bot.db.save_character(char)
         print(f"Reset state for {name}")
 
-async def debug_movesets(interaction: discord.Interaction):
+async def debug_movesets(interaction: discord.Interaction, enable_firebase_logging: bool = False):
     """Run comprehensive moveset debugging"""
     try:
         await interaction.response.defer()
         
-        # Get bot reference
+        # Get bot reference directly from interaction
         bot = interaction.client
+        
+        # Set Firebase logging on database if requested
+        if hasattr(bot, 'db'):
+            bot.db.debug_mode = enable_firebase_logging
+            if enable_firebase_logging:
+                print("\n:bar_chart: Firebase debug logging ENABLED")
+            else:
+                print("\n:bar_chart: Firebase debug logging DISABLED")
         
         # First step: Recreate test characters
         print("\nRecreating test characters...")
         await recreate_test_characters(bot)
         
-        # Load debug moveset
+        # Load debug moveset - fixed to pass the bot directly
         print("\nLoading debug moveset...")
         moveset = await load_debug_moveset(bot)
         if not moveset:
             await interaction.followup.send(
-                "❌ Debug moveset not found. Please create a moveset called 'debug' in Firebase."
+                ":x: Debug moveset not found. Please create a moveset called 'debug' in Firebase."
             )
             return
         
@@ -181,43 +195,50 @@ async def debug_movesets(interaction: discord.Interaction):
         loaded_chars = await apply_moveset_to_characters(bot, moveset, test_chars)
         
         if not loaded_chars:
-            await interaction.followup.send("❌ Failed to load moveset to any test characters")
+            await interaction.followup.send(":x: Failed to load moveset to any test characters")
             return
         
         # Run comprehensive tests
         print("\n=== STARTING COMPREHENSIVE MOVE TESTS ===\n")
         
-        # Test 1: Focused test on phase durations and transitions
-        await test_phase_durations(interaction)
+        # Test 1: Basic move usage - checks move creation and application
+        await test_move_basics(interaction, bot)
         
-        # Test 2: Basic move usage - checks move creation and application
-        await test_move_basics(interaction)
+        # Test 2: Initiative with moves - checks how moves behave in combat flow
+        await test_move_initiative(interaction, bot)
         
-        # Test 3: Initiative with moves - checks how moves behave in combat flow
-        await test_move_initiative(interaction)
+        # Test 3: Move cooldowns - specifically test cooldown tracking and messages
+        await test_move_cooldowns(interaction, bot)
         
-        # Test 4: Move cooldowns - specifically test cooldown tracking and messages
-        await test_move_cooldowns(interaction)
+        # Test 4: Move targeting - tests target selection and attack rolls
+        await test_move_targeting(interaction, bot)
         
-        # Test 5: Move targeting - tests target selection and attack rolls
-        await test_move_targeting(interaction)
+        # Test 5: Move UI - test UI components like action_handler
+        await test_move_ui(interaction, bot)
+        
+        # Test 6: Phase durations - test timing and transitions
+        await test_phase_durations(interaction, bot)
         
         print("\n=== COMPREHENSIVE MOVE TESTS COMPLETE ===\n")
         
+        # Restore database debug mode
+        if hasattr(bot, 'db'):
+            bot.db.debug_mode = False
+        
         # Summarize results
-        await interaction.followup.send("✅ Moveset debugging complete - check console for results")
+        await interaction.followup.send(
+            f":white_check_mark: Moveset debugging complete - check console for results\n" +
+            f"Firebase logging was {'enabled' if enable_firebase_logging else 'disabled'}"
+        )
         
     except Exception as e:
         print(f"Error in movesets debug: {e}")
         await interaction.followup.send(f"Error in debug command: {str(e)}")
 
-async def test_phase_durations(interaction: discord.Interaction):
+async def test_phase_durations(interaction: discord.Interaction, bot):
     """Test phase durations and transitions in detail"""
     try:
         print("\n=== TEST: PHASE DURATIONS AND TRANSITIONS ===\n")
-        
-        # Get bot reference
-        bot = interaction.client
         
         # Reset character state
         await reset_character_state(bot, ["test", "test2"])
@@ -249,7 +270,7 @@ async def test_phase_durations(interaction: discord.Interaction):
         
         # Apply effect
         print("\n[Round 1] Applying effect...")
-        result = source.add_effect(full_move, 1)  # Round 1
+        result = await full_move.on_apply(source, 1)  # Round 1
         print(f"Apply result: {result}")
         
         # Manually use action stars
@@ -307,13 +328,10 @@ async def test_phase_durations(interaction: discord.Interaction):
         except:
             pass
 
-async def test_move_basics(interaction: discord.Interaction):
+async def test_move_basics(interaction: discord.Interaction, bot):
     """Test basic move usage and functionality"""
     try:
         print("\n=== TEST: BASIC MOVE USAGE ===\n")
-        
-        # Get bot reference
-        bot = interaction.client
         
         # Reset character state
         await reset_character_state(bot, ["test", "test2"])
@@ -392,7 +410,7 @@ async def test_move_basics(interaction: discord.Interaction):
             print(f"Stars: {source.action_stars.current_stars}/{source.action_stars.max_stars}")
             
             # Apply effect
-            result = source.add_effect(move_effect, 1)
+            result = await move_effect.on_apply(source, 1)
             print(f"\nApply result: {result}")
             
             # Manually use action stars (would normally be done by move command)
@@ -433,13 +451,10 @@ async def test_move_basics(interaction: discord.Interaction):
     except Exception as e:
         print(f"Error in basic move test: {e}")
 
-async def test_move_initiative(interaction: discord.Interaction):
+async def test_move_initiative(interaction: discord.Interaction, bot):
     """Test move behavior in initiative"""
     try:
         print("\n=== TEST: INITIATIVE MOVES ===\n")
-        
-        # Get bot reference
-        bot = interaction.client
         
         # Reset character state
         await reset_character_state(bot, ["test", "test2"])
@@ -501,7 +516,7 @@ async def test_move_initiative(interaction: discord.Interaction):
             
             # Apply effect
             print("\nApplying move effect...")
-            result = source.add_effect(move_effect, bot.initiative_tracker.round_number)
+            result = await move_effect.on_apply(source, bot.initiative_tracker.round_number)
             print(f"Apply result: {result}")
             
             # Manually use action stars
@@ -549,13 +564,10 @@ async def test_move_initiative(interaction: discord.Interaction):
         except:
             pass
 
-async def test_move_cooldowns(interaction: discord.Interaction):
+async def test_move_cooldowns(interaction: discord.Interaction, bot):
     """Test move cooldown behavior"""
     try:
         print("\n=== TEST: MOVE COOLDOWNS ===\n")
-        
-        # Get bot reference
-        bot = interaction.client
         
         # Reset character state
         await reset_character_state(bot, ["test", "test2"])
@@ -603,7 +615,7 @@ async def test_move_cooldowns(interaction: discord.Interaction):
         
         # Apply effect
         print("\nApplying move effect first time...")
-        result = source.add_effect(move_effect, bot.initiative_tracker.round_number)
+        result = await move_effect.on_apply(source, bot.initiative_tracker.round_number)
         print(f"Apply result: {result}")
         
         # Mark move as used in moveset data
@@ -670,13 +682,10 @@ async def test_move_cooldowns(interaction: discord.Interaction):
         except:
             pass
 
-async def test_move_targeting(interaction: discord.Interaction):
+async def test_move_targeting(interaction: discord.Interaction, bot):
     """Test move targeting and attack rolls"""
     try:
         print("\n=== TEST: MOVE TARGETING ===\n")
-        
-        # Get bot reference
-        bot = interaction.client
         
         # Reset character state
         await reset_character_state(bot, ["test", "test2", "test3"])
@@ -713,7 +722,7 @@ async def test_move_targeting(interaction: discord.Interaction):
         print(f"Damage: {attack_move.damage}")
         
         # Test 1: Single target
-        print("\n--- TEST: SINGLE TARGET ---")
+        print("\n--- TEST 1: SINGLE TARGET ---")
         print(f"Target: {target1.name} (AC: {target1.defense.current_ac})")
         
         single_effect = MoveEffect(
@@ -723,12 +732,13 @@ async def test_move_targeting(interaction: discord.Interaction):
             star_cost=attack_move.star_cost,
             attack_roll=attack_move.attack_roll,
             damage=attack_move.damage,
-            targets=[target1]  # Single target
+            targets=[target1],  # Single target
+            roll_timing="instant"  # Force instant roll for testing
         )
         
         # Apply effect
         print("\nApplying single target effect...")
-        result = source.add_effect(single_effect, bot.initiative_tracker.round_number)
+        result = await single_effect.on_apply(source, bot.initiative_tracker.round_number)
         print(f"Apply result: {result}")
         
         # Save character
@@ -742,7 +752,7 @@ async def test_move_targeting(interaction: discord.Interaction):
         await reset_character_state(bot, ["test", "test2", "test3"])
         
         # Test 2: Multi-target
-        print("\n--- TEST: MULTI-TARGET ---")
+        print("\n--- TEST 2: MULTI-TARGET (SINGLE ROLL) ---")
         print(f"Targets: {target1.name}, {target2.name}")
         
         multi_effect = MoveEffect(
@@ -752,19 +762,56 @@ async def test_move_targeting(interaction: discord.Interaction):
             star_cost=attack_move.star_cost,
             attack_roll=attack_move.attack_roll,
             damage=attack_move.damage,
-            targets=[target1, target2]  # Multiple targets
+            targets=[target1, target2],  # Multiple targets
+            roll_timing="instant"  # Force instant roll
         )
         
+        # Set AoE mode to 'single' (one roll for all targets)
+        multi_effect.combat_processor.aoe_mode = 'single'
+        
         # Apply effect
-        print("\nApplying multi-target effect...")
-        result = source.add_effect(multi_effect, bot.initiative_tracker.round_number)
+        print("\nApplying multi-target effect (Single Roll Mode)...")
+        result = await multi_effect.on_apply(source, bot.initiative_tracker.round_number)
         print(f"Apply result: {result}")
         
         # Save character
         await bot.db.save_character(source)
         
         # Process 1 turn to see attack resolution
-        print("\nProcessing 1 turn to see attack resolution for multiple targets...")
+        print("\nProcessing 1 turn to see attack resolution for multiple targets (Single Roll)...")
+        await process_turns(bot, interaction, ["test", "test2", "test3"], 1)
+        
+        # Reset character state for next test
+        await reset_character_state(bot, ["test", "test2", "test3"])
+        
+        # Test 3: Multi-target with separate rolls
+        print("\n--- TEST 3: MULTI-TARGET (MULTI ROLL) ---")
+        print(f"Targets: {target1.name}, {target2.name}")
+        
+        multiroll_effect = MoveEffect(
+            name=attack_move.name,
+            description=attack_move.description,
+            mp_cost=attack_move.mp_cost,
+            star_cost=attack_move.star_cost,
+            attack_roll=attack_move.attack_roll,
+            damage=attack_move.damage,
+            targets=[target1, target2],  # Multiple targets
+            roll_timing="instant"  # Force instant roll
+        )
+        
+        # Set AoE mode to 'multi' (separate roll for each target)
+        multiroll_effect.combat_processor.aoe_mode = 'multi'
+        
+        # Apply effect
+        print("\nApplying multi-target effect (Multi Roll Mode)...")
+        result = await multiroll_effect.on_apply(source, bot.initiative_tracker.round_number)
+        print(f"Apply result: {result}")
+        
+        # Save character
+        await bot.db.save_character(source)
+        
+        # Process 1 turn to see attack resolution
+        print("\nProcessing 1 turn to see attack resolution for multiple targets (Multi Roll)...")
         await process_turns(bot, interaction, ["test", "test2", "test3"], 1)
         
         # End combat
@@ -779,13 +826,10 @@ async def test_move_targeting(interaction: discord.Interaction):
         except:
             pass
 
-async def test_move_ui(interaction: discord.Interaction):
+async def test_move_ui(interaction: discord.Interaction, bot):
     """Test move UI components"""
     try:
         print("\n=== TEST: MOVE UI ===\n")
-        
-        # Get bot reference
-        bot = interaction.client
         
         # Reset character state
         await reset_character_state(bot, ["test"])
@@ -835,13 +879,10 @@ async def test_move_ui(interaction: discord.Interaction):
     except Exception as e:
         print(f"Error in UI test: {e}")
 
-async def create_debug_moveset(interaction: discord.Interaction):
+async def create_debug_moveset(interaction: discord.Interaction, bot):
     """Create a debug moveset with various move types for testing"""
     try:
         await interaction.response.defer()
-        
-        # Get bot reference
-        bot = interaction.client
         
         print("\n=== CREATING DEBUG MOVESET ===\n")
         
@@ -855,7 +896,8 @@ async def create_debug_moveset(interaction: discord.Interaction):
                 star_cost=1,
                 attack_roll="1d20+str",
                 damage="1d8+str slashing",
-                category="Offense"
+                category="Offense",
+                roll_timing="instant"  # Important for instant behavior
             ),
             
             # Cast time move
@@ -870,7 +912,8 @@ async def create_debug_moveset(interaction: discord.Interaction):
                 save_type="dex",
                 save_dc="8+prof+int",
                 half_on_save=True,
-                category="Offense"
+                category="Offense",
+                roll_timing="active"  # Default - will roll when active
             ),
             
             # Duration buff
@@ -892,19 +935,36 @@ async def create_debug_moveset(interaction: discord.Interaction):
                 attack_roll="1d20+str",
                 damage="2d8+str slashing",
                 cooldown=2,
-                category="Offense"
+                category="Offense",
+                roll_timing="active"
             ),
             
-            # Multi-target attack
+            # Multi-target attack - AoE Single mode
             MoveData(
                 name="Cleave",
-                description="An attack that can hit multiple targets",
+                description="An attack that hits multiple targets with one roll",
                 mp_cost=8,
                 star_cost=2,
                 attack_roll="1d20+str",
                 damage="1d10+str slashing",
-                targets=2,
-                category="Offense"
+                category="Offense",
+                advanced_params={
+                    "aoe_mode": "single"
+                }
+            ),
+            
+            # Multi-target attack - AoE Multi mode
+            MoveData(
+                name="Multi-Strike",
+                description="Attacks multiple targets with separate rolls for each",
+                mp_cost=10,
+                star_cost=2,
+                attack_roll="1d20+dex",
+                damage="1d8+dex piercing",
+                category="Offense",
+                advanced_params={
+                    "aoe_mode": "multi"
+                }
             ),
             
             # Healing move
@@ -928,20 +988,106 @@ async def create_debug_moveset(interaction: discord.Interaction):
                 cooldown=2,
                 attack_roll="1d20+int advantage",
                 damage="5d6 force",
-                category="Offense"
+                category="Offense",
+                roll_timing="active"
             ),
             
-            # Test Move with Very Specific Phase Durations
+            # Utility move
             MoveData(
-                name="Phase Test",
-                description="Move with carefully tracked phases; Each phase has distinct duration; For testing turn counting",
-                mp_cost=5,
-                star_cost=1,
-                cast_time=2,    # 2-turn cast time
-                duration=3,     # 3-turn active duration
-                cooldown=2,     # 2-turn cooldown
+                name="Teleport",
+                description="Teleports the character a short distance",
+                mp_cost=12,
+                star_cost=2,
+                cooldown=3,
                 category="Utility"
             ),
+            
+            # Limited uses move
+            MoveData(
+                name="Last Resort",
+                description="A powerful attack with limited uses",
+                mp_cost=20,
+                star_cost=3,
+                attack_roll="1d20+int",
+                damage="8d8 radiant",
+                uses=1,
+                category="Offense",
+                roll_timing="instant"
+            ),
+            
+            # Multi-hit attack
+            MoveData(
+                name="Flurry of Blows",
+                description="Multiple rapid strikes against a single target",
+                mp_cost=12,
+                star_cost=2,
+                attack_roll="3d20 multihit dex",
+                damage="1d6+dex bludgeoning",
+                cooldown=2,
+                category="Offense",
+                roll_timing="instant"
+            ),
+            
+            # Per-turn DOT move
+            MoveData(
+                name="Ongoing Attack",
+                description="Attacks the target each turn",
+                mp_cost=10,
+                star_cost=2,
+                attack_roll="1d20+str",
+                damage="1d8+str slashing",
+                duration=3,
+                category="Offense",
+                roll_timing="per_turn"  # Will roll each turn
+            ),
+            
+            # Per-turn multi-target, single mode
+            MoveData(
+                name="Storm Cloud",
+                description="A cloud that strikes all targets each turn",
+                mp_cost=15,
+                star_cost=3,
+                attack_roll="1d20+int",
+                damage="2d6 lightning",
+                duration=2,
+                category="Offense",
+                roll_timing="per_turn",
+                advanced_params={
+                    "aoe_mode": "single"
+                }
+            ),
+            
+            # Per-turn multi-target, multi mode
+            MoveData(
+                name="Homing Missiles",
+                description="Missiles that seek targets each turn",
+                mp_cost=12,
+                star_cost=2,
+                attack_roll="1d20+int",
+                damage="2d4 fire",
+                duration=2,
+                category="Offense",
+                roll_timing="per_turn",
+                advanced_params={
+                    "aoe_mode": "multi"
+                }
+            ),
+            
+            # Heat tracking move
+            MoveData(
+                name="Phoenix Strike",
+                description="A fiery attack that builds heat stacks on targets",
+                mp_cost=10,
+                star_cost=2,
+                attack_roll="1d20+dex",
+                damage="2d6 fire",
+                category="Offense",
+                roll_timing="instant",
+                advanced_params={
+                    "enable_heat_tracking": True,
+                    "crit_range": 18
+                }
+            )
         ]
         
         # Create moveset
