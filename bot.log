@@ -8236,3 +8236,56 @@ NameError: name 'char' is not defined. Did you mean: 'chr'?
 2025-03-04 13:26:33,309 - core.database - INFO - Character test2 saved successfully
 2025-03-04 13:26:33,399 - core.database - INFO - Character test saved successfully
 2025-03-04 13:26:33,494 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:02:56,445 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 14:02:56,447 - discord.client - INFO - logging in using static token
+2025-03-04 14:02:57,444 - core.database - INFO - No migration needed
+2025-03-04 14:02:57,444 - core.database - INFO - Database initialized successfully
+2025-03-04 14:02:57,585 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 14:02:57,977 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7af45c2ce3cad7e6d9ae94487b4fcf14).
+2025-03-04 14:02:59,979 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 14:03:45,626 - core.database - INFO - Character test saved successfully
+2025-03-04 14:03:48,288 - core.database - INFO - Character test saved successfully
+2025-03-04 14:04:07,467 - core.database - INFO - Character test saved successfully
+2025-03-04 14:12:11,822 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 14:12:11,825 - discord.client - INFO - logging in using static token
+2025-03-04 14:12:12,840 - core.database - INFO - No migration needed
+2025-03-04 14:12:12,841 - core.database - INFO - Database initialized successfully
+2025-03-04 14:12:12,986 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 14:12:13,375 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 493b6e53c38cf2881665c3e1046a4a49).
+2025-03-04 14:12:15,393 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 14:12:33,732 - core.database - INFO - Character test saved successfully
+2025-03-04 14:12:36,090 - core.database - INFO - Character test saved successfully
+2025-03-04 14:12:41,712 - core.database - INFO - Character test saved successfully
+2025-03-04 14:13:25,267 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:13:29,892 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:13:33,750 - core.database - INFO - Character test saved successfully
+2025-03-04 14:13:37,553 - core.database - INFO - Character test saved successfully
+2025-03-04 14:13:42,377 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:13:46,751 - core.database - INFO - Character test saved successfully
+2025-03-04 14:14:08,996 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:14:13,165 - core.database - INFO - Character test saved successfully
+2025-03-04 14:14:16,961 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:14:20,959 - core.database - INFO - Character test saved successfully
+2025-03-04 14:14:25,004 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:32:30,723 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 14:32:30,725 - discord.client - INFO - logging in using static token
+2025-03-04 14:32:31,716 - core.database - INFO - No migration needed
+2025-03-04 14:32:31,716 - core.database - INFO - Database initialized successfully
+2025-03-04 14:32:31,858 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 14:32:32,252 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 397c243f5e49f8da70f8a691e760bde6).
+2025-03-04 14:32:34,262 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 14:34:43,551 - core.database - INFO - Character test saved successfully
+2025-03-04 14:34:43,663 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:34:43,756 - core.database - INFO - Character test3 saved successfully
+2025-03-04 14:34:45,778 - core.database - INFO - Character test saved successfully
+2025-03-04 14:35:31,802 - core.database - INFO - Character test saved successfully
+2025-03-04 14:35:39,115 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:35:43,894 - core.database - INFO - Character test3 saved successfully
+2025-03-04 14:35:47,373 - core.database - INFO - Character test saved successfully
+2025-03-04 14:35:54,631 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:35:58,038 - core.database - INFO - Character test3 saved successfully
+2025-03-04 14:36:01,206 - core.database - INFO - Character test saved successfully
+2025-03-04 14:36:11,239 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:36:16,627 - core.database - INFO - Character test3 saved successfully
+2025-03-04 14:36:41,784 - core.database - INFO - Character test saved successfully
+2025-03-04 14:36:47,887 - core.database - INFO - Character test saved successfully

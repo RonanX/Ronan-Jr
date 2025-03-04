@@ -7,9 +7,20 @@ Handles:
 - Effect processing
 - Combat logging integration
 - Resource change tracking
+
+IMPLEMENTATION MANDATES:
+- All effect processing MUST use inspect.iscoroutinefunction()
+- Always properly await async methods
+- Maintain consistent return types (strings, never coroutines)
+- Ensure compatibility with both sync and async methods
+- Document async requirements clearly for future developers
 """
 
 from typing import List, Tuple, Optional, Dict, Any
+import inspect
+import logging
+import asyncio
+
 from .base import BaseEffect, EffectRegistry, EffectCategory, CustomEffect
 from .combat import (
     ResistanceEffect, VulnerabilityEffect, WeaknessEffect, TempHPEffect,
@@ -17,8 +28,6 @@ from .combat import (
 )
 from .status import ACEffect, FrostbiteEffect, SkipEffect
 from .move import MoveEffect  # Add MoveEffect import
-import inspect
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +57,20 @@ async def apply_effect(
     round_number: int = 1,
     combat_logger = None
 ) -> str:
-    """Apply an effect to a character and return the feedback message"""
+    """
+    Apply an effect to a character and return the feedback message.
+    
+    This function properly handles both sync and async effect methods.
+    
+    Args:
+        character: Character to affect
+        effect: Effect to apply
+        round_number: Current combat round
+        combat_logger: Optional combat logger
+        
+    Returns:
+        Feedback message as string
+    """
     try:
         # Take a snapshot of character state before changes
         if combat_logger:
@@ -80,7 +102,8 @@ async def apply_effect(
         
         # No existing stacking effect found, apply new effect
         
-        # Call on_apply method - handle async or sync
+        # Call on_apply method - shouldn't be async in base implementation
+        # but we check just to be safe
         if inspect.iscoroutinefunction(effect.on_apply):
             message = await effect.on_apply(character, round_number)
         else:
@@ -88,6 +111,15 @@ async def apply_effect(
         
         # Add to character's effects list
         character.effects.append(effect)
+        
+        # Special case for MoveEffect - process any stored async operations
+        if isinstance(effect, MoveEffect):
+            # Get attack messages (if any)
+            attack_messages = await effect.process_async_results()
+            if attack_messages:
+                for msg in attack_messages:
+                    if not message.endswith('\n' + msg):
+                        message += f"\n{msg}"
         
         # Log the application if we have a logger
         if combat_logger:
@@ -113,7 +145,17 @@ async def remove_effect(
     effect_name: str,
     combat_logger = None
 ) -> str:
-    """Remove a named effect from a character"""
+    """
+    Remove a named effect from a character.
+    
+    Args:
+        character: Character to affect
+        effect_name: Name of effect to remove
+        combat_logger: Optional combat logger
+        
+    Returns:
+        Feedback message as string
+    """
     try:
         # Take a snapshot of character state before changes
         if combat_logger:
@@ -158,6 +200,8 @@ async def process_effects(
     """
     Process all effects for a character's turn.
     
+    This function handles both sync and async effect methods properly.
+    
     Args:
         character: Character to process
         round_number: Current round number
@@ -188,7 +232,7 @@ async def process_effects(
             for effect in character.effects[:]:  # Copy to avoid modification issues
                 # Call on_turn_start if it exists
                 if hasattr(effect, 'on_turn_start'):
-                    # Handle async or sync method using inspect
+                    # Check if method is async
                     if inspect.iscoroutinefunction(effect.on_turn_start):
                         start_result = await effect.on_turn_start(character, round_number, turn_name)
                     else:
@@ -200,6 +244,11 @@ async def process_effects(
                             start_messages.extend(start_result)
                         else:
                             start_messages.append(start_result)
+                    
+                    # Special case for MoveEffect - process any stored async operations
+                    if isinstance(effect, MoveEffect):
+                        attack_messages = await effect.process_async_results()
+                        start_messages.extend(attack_messages)
                 
                 # Check if this effect causes the turn to be skipped
                 if hasattr(effect, 'skips_turn') and effect.skips_turn:
@@ -209,7 +258,7 @@ async def process_effects(
             for effect in character.effects[:]:  # Copy to avoid modification issues
                 # Call on_turn_end if it exists
                 if hasattr(effect, 'on_turn_end'):
-                    # Handle async or sync method using inspect
+                    # Check if method is async
                     if inspect.iscoroutinefunction(effect.on_turn_end):
                         end_result = await effect.on_turn_end(character, round_number, turn_name)
                     else:
@@ -221,6 +270,12 @@ async def process_effects(
                             end_messages.extend(end_result)
                         else:
                             end_messages.append(end_result)
+                    
+                    # Special case for MoveEffect - process any stored async operations
+                    if isinstance(effect, MoveEffect):
+                        attack_messages = await effect.process_async_results()
+                        if attack_messages:
+                            end_messages.extend(attack_messages)
                 
                 # Check if effect should expire
                 should_expire = False
@@ -252,6 +307,15 @@ async def process_effects(
                     # Remove effect from character
                     if effect in character.effects:  # Check still exists
                         character.effects.remove(effect)
+                        
+                    # Log effect removal if we have a logger
+                    if combat_logger and expire_msg:
+                        combat_logger.add_event(
+                            "EFFECT_EXPIRED",
+                            message=expire_msg,
+                            character=character.name,
+                            details={"effect": effect.name}
+                        )
             
             # Clean up the character round number
             if hasattr(character, 'round_number'):
@@ -274,7 +338,18 @@ async def process_effects(
         return False, [], []
 
 def get_effect_summary(character) -> List[str]:
-    """Get a formatted list of all active effects on a character"""
+    """
+    Get a formatted list of all active effects on a character.
+    
+    This is a synchronous function that doesn't need async since
+    it's only displaying information, not processing effects.
+    
+    Args:
+        character: Character to summarize effects for
+        
+    Returns:
+        List of formatted effect summary strings
+    """
     if not character.effects:
         return [f"{character.name} has no active effects."]
         
@@ -315,7 +390,7 @@ def get_effect_summary(character) -> List[str]:
             
     return summary
 
-def log_resource_change(
+async def log_resource_change(
     character,
     resource_type: str,
     old_value: int,
@@ -323,7 +398,17 @@ def log_resource_change(
     reason: str,
     combat_logger = None
 ) -> None:
-    """Log resource changes to the combat log"""
+    """
+    Log resource changes to the combat log.
+    
+    Args:
+        character: Character affected
+        resource_type: Type of resource (hp, mp, temp_hp)
+        old_value: Previous value
+        new_value: New value
+        reason: Reason for the change
+        combat_logger: Optional combat logger
+    """
     if not combat_logger:
         return
         

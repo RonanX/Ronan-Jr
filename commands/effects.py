@@ -109,6 +109,22 @@ def find_matching_effects(search_term: str, effects: List[Any]) -> List[Tuple[st
     # Sort by match score (highest first)
     return sorted(matches, key=lambda x: x[1], reverse=True)
 
+def fuzzy_match_effects(search_term: str, effects: List[Any]) -> List[Tuple[str, float]]:
+    """Find effects with names similar to search_term"""
+    from difflib import SequenceMatcher
+    
+    search_term = search_term.lower()
+    matches = []
+    
+    for effect in effects:
+        if hasattr(effect, 'name'):
+            name = effect.name.lower()
+            ratio = SequenceMatcher(None, search_term, name).ratio()
+            if ratio > 0.5:  # Only decent matches
+                matches.append((effect.name, ratio))
+    
+    return sorted(matches, key=lambda x: x[1], reverse=True)
+
 class EffectCommands(commands.GroupCog, name="effect"):
     def __init__(self, bot):
         self.bot = bot
@@ -205,8 +221,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
             if combat_logger:
                 round_number = getattr(self.bot.initiative_tracker, 'round_number', 1)
 
-            # Apply effect
-            message = apply_effect(
+            # Apply effect - with proper await
+            message = await apply_effect(
                 char,
                 effect,
                 round_number,
@@ -333,7 +349,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                self.bot.initiative_tracker.state == CombatState.ACTIVE:
                 round_number = self.bot.initiative_tracker.round_number
             
-            result = character.add_effect(effect, round_number)
+            # Apply effect - with proper await
+            result = await apply_effect(character, effect, round_number)
             
             # Create response embed
             embed = discord.Embed(
@@ -417,7 +434,11 @@ class EffectCommands(commands.GroupCog, name="effect"):
         if effect_name.lower() == "all":
             # Process cleanup for each effect
             for effect in char.effects[:]:  # Copy list since we're modifying it
-                effect.on_expire(char)
+                # Handle async/sync for on_expire
+                if hasattr(effect.on_expire, '__await__'):
+                    await effect.on_expire(char)
+                else:
+                    effect.on_expire(char)
             
             # Clear all effects
             char.effects = []
@@ -444,7 +465,12 @@ class EffectCommands(commands.GroupCog, name="effect"):
             # Find all heat-related effects
             for effect in char.effects[:]:  # Copy list since we're modifying it
                 if isinstance(effect, (SourceHeatWaveEffect, TargetHeatWaveEffect)):
-                    expire_msg = effect.on_expire(char)
+                    # Handle async/sync for on_expire
+                    if hasattr(effect.on_expire, '__await__'):
+                        expire_msg = await effect.on_expire(char)
+                    else:
+                        expire_msg = effect.on_expire(char)
+                    
                     if expire_msg:
                         messages.append(expire_msg)
                     char.effects.remove(effect)
@@ -474,7 +500,11 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 
             if len(standalone_ac_effects) == 1:
                 effect = standalone_ac_effects[0]
-                message = effect.on_expire(char)
+                # Handle async/sync for on_expire
+                if hasattr(effect.on_expire, '__await__'):
+                    message = await effect.on_expire(char)
+                else:
+                    message = effect.on_expire(char)
                 char.effects.remove(effect)
                 await self.bot.db.save_character(char)
                 await interaction.followup.send(message)
@@ -501,7 +531,11 @@ class EffectCommands(commands.GroupCog, name="effect"):
             
             async def select_callback(interaction: discord.Interaction):
                 effect = standalone_ac_effects[int(select.values[0])]
-                message = effect.on_expire(char)
+                # Handle async/sync for on_expire
+                if hasattr(effect.on_expire, '__await__'):
+                    message = await effect.on_expire(char)
+                else:
+                    message = effect.on_expire(char)
                 char.effects.remove(effect)
                 await self.bot.db.save_character(char)
                 await interaction.response.send_message(message)
@@ -529,7 +563,11 @@ class EffectCommands(commands.GroupCog, name="effect"):
         if len(matches) == 1 or matches[0][1] > 0.8:  # Perfect or very good match
             effect_name = matches[0][0]
             effect = next(e for e in char.effects if e.name == effect_name)
-            message = effect.on_expire(char)
+            # Handle async/sync for on_expire
+            if hasattr(effect.on_expire, '__await__'):
+                message = await effect.on_expire(char)
+            else:
+                message = effect.on_expire(char)
             char.effects.remove(effect)
             await self.bot.db.save_character(char)
             await interaction.followup.send(message)
@@ -562,7 +600,11 @@ class EffectCommands(commands.GroupCog, name="effect"):
         
         async def select_callback(interaction: discord.Interaction):
             effect = next(e for e in char.effects if e.name == select.values[0])
-            message = effect.on_expire(char)
+            # Handle async/sync for on_expire
+            if hasattr(effect.on_expire, '__await__'):
+                message = await effect.on_expire(char)
+            else:
+                message = effect.on_expire(char)
             char.effects.remove(effect)
             await self.bot.db.save_character(char)
             await interaction.response.send_message(message)
@@ -634,7 +676,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 return
 
             effect = ACEffect(amount, duration, permanent)
-            message = apply_effect(char, effect)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect)
 
             await self.bot.db.save_character(char)
             
@@ -678,7 +721,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 return
 
             effect = ResistanceEffect(damage_type, percentage, duration)
-            message = apply_effect(char, effect)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect)
 
             await self.bot.db.save_character(char)
             
@@ -715,7 +759,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 return
 
             effect = VulnerabilityEffect(damage_type, percentage, duration)
-            message = apply_effect(char, effect)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect)
 
             await self.bot.db.save_character(char)
             
@@ -752,7 +797,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 return
 
             effect = WeaknessEffect(damage_type, percentage, duration)
-            message = apply_effect(char, effect)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect)
 
             await self.bot.db.save_character(char)
             
@@ -791,8 +837,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
             current_round = initiative_cog.tracker.round_number if initiative_cog else 1
 
             effect = BurnEffect(damage, duration)
-            char.add_effect(effect)
-            message = effect.on_apply(char, current_round)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect, current_round)
 
             await self.bot.db.save_character(char)
             await interaction.followup.send(message)
@@ -821,7 +867,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 return
 
             effect = FrostbiteEffect(stacks)
-            message = apply_effect(char, effect)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect)
 
             await self.bot.db.save_character(char)
             await interaction.followup.send(message)
@@ -856,7 +903,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 return
 
             effect = CustomEffect(name, duration, description, permanent=permanent)
-            message = apply_effect(char, effect)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect)
 
             await self.bot.db.save_character(char)
             
@@ -904,8 +952,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
             if not any(isinstance(e, SourceHeatWaveEffect) for e in source_char.effects):
                 source_char.effects.append(source_effect)
                 
-            # Apply target effect
-            target_msg = apply_effect(target_char, target_effect)
+            # Apply target effect - with proper await
+            target_msg = await apply_effect(target_char, target_effect)
 
             await self.bot.db.save_character(source_char)
             await self.bot.db.save_character(target_char)
@@ -1053,7 +1101,8 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 
             # Create and apply skip effect
             effect = SkipEffect(duration=duration, reason=reason)
-            message = apply_effect(char, effect)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect)
             
             # Save character
             await self.bot.db.save_character(char)
@@ -1138,7 +1187,7 @@ class EffectCommands(commands.GroupCog, name="effect"):
         print(f"Initial AC: {char.defense.current_ac}")
         
         effect = ACEffect(amount=-2, duration=2)
-        msg = char.add_effect(effect, self.tracker.round_number)
+        msg = await apply_effect(char, effect, self.tracker.round_number)
         print(f"Apply message: {msg}")
         print(f"New AC: {char.defense.current_ac}")
         print("Expected: AC should decrease by 2 and last 2 turns")
@@ -1150,7 +1199,7 @@ class EffectCommands(commands.GroupCog, name="effect"):
         print(f"Initial HP: {char.resources.current_hp}")
         
         effect = BurnEffect("1d6", duration=3)
-        msg = char.add_effect(effect, self.tracker.round_number)
+        msg = await apply_effect(char, effect, self.tracker.round_number)
         print(f"Apply message: {msg}")
         print("Expected: Should roll 1d6 damage at start of each turn for 3 turns")
 
@@ -1163,7 +1212,7 @@ class EffectCommands(commands.GroupCog, name="effect"):
         print(f"Target MP: {target.resources.current_mp}")
         
         effect = DrainEffect(5, "mp", source.name, duration=2)
-        msg = target.add_effect(effect, self.tracker.round_number)
+        msg = await apply_effect(target, effect, self.tracker.round_number)
         print(f"Apply message: {msg}")
         print("Expected: 5 MP should transfer each turn for 2 turns")
 
@@ -1196,7 +1245,7 @@ class EffectCommands(commands.GroupCog, name="effect"):
         print(f"  Cooldown: 1 turn")
         print(f"Initial state: {move_effect.state}")
         
-        msg = char.add_effect(move_effect, self.tracker.round_number)
+        msg = await apply_effect(char, move_effect, self.tracker.round_number)
         print(f"Apply message: {msg}")
         print("Expected phases:")
         print("1. Cast Time (1 turn)")
@@ -1225,7 +1274,7 @@ class EffectCommands(commands.GroupCog, name="effect"):
         target_effect = TargetHeatWaveEffect(source.name, 1)
         
         source_msg = source_effect.add_stacks(1, source)
-        target_msg = target.add_effect(target_effect)
+        target_msg = await apply_effect(target, target_effect)
         
         print("\nAfter 1 stack:")
         print(f"Source message: {source_msg}")
@@ -1278,8 +1327,10 @@ class EffectCommands(commands.GroupCog, name="effect"):
             # Process cleanup for each effect
             for effect in char.effects[:]:  # Copy list since we're modifying it
                 print(f"  Removing {effect.name}")
-                # Process proper cleanup
-                if hasattr(effect, 'on_expire'):
+                # Handle async/sync for on_expire
+                if hasattr(effect.on_expire, '__await__'):
+                    await effect.on_expire(char)
+                else:
                     effect.on_expire(char)
                     
             # Clear all effects

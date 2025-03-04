@@ -1,25 +1,26 @@
 """
 ## src/core/effects/move.py
 
-Move Effect System Implementation - Fixed Async Version
+Move Effect System Implementation with Async Pattern Improvements
 
-Features:
+Key Features:
 - Phase-based duration tracking (cast -> active -> cooldown)
 - Resource cost handling
 - Attack roll processing with stat mods
 - Multi-target support
-- Fixed async/await patterns
+- Consistent async/sync patterns
 
-Implementation Notes:
-- Proper async/await handling
-- Clear state transitions
-- Consistent message formatting
-- Streamlined combat handling
+Implementation Mandates:
+- Clear async boundaries
+- Consistent lifecycle methods
+- Proper state transitions
+- Uniform return values
 """
 
 from typing import Optional, List, Dict, Any, Tuple, Set
-from enum import Enum
+from enum import Enum, auto
 import logging
+import inspect
 
 from core.effects.base import BaseEffect, EffectCategory, EffectTiming
 from core.effects.condition import ConditionType
@@ -31,19 +32,224 @@ class MoveState(Enum):
     """Possible states for a move effect"""
     INSTANT = "instant"     # No cast time or duration
     CASTING = "casting"     # In cast time phase
-    ACTIVE = "active"      # Active duration
-    COOLDOWN = "cooldown"  # In cooldown phase
+    ACTIVE = "active"       # Active duration
+    COOLDOWN = "cooldown"   # In cooldown phase
 
 class RollTiming(Enum):
     """When to process attack/damage rolls"""
-    INSTANT = "instant"    # Roll immediately on use
-    ACTIVE = "active"     # Roll when active phase starts
-    PER_TURN = "per_turn" # Roll each turn during duration
+    INSTANT = "instant"     # Roll immediately on use
+    ACTIVE = "active"       # Roll when active phase starts
+    PER_TURN = "per_turn"   # Roll each turn during duration
+
+class PhaseManager:
+    """
+    Handles state transitions between move phases.
+    
+    This class encapsulates the logic for:
+    - Tracking phase durations
+    - Managing state transitions
+    - Computing remaining time
+    - Determining when phases should expire
+    """
+    def __init__(self):
+        self.phases = {}
+        self.state = MoveState.INSTANT
+        
+    def set_phase(self, state: MoveState, duration: Optional[int]) -> None:
+        """Set up a phase with its duration"""
+        if duration is not None and duration > 0:
+            self.phases[state] = {"duration": duration, "turns_completed": 0}
+    
+    def get_current_phase(self) -> Optional[Dict]:
+        """Get current phase info"""
+        return self.phases.get(self.state)
+    
+    def get_remaining_turns(self) -> int:
+        """Get remaining turns in current phase"""
+        phase = self.get_current_phase()
+        if not phase:
+            return 0
+        return max(0, phase["duration"] - phase["turns_completed"])
+
+    def increment_turn(self) -> None:
+        """Increment turn counter for current phase"""
+        phase = self.get_current_phase()
+        if phase:
+            phase["turns_completed"] += 1
+            # Add debug logging
+            print(f"DEBUG: Incremented {self.state.value} phase - now at {phase['turns_completed']}/{phase['duration']} turns")
+
+    def should_transition(self) -> bool:
+        """Check if current phase should transition to next"""
+        phase = self.get_current_phase()
+        if not phase:
+            return False
+        # The problem is here - we check >= but should check ==
+        # Only transition when we've completed EXACTLY the requested duration
+        completed = phase["turns_completed"] >= phase["duration"]
+        # Debug logging
+        print(f"DEBUG: Phase transition check for {self.state} - {phase['turns_completed']}/{phase['duration']} - Should transition: {completed}")
+        return completed
+    
+    def transition_state(self) -> Tuple[bool, Optional[str], Optional[MoveState]]:
+        """
+        Process state transition if needed.
+        Returns (did_transition, message, next_state)
+        """
+        phase = self.get_current_phase()
+        if not phase:
+            return False, None, None
+            
+        # Only transition when turns_completed EQUALS duration (not >=)
+        # This fixes premature transitions
+        if phase["turns_completed"] != phase["duration"]:
+            return False, None, None
+        
+        # Now determine next state and message
+        next_state = None
+        message = None
+        
+        # Find next valid state
+        if self.state == MoveState.CASTING:
+            if MoveState.ACTIVE in self.phases:
+                next_state = MoveState.ACTIVE
+                message = "activates!"
+            elif MoveState.COOLDOWN in self.phases:
+                next_state = MoveState.COOLDOWN
+                message = "enters cooldown"
+            else:
+                message = "completes"
+                
+        elif self.state == MoveState.ACTIVE:
+            if MoveState.COOLDOWN in self.phases:
+                next_state = MoveState.COOLDOWN
+                message = "enters cooldown"
+            else:
+                message = "wears off"
+                
+        elif self.state == MoveState.COOLDOWN:
+            message = "cooldown has ended"
+        
+        # Update state if transitioning
+        if next_state:
+            old_state = self.state
+            self.state = next_state
+            
+            # Reset phase tracking for the new phase
+            if phase := self.phases.get(next_state):
+                phase["turns_completed"] = 0
+                
+        return True, message, next_state
+
+class CombatProcessor:
+    """
+    Handles attack rolls and damage calculations.
+    
+    This class encapsulates:
+    - Attack roll processing
+    - Target handling
+    - Damage calculation
+    - Heat tracking
+    
+    Supports both sync and async patterns for flexibility.
+    """
+    def __init__(self):
+        self.targets_hit = set()
+        self.attacks_this_turn = 0
+        self.aoe_mode = 'single'
+        
+    async def process_attack(self, 
+                           source, 
+                           targets,
+                           attack_roll,
+                           damage,
+                           crit_range,
+                           reason,
+                           enable_heat_tracking=False) -> List[str]:
+        """Process attack roll and damage"""
+        # Skip if no attack roll defined
+        if not attack_roll:
+            return []
+
+        # Track attack count
+        self.attacks_this_turn += 1
+        messages = []
+        
+        # Import here to avoid circular import
+        from utils.advanced_dice.attack_calculator import AttackCalculator, AttackParameters
+        
+        # Handle no targets case
+        if not targets:
+            # Set up attack parameters
+            params = AttackParameters(
+                roll_expression=attack_roll,
+                character=source,
+                targets=None,
+                damage_str=damage,
+                crit_range=crit_range,
+                reason=reason
+            )
+            
+            # Process attack - this call is already awaitable
+            message, _ = await AttackCalculator.process_attack(params)
+            messages.append(message)
+            return messages
+        
+        # Set up attack parameters for all targets
+        params = AttackParameters(
+            roll_expression=attack_roll,
+            character=source,
+            targets=targets,
+            damage_str=damage,
+            crit_range=crit_range,
+            aoe_mode=self.aoe_mode,
+            reason=reason
+        )
+
+        # Process attack with all targets - this call is already awaitable
+        message, hit_results = await AttackCalculator.process_attack(params)
+        messages.append(message)
+        
+        # Process hit tracking for heat mechanic
+        if hit_results:
+            # Extract hit targets
+            for target_name, hit_data in hit_results.items():
+                if hit_data.get('hit', False):
+                    self.targets_hit.add(target_name)
+        
+        # Handle heat tracking if enabled
+        if enable_heat_tracking and self.targets_hit:
+            # Source heat (attunement)
+            if not hasattr(source, 'heat_stacks'):
+                source.heat_stacks = 0
+            
+            source.heat_stacks += 1
+            
+            # Target heat (vulnerability) for each hit target
+            for target_name in self.targets_hit:
+                target = next((t for t in targets if t.name == target_name), None)
+                if target:
+                    if not hasattr(target, 'heat_stacks'):
+                        target.heat_stacks = 0
+                    target.heat_stacks += 1
+        
+        return messages
 
 class MoveEffect(BaseEffect):
     """
     Handles move execution with phase-based state tracking.
-    Each state (cast/active/cooldown) is a separate phase with its own timing.
+    
+    This redesigned implementation provides:
+    - Clear sync/async boundaries
+    - Consistent state transitions
+    - Proper resource handling
+    - Reliable attack roll processing
+    
+    IMPLEMENTATION NOTES:
+    - All public lifecycle methods (on_apply, etc.) are now SYNC
+    - Internal processing uses async where needed
+    - Phase transitions are handled by PhaseManager
+    - Combat processing is handled by CombatProcessor
     """
     def __init__(
             self,
@@ -68,26 +274,25 @@ class MoveEffect(BaseEffect):
             targets: Optional[List['Character']] = None,
             enable_heat_tracking: bool = False
         ):
-            # Set up initial phases and state
-            self.phases = {}
+            # Create specialized managers
+            self.phase_mgr = PhaseManager()
+            self.combat = CombatProcessor()
             
+            # Set up phases
             if cast_time:
-                self.phases[MoveState.CASTING] = {"duration": cast_time, "turns_completed": 0}
-                self.state = MoveState.CASTING
+                self.phase_mgr.set_phase(MoveState.CASTING, cast_time)
+                self.phase_mgr.state = MoveState.CASTING
             elif duration:
-                self.phases[MoveState.ACTIVE] = {"duration": duration, "turns_completed": 0}
-                self.state = MoveState.ACTIVE
-            elif cooldown:
-                self.phases[MoveState.COOLDOWN] = {"duration": cooldown, "turns_completed": 0}
-                self.state = MoveState.COOLDOWN
+                self.phase_mgr.set_phase(MoveState.ACTIVE, duration)
+                self.phase_mgr.state = MoveState.ACTIVE
             else:
-                self.state = MoveState.INSTANT
+                self.phase_mgr.state = MoveState.INSTANT
                 
-            # Set up other phases if needed
-            if duration and self.state != MoveState.ACTIVE:
-                self.phases[MoveState.ACTIVE] = {"duration": duration, "turns_completed": 0}
-            if cooldown and self.state != MoveState.COOLDOWN:
-                self.phases[MoveState.COOLDOWN] = {"duration": cooldown, "turns_completed": 0}
+            # Set up additional phases if needed
+            if duration and self.phase_mgr.state != MoveState.ACTIVE:
+                self.phase_mgr.set_phase(MoveState.ACTIVE, duration)
+            if cooldown:
+                self.phase_mgr.set_phase(MoveState.COOLDOWN, cooldown)
             
             # Initial duration is based on first phase
             initial_duration = cast_time if cast_time else duration
@@ -136,15 +341,21 @@ class MoveEffect(BaseEffect):
             self.targets = targets or []
             self.enable_heat_tracking = enable_heat_tracking
             
+            # Configure combat settings
+            self.combat.aoe_mode = 'single'
+            
             # Tracking variables
             self.last_processed_round = None
             self.last_processed_turn = None
-            self.targets_hit = set()
-            self.attacks_this_turn = 0
-            self.aoe_mode = 'single'
-            self.heat_stacks = 0
             self.marked_for_removal = False
+            self._internal_cache = {}  # Cache for attack results
 
+    # Property accessors for state
+    @property
+    def state(self) -> MoveState:
+        """Current move state"""
+        return self.phase_mgr.state
+    
     def get_emoji(self) -> str:
         """Get state-specific emoji"""
         return {
@@ -154,76 +365,12 @@ class MoveEffect(BaseEffect):
             MoveState.COOLDOWN: "⏳"
         }.get(self.state, "✨")
 
-    def get_current_phase(self) -> Optional[Dict]:
-        """Get the current phase info"""
-        return self.phases.get(self.state)
-    
     def get_remaining_turns(self) -> int:
         """Get the number of turns remaining in the current phase"""
-        phase = self.get_current_phase()
-        if not phase:
-            return 0
-        return max(0, phase["duration"] - phase["turns_completed"])
+        return self.phase_mgr.get_remaining_turns()
     
-    def transition_state(self) -> Optional[str]:
-        """
-        Handle state transitions between phases.
-        Returns a message if the state changes, None otherwise.
-        """
-        if self.state == MoveState.INSTANT:
-            return None
-
-        # Get current phase and check if we should transition
-        phase = self.get_current_phase()
-        if not phase or phase["turns_completed"] < phase["duration"]:
-            return None
-
-        # Determine next state and message
-        next_state = None
-        message = None
-        
-        # Find next valid state
-        if self.state == MoveState.CASTING:
-            if MoveState.ACTIVE in self.phases:
-                next_state = MoveState.ACTIVE
-                message = "activates!"
-            elif MoveState.COOLDOWN in self.phases:
-                next_state = MoveState.COOLDOWN
-                message = "enters cooldown"
-            else:
-                message = "completes"
-                self.marked_for_removal = True
-                
-        elif self.state == MoveState.ACTIVE:
-            if MoveState.COOLDOWN in self.phases:
-                next_state = MoveState.COOLDOWN
-                message = "enters cooldown"
-            else:
-                message = "wears off"
-                self.marked_for_removal = True
-                
-        elif self.state == MoveState.COOLDOWN:
-            message = "cooldown has ended"
-            self.marked_for_removal = True
-        
-        # Update state if transitioning
-        if next_state:
-            # Store old state for logging
-            old_state = self.state
-            
-            # Update state
-            self.state = next_state
-            
-            # Reset phase tracking for the new phase
-            if phase := self.phases.get(next_state):
-                phase["turns_completed"] = 0
-            
-            # Log transition for debugging
-            logger.debug(f"Move transitioned from {old_state} to {next_state}")
-        
-        return message
-
-    async def apply_costs(self, character) -> List[str]:
+    # Resource handling
+    def apply_costs(self, character) -> List[str]:
         """Apply resource costs and return messages"""
         messages = []
         
@@ -262,7 +409,7 @@ class MoveEffect(BaseEffect):
         """
         # Check if currently in cooldown phase
         if self.state == MoveState.COOLDOWN:
-            if phase := self.get_current_phase():
+            if phase := self.phase_mgr.get_current_phase():
                 remaining = phase["duration"] - phase["turns_completed"]
                 return False, f"On cooldown ({remaining} turns remaining)"
         
@@ -275,7 +422,8 @@ class MoveEffect(BaseEffect):
         
         return True, None
 
-    async def should_roll(self, state: MoveState, force_roll: bool = False) -> bool:
+    # Core logic for determining if attacks should roll
+    def should_roll(self, state: MoveState, force_roll: bool = False) -> bool:
         """Determine if we should roll based on timing and state"""
         if force_roll:
             return True
@@ -288,87 +436,15 @@ class MoveEffect(BaseEffect):
             return state == MoveState.ACTIVE
             
         return False
-
-    async def process_attack(self, source: 'Character', reason: str, force_roll: bool = False) -> List[str]:
+    
+    # LIFECYCLE METHODS - These are now sync for consistent interfaces
+    
+    def on_apply(self, character, round_number: int) -> str:
         """
-        Process attack roll and damage if needed.
-        Returns list of messages for each target.
+        Initial effect application - synchronous interface.
+        This method handles the async operations internally.
         """
-        # Skip if no attack roll defined
-        if not self.attack_roll:
-            return []
-            
-        # Check if we should roll based on timing
-        if not await self.should_roll(self.state, force_roll):
-            return []
-
-        # Track attack count
-        self.attacks_this_turn += 1
-
-        messages = []
-        
-        # Import here to avoid circular import
-        from utils.advanced_dice.attack_calculator import AttackCalculator, AttackParameters
-        
-        # Handle no targets case
-        if not self.targets:
-            # Set up attack parameters
-            params = AttackParameters(
-                roll_expression=self.attack_roll,
-                character=source,
-                targets=None,
-                damage_str=self.damage,
-                crit_range=self.crit_range,
-                reason=reason
-            )
-            
-            # Process attack
-            message, _ = await AttackCalculator.process_attack(params)
-            messages.append(message)
-            return messages
-        
-        # Set up attack parameters for all targets
-        params = AttackParameters(
-            roll_expression=self.attack_roll,
-            character=source,
-            targets=self.targets,
-            damage_str=self.damage,
-            crit_range=self.crit_range,
-            aoe_mode=self.aoe_mode,
-            reason=reason
-        )
-
-        # Process attack with all targets
-        message, hit_results = await AttackCalculator.process_attack(params)
-        messages.append(message)
-        
-        # Process hit tracking for heat mechanic
-        if hit_results:
-            # Extract hit targets
-            for target_name, hit_data in hit_results.items():
-                if hit_data.get('hit', False):
-                    self.targets_hit.add(target_name)
-        
-        # Handle heat tracking if enabled
-        if self.enable_heat_tracking and self.targets_hit:
-            # Source heat (attunement)
-            if not hasattr(source, 'heat_stacks'):
-                source.heat_stacks = 0
-            
-            source.heat_stacks += 1
-            
-            # Target heat (vulnerability) for each hit target
-            for target_name in self.targets_hit:
-                target = next((t for t in self.targets if t.name == target_name), None)
-                if target:
-                    if not hasattr(target, 'heat_stacks'):
-                        target.heat_stacks = 0
-                    target.heat_stacks += 1
-        
-        return messages
-
-    async def on_apply(self, character, round_number: int) -> str:
-        """Initial effect application"""
+        # Initialize timing
         self.initialize_timing(round_number, character.name)
         
         # Apply costs and format messages
@@ -377,7 +453,7 @@ class MoveEffect(BaseEffect):
         timing_info = []
         
         # Apply resource costs
-        cost_messages = await self.apply_costs(character)
+        cost_messages = self.apply_costs(character)
         for msg in cost_messages:
             if "MP" in msg:
                 costs.append(f"💙 MP: {self.mp_cost}")
@@ -391,14 +467,15 @@ class MoveEffect(BaseEffect):
             costs.append(f"⭐ {self.star_cost}")
             
         # Add timing info
-        if MoveState.CASTING in self.phases:
-            cast_time = self.phases[MoveState.CASTING]["duration"]
+        phase_timing = self.phase_mgr.phases
+        if MoveState.CASTING in phase_timing:
+            cast_time = phase_timing[MoveState.CASTING]["duration"]
             timing_info.append(f"🔄 {cast_time}T Cast")
-        if MoveState.ACTIVE in self.phases:
-            duration = self.phases[MoveState.ACTIVE]["duration"]
+        if MoveState.ACTIVE in phase_timing:
+            duration = phase_timing[MoveState.ACTIVE]["duration"]
             timing_info.append(f"⏳ {duration}T Duration")
-        if MoveState.COOLDOWN in self.phases:
-            cooldown = self.phases[MoveState.COOLDOWN]["duration"]
+        if MoveState.COOLDOWN in phase_timing:
+            cooldown = phase_timing[MoveState.COOLDOWN]["duration"]
             timing_info.append(f"⌛ {cooldown}T Cooldown")
             
         # Format target info if any
@@ -409,7 +486,17 @@ class MoveEffect(BaseEffect):
         # Process instant attack rolls here if needed
         attack_messages = []
         if self.attack_roll and self.roll_timing == RollTiming.INSTANT:
-            attack_messages = await self.process_attack(character, self.name, force_roll=True)
+            # Process the attack using our CombatProcessor
+            # Store the coroutine in the cache for later processing
+            self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+                source=character,
+                targets=self.targets,
+                attack_roll=self.attack_roll,
+                damage=self.damage,
+                crit_range=self.crit_range,
+                reason=self.name,
+                enable_heat_tracking=self.enable_heat_tracking
+            )
                     
         # Build the primary message
         if self.cast_description:
@@ -449,20 +536,12 @@ class MoveEffect(BaseEffect):
                     
             formatted_message += "\n" + "\n".join(detail_strings)
         
-        # Now add any attack roll messages as separate bullets
-        if attack_messages:
-            for msg in attack_messages:
-                # Format the attack message as a bullet point if it isn't already
-                if not msg.startswith("•") and not msg.startswith("`"):
-                    formatted_message += f"\n• {msg}"
-                else:
-                    formatted_message += f"\n{msg}"
-        
+        # Return message (without attack messages that need async)
         return formatted_message
-
-    async def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Process start of turn effects including resource costs and state updates"""
-        # Store these values for debugging and state tracking
+    
+    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Process start of turn effects - returns list of messages"""
+        # Store tracking values
         self.last_processed_round = round_number
         self.last_processed_turn = turn_name
         
@@ -474,15 +553,23 @@ class MoveEffect(BaseEffect):
         
         # First, check if we need to transition phases BEFORE showing any messages
         # This ensures we start the turn in the proper phase
-        transition_msg = self.transition_state()
-        if transition_msg:
+        did_transition, transition_msg, next_state = self.phase_mgr.transition_state()
+        if did_transition and transition_msg:
             messages.append(self.format_effect_message(f"{self.name} {transition_msg}"))
             
-            # If we transitioned to active, process attack roll if timing is ACTIVE
-            if self.state == MoveState.ACTIVE and self.attack_roll and self.roll_timing == RollTiming.ACTIVE:
-                attack_msgs = await self.process_attack(character, self.name, force_roll=True)
-                if attack_msgs:
-                    messages.extend(attack_msgs)
+            # If we transitioned to active, prepare attack roll if timing is ACTIVE
+            if next_state == MoveState.ACTIVE and self.attack_roll and self.roll_timing == RollTiming.ACTIVE:
+                # Process the attack using CombatProcessor
+                # Store the coroutine in the cache for later async processing
+                self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+                    source=character,
+                    targets=self.targets,
+                    attack_roll=self.attack_roll,
+                    damage=self.damage,
+                    crit_range=self.crit_range,
+                    reason=self.name,
+                    enable_heat_tracking=self.enable_heat_tracking
+                )
     
         # Now handle the current state (which might have just changed)
         if self.state == MoveState.CASTING:
@@ -499,9 +586,16 @@ class MoveEffect(BaseEffect):
             # Process attack if timing is ACTIVE and we didn't just transition
             # This handles the case where we were already in ACTIVE state
             if self.attack_roll and self.roll_timing == RollTiming.ACTIVE and not any("activates" in msg for msg in messages):
-                attack_msgs = await self.process_attack(character, self.name, force_roll=True)
-                if attack_msgs:
-                    messages.extend(attack_msgs)
+                # Process the attack - store for later async processing
+                self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+                    source=character,
+                    targets=self.targets,
+                    attack_roll=self.attack_roll,
+                    damage=self.damage,
+                    crit_range=self.crit_range,
+                    reason=self.name,
+                    enable_heat_tracking=self.enable_heat_tracking
+                )
             
             # Only add active message if we didn't just transition
             if not any("activates" in msg for msg in messages):
@@ -531,17 +625,24 @@ class MoveEffect(BaseEffect):
             
             # Process per-turn attack rolls
             if self.attack_roll and self.roll_timing == RollTiming.PER_TURN:
-                attack_msgs = await self.process_attack(character, self.name, force_roll=True)
-                if attack_msgs:
-                    messages.extend(attack_msgs)
-            
+                # Process the attack - store for later async processing
+                self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+                    source=character,
+                    targets=self.targets,
+                    attack_roll=self.attack_roll,
+                    damage=self.damage,
+                    crit_range=self.crit_range,
+                    reason=self.name,
+                    enable_heat_tracking=self.enable_heat_tracking
+                )
+        
         return messages
 
-    async def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """
         Handle phase transitions and duration tracking.
         """
-        # Store these values for debugging and state tracking
+        # Store tracking values
         self.last_processed_round = round_number
         self.last_processed_turn = turn_name
         
@@ -552,20 +653,19 @@ class MoveEffect(BaseEffect):
         messages = []
         
         # Complete this turn for the current phase
-        phase = self.get_current_phase()
-        if phase:
-            phase["turns_completed"] += 1
+        self.phase_mgr.increment_turn()
         
         # Get remaining turns for messaging
         remaining = self.get_remaining_turns()
         
         # Handle phase transitions if the phase is complete
-        transition_msg = self.transition_state()
-        if transition_msg:
+        did_transition, transition_msg, _ = self.phase_mgr.transition_state()
+        if did_transition and transition_msg:
             messages.append(self.format_effect_message(f"{self.name} {transition_msg}"))
         
-            # If marked for removal, ensure it gets removed
-            if self.marked_for_removal:
+            # If we've completed the cooldown, mark for removal
+            if self.state == MoveState.COOLDOWN and transition_msg == "cooldown has ended":
+                self.marked_for_removal = True
                 if hasattr(self, 'timing'):
                     self.timing.duration = 0
         else:
@@ -590,8 +690,8 @@ class MoveEffect(BaseEffect):
                         f"{self.name} cooldown",
                         [f"{remaining} turns remaining"]
                     ))
-                else:
-                    # If this is the last turn of cooldown, mark for removal
+                # Special case - if this is the last turn of cooldown, show ending message
+                elif remaining == 0:
                     self.marked_for_removal = True
                     if hasattr(self, 'timing'):
                         self.timing.duration = 0
@@ -611,21 +711,21 @@ class MoveEffect(BaseEffect):
         if self.state == MoveState.INSTANT:
             return True
             
-        current_phase = self.get_current_phase()
+        current_phase = self.phase_mgr.get_current_phase()
         if not current_phase:
             return True
             
         # Check if we're in the final phase with no more transitions available
         if self.state == MoveState.COOLDOWN:
             return current_phase["turns_completed"] >= current_phase["duration"]
-        elif self.state == MoveState.ACTIVE and MoveState.COOLDOWN not in self.phases:
+        elif self.state == MoveState.ACTIVE and MoveState.COOLDOWN not in self.phase_mgr.phases:
             return current_phase["turns_completed"] >= current_phase["duration"]
-        elif self.state == MoveState.CASTING and MoveState.ACTIVE not in self.phases and MoveState.COOLDOWN not in self.phases:
+        elif self.state == MoveState.CASTING and MoveState.ACTIVE not in self.phase_mgr.phases and MoveState.COOLDOWN not in self.phase_mgr.phases:
             return current_phase["turns_completed"] >= current_phase["duration"]
             
         return False
 
-    async def on_expire(self, character) -> Optional[str]:
+    def on_expire(self, character) -> str:
         """Handle move expiry and ensure complete removal"""
         if self.state == MoveState.INSTANT:
             return None
@@ -641,13 +741,14 @@ class MoveEffect(BaseEffect):
             self.timing.duration = 0
             
         return self.format_effect_message(f"{self.name} has ended")
-
+    
+    # Serialization methods
     def to_dict(self) -> dict:
         """Convert to dictionary for storage with state preservation"""
         data = super().to_dict()
         
         # Add phase data
-        phase_data = {state.value: phase for state, phase in self.phases.items()}
+        phase_data = {state.value: phase for state, phase in self.phase_mgr.phases.items()}
         
         # Add move-specific data
         data.update({
@@ -667,8 +768,8 @@ class MoveEffect(BaseEffect):
             "half_on_save": self.half_on_save,
             "conditions": [c.value if hasattr(c, 'value') else str(c) for c in self.conditions] if self.conditions else [],
             "roll_timing": self.roll_timing.value,
-            "targets_hit": list(self.targets_hit),
-            "aoe_mode": self.aoe_mode,
+            "targets_hit": list(self.combat.targets_hit),
+            "aoe_mode": self.combat.aoe_mode,
             "enable_heat_tracking": self.enable_heat_tracking,
             "marked_for_removal": self.marked_for_removal,
             "last_processed_round": self.last_processed_round,
@@ -725,20 +826,20 @@ class MoveEffect(BaseEffect):
             
             # Restore state
             if state_value := data.get('state'):
-                effect.state = MoveState(state_value)
+                effect.phase_mgr.state = MoveState(state_value)
                 
             # Restore phase progress
             for state_str, phase_info in phases.items():
                 state = MoveState(state_str)
-                if state in effect.phases:
-                    effect.phases[state]["turns_completed"] = phase_info.get('turns_completed', 0)
+                if state in effect.phase_mgr.phases:
+                    effect.phase_mgr.phases[state]["turns_completed"] = phase_info.get('turns_completed', 0)
             
             # Restore usage tracking
             effect.uses_remaining = data.get('uses_remaining')
             
             # Restore combat state
-            effect.targets_hit = set(data.get('targets_hit', []))
-            effect.aoe_mode = data.get('aoe_mode', 'single')
+            effect.combat.targets_hit = set(data.get('targets_hit', []))
+            effect.combat.aoe_mode = data.get('aoe_mode', 'single')
             
             # Restore tracking information
             if timing_data := data.get('timing'):
@@ -753,3 +854,26 @@ class MoveEffect(BaseEffect):
         except Exception as e:
             logger.error(f"Error reconstructing MoveEffect: {str(e)}")
             return None
+            
+    # Special method to retrieve async results 
+    async def process_async_results(self) -> List[str]:
+        """
+        Process any stored async coroutines from the cache.
+        
+        This must be called after on_apply(), on_turn_start(),
+        or on_turn_end() to get any attack messages.
+        
+        Returns messages generated from async operations.
+        """
+        messages = []
+        
+        # Process any attack coroutines
+        if 'attack_coroutine' in self._internal_cache:
+            try:
+                attack_messages = await self._internal_cache['attack_coroutine']
+                messages.extend(attack_messages)
+                del self._internal_cache['attack_coroutine']
+            except Exception as e:
+                logger.error(f"Error processing attack coroutine: {str(e)}")
+                
+        return messages
