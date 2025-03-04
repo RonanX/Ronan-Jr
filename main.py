@@ -180,7 +180,7 @@ class GameBot(commands.Bot):
 
     async def on_ready(self):  
         """Called when the bot is ready"""  
-        logger.info(f'Logged in as {self.user} (ID: {self.user.id})')  
+        print(f'Logged in as {self.user} (ID: {self.user.id})')  
         print(f'{self.user}: ok i pull up')
 
 bot = GameBot()

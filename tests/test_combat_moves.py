@@ -88,7 +88,7 @@ class CombatTester:
 
     async def run_combat_test(self):
         """Test moves in combat with initiative"""
-        logger.info("\n=== Starting Combat Test ===")
+        print("\n=== Starting Combat Test ===")
         
         # Setup combat
         await self.setup_test_combat()
@@ -148,14 +148,14 @@ class CombatTester:
         # Run 4 rounds
         for round_num in range(1, 5):
             self.combat_state.round_number = round_num
-            logger.info(f"\n=== Round {round_num} ===")
+            print(f"\n=== Round {round_num} ===")
             
             # Process each turn
             for i, char_name in enumerate(self.combat_state.initiative_order):
                 self.combat_state.current_turn = i
                 char = self.combat_state.characters[char_name]
                 
-                logger.info(f"\n{char_name}'s Turn:")
+                print(f"\n{char_name}'s Turn:")
                 
                 # Process turn start effects
                 turn_messages = []
@@ -167,25 +167,25 @@ class CombatTester:
                             turn_messages.append(msgs)
                 
                 if turn_messages:
-                    logger.info("Turn Start Effects:")
+                    print("Turn Start Effects:")
                     for msg in turn_messages:
-                        logger.info(f"  {msg}")
+                        print(f"  {msg}")
                 
                 # Use a move if it's Flames' turn
                 if char_name == "Flames":
                     if round_num == 1:
                         # Test instant roll
-                        logger.info("\nUsing Quick Strike (instant roll):")
+                        print("\nUsing Quick Strike (instant roll):")
                         move = flames.get_move("Quick Strike")
                         flames.add_move(move)
                     elif round_num == 2:
                         # Test active phase roll
-                        logger.info("\nUsing Power Attack (active phase roll):")
+                        print("\nUsing Power Attack (active phase roll):")
                         move = flames.get_move("Power Attack")
                         flames.add_move(move)
                     elif round_num == 3:
                         # Test per turn roll
-                        logger.info("\nUsing Burning Weapon (per turn roll):")
+                        print("\nUsing Burning Weapon (per turn roll):")
                         move = flames.get_move("Burning Weapon")
                         flames.add_move(move)
                         
@@ -205,15 +205,15 @@ class CombatTester:
                         char.effects.remove(effect)
                 
                 if effect_messages:
-                    logger.info("\nTurn End Effects:")
+                    print("\nTurn End Effects:")
                     for msg in effect_messages:
-                        logger.info(f"  {msg}")
+                        print(f"  {msg}")
             
             # End of round - refresh stars
             for char in self.combat_state.characters.values():
                 char.refresh_stars()
                 
-            logger.info("\nEnd of Round")
+            print("\nEnd of Round")
 
 async def main():
     """Run all tests"""

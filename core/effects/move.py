@@ -54,6 +54,7 @@ class PhaseManager:
     def __init__(self):
         self.phases = {}
         self.state = MoveState.INSTANT
+        self.debug_mode = False
         
     def set_phase(self, state: MoveState, duration: Optional[int]) -> None:
         """Set up a phase with its duration"""
@@ -69,26 +70,40 @@ class PhaseManager:
         phase = self.get_current_phase()
         if not phase:
             return 0
-        return max(0, phase["duration"] - phase["turns_completed"])
+        # Calculate remaining turns as the difference between duration and completed turns
+        remaining = max(0, phase["duration"] - phase["turns_completed"])
+        if self.debug_mode:
+            print(f"DEBUG: Remaining turns in {self.state.value} phase: {remaining} " 
+                  f"({phase['turns_completed']}/{phase['duration']} completed)")
+        return remaining
 
     def increment_turn(self) -> None:
         """Increment turn counter for current phase"""
         phase = self.get_current_phase()
         if phase:
+            # Record the previous value for debugging
+            old_value = phase["turns_completed"]
+            # Increment the counter
             phase["turns_completed"] += 1
-            # Add debug logging
-            print(f"DEBUG: Incremented {self.state.value} phase - now at {phase['turns_completed']}/{phase['duration']} turns")
+            if self.debug_mode:
+                print(f"DEBUG: Incremented {self.state.value} phase from {old_value} to {phase['turns_completed']}/{phase['duration']} turns")
 
     def should_transition(self) -> bool:
-        """Check if current phase should transition to next"""
+        """
+        Check if current phase should transition to next.
+        FIXED: Only transition when turns_completed EQUALS duration (not >=)
+        """
         phase = self.get_current_phase()
         if not phase:
             return False
-        # The problem is here - we check >= but should check ==
-        # Only transition when we've completed EXACTLY the requested duration
-        completed = phase["turns_completed"] >= phase["duration"]
-        # Debug logging
-        print(f"DEBUG: Phase transition check for {self.state} - {phase['turns_completed']}/{phase['duration']} - Should transition: {completed}")
+        
+        # FIXED: Only transition on EXACT completion of duration
+        completed = phase["turns_completed"] == phase["duration"]
+        
+        if self.debug_mode:
+            print(f"DEBUG: Phase transition check for {self.state.value} - "
+                  f"{phase['turns_completed']}/{phase['duration']} - Should transition: {completed}")
+            
         return completed
     
     def transition_state(self) -> Tuple[bool, Optional[str], Optional[MoveState]]:
@@ -101,7 +116,6 @@ class PhaseManager:
             return False, None, None
             
         # Only transition when turns_completed EQUALS duration (not >=)
-        # This fixes premature transitions
         if phase["turns_completed"] != phase["duration"]:
             return False, None, None
         
@@ -135,9 +149,13 @@ class PhaseManager:
             old_state = self.state
             self.state = next_state
             
-            # Reset phase tracking for the new phase
+            # Reset phase tracking for the new phase - start at 0 turns completed
             if phase := self.phases.get(next_state):
+                # Important: We're starting the new phase with 0 turns completed
                 phase["turns_completed"] = 0
+                
+            if self.debug_mode:
+                print(f"DEBUG: Transitioned from {old_state.value} to {next_state.value} - Reset to 0 turns completed")
                 
         return True, message, next_state
 
@@ -349,6 +367,9 @@ class MoveEffect(BaseEffect):
             self.last_processed_turn = None
             self.marked_for_removal = False
             self._internal_cache = {}  # Cache for attack results
+            
+            # Debug flag - can be toggled for verbose output
+            self.debug = False
 
     # Property accessors for state
     @property
@@ -659,7 +680,7 @@ class MoveEffect(BaseEffect):
         remaining = self.get_remaining_turns()
         
         # Handle phase transitions if the phase is complete
-        did_transition, transition_msg, _ = self.phase_mgr.transition_state()
+        did_transition, transition_msg, next_state = self.phase_mgr.transition_state()
         if did_transition and transition_msg:
             messages.append(self.format_effect_message(f"{self.name} {transition_msg}"))
         
@@ -690,12 +711,6 @@ class MoveEffect(BaseEffect):
                         f"{self.name} cooldown",
                         [f"{remaining} turns remaining"]
                     ))
-                # Special case - if this is the last turn of cooldown, show ending message
-                elif remaining == 0:
-                    self.marked_for_removal = True
-                    if hasattr(self, 'timing'):
-                        self.timing.duration = 0
-                    messages.append(self.format_effect_message(f"{self.name} cooldown has ended"))
         
         return messages
         
@@ -704,6 +719,7 @@ class MoveEffect(BaseEffect):
         """
         Check if move effect is fully expired.
         A move is expired when marked for removal or all phases complete.
+        FIXED: Only check exact completion, not >= condition
         """
         if self.marked_for_removal:
             return True
@@ -715,13 +731,14 @@ class MoveEffect(BaseEffect):
         if not current_phase:
             return True
             
-        # Check if we're in the final phase with no more transitions available
+        # FIXED: Check if we're in the final phase with completed duration
+        # Using equality check instead of >= to prevent early expiration
         if self.state == MoveState.COOLDOWN:
-            return current_phase["turns_completed"] >= current_phase["duration"]
+            return current_phase["turns_completed"] == current_phase["duration"]
         elif self.state == MoveState.ACTIVE and MoveState.COOLDOWN not in self.phase_mgr.phases:
-            return current_phase["turns_completed"] >= current_phase["duration"]
+            return current_phase["turns_completed"] == current_phase["duration"]
         elif self.state == MoveState.CASTING and MoveState.ACTIVE not in self.phase_mgr.phases and MoveState.COOLDOWN not in self.phase_mgr.phases:
-            return current_phase["turns_completed"] >= current_phase["duration"]
+            return current_phase["turns_completed"] == current_phase["duration"]
             
         return False
 
@@ -841,7 +858,7 @@ class MoveEffect(BaseEffect):
             effect.combat.targets_hit = set(data.get('targets_hit', []))
             effect.combat.aoe_mode = data.get('aoe_mode', 'single')
             
-            # Restore tracking information
+            # Restore timing information
             if timing_data := data.get('timing'):
                 effect.timing = EffectTiming(**timing_data)
                 

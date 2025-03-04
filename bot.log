@@ -8289,3 +8289,25 @@ NameError: name 'char' is not defined. Did you mean: 'chr'?
 2025-03-04 14:36:16,627 - core.database - INFO - Character test3 saved successfully
 2025-03-04 14:36:41,784 - core.database - INFO - Character test saved successfully
 2025-03-04 14:36:47,887 - core.database - INFO - Character test saved successfully
+2025-03-04 14:59:15,014 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 14:59:15,016 - discord.client - INFO - logging in using static token
+2025-03-04 14:59:15,986 - core.database - INFO - No migration needed
+2025-03-04 14:59:15,986 - core.database - INFO - Database initialized successfully
+2025-03-04 14:59:16,163 - core.state - INFO - Loaded 5 characters into game state
+2025-03-04 14:59:16,739 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1898f05611b282b1ab7b3e46ff653c3d).
+2025-03-04 14:59:18,757 - __main__ - INFO - Logged in as Ronan Jr#9263 (ID: 1152443752879751292)
+2025-03-04 14:59:49,206 - core.database - INFO - Character test saved successfully
+2025-03-04 14:59:49,312 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:59:52,843 - core.database - INFO - Character test2 saved successfully
+2025-03-04 14:59:58,283 - core.database - INFO - Character test saved successfully
+2025-03-04 15:00:01,582 - core.database - INFO - Character test2 saved successfully
+2025-03-04 15:00:19,158 - core.database - INFO - Character test saved successfully
+2025-03-04 15:00:22,404 - core.database - INFO - Character test saved successfully
+2025-03-04 15:00:27,461 - core.database - INFO - Character test2 saved successfully
+2025-03-04 15:00:37,520 - core.database - INFO - Character test saved successfully
+2025-03-04 15:00:51,723 - core.database - INFO - Character test2 saved successfully
+2025-03-04 15:01:32,948 - core.database - INFO - Character test saved successfully
+2025-03-04 15:01:38,269 - core.database - INFO - Character test2 saved successfully
+2025-03-04 15:21:20,951 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 15:21:20,954 - discord.client - INFO - logging in using static token
+2025-03-04 15:21:22,647 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ff9af790cb72e3dd7804beb7ae4a82ed).

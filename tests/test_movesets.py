@@ -64,7 +64,7 @@ class MovesetTester:
         
         # Save to database
         await self.db.save_character(char)
-        logger.info("Created test character: TestChar")
+        print("Created test character: TestChar")
         
         return char
         
@@ -102,7 +102,7 @@ class MovesetTester:
             
         # Save character
         await self.db.save_character(char)
-        logger.info(f"Added {len(moves)} test moves to TestChar")
+        print(f"Added {len(moves)} test moves to TestChar")
         
         return moves
         
@@ -114,7 +114,7 @@ class MovesetTester:
             moves = await self.create_test_moves(char)
             
             # Test saving character moveset
-            logger.info("\nTesting character moveset save...")
+            print("\nTesting character moveset save...")
             # Save movesets as part of character data
             char_dict = char.to_dict()
             char_dict['movesets'] = char.moveset.to_dict()
@@ -122,13 +122,13 @@ class MovesetTester:
             await self.db.save_character_moveset(char.name, char.moveset.to_dict())
             
             # Test loading character moveset
-            logger.info("\nTesting character moveset load...")
+            print("\nTesting character moveset load...")
             loaded_data = await self.db.load_character_moveset(char.name)
             if loaded_data:
                 loaded_moveset = Moveset.from_dict(loaded_data)
-                logger.info(f"Loaded {len(loaded_moveset.moves)} moves")
+                print(f"Loaded {len(loaded_moveset.moves)} moves")
                 for name, move in loaded_moveset.moves.items():
-                    logger.info(f"  {name}: {move.description}")
+                    print(f"  {name}: {move.description}")
             else:
                 logger.error("Failed to load character moveset")
                 
@@ -146,7 +146,7 @@ class MovesetTester:
             moves = await self.create_test_moves(char)
             
             # Save as shared moveset
-            logger.info("\nTesting shared moveset save...")
+            print("\nTesting shared moveset save...")
             moveset_name = "TestMoveset"
             await self.db.save_shared_moveset(
                 moveset_name,
@@ -158,26 +158,26 @@ class MovesetTester:
             )
             
             # List shared movesets
-            logger.info("\nTesting shared moveset list...")
+            print("\nTesting shared moveset list...")
             movesets = await self.db.list_shared_movesets()
             for ms in movesets:
-                logger.info(f"Found moveset: {ms['name']}")
+                print(f"Found moveset: {ms['name']}")
                 
             # Load shared moveset
-            logger.info("\nTesting shared moveset load...")
+            print("\nTesting shared moveset load...")
             loaded = await self.db.load_shared_moveset(moveset_name)
             if loaded:
                 moveset = Moveset.from_dict(loaded["moves"])
-                logger.info(f"Loaded {len(moveset.moves)} moves from shared moveset")
+                print(f"Loaded {len(moveset.moves)} moves from shared moveset")
                 for name, move in moveset.moves.items():
-                    logger.info(f"  {name}: {move.description}")
+                    print(f"  {name}: {move.description}")
             else:
                 logger.error("Failed to load shared moveset")
                 
             # Delete shared moveset
-            logger.info("\nTesting shared moveset delete...")
+            print("\nTesting shared moveset delete...")
             deleted = await self.db.delete_shared_moveset(moveset_name)
-            logger.info(f"Moveset deleted: {deleted}")
+            print(f"Moveset deleted: {deleted}")
             
             return True
             
@@ -190,13 +190,13 @@ async def main():
     tester = MovesetTester()
     
     # Run tests
-    logger.info("Starting moveset tests...")
+    print("Starting moveset tests...")
     
     char_test = await tester.test_character_movesets()
-    logger.info(f"\nCharacter moveset tests: {'PASSED' if char_test else 'FAILED'}")
+    print(f"\nCharacter moveset tests: {'PASSED' if char_test else 'FAILED'}")
     
     shared_test = await tester.test_shared_movesets()
-    logger.info(f"\nShared moveset tests: {'PASSED' if shared_test else 'FAILED'}")
+    print(f"\nShared moveset tests: {'PASSED' if shared_test else 'FAILED'}")
     
 if __name__ == "__main__":
     asyncio.run(main())

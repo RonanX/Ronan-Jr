@@ -631,7 +631,7 @@ class EffectCommands(commands.GroupCog, name="effect"):
     ):
         """List all active effects on a character"""
         await interaction.response.send_message("Fetching effects...", ephemeral=True)
-        logger.info(f"Command used: /effect list {character}")
+        print(f"Command used: /effect list {character}")
 
         char = self.bot.game_state.get_character(character)
         if not char:

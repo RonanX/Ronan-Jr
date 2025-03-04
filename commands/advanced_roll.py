@@ -234,7 +234,7 @@ class RollCommands(commands.Cog):
             # Log detailed breakdowns
             if detailed_logs:
                 log_output = "\n\n".join(detailed_logs)
-                logger.info(f"Detailed multiroll breakdown for {interaction.user}:\n{log_output}")
+                print(f"Detailed multiroll breakdown for {interaction.user}:\n{log_output}")
 
         except Exception as e:
             await handle_error(interaction, e)

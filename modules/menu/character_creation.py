@@ -271,13 +271,13 @@ class CharacterTypeView(View):
                     view=None
                 )
 
-                logger.info(f"Quick creating character with style {style}")
+                print(f"Quick creating character with style {style}")
                 proficiencies = get_preset_proficiencies(style)
             else:
                 # For manual creation, defer the interaction first
                 await interaction.response.defer()
                 
-                logger.info(f"Starting manual proficiency selection for style {style}")
+                print(f"Starting manual proficiency selection for style {style}")
                 prof_view = ProficiencySelectionView(
                     style, 
                     quick_create=False,
@@ -304,7 +304,7 @@ class CharacterTypeView(View):
                 proficiencies = prof_view.value
                     
                 if not proficiencies:
-                    logger.info("Proficiency selection cancelled or timed out")
+                    print("Proficiency selection cancelled or timed out")
                     await selection_message.edit(
                         embed=discord.Embed(
                             title="Character Creation Cancelled",
@@ -315,7 +315,7 @@ class CharacterTypeView(View):
                     )
                     return
             
-            logger.info(f"Creating character with proficiencies: {proficiencies}")
+            print(f"Creating character with proficiencies: {proficiencies}")
             
             character = create_character_with_stats(
                 name=self.name,
@@ -328,10 +328,10 @@ class CharacterTypeView(View):
                 base_proficiency=self.base_proficiency
             )
             
-            logger.info("Saving character to database")
+            print("Saving character to database")
             await interaction.client.db.save_character(character)
             
-            logger.info("Character created successfully, showing results")
+            print("Character created successfully, showing results")
             # Show completion message
             success_embed = discord.Embed(
                 title="✨ Character Created!",
@@ -715,8 +715,8 @@ def create_character_with_stats(*,
     resources = Resources(current_hp=hp, max_hp=hp, current_mp=mp, max_mp=mp)
     defense = DefenseStats(base_ac=ac, current_ac=ac)
     
-    logger.info(f"Creating character with style: {style}, proficiency: {base_proficiency}")
-    logger.info(f"Proficiencies provided: {proficiencies}")
+    print(f"Creating character with style: {style}, proficiency: {base_proficiency}")
+    print(f"Proficiencies provided: {proficiencies}")
     
     # Create character with specified base proficiency
     character = Character(
@@ -764,7 +764,7 @@ def create_character_with_stats(*,
     else:
         character.spell_save_dc = 8 + base_proficiency + highest_mod
     
-    logger.info(f"Character created successfully: {character.name}")
+    print(f"Character created successfully: {character.name}")
     return character
 
 def preview_skills(stats: Dict[StatType, int]) -> str:

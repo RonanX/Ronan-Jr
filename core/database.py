@@ -62,7 +62,7 @@ class Database:
 
             await self._check_and_migrate()
             self.initialized = True
-            logger.info("Database initialized successfully")
+            print("Database initialized successfully")
             
         except Exception as e:
             logger.error(f"Failed to initialize database: {str(e)}", exc_info=True)
@@ -76,7 +76,7 @@ class Database:
             
         try:
             self._refs['movesets'].child(name).set(moveset_data)
-            logger.info(f"Moveset {name} saved successfully")
+            print(f"Moveset {name} saved successfully")
             
         except Exception as e:
             logger.error(f"Failed to save moveset: {str(e)}", exc_info=True)
@@ -94,7 +94,7 @@ class Database:
                 logger.warning(f"Moveset {name} not found in database")
                 return None
                 
-            logger.info(f"Moveset {name} loaded successfully")
+            print(f"Moveset {name} loaded successfully")
             return moveset
             
         except Exception as e:
@@ -120,7 +120,7 @@ class Database:
                 'created_at': {'.sv': 'timestamp'}
             })
             
-            logger.info(f"Move shared successfully with ID: {share_id}")
+            print(f"Move shared successfully with ID: {share_id}")
             return share_id
             
         except Exception as e:
@@ -139,7 +139,7 @@ class Database:
                 logger.warning(f"Shared move {share_id} not found")
                 return None
                 
-            logger.info(f"Shared move {share_id} loaded successfully")
+            print(f"Shared move {share_id} loaded successfully")
             return move_data.get('data')
             
         except Exception as e:
@@ -157,7 +157,7 @@ class Database:
                 return False
                 
             self._refs['shared_moves'].child(share_id).delete()
-            logger.info(f"Shared move {share_id} deleted successfully")
+            print(f"Shared move {share_id} deleted successfully")
             return True
             
         except Exception as e:
@@ -171,7 +171,7 @@ class Database:
             old_char_data = db.reference('character_data').get()
 
             if old_base_stats or old_char_data:
-                logger.info("Found old data structure, starting migration...")
+                print("Found old data structure, starting migration...")
                 
                 # Migrate each character
                 migrated = 0
@@ -223,9 +223,9 @@ class Database:
                 db.reference('base_stats').delete()
                 db.reference('character_data').delete()
                 
-                logger.info(f"Migration complete: {migrated} characters migrated")
+                print(f"Migration complete: {migrated} characters migrated")
             else:
-                logger.info("No migration needed")
+                print("No migration needed")
 
         except Exception as e:
             logger.error(f"Error during migration: {str(e)}", exc_info=True)
@@ -262,7 +262,7 @@ class Database:
             
             # Normal logging
             if not getattr(self, 'debug_mode', False):
-                logger.info(f"Character {character.name} saved successfully")
+                print(f"Character {character.name} saved successfully")
             
         except Exception as e:
             logger.error(f"Failed to save character: {str(e)}", exc_info=True)
@@ -296,7 +296,7 @@ class Database:
                 ]
                 char_data['spell_save_dc'] = 8 + proficiency + max(spellcasting_mods)
 
-            logger.info(f"Character {name} loaded successfully")
+            print(f"Character {name} loaded successfully")
             return char_data
             
         except Exception as e:
@@ -317,7 +317,7 @@ class Database:
             # Delete from characters collection
             self._refs['characters'].child(name).delete()
             
-            logger.info(f"Character {name} deleted successfully")
+            print(f"Character {name} deleted successfully")
             return True
             
         except Exception as e:
@@ -511,7 +511,7 @@ class Database:
                 "moves": moves_data
             })
             
-            logger.info(f"Moveset {name} saved successfully")
+            print(f"Moveset {name} saved successfully")
             return True
             
         except Exception as e:
@@ -534,7 +534,7 @@ class Database:
             # Extract just the moves data
             moves_data = moveset_data.get('moves', {})
             
-            logger.info(f"Moveset {name} loaded successfully")
+            print(f"Moveset {name} loaded successfully")
             return moves_data
             
         except Exception as e:
@@ -590,7 +590,7 @@ class Database:
             # Delete the moveset
             self._refs['shared_movesets'].child(name).delete()
             
-            logger.info(f"Moveset {name} deleted successfully")
+            print(f"Moveset {name} deleted successfully")
             return True
             
         except Exception as e:

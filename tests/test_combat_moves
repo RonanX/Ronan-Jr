@@ -114,9 +114,9 @@ class TestScenario:
         
     def log_separator(self):
         """Print a visual separator in logs"""
-        logger.info("\n" + "="*50)
-        logger.info(f"Testing: {self.name}")
-        logger.info("="*50)
+        print("\n" + "="*50)
+        print(f"Testing: {self.name}")
+        print("="*50)
 
 class BasicAttackTest(TestScenario):
     """Test basic attack functionality"""
@@ -162,25 +162,25 @@ class BasicAttackTest(TestScenario):
         )
         
         # Log initial resources
-        logger.info(f"\nInitial state:")
-        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
-        logger.info(f"Target HP: {target.resources.current_hp}")
+        print(f"\nInitial state:")
+        print(f"Attacker MP: {attacker.resources.current_mp}")
+        print(f"Target HP: {target.resources.current_hp}")
         
         # Apply effect
         feedback = attacker.add_effect(effect)
-        logger.info(f"\nEffect feedback:\n{feedback}")
+        print(f"\nEffect feedback:\n{feedback}")
         
         # Process turn effects
         messages = await effect.on_turn_start(attacker, self.current_round, attacker.name)
         if messages:
-            logger.info("\nTurn effects:")
+            print("\nTurn effects:")
             for msg in messages:
-                logger.info(msg)
+                print(msg)
         
         # Log final state
-        logger.info(f"\nFinal state:")
-        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
-        logger.info(f"Target HP: {target.resources.current_hp}")
+        print(f"\nFinal state:")
+        print(f"Attacker MP: {attacker.resources.current_mp}")
+        print(f"Target HP: {target.resources.current_hp}")
 
 class MultiTargetTest(TestScenario):
     """Test targeting multiple characters"""
@@ -227,27 +227,27 @@ class MultiTargetTest(TestScenario):
         )
         
         # Log initial states
-        logger.info(f"\nInitial state:")
-        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
+        print(f"\nInitial state:")
+        print(f"Attacker MP: {attacker.resources.current_mp}")
         for target in targets:
-            logger.info(f"{target.name} HP: {target.resources.current_hp}")
+            print(f"{target.name} HP: {target.resources.current_hp}")
         
         # Apply effect
         feedback = attacker.add_effect(effect)
-        logger.info(f"\nEffect feedback:\n{feedback}")
+        print(f"\nEffect feedback:\n{feedback}")
         
         # Process turn effects
         messages = await effect.on_turn_start(attacker, self.current_round, attacker.name)
         if messages:
-            logger.info("\nTurn effects:")
+            print("\nTurn effects:")
             for msg in messages:
-                logger.info(msg)
+                print(msg)
         
         # Log final states
-        logger.info(f"\nFinal state:")
-        logger.info(f"Attacker MP: {attacker.resources.current_mp}")
+        print(f"\nFinal state:")
+        print(f"Attacker MP: {attacker.resources.current_mp}")
         for target in targets:
-            logger.info(f"{target.name} HP: {target.resources.current_hp}")
+            print(f"{target.name} HP: {target.resources.current_hp}")
 
 class PhaseTest(TestScenario):
     """Test move phase transitions"""
@@ -289,7 +289,7 @@ class PhaseTest(TestScenario):
         # Test through multiple rounds
         for round_num in range(1, 6):
             self.current_round = round_num
-            logger.info(f"\n=== Round {round_num} ===")
+            print(f"\n=== Round {round_num} ===")
             
             if round_num == 1:
                 # Initial cast
@@ -299,24 +299,24 @@ class PhaseTest(TestScenario):
                     targets=[target]
                 )
                 feedback = caster.add_effect(effect)
-                logger.info(f"Cast start:\n{feedback}")
+                print(f"Cast start:\n{feedback}")
             
             # Process turn
             start_msgs = await effect.on_turn_start(caster, round_num, caster.name)
             if start_msgs:
-                logger.info("\nTurn start:")
+                print("\nTurn start:")
                 for msg in start_msgs:
-                    logger.info(msg)
+                    print(msg)
                     
             end_msgs = effect.on_turn_end(caster, round_num, caster.name)
             if end_msgs:
-                logger.info("\nTurn end:")
+                print("\nTurn end:")
                 for msg in end_msgs:
-                    logger.info(msg)
+                    print(msg)
             
             # Check state
-            logger.info(f"\nState: {effect.state.name}")
-            logger.info(f"MP: {caster.resources.current_mp}")
+            print(f"\nState: {effect.state.name}")
+            print(f"MP: {caster.resources.current_mp}")
 
 async def main():
     """Run all test scenarios"""

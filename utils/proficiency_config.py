@@ -259,7 +259,7 @@ def get_available_points(character_type: Enum) -> int:
 
 def get_preset_proficiencies(character_type: Enum) -> Dict:
     """Get preset proficiencies for a character type"""
-    logger.info(f"Getting preset proficiencies for type: {character_type}")
+    print(f"Getting preset proficiencies for type: {character_type}")
     
     # Get raw presets - this already has the correct structure
     presets = PRESET_PROFICIENCIES.get(character_type, {
@@ -267,7 +267,7 @@ def get_preset_proficiencies(character_type: Enum) -> Dict:
         "skills": {}
     })
     
-    logger.info(f"Using preset proficiencies: {presets}")
+    print(f"Using preset proficiencies: {presets}")
     return presets
 
 def get_skill_stat(skill: str) -> StatType:

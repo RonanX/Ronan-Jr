@@ -38,7 +38,7 @@ class ProficiencySelectionView(View):
             # Start with total points based on max possible selections
             self.total_points = self.max_saves + self.max_skills
             self.points_remaining = self.total_points
-            logger.info(
+            print(
                 f"Initialized hybrid proficiency selection - Points: {self.points_remaining}, "
                 f"Max Saves: {self.max_saves}, Max Skills: {self.max_skills}, "
                 f"Can Expertise: {self.can_expertise} for {character_type}"
@@ -49,7 +49,7 @@ class ProficiencySelectionView(View):
         """Add all the selection components to the view"""
         # Save selection - respect both points and max saves
         max_saves = min(self.max_saves, max(1, self.points_remaining))
-        logger.info(f"Setting up save selection with max {max_saves} saves")
+        print(f"Setting up save selection with max {max_saves} saves")
         save_select = Select(
             placeholder="Select Saving Throw Proficiencies",
             options=[
@@ -69,7 +69,7 @@ class ProficiencySelectionView(View):
 
         # Skill selection - respect both points and max skills
         max_skills = min(self.max_skills, self.points_remaining)
-        logger.info(f"Setting up skill selection with max {max_skills} skills")
+        print(f"Setting up skill selection with max {max_skills} skills")
         skill_select = Select(
             placeholder="Select Skill Proficiencies",
             options=[
@@ -174,7 +174,7 @@ class ProficiencySelectionView(View):
             )
             return
 
-        logger.info(
+        print(
             f"Confirming selections - Saves: {self.selected_saves}, "
             f"Skills: {self.selected_skills}, Expertise: {self.expertise}"
         )
@@ -194,7 +194,7 @@ class ProficiencySelectionView(View):
             }
         }
         
-        logger.info(f"Created proficiency dictionary: {proficiencies}")
+        print(f"Created proficiency dictionary: {proficiencies}")
         
         # Show confirmation message
         embed = discord.Embed(
@@ -223,7 +223,7 @@ class ProficiencySelectionView(View):
 
     async def update_display(self, interaction: discord.Interaction):
         """Update the embed with current selections"""
-        logger.info(
+        print(
             f"Updating display - Points: {self.points_remaining}/{self.total_points}, "
             f"Saves: {self.selected_saves}, Skills: {self.selected_skills}, "
             f"Expertise: {self.expertise}"
@@ -270,7 +270,7 @@ class ProficiencySelectionView(View):
 
         try:
             await interaction.response.edit_message(embed=embed, view=self)
-            logger.info("Successfully updated display")
+            print("Successfully updated display")
         except Exception as e:
             logger.error(f"Error updating display: {e}")
 
