@@ -26,12 +26,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from core.character import Character, StatType
+from core.state import CombatLogger, CombatEventType
 from core.effects.manager import process_effects  # Import the async function
 from core.effects.status import FrostbiteEffect, SkipEffect
 from utils.dice import DiceRoller
 from utils.error_handler import handle_error
 from utils.formatting import MessageFormatter
-from .logger import CombatLogger, CombatEventType
 from .save_handler import SaveHandler, InitiativeSaveData
 
 logger = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ class InitiativeTracker:
         self.combat_log = CombatLog()
         self.last_state = None
         self.current_turn_message: Optional[discord.Message] = None
-        self.logger = CombatLogger(None)  # Channel ID set when combat starts
+        self.logger = bot.game_state.logger
         self.save_handler = SaveHandler(bot.db, self.logger)
         self.quiet_mode = False  # For suppressing debug prints
 

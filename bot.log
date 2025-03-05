@@ -8311,3 +8311,77 @@ NameError: name 'char' is not defined. Did you mean: 'chr'?
 2025-03-04 15:21:20,951 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
 2025-03-04 15:21:20,954 - discord.client - INFO - logging in using static token
 2025-03-04 15:21:22,647 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ff9af790cb72e3dd7804beb7ae4a82ed).
+2025-03-04 15:36:32,707 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 15:36:32,710 - discord.client - INFO - logging in using static token
+2025-03-04 15:36:34,185 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b0fc2dda49966a53caab9389b02ae3c2).
+2025-03-04 15:45:24,404 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 15:45:24,406 - discord.client - INFO - logging in using static token
+2025-03-04 15:45:25,903 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 611de28d4c3046de534e69512a9add88).
+2025-03-04 16:11:11,041 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 16:11:11,044 - discord.client - INFO - logging in using static token
+2025-03-04 16:11:12,702 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9e919a33c9ac9b6785acd7c5fe7e6e3c).
+2025-03-04 16:23:03,388 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 16:23:03,391 - discord.client - INFO - logging in using static token
+2025-03-04 16:23:04,879 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0292ab85a95729c9355558509e2e09a8).
+2025-03-04 16:27:10,113 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 16:27:10,115 - discord.client - INFO - logging in using static token
+2025-03-04 16:27:11,552 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: abd55e5f32a2e524b8ecd655463341f0).
+2025-03-04 16:35:48,342 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 16:35:48,345 - discord.client - INFO - logging in using static token
+2025-03-04 16:35:49,875 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 17f989d43919f0093c84ccec03e28026).
+2025-03-04 16:41:35,234 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 16:41:35,237 - discord.client - INFO - logging in using static token
+2025-03-04 16:41:37,852 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e0eca38ae51bbd720c251e3afd25e7d5).
+2025-03-04 23:04:14,009 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-04 23:04:19,687 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 59f7c8f168b3098db5d678891ffc6d81).
+2025-03-04 23:40:42,650 - commands.effects - ERROR - Error in drain effect: CombatLogger.log_command() takes 2 positional arguments but 4 were given
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\effects.py", line 250, in drain_effect
+    combat_logger.log_command(
+TypeError: CombatLogger.log_command() takes 2 positional arguments but 4 were given
+2025-03-04 23:40:59,886 - core.effects.manager - ERROR - Error processing effects: Invalid dice component: d4
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 239, in process_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\resource.py", line 116, in on_turn_start
+    amount = self._calculate_drain(character)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\resource.py", line 56, in _calculate_drain
+    total, _ = DiceRoller.roll_dice(self.amount, character)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\dice.py", line 80, in roll_dice
+    raise ValueError(f"Invalid dice component: {comp}")
+ValueError: Invalid dice component: d4
+2025-03-04 23:41:06,898 - core.effects.manager - ERROR - Error processing effects: Invalid dice component: d4
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 239, in process_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\resource.py", line 116, in on_turn_start
+    amount = self._calculate_drain(character)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\resource.py", line 56, in _calculate_drain
+    total, _ = DiceRoller.roll_dice(self.amount, character)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\dice.py", line 80, in roll_dice
+    raise ValueError(f"Invalid dice component: {comp}")
+ValueError: Invalid dice component: d4
+2025-03-04 23:45:30,781 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-04 23:45:30,785 - discord.client - INFO - logging in using static token
+2025-03-04 23:45:32,580 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f50b0e178f71ce07e637288021a9ba30).
+2025-03-05 00:28:14,728 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 00:28:14,730 - discord.client - INFO - logging in using static token
+2025-03-05 00:28:18,706 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b92f551c0c631f46122a1b1212a10201).
+2025-03-05 00:37:30,656 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 00:37:30,658 - discord.client - INFO - logging in using static token
+2025-03-05 00:37:32,160 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0d0e6c8e71dd75a2804cf9c8cb0d1a2b).
+2025-03-05 00:45:19,053 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 00:45:19,055 - discord.client - INFO - logging in using static token
+2025-03-05 00:45:20,826 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e3f1ac82c7f4a25e6f39c1e4ba022a6d).
+2025-03-05 01:06:09,643 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 01:06:09,645 - discord.client - INFO - logging in using static token
+2025-03-05 01:06:11,247 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b0259a9541da5a57c9e543a9182525e7).
+2025-03-05 01:13:54,954 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 01:13:54,956 - discord.client - INFO - logging in using static token
+2025-03-05 01:13:56,717 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9fe4639610407fde1535ae41a16f38a7).

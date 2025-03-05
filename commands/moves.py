@@ -66,7 +66,27 @@ class MoveCommands(commands.GroupCog, name="move"):
             if not char:
                 await interaction.followup.send(f"Character '{character}' not found")
                 return
-            
+        
+            # Get move data
+            move_data = char.get_move(name)
+            if move_data:
+                # Log move parameters
+                self.bot.game_state.logger.log_move_parameters(
+                    character,
+                    name,
+                    target=target,
+                    mp_cost=move_data.mp_cost,
+                    hp_cost=move_data.hp_cost,
+                    star_cost=move_data.star_cost,
+                    cast_time=move_data.cast_time,
+                    duration=move_data.duration,
+                    cooldown=move_data.cooldown,
+                    roll_timing=roll_timing if roll_timing else move_data.roll_timing,
+                    attack_roll=move_data.attack_roll,
+                    damage=move_data.damage,
+                    aoe_mode=aoe_mode
+                )
+
             # Get targets if specified (supports multiple targets)
             target_chars = []
             if target:
@@ -241,6 +261,25 @@ class MoveCommands(commands.GroupCog, name="move"):
                 await interaction.followup.send(f"Character '{character}' not found")
                 return
                 
+            # Log move parameters
+            self.bot.game_state.logger.log_move_parameters(
+                character,
+                name,
+                description=description,
+                target=target,
+                mp_cost=mp_cost,
+                hp_cost=hp_cost,
+                star_cost=star_cost,
+                cast_time=cast_time,
+                duration=duration,
+                cooldown=cooldown,
+                roll_timing=roll_timing,
+                attack_roll=attack_roll,
+                damage=damage,
+                aoe_mode=aoe_mode,
+                advanced_json=advanced_json
+            )                
+
             # Get targets if specified (supports multiple targets)
             target_chars = []
             if target:

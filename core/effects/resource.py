@@ -6,7 +6,6 @@ from typing import Optional, List, Dict, Union, Tuple
 from .base import BaseEffect, EffectCategory, EffectTiming
 from utils.dice import DiceRoller
 import logging
-from modules.combat.logger import CombatEventType
 
 logger = logging.getLogger(__name__)
 
