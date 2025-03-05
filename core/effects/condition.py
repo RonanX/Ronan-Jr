@@ -365,7 +365,7 @@ class ConditionEffect(BaseEffect):
                 self.tags.update(props["tags"])
 
     def on_apply(self, character, round_number: int) -> str:
-        """Apply conditions and their tags"""
+        """Apply conditions and their tags with enhanced formatting"""
         self.initialize_timing(round_number, character.name)
         
         # Add condition tags to character
@@ -373,68 +373,188 @@ class ConditionEffect(BaseEffect):
             character.condition_tags = set()
         character.condition_tags.update(self.tags)
         
-        # Generate application messages
+        # Generate application messages with proper formatting
         messages = []
+        details = []
+        
+        # Gather primary message and details
         for condition in self.conditions:
             if props := CONDITION_PROPERTIES.get(condition):
                 emoji = props["emoji"]
                 msg = props["apply_message"].format(character.name)
-                messages.append(f"{emoji} `{msg}`")
+                messages.append(f"{emoji} {msg}")
                 
-        return "\n".join(messages)
+                # Add mechanical effect as a detail
+                if turn_effects := props.get("turn_effects", []):
+                    for effect in turn_effects:
+                        details.append(effect.strip())
+        
+        # Add duration info if applicable
+        if self.duration:
+            details.append(f"Duration: {self.duration} turns")
+        elif self.permanent:
+            details.append("Duration: Permanent")
+            
+        # Get source if provided
+        if self.source:
+            details.append(f"Source: {self.source}")
+                
+        # Format using combined message for all conditions
+        primary_message = "; ".join(messages)
+        return self.format_effect_message(
+            primary_message,
+            details
+        )
 
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Process start of turn effects"""
+        """Process start of turn effects with improved formatting"""
         if character.name != turn_name:
             return []
             
         messages = []
         
-        # Add effects for each active condition
-        for condition in self.conditions:
-            if props := CONDITION_PROPERTIES.get(condition):
-                # Add turn effects if they exist
-                if turn_effects := props.get("turn_effects", []):
-                    messages.append(f"{props['emoji']} `{props['status_message']}`")
-                    messages.extend(turn_effects)
-                
-        return messages
-
-    def on_expire(self, character) -> str:
-        """Remove conditions and their tags"""
-        if hasattr(character, 'condition_tags'):
-            character.condition_tags.difference_update(self.tags)
-            
-        # Generate removal messages
-        messages = []
-        for condition in self.conditions:
-            if props := CONDITION_PROPERTIES.get(condition):
-                emoji = props["emoji"]
-                msg = props["remove_message"].format(character.name)
-                messages.append(f"{emoji} `{msg}`")
-                
-        return "\n".join(messages)
-
-    def get_status_text(self, character) -> str:
-        """Format condition status for display"""
-        messages = []
+        # Create a single message with all active conditions
+        condition_effects = []
+        condition_details = []
+        
+        # Collect effects for each condition
         for condition in self.conditions:
             if props := CONDITION_PROPERTIES.get(condition):
                 emoji = props["emoji"]
                 status = props["status_message"]
-                messages.append(f"{emoji} **{condition.value.title()}**\n╰─ `{status}`")
+                condition_effects.append(f"{emoji} {condition.value.title()}: {status}")
                 
-                # Add turn effects if they exist
+                # Add turn effects as details
                 if turn_effects := props.get("turn_effects", []):
                     for effect in turn_effects:
-                        messages.append(f"╰─ {effect}")
+                        condition_details.append(effect)
+        
+        # Add duration info
+        if not self.permanent and self.duration:
+            rounds_completed = round_number - self.timing.start_round
+            turns_remaining = max(0, self.duration - rounds_completed)
+            if turns_remaining > 0:
+                condition_details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
                 
-        duration_text = ""
+        # Create the formatted message
+        if condition_effects:
+            main_message = "; ".join(condition_effects)
+            messages.append(self.format_effect_message(
+                main_message,
+                condition_details
+            ))
+                
+        return messages
+
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Process turn end with improved duration tracking"""
+        if character.name != turn_name or self.permanent:
+            return []
+            
+        # Calculate remaining turns
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        
+        # Create message based on remaining duration
+        if should_expire:
+            # Create list of condition names
+            condition_names = [cond.value.title() for cond in self.conditions]
+            
+            if len(condition_names) == 1:
+                condition_text = condition_names[0]
+            elif len(condition_names) == 2:
+                condition_text = f"{condition_names[0]} and {condition_names[1]}"
+            else:
+                condition_text = f"{', '.join(condition_names[:-1])}, and {condition_names[-1]}"
+                
+            return [self.format_effect_message(
+                f"{condition_text} will wear off from {character.name}"
+            )]
+        elif turns_remaining > 0:
+            # Format duration message
+            details = [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"]
+            
+            # Get condition names
+            condition_names = [cond.value.title() for cond in self.conditions]
+            if len(condition_names) == 1:
+                condition_text = condition_names[0]
+            elif len(condition_names) == 2:
+                condition_text = f"{condition_names[0]} and {condition_names[1]}"
+            else:
+                condition_text = f"{', '.join(condition_names[:-1])}, and {condition_names[-1]}"
+                
+            return [self.format_effect_message(
+                f"{condition_text} continues to affect {character.name}",
+                details
+            )]
+            
+        return []
+
+    def on_expire(self, character) -> str:
+        """Remove conditions and their tags with improved formatting"""
+        if hasattr(character, 'condition_tags'):
+            character.condition_tags.difference_update(self.tags)
+            
+        # Generate removal messages with proper formatting
+        messages = []
+        
+        # Get emojis and removal messages
+        for condition in self.conditions:
+            if props := CONDITION_PROPERTIES.get(condition):
+                emoji = props["emoji"]
+                msg = props["remove_message"].format(character.name)
+                messages.append(f"{emoji} {msg}")
+                
+        # Format as a single message for all conditions
+        primary_message = "; ".join(messages)
+        return self.format_effect_message(primary_message)
+
+    def get_status_text(self, character) -> str:
+        """Format condition status for character sheet display"""
+        messages = []
+        
+        # Create header based on number of conditions
+        condition_names = [cond.value.title() for cond in self.conditions]
+        if len(condition_names) == 1:
+            condition_header = condition_names[0]
+        elif len(condition_names) == 2:
+            condition_header = f"{condition_names[0]} & {condition_names[1]}"
+        else:
+            condition_header = f"Multiple Conditions ({len(condition_names)})"
+            
+        messages.append(f"⚠️ **{condition_header}**")
+        
+        # Add details for each condition
+        for condition in self.conditions:
+            if props := CONDITION_PROPERTIES.get(condition):
+                emoji = props["emoji"]
+                status = props["status_message"]
+                messages.append(f"• {emoji} `{condition.value.title()}`: {status}")
+                
+                # Add first effect as a subpoint if available
+                if turn_effects := props.get("turn_effects", []):
+                    messages.append(f"  ↳ `{turn_effects[0]}`")
+                    if len(turn_effects) > 1:
+                        messages.append(f"  ↳ `+{len(turn_effects)-1} more effects`")
+                
+        # Add duration info
         if self.duration:
             turns = "turn" if self.duration == 1 else "turns"
-            duration_text = f"\n╰─ `{self.duration} {turns} remaining`"
             
-        return "\n".join(messages) + duration_text
+            # Calculate remaining if possible
+            if self.timing and hasattr(character, 'round_number'):
+                rounds_passed = character.round_number - self.timing.start_round
+                remaining = max(0, self.duration - rounds_passed)
+                messages.append(f"• `{remaining} {turns} remaining`")
+            else:
+                messages.append(f"• `Duration: {self.duration} {turns}`")
+        elif self.permanent:
+            messages.append("• `Permanent`")
+            
+        # Add source if available
+        if self.source:
+            messages.append(f"• `Source: {self.source}`")
+            
+        return "\n".join(messages)
 
     def to_dict(self) -> dict:
         """Convert to dictionary for storage"""

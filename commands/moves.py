@@ -11,6 +11,8 @@ Commands:
 - /move list: List a character's available moves
 - /move info: Show detailed information about a move
 - /move delete: Delete a move from a character's moveset
+- /say: Make the bot say a message directly in the channel
+- /embed: Create an embedded message in the channel
 """
 
 import discord
@@ -19,6 +21,7 @@ from discord.ext import commands
 import logging
 from typing import Optional, List, Literal
 import json
+from io import BytesIO
 
 from core.effects.move import MoveEffect, MoveState, RollTiming
 from core.effects.manager import apply_effect  # Import apply_effect directly
@@ -36,6 +39,105 @@ class MoveCommands(commands.GroupCog, name="move"):
         self.bot = bot
         self.action_handler = ActionHandler(bot)
         super().__init__()
+
+    @commands.command(name="say")
+    @commands.has_permissions(manage_messages=True)
+    async def say(self, ctx, *, message: str):
+        """
+        Have the bot say something in the channel.
+        This command posts the message directly without showing the command.
+        """
+        try:
+            # Delete the command message if we have permissions
+            try:
+                await ctx.message.delete()
+            except:
+                pass
+                
+            # Send the message directly to the channel
+            await ctx.send(message)
+        except Exception as e:
+            error_msg = handle_error(e, "Error sending message")
+            await ctx.send(error_msg, ephemeral=True)
+            
+    @app_commands.command(name="say")
+    @app_commands.describe(message="The message to say")
+    async def slash_say(self, interaction: discord.Interaction, message: str):
+        """Have the bot say something in the channel"""
+        try:
+            # Hide the command execution
+            await interaction.response.defer(ephemeral=True)
+            
+            # Send the message directly to the channel
+            await interaction.channel.send(message)
+            
+            # Send confirmation only to the command user
+            await interaction.followup.send("Message sent!", ephemeral=True)
+        except Exception as e:
+            error_msg = handle_error(e, "Error sending message")
+            await interaction.followup.send(error_msg, ephemeral=True)
+            
+    @app_commands.command(name="embed")
+    @app_commands.describe(
+        title="Embed title",
+        description="Embed description",
+        footer="Optional footer text",
+        color="Hex color code (e.g. #FF0000)",
+        attachment="Optional attachment file"
+    )
+    async def embed_message(
+        self, 
+        interaction: discord.Interaction, 
+        title: str,
+        description: str,
+        footer: Optional[str] = None,
+        color: Optional[str] = None,
+        attachment: Optional[discord.Attachment] = None
+    ):
+        """Create an embedded message"""
+        try:
+            await interaction.response.defer(ephemeral=True)
+            
+            # Parse color if provided
+            embed_color = discord.Color.blue()  # Default
+            if color:
+                try:
+                    if color.startswith('#'):
+                        color = color[1:]
+                    embed_color = discord.Color.from_rgb(
+                        int(color[0:2], 16),
+                        int(color[2:4], 16),
+                        int(color[4:6], 16)
+                    )
+                except:
+                    pass  # Keep default if parsing fails
+            
+            embed = discord.Embed(
+                title=title,
+                description=description,
+                color=embed_color
+            )
+            
+            if footer:
+                embed.set_footer(text=footer)
+            
+            # Handle attachment
+            file = None
+            if attachment:
+                file_data = await attachment.read()
+                file = discord.File(fp=BytesIO(file_data), filename=attachment.filename)
+                embed.set_image(url=f"attachment://{attachment.filename}")
+            
+            # Send the embed
+            if file:
+                await interaction.channel.send(embed=embed, file=file)
+            else:
+                await interaction.channel.send(embed=embed)
+            
+            await interaction.followup.send("Embed sent!", ephemeral=True)
+        except Exception as e:
+            error_msg = handle_error(e, "Error sending embed")
+            await interaction.followup.send(error_msg, ephemeral=True)
         
     @app_commands.command(name="use")
     @app_commands.describe(
@@ -181,11 +283,11 @@ class MoveCommands(commands.GroupCog, name="move"):
                 half_on_save=move_data.half_on_save,
                 roll_timing=actual_roll_timing,  # Use potentially overridden value
                 targets=target_chars,
-                enable_heat_tracking=move_data.enable_heat_tracking
+                enable_hit_bonus=move_data.enable_heat_tracking  # Use old param for compatibility
             )
             
             # Set the AoE mode if specified
-            move_effect.aoe_mode = aoe_mode
+            move_effect.combat.aoe_mode = aoe_mode
             
             # Use action stars
             char.use_move_stars(move_data.star_cost, move_data.name)
@@ -217,7 +319,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         target="Target character(s) (comma-separated for multiple targets)",
         mp_cost="MP cost (default: 0)",
         hp_cost="HP cost or healing if negative (default: 0)",
-        star_cost="Star cost (default: 1)",
+        star_cost="Star cost (default: 0)",  # Changed default to 0
         attack_roll="Attack roll expression (e.g., '1d20+int')",
         damage="Damage expression (e.g., '2d6 fire')",
         cast_time="Turns needed to cast (default: 0)",
@@ -225,7 +327,10 @@ class MoveCommands(commands.GroupCog, name="move"):
         cooldown="Turns before usable again (default: 0)",
         roll_timing="When to process attack roll (instant, active, per_turn)",
         aoe_mode="AoE mode: 'single' (one roll) or 'multi' (roll per target)",
-        advanced_json="Optional JSON with advanced parameters (save_type, half_on_save, etc.)"
+        save_type="Save ability (STR, DEX, CON, INT, WIS, CHA)",
+        save_dc="Save DC expression (e.g., '8+prof+int')",
+        half_on_save="Whether save halves damage (True/False)",
+        advanced_json="Optional JSON with other advanced parameters"
     )
     async def temp_move(
         self, 
@@ -237,7 +342,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         target: Optional[str] = None,
         mp_cost: Optional[int] = 0,
         hp_cost: Optional[int] = 0, 
-        star_cost: Optional[int] = 1,
+        star_cost: Optional[int] = 0,  # Changed default to 0
         attack_roll: Optional[str] = None,
         damage: Optional[str] = None,
         cast_time: Optional[int] = None,
@@ -245,12 +350,16 @@ class MoveCommands(commands.GroupCog, name="move"):
         cooldown: Optional[int] = None,
         roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
         aoe_mode: Optional[Literal["single", "multi"]] = "single",
+        save_type: Optional[Literal["STR", "DEX", "CON", "INT", "WIS", "CHA"]] = None,
+        save_dc: Optional[str] = None,
+        half_on_save: Optional[bool] = False,
+        hit_bonus_value: Optional[int] = 1,
         advanced_json: Optional[str] = None
     ):
         """
         Create and use a temporary one-time move.
         This creates an effect but does NOT save to the moveset.
-        Use advanced_json for specialized parameters like save_type, half_on_save, etc.
+        Use advanced_json for specialized parameters.
         """
         try:
             await interaction.response.defer()
@@ -277,6 +386,9 @@ class MoveCommands(commands.GroupCog, name="move"):
                 attack_roll=attack_roll,
                 damage=damage,
                 aoe_mode=aoe_mode,
+                save_type=save_type,
+                save_dc=save_dc,
+                half_on_save=half_on_save,
                 advanced_json=advanced_json
             )                
 
@@ -339,16 +451,18 @@ class MoveCommands(commands.GroupCog, name="move"):
                 damage=damage,
                 targets=target_chars,
                 roll_timing=roll_timing,
-                # Advanced parameters from JSON
+                # Save parameters
+                save_type=save_type.lower() if save_type else advanced_params.get('save_type'),
+                save_dc=save_dc or advanced_params.get('save_dc'),
+                half_on_save=half_on_save or advanced_params.get('half_on_save', False),
+                # Additional advanced parameters
                 crit_range=advanced_params.get('crit_range', 20),
-                save_type=advanced_params.get('save_type'),
-                save_dc=advanced_params.get('save_dc'),
-                half_on_save=advanced_params.get('half_on_save', False),
-                enable_heat_tracking=advanced_params.get('enable_heat_tracking', False)
+                enable_hit_bonus=advanced_params.get('enable_hit_bonus', False),
+                hit_bonus_value=advanced_params.get('hit_bonus_value', hit_bonus_value)
             )
             
             # Set the AoE mode if specified
-            move_effect.aoe_mode = aoe_mode
+            move_effect.combat.aoe_mode = aoe_mode
             
             # Use action stars
             char.use_move_stars(star_cost, name)
@@ -375,7 +489,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         category="Move category (REQUIRED)",
         mp_cost="MP cost (default: 0)",
         hp_cost="HP cost or healing if negative (default: 0)",
-        star_cost="Star cost (default: 1)",
+        star_cost="Star cost (default: 0)",  # Changed default to 0
         attack_roll="Attack roll expression (e.g., '1d20+int')",
         damage="Damage expression (e.g., '2d6 fire')",
         cast_time="Turns needed to cast (default: 0)",
@@ -383,7 +497,10 @@ class MoveCommands(commands.GroupCog, name="move"):
         cooldown="Turns before usable again (default: 0)",
         roll_timing="When to process attack roll (instant, active, per_turn)",
         uses="Number of uses (-1 for unlimited)",
-        advanced_json="Optional JSON with advanced parameters (save_type, half_on_save, etc.)"
+        save_type="Save ability (STR, DEX, CON, INT, WIS, CHA)",
+        save_dc="Save DC expression (e.g., '8+prof+int')",
+        half_on_save="Whether save halves damage (True/False)",
+        advanced_json="Optional JSON with other advanced parameters"
     )
     async def create_move(
         self,
@@ -394,7 +511,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         category: Literal["Offense", "Utility", "Defense", "Other"],
         mp_cost: Optional[int] = 0,
         hp_cost: Optional[int] = 0,
-        star_cost: Optional[int] = 1,
+        star_cost: Optional[int] = 0,  # Changed default to 0
         attack_roll: Optional[str] = None,
         damage: Optional[str] = None,
         cast_time: Optional[int] = None,
@@ -402,11 +519,14 @@ class MoveCommands(commands.GroupCog, name="move"):
         cooldown: Optional[int] = None,
         roll_timing: Optional[Literal["instant", "active", "per_turn"]] = "active",
         uses: Optional[int] = -1,
+        save_type: Optional[Literal["STR", "DEX", "CON", "INT", "WIS", "CHA"]] = None,
+        save_dc: Optional[str] = None,
+        half_on_save: Optional[bool] = False,
         advanced_json: Optional[str] = None
     ):
         """
         Create and add a permanent move to a character's moveset.
-        Use advanced_json for specialized parameters like save_type, half_on_save, etc.
+        Use advanced_json for specialized parameters.
         """
         try:
             await interaction.response.defer()
@@ -443,15 +563,16 @@ class MoveCommands(commands.GroupCog, name="move"):
                 attack_roll=attack_roll,
                 damage=damage,
                 category=category,
-                roll_timing=roll_timing,  # Added roll_timing parameter
+                roll_timing=roll_timing,
+                # Save parameters
+                save_type=save_type.lower() if save_type else advanced_params.get('save_type'),
+                save_dc=save_dc or advanced_params.get('save_dc'),
+                half_on_save=half_on_save or advanced_params.get('half_on_save', False),
                 # Advanced parameters from JSON
                 crit_range=advanced_params.get('crit_range', 20),
-                save_type=advanced_params.get('save_type'),
-                save_dc=advanced_params.get('save_dc'),
-                half_on_save=advanced_params.get('half_on_save', False),
                 conditions=advanced_params.get('conditions', []),
-                enable_heat_tracking=advanced_params.get('enable_heat_tracking', False),
-                target_selection=advanced_params.get('target_selection', 'manual')
+                enable_heat_tracking=advanced_params.get('enable_hit_bonus', False) or 
+                                    advanced_params.get('enable_heat_tracking', False)
             )
             
             # Add to character's moveset
@@ -509,22 +630,26 @@ class MoveCommands(commands.GroupCog, name="move"):
             if attack_details:
                 details.append("• `" + " | ".join(attack_details) + "`")
                 
+            # Add save info if applicable
+            save_details = []
+            if save_type:
+                save_details.append(f"Save: {save_type}")
+            if save_dc:
+                save_details.append(f"DC: {save_dc}")
+            if half_on_save:
+                save_details.append(f"Half damage on save")
+                
+            if save_details:
+                details.append("• `" + " | ".join(save_details) + "`")
+                
             # Add advanced params summary if used
             if advanced_json:
                 adv_summary = []
-                if advanced_params.get('save_type'):
-                    save_info = f"{advanced_params['save_type'].upper()} Save"
-                    if advanced_params.get('save_dc'):
-                        save_info += f" (DC: {advanced_params['save_dc']})"
-                    if advanced_params.get('half_on_save'):
-                        save_info += " (Half on save)"
-                    adv_summary.append(save_info)
-                
                 if advanced_params.get('crit_range', 20) != 20:
                     adv_summary.append(f"Crit: {advanced_params['crit_range']}-20")
                 
-                if advanced_params.get('enable_heat_tracking'):
-                    adv_summary.append("Heat tracking enabled")
+                if advanced_params.get('enable_hit_bonus', False) or advanced_params.get('enable_heat_tracking', False):
+                    adv_summary.append("Star bonus on hit")
                 
                 if adv_summary:
                     details.append("• `Advanced: " + " | ".join(adv_summary) + "`")

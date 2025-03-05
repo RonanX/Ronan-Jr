@@ -111,6 +111,33 @@ class ActionStars:
             "last_refresh_round": self.last_refresh_round
         }
 
+    def add_bonus_stars(self, amount: int) -> int:
+        """
+        Add bonus stars to the character's current stars.
+        
+        These are additional stars earned from successful attacks or other
+        special actions, separate from the normal star refresh.
+        
+        Args:
+            amount: Number of bonus stars to add
+            
+        Returns:
+            New total star count
+        """
+        if amount <= 0:
+            return self.current_stars
+            
+        # Add stars up to maximum
+        old_stars = self.current_stars
+        self.current_stars = min(self.max_stars, self.current_stars + amount)
+        
+        # Log the bonus
+        added = self.current_stars - old_stars
+        if added > 0:
+            print(f"Added {added} bonus stars")
+            
+        return self.current_stars
+
     @classmethod
     def from_dict(cls, data: dict) -> 'ActionStars':
         """Create from dictionary data"""

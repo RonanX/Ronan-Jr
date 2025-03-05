@@ -31,6 +31,7 @@ class BurnEffect(BaseEffect):
             category=EffectCategory.COMBAT
         )
         self.damage = damage
+        self.last_damage = 0  # Track last damage dealt for messages
         
     def _roll_damage(self, character) -> int:
         """Roll damage if dice notation, otherwise return static value"""
@@ -40,42 +41,147 @@ class BurnEffect(BaseEffect):
         return int(self.damage)
 
     def on_apply(self, character, round_number: int) -> str:
+        """Apply burn effect with formatted message"""
         self.initialize_timing(round_number, character.name)
-        duration_text = f" for {self.duration} rounds" if self.duration else " permanently"
-        return f"🔥 Applied burn effect to {character.name} ({self.damage} damage/turn){duration_text} 🔥"
+        
+        # Format duration text
+        duration_text = ""
+        if self.duration:
+            turns = "turn" if self.duration == 1 else "turns"
+            duration_text = f"for {self.duration} {turns}"
+        elif self.permanent:
+            duration_text = "permanently"
+        
+        # Return formatted message using base class method
+        return self.format_effect_message(
+            f"{character.name} is burning",
+            [
+                f"Taking {self.damage} fire damage per turn",
+                duration_text
+            ],
+            emoji="🔥"
+        )
 
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
         """Process burn damage at start of affected character's turn"""
-        if character.name == turn_name:
-            # Check if we've already used all our rounds
-            rounds_completed = round_number - self.timing.start_round
-            if rounds_completed >= self.duration:
-                return []
+        if character.name != turn_name:
+            return []
+            
+        # Skip if rounds completed exceeds duration
+        rounds_completed = round_number - self.timing.start_round
+        if not self.permanent and self.duration and rounds_completed >= self.duration:
+            return []
                 
-            # Roll/calculate damage
-            damage = self._roll_damage(character)
+        # Roll/calculate damage
+        damage = self._roll_damage(character)
+        self.last_damage = damage
+        
+        # Apply damage
+        old_hp = character.resources.current_hp
+        
+        # Handle temp HP first
+        absorbed = 0
+        if character.resources.current_temp_hp > 0:
+            absorbed = min(character.resources.current_temp_hp, damage)
+            character.resources.current_temp_hp -= absorbed
+            damage -= absorbed
             
-            # Apply damage
-            old_hp = character.resources.current_hp
-            character.resources.current_hp = max(0, old_hp - damage)
-            
-            return [
-                f"{character.name} takes {damage} fire damage from burn",
-                f"{character.name} now at {character.resources.current_hp}/{character.resources.max_hp} HP"
-            ]
-        return []
+        # Apply remaining damage to regular HP
+        character.resources.current_hp = max(0, character.resources.current_hp - damage)
+        
+        # Create message details
+        details = []
+        if absorbed > 0:
+            details.append(f"{absorbed} absorbed by temp HP")
+        details.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
+        
+        # Get duration info
+        if not self.permanent and self.duration:
+            turns_remaining = max(0, self.duration - rounds_completed)
+            if turns_remaining > 0:
+                plural = "s" if turns_remaining != 1 else ""
+                details.append(f"{turns_remaining} turn{plural} remaining")
+        
+        # Return formatted message
+        return [self.format_effect_message(
+            f"{character.name} takes {self.last_damage} fire damage from burn",
+            details,
+            emoji="🔥"
+        )]
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """Handle duration tracking at end of turn"""
-        if character.name == turn_name and not self.permanent:
-            rounds_completed = round_number - self.timing.start_round
-            if turn_name == self.timing.start_turn:
-                rounds_completed += 1
-            rounds_remaining = max(0, self.duration - rounds_completed)
+        if character.name != turn_name or self.permanent:
+            return []
             
-            if rounds_remaining > 0:
-                return [f"Burn will last {rounds_remaining} more round{'s' if rounds_remaining != 1 else ''}"]
+        # Calculate remaining turns
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        
+        # Format message based on remaining duration
+        if should_expire:
+            return [self.format_effect_message(
+                f"Burn effect will wear off from {character.name}",
+                emoji="🔥"
+            )]
+        elif turns_remaining > 0:
+            return [self.format_effect_message(
+                f"Burn effect continues",
+                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
+                emoji="🔥"
+            )]
+            
         return []
+    
+    def on_expire(self, character) -> str:
+        """Clean message when effect expires"""
+        return self.format_effect_message(
+            f"Burn effect has worn off from {character.name}",
+            emoji="🔥"
+        )
+        
+    def get_status_text(self, character) -> str:
+        """Format status text for character sheet display"""
+        lines = [f"🔥 **{self.name}**"]
+        
+        # Add damage info
+        lines.append(f"• `Damage: {self.damage} per turn`")
+        if self.last_damage:
+            lines.append(f"• `Last damage: {self.last_damage}`")
+            
+        # Add duration info
+        if self.timing and self.timing.duration is not None:
+            if hasattr(character, 'round_number'):
+                rounds_passed = character.round_number - self.timing.start_round
+                remaining = max(0, self.timing.duration - rounds_passed)
+                lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
+        elif self.permanent:
+            lines.append("• `Permanent`")
+            
+        return "\n".join(lines)
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary for storage"""
+        data = super().to_dict()
+        data.update({
+            "damage": self.damage,
+            "last_damage": self.last_damage
+        })
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'BurnEffect':
+        """Create from dictionary data"""
+        effect = cls(
+            damage=data.get('damage', "1d4"),
+            duration=data.get('duration')
+        )
+        effect.last_damage = data.get('last_damage', 0)
+        
+        # Restore timing if it exists
+        if timing_data := data.get('timing'):
+            effect.timing = EffectTiming(**timing_data)
+            
+        return effect
     
 class SourceHeatWaveEffect(BaseEffect):
     """
@@ -556,10 +662,22 @@ class DamageCalculator:
         )
 
 class ResistanceEffect(BaseEffect):
-    """Adds resistance to specific damage types"""
+    """
+    Adds resistance to specific damage types.
+    
+    Features:
+    - Supports percentage-based resistance
+    - Combines with existing resistances (natural and other effects)
+    - Visual feedback during combat
+    - Proper duration tracking
+    """
     def __init__(self, damage_type: str, percentage: int, duration: Optional[int] = None):
         name = f"{damage_type.title()} Resistance"
-        super().__init__(name=name, duration=duration, category=EffectCategory.COMBAT)
+        super().__init__(
+            name=name, 
+            duration=duration, 
+            category=EffectCategory.COMBAT
+        )
         self.damage_type = DamageType.from_string(damage_type)
         self.percentage = percentage
 
@@ -574,10 +692,86 @@ class ResistanceEffect(BaseEffect):
         total = character.defense.get_total_resistance(str(self.damage_type))
         natural = character.defense.natural_resistances.get(str(self.damage_type), 0)
         
-        # Format message based on natural resistance
+        # Create details for message
+        details = []
+        
+        # Add natural resistance info if any
         if natural > 0:
-            return f"🛡️ {character.name} gains {self.percentage}% {self.damage_type} resistance (Total: {total}% with natural resistance)"
-        return f"🛡️ {character.name} gains {self.percentage}% {self.damage_type} resistance"
+            details.append(f"Natural resistance: {natural}%")
+            details.append(f"Effect resistance: {self.percentage}%")
+            details.append(f"Total resistance: {total}%")
+        else:
+            details.append(f"Resistance: {self.percentage}%")
+            
+        # Add duration info
+        if self.duration:
+            details.append(f"Duration: {self.duration} turns")
+        elif self.permanent:
+            details.append("Duration: Permanent")
+        
+        # Return formatted message
+        return self.format_effect_message(
+            f"{character.name} gains {self.damage_type} resistance",
+            details,
+            emoji="🛡️"
+        )
+
+    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Display resistance effect at start of character's turn"""
+        if character.name != turn_name:
+            return []
+            
+        # Calculate total resistance
+        total = character.defense.get_total_resistance(str(self.damage_type))
+        natural = character.defense.natural_resistances.get(str(self.damage_type), 0)
+        effect = character.defense.damage_resistances.get(str(self.damage_type), 0)
+        
+        # Format details
+        details = []
+        
+        # Add resistance breakdown
+        if natural > 0:
+            details.append(f"Natural: {natural}% | Effect: {effect}% | Total: {total}%")
+        else:
+            details.append(f"Resistance: {self.percentage}%")
+            
+        # Add duration info if applicable
+        if not self.permanent and self.duration:
+            rounds_completed = round_number - self.timing.start_round
+            turns_remaining = max(0, self.duration - rounds_completed)
+            if turns_remaining > 0:
+                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+        
+        # Return formatted message
+        return [self.format_effect_message(
+            f"{character.name} resists {self.damage_type} damage",
+            details,
+            emoji="🛡️"
+        )]
+
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Track duration and show expiry warning"""
+        if character.name != turn_name or self.permanent:
+            return []
+            
+        # Calculate remaining turns
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        
+        # Create expiry warning if needed
+        if should_expire:
+            return [self.format_effect_message(
+                f"{self.damage_type} resistance will wear off from {character.name}",
+                emoji="🛡️"
+            )]
+        elif turns_remaining > 0:
+            # Format with duration
+            return [self.format_effect_message(
+                f"{self.damage_type} resistance continues",
+                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
+                emoji="🛡️"
+            )]
+            
+        return []
 
     def on_expire(self, character) -> str:
         """Remove resistance and show remaining"""
@@ -586,10 +780,24 @@ class ResistanceEffect(BaseEffect):
             
             # Check remaining resistance
             natural = character.defense.natural_resistances.get(str(self.damage_type), 0)
+            
+            # Format message based on natural resistance
             if natural > 0:
-                return f"🛡️ {self.damage_type} resistance effect expired from {character.name} (Natural {natural}% remains)"
-            return f"🛡️ {self.damage_type} resistance expired from {character.name}"
-        return ""
+                return self.format_effect_message(
+                    f"{self.damage_type} resistance expired from {character.name}",
+                    [f"Natural {natural}% resistance remains"],
+                    emoji="🛡️"
+                )
+                
+            return self.format_effect_message(
+                f"{self.damage_type} resistance expired from {character.name}",
+                emoji="🛡️"
+            )
+            
+        return self.format_effect_message(
+            f"{self.damage_type} resistance expired from {character.name}",
+            emoji="🛡️"
+        )
 
     def get_status_text(self, character) -> str:
         """Format resistance status for character sheet"""
@@ -601,15 +809,21 @@ class ResistanceEffect(BaseEffect):
         # Show breakdown if there's natural resistance
         if natural > 0:
             text.extend([
-                f"• Natural: {natural}%",
-                f"• Effect: {self.percentage}%",
-                f"• Total: {total}%"
+                f"• `Natural: {natural}%`",
+                f"• `Effect: {self.percentage}%`",
+                f"• `Total: {total}%`"
             ])
         else:
-            text.append(f"• Amount: {self.percentage}%")
+            text.append(f"• `Amount: {self.percentage}%`")
             
-        if self.duration:
-            text.append(f"• Duration: {self.duration} turns")
+        # Add duration info
+        if self.timing and self.timing.duration is not None:
+            if hasattr(character, 'round_number'):
+                rounds_passed = character.round_number - self.timing.start_round
+                remaining = max(0, self.timing.duration - rounds_passed)
+                text.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
+        elif self.permanent:
+            text.append("• `Permanent`")
             
         return "\n".join(text)
 
@@ -636,10 +850,22 @@ class ResistanceEffect(BaseEffect):
         return effect
 
 class VulnerabilityEffect(BaseEffect):
-    """Adds vulnerability to specific damage types"""
+    """
+    Adds vulnerability to specific damage types.
+    
+    Features:
+    - Supports percentage-based vulnerability
+    - Combines with existing vulnerabilities (natural and other effects)
+    - Visual feedback during combat
+    - Proper duration tracking
+    """
     def __init__(self, damage_type: str, percentage: int, duration: Optional[int] = None):
         name = f"{damage_type.title()} Vulnerability"
-        super().__init__(name=name, duration=duration, category=EffectCategory.COMBAT)
+        super().__init__(
+            name=name, 
+            duration=duration, 
+            category=EffectCategory.COMBAT
+        )
         self.damage_type = DamageType.from_string(damage_type)
         self.percentage = percentage
 
@@ -654,10 +880,86 @@ class VulnerabilityEffect(BaseEffect):
         total = character.defense.get_total_vulnerability(str(self.damage_type))
         natural = character.defense.natural_vulnerabilities.get(str(self.damage_type), 0)
         
-        # Format message based on natural vulnerability
+        # Create details for message
+        details = []
+        
+        # Add natural vulnerability info if any
         if natural > 0:
-            return f"⚔️ {character.name} gains {self.percentage}% {self.damage_type} vulnerability (Total: {total}% with natural vulnerability)"
-        return f"⚔️ {character.name} gains {self.percentage}% {self.damage_type} vulnerability"
+            details.append(f"Natural vulnerability: {natural}%")
+            details.append(f"Effect vulnerability: {self.percentage}%")
+            details.append(f"Total vulnerability: {total}%")
+        else:
+            details.append(f"Vulnerability: {self.percentage}%")
+            
+        # Add duration info
+        if self.duration:
+            details.append(f"Duration: {self.duration} turns")
+        elif self.permanent:
+            details.append("Duration: Permanent")
+        
+        # Return formatted message
+        return self.format_effect_message(
+            f"{character.name} gains {self.damage_type} vulnerability",
+            details,
+            emoji="⚠️"
+        )
+
+    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Display vulnerability effect at start of character's turn"""
+        if character.name != turn_name:
+            return []
+            
+        # Calculate total vulnerability
+        total = character.defense.get_total_vulnerability(str(self.damage_type))
+        natural = character.defense.natural_vulnerabilities.get(str(self.damage_type), 0)
+        effect = character.defense.damage_vulnerabilities.get(str(self.damage_type), 0)
+        
+        # Format details
+        details = []
+        
+        # Add vulnerability breakdown
+        if natural > 0:
+            details.append(f"Natural: {natural}% | Effect: {effect}% | Total: {total}%")
+        else:
+            details.append(f"Vulnerability: {self.percentage}%")
+            
+        # Add duration info if applicable
+        if not self.permanent and self.duration:
+            rounds_completed = round_number - self.timing.start_round
+            turns_remaining = max(0, self.duration - rounds_completed)
+            if turns_remaining > 0:
+                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+        
+        # Return formatted message
+        return [self.format_effect_message(
+            f"{character.name} vulnerable to {self.damage_type} damage",
+            details,
+            emoji="⚠️"
+        )]
+
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Track duration and show expiry warning"""
+        if character.name != turn_name or self.permanent:
+            return []
+            
+        # Calculate remaining turns
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        
+        # Create expiry warning if needed
+        if should_expire:
+            return [self.format_effect_message(
+                f"{self.damage_type} vulnerability will wear off from {character.name}",
+                emoji="⚠️"
+            )]
+        elif turns_remaining > 0:
+            # Format with duration
+            return [self.format_effect_message(
+                f"{self.damage_type} vulnerability continues",
+                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
+                emoji="⚠️"
+            )]
+            
+        return []
 
     def on_expire(self, character) -> str:
         """Remove vulnerability and show remaining"""
@@ -666,30 +968,50 @@ class VulnerabilityEffect(BaseEffect):
             
             # Check remaining vulnerability
             natural = character.defense.natural_vulnerabilities.get(str(self.damage_type), 0)
+            
+            # Format message based on natural vulnerability
             if natural > 0:
-                return f"⚔️ {self.damage_type} vulnerability effect expired from {character.name} (Natural {natural}% remains)"
-            return f"⚔️ {self.damage_type} vulnerability expired from {character.name}"
-        return ""
+                return self.format_effect_message(
+                    f"{self.damage_type} vulnerability expired from {character.name}",
+                    [f"Natural {natural}% vulnerability remains"],
+                    emoji="⚠️"
+                )
+                
+            return self.format_effect_message(
+                f"{self.damage_type} vulnerability expired from {character.name}",
+                emoji="⚠️"
+            )
+            
+        return self.format_effect_message(
+            f"{self.damage_type} vulnerability expired from {character.name}",
+            emoji="⚠️"
+        )
 
     def get_status_text(self, character) -> str:
         """Format vulnerability status for character sheet"""
         total = character.defense.get_total_vulnerability(str(self.damage_type))
         natural = character.defense.natural_vulnerabilities.get(str(self.damage_type), 0)
         
-        text = [f"⚔️ **{self.damage_type.title()} Vulnerability**"]
+        text = [f"⚠️ **{self.damage_type.title()} Vulnerability**"]
         
         # Show breakdown if there's natural vulnerability
         if natural > 0:
             text.extend([
-                f"• Natural: {natural}%",
-                f"• Effect: {self.percentage}%",
-                f"• Total: {total}%"
+                f"• `Natural: {natural}%`",
+                f"• `Effect: {self.percentage}%`",
+                f"• `Total: {total}%`"
             ])
         else:
-            text.append(f"• Amount: {self.percentage}%")
+            text.append(f"• `Amount: {self.percentage}%`")
             
-        if self.duration:
-            text.append(f"• Duration: {self.duration} turns")
+        # Add duration info
+        if self.timing and self.timing.duration is not None:
+            if hasattr(character, 'round_number'):
+                rounds_passed = character.round_number - self.timing.start_round
+                remaining = max(0, self.timing.duration - rounds_passed)
+                text.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
+        elif self.permanent:
+            text.append("• `Permanent`")
             
         return "\n".join(text)
 

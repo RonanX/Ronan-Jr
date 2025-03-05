@@ -8,6 +8,8 @@ Key Features:
 - Clear state transitions with proper timing
 - Consistent turn counting
 - Extensive debug logging
+- Immediate attack roll processing for instant moves
+- Support for saving throws with proper feedback
 
 IMPLEMENTATION MANDATES:
 - Always track absolute rounds for transition timing
@@ -21,10 +23,12 @@ from enum import Enum, auto
 import logging
 import inspect
 import time
+import random
 
 from core.effects.base import BaseEffect, EffectCategory, EffectTiming
 from core.effects.condition import ConditionType
 from utils.advanced_dice.calculator import DiceCalculator
+from core.character import StatType
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +40,7 @@ class MoveState(Enum):
     COOLDOWN = "cooldown"   # In cooldown phase
 
 class RollTiming(Enum):
-    """When to process attack/damage rolls"""
+    """When to process attack rolls"""
     INSTANT = "instant"     # Roll immediately on use
     ACTIVE = "active"       # Roll when active phase starts
     PER_TURN = "per_turn"   # Roll each turn during duration
@@ -182,6 +186,167 @@ class MoveStateMachine:
         sm.last_processed_turn = data.get('last_processed_turn')
         return sm
 
+class SavingThrowProcessor:
+    """
+    Handles saving throw mechanics for effects.
+    
+    Processes saving throws against DCs with:
+    - Support for all save types (STR, DEX, etc.)
+    - Formatted messages for save results
+    - Optional damage application
+    - Half-damage on successful save option
+    """
+    def __init__(self, debug_mode=True):
+        self.debug_mode = debug_mode
+        self.targets_saved = set()
+        self.last_save_round = None
+        
+    def debug_print(self, message):
+        """Print debug messages if debug mode is enabled"""
+        if self.debug_mode:
+            print(f"[SavingThrowProcessor] {message}")
+            
+    async def process_save(self,
+                         source, 
+                         targets,
+                         save_type: str,
+                         save_dc: str,
+                         effect_name: str,
+                         half_on_save: bool = False,
+                         damage: Optional[str] = None) -> List[str]:
+        """
+        Process saving throws for targets.
+        
+        Args:
+            source: Character causing the save
+            targets: List of characters making saves
+            save_type: Type of save (str, dex, con, etc.)
+            save_dc: DC expression (e.g. "8+prof+int")
+            effect_name: Name of the effect
+            half_on_save: Whether successful save halves damage
+            damage: Optional damage to apply on failure
+            
+        Returns:
+            List of formatted message strings
+        """
+        # Skip if no targets or save type
+        if not targets or not save_type:
+            return []
+            
+        # Track when we last processed saves
+        self.last_save_round = getattr(source, 'round_number', None)
+            
+        # Import utility functions
+        from utils.dice import DiceRoller
+        
+        self.debug_print(f"Processing saves for {len(targets)} targets")
+        messages = []
+        
+        # Calculate actual DC
+        dc_value = 10  # Default DC
+        if save_dc:
+            # Parse expressions like "8+prof+int"
+            try:
+                parts = save_dc.lower().replace(" ", "").split("+")
+                dc_value = 0
+                
+                for part in parts:
+                    if part.isdigit():
+                        dc_value += int(part)
+                    elif part == "prof":
+                        dc_value += source.base_proficiency
+                    elif part in ["str", "strength"]:
+                        dc_value += source.stats.get_modifier(StatType.STRENGTH)
+                    elif part in ["dex", "dexterity"]:
+                        dc_value += source.stats.get_modifier(StatType.DEXTERITY)
+                    elif part in ["con", "constitution"]:
+                        dc_value += source.stats.get_modifier(StatType.CONSTITUTION)
+                    elif part in ["int", "intelligence"]:
+                        dc_value += source.stats.get_modifier(StatType.INTELLIGENCE)
+                    elif part in ["wis", "wisdom"]:
+                        dc_value += source.stats.get_modifier(StatType.WISDOM)
+                    elif part in ["cha", "charisma"]:
+                        dc_value += source.stats.get_modifier(StatType.CHARISMA)
+            except Exception as e:
+                self.debug_print(f"Error parsing save DC: {e}")
+                
+        self.debug_print(f"Calculated DC: {dc_value}")
+            
+        # Format a single message with all save results
+        main_message = f"{save_type.upper()} Save DC {dc_value} | {effect_name}"
+        
+        # Process each target's save
+        target_results = []
+        for target in targets:
+            # Get save modifier based on type
+            save_mod = 0
+            if save_type.lower() in ["str", "strength"]:
+                save_mod = target.saves.get(StatType.STRENGTH, 0)
+            elif save_type.lower() in ["dex", "dexterity"]:
+                save_mod = target.saves.get(StatType.DEXTERITY, 0)
+            elif save_type.lower() in ["con", "constitution"]:
+                save_mod = target.saves.get(StatType.CONSTITUTION, 0)
+            elif save_type.lower() in ["int", "intelligence"]:
+                save_mod = target.saves.get(StatType.INTELLIGENCE, 0)
+            elif save_type.lower() in ["wis", "wisdom"]:
+                save_mod = target.saves.get(StatType.WISDOM, 0)
+            elif save_type.lower() in ["cha", "charisma"]:
+                save_mod = target.saves.get(StatType.CHARISMA, 0)
+                
+            # Roll the save
+            roll_result = random.randint(1, 20)
+            total = roll_result + save_mod
+            
+            # Check if save succeeds
+            success = total >= dc_value
+            if success:
+                self.targets_saved.add(target.name)
+                
+            # Format target result
+            result_text = f"{target.name}: {roll_result}+{save_mod}={total} | {'✅' if success else '❌'}"
+            
+            # Handle damage if applicable
+            if damage:
+                damage_dealt = 0
+                
+                if not success:
+                    # Full damage on failure
+                    damage_roll, _ = DiceRoller.roll_dice(damage, target)
+                    damage_dealt = damage_roll
+                elif half_on_save:
+                    # Half damage on success with half_on_save
+                    damage_roll, _ = DiceRoller.roll_dice(damage, target)
+                    damage_dealt = damage_roll // 2
+                    result_text += f" | Half dmg: {damage_dealt}"
+                
+                # Apply the damage
+                if damage_dealt > 0:
+                    # Handle any temp HP first
+                    if target.resources.current_temp_hp > 0:
+                        absorbed = min(target.resources.current_temp_hp, damage_dealt)
+                        target.resources.current_temp_hp -= absorbed
+                        damage_dealt -= absorbed
+                        
+                        if absorbed > 0:
+                            result_text += f" | {absorbed} absorbed"
+                    
+                    # Apply remaining damage to regular HP
+                    if damage_dealt > 0:
+                        old_hp = target.resources.current_hp
+                        target.resources.current_hp = max(0, old_hp - damage_dealt)
+                        
+                        if not success:
+                            result_text += f" | {damage_dealt} damage"
+            
+            target_results.append(result_text)
+            
+        # Format final message with all results
+        if target_results:
+            formatted = f"🎯 `{main_message}` 🎯\n" + "\n".join(f"• `{result}`" for result in target_results)
+            messages.append(formatted)
+            
+        return messages
+
 class CombatProcessor:
     """
     Handles attack rolls and damage calculations.
@@ -190,7 +355,7 @@ class CombatProcessor:
     - Attack roll processing
     - Target handling
     - Damage calculation
-    - Heat tracking
+    - Hit tracking 
     
     Supports both sync and async patterns for flexibility.
     """
@@ -212,7 +377,8 @@ class CombatProcessor:
                            damage,
                            crit_range,
                            reason,
-                           enable_heat_tracking=False) -> List[str]:
+                           enable_hit_bonus=False,
+                           hit_bonus_value=1) -> List[str]:
         """Process attack roll and damage"""
         # Skip if no attack roll defined
         if not attack_roll:
@@ -260,7 +426,7 @@ class CombatProcessor:
         message, hit_results = await AttackCalculator.process_attack(params)
         messages.append(message)
         
-        # Process hit tracking for heat mechanic
+        # Process hit tracking
         if hit_results:
             # Extract hit targets
             for target_name, hit_data in hit_results.items():
@@ -268,23 +434,21 @@ class CombatProcessor:
                     self.targets_hit.add(target_name)
                     self.debug_print(f"Target hit: {target_name}")
         
-        # Handle heat tracking if enabled
-        if enable_heat_tracking and self.targets_hit:
-            # Source heat (attunement)
-            if not hasattr(source, 'heat_stacks'):
-                source.heat_stacks = 0
-            
-            source.heat_stacks += 1
-            self.debug_print(f"Source heat increased to {source.heat_stacks}")
-            
-            # Target heat (vulnerability) for each hit target
-            for target_name in self.targets_hit:
-                target = next((t for t in targets if t.name == target_name), None)
-                if target:
-                    if not hasattr(target, 'heat_stacks'):
-                        target.heat_stacks = 0
-                    target.heat_stacks += 1
-                    self.debug_print(f"Target {target_name} heat increased to {target.heat_stacks}")
+        # Handle hit bonus tracking if enabled
+        if enable_hit_bonus and self.targets_hit:
+            # Calculate bonus based on hits, applying the custom value
+            hit_count = len(self.targets_hit)
+            if hit_count > 0:
+                total_bonus = hit_count * hit_bonus_value
+                bonus_message = f"🎯 `{source.name} gains {total_bonus} star bonus from {hit_count} successful hits!`"
+                messages.append(bonus_message)
+                
+                # Access action stars if available and apply bonus
+                if hasattr(source, 'action_stars') and hasattr(source.action_stars, 'add_bonus_stars'):
+                    source.action_stars.add_bonus_stars(total_bonus)
+                elif hasattr(source, 'action_stars') and hasattr(source.action_stars, 'add_stars'):
+                    # Fallback to add_stars if add_bonus_stars doesn't exist
+                    source.action_stars.add_stars(total_bonus)
         
         return messages
 
@@ -296,7 +460,9 @@ class MoveEffect(BaseEffect):
     - Direct state transitions
     - Predictable turn counting
     - Proper resource handling
-    - Debug-friendly implementation
+    - Immediate attack roll processing for instant moves
+    - Support for saving throws
+    - Hit bonus tracking (replacing heat tracking)
     """
     def __init__(
             self,
@@ -319,15 +485,18 @@ class MoveEffect(BaseEffect):
             roll_timing: str = "active",
             uses: Optional[int] = None,
             targets: Optional[List['Character']] = None,
-            enable_heat_tracking: bool = False
+            enable_hit_bonus: bool = False,
+            enable_heat_tracking: bool = False,  # Added for backward compatibility
+            hit_bonus_value: int = 1  # Added for customizing bonus amount
         ):
-            # Create specialized state machine and combat processor
+            # Create specialized state machine and processors
             self.debug_mode = True
             self.debug_id = f"MoveEffect-{int(time.time() * 1000) % 10000}"
             self.debug_print(f"Initializing {name}")
             
             self.state_machine = MoveStateMachine(cast_time, duration, cooldown, self.debug_mode)
             self.combat = CombatProcessor(self.debug_mode)
+            self.saves = SavingThrowProcessor(self.debug_mode)
             
             # Set initial duration based on state machine
             initial_duration = self.state_machine.get_remaining_turns()
@@ -357,6 +526,8 @@ class MoveEffect(BaseEffect):
             self.attack_roll = attack_roll
             self.damage = damage
             self.crit_range = crit_range
+            
+            # Save parameters
             self.save_type = save_type
             self.save_dc = save_dc
             self.half_on_save = half_on_save
@@ -374,14 +545,17 @@ class MoveEffect(BaseEffect):
             # Additional properties
             self.cast_description = cast_description
             self.targets = targets or []
-            self.enable_heat_tracking = enable_heat_tracking
+            
+            # Support both parameter names for backward compatibility
+            self.enable_hit_bonus = enable_hit_bonus or enable_heat_tracking
+            self.hit_bonus_value = hit_bonus_value
             
             # Configure combat settings
             self.combat.aoe_mode = 'single'
             
             # Tracking variables
             self.marked_for_removal = False
-            self._internal_cache = {}  # Cache for attack results
+            self._internal_cache = {}  # Cache for async results
             self.last_roll_round = None  # Track when we last rolled
             
             self.debug_print(f"Initialized with state {self.state}")
@@ -462,9 +636,9 @@ class MoveEffect(BaseEffect):
         
         return True, None
 
-    # Core logic for determining if attacks should roll
-    def should_roll(self, state: MoveState, force_roll: bool = False) -> bool:
-        """Determine if we should roll based on timing and state"""
+    # Core logic for determining if actions should happen
+    def should_roll_attack(self, state: MoveState, force_roll: bool = False) -> bool:
+        """Determine if we should roll attack based on timing and state"""
         if force_roll:
             return True
             
@@ -476,13 +650,26 @@ class MoveEffect(BaseEffect):
             return state == MoveState.ACTIVE
             
         return False
+        
+    def should_process_save(self, state: MoveState, force_save: bool = False) -> bool:
+        """Determine if we should process saving throw based on timing and state"""
+        # Save checks follow same logic as attack rolls
+        return self.should_roll_attack(state, force_save)
     
     # LIFECYCLE METHODS
     
-    def on_apply(self, character, round_number: int) -> str:
+    async def on_apply(self, character, round_number: int) -> str:
         """
         Initial effect application - synchronous interface.
         This method handles the async operations internally.
+        
+        For instant moves with attack rolls:
+        - Processes attack rolls immediately
+        - Includes results in the initial message
+        
+        For other moves:
+        - Sets up the effect state
+        - Returns appropriate status message
         """
         self.debug_print(f"on_apply called for {character.name} on round {round_number}")
         
@@ -493,6 +680,8 @@ class MoveEffect(BaseEffect):
         costs = []
         details = []
         timing_info = []
+        attack_messages = []
+        save_messages = []
         
         # Apply resource costs
         cost_messages = self.apply_costs(character)
@@ -521,20 +710,37 @@ class MoveEffect(BaseEffect):
             target_names = ", ".join(t.name for t in self.targets)
             details.append(f"Target{'s' if len(self.targets) > 1 else ''}: {target_names}")
             
-        # Process instant attack rolls here if needed
-        attack_messages = []
+        # Process instant attack rolls immediately
         if self.attack_roll and self.roll_timing == RollTiming.INSTANT:
-            self.debug_print(f"Queuing instant attack roll")
-            # Store the coroutine in the cache for later processing
-            self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+            self.debug_print(f"Processing instant attack roll")
+            # Process attack immediately
+            attack_results = await self.combat.process_attack(
                 source=character,
                 targets=self.targets,
                 attack_roll=self.attack_roll,
                 damage=self.damage,
                 crit_range=self.crit_range,
                 reason=self.name,
-                enable_heat_tracking=self.enable_heat_tracking
+                enable_hit_bonus=self.enable_hit_bonus
             )
+            if attack_results:
+                attack_messages.extend(attack_results)
+                
+        # Process instant saving throws immediately
+        if self.save_type and self.save_dc and self.roll_timing == RollTiming.INSTANT and self.targets:
+            self.debug_print(f"Processing instant saving throw")
+            # Process saving throw immediately
+            save_results = await self.saves.process_save(
+                source=character,
+                targets=self.targets,
+                save_type=self.save_type,
+                save_dc=self.save_dc,
+                effect_name=self.name,
+                half_on_save=self.half_on_save,
+                damage=self.damage if not self.attack_roll else None  # Only use damage if no attack roll
+            )
+            if save_results:
+                save_messages.extend(save_results)
                     
         # Build the primary message
         if self.cast_description:
@@ -573,13 +779,32 @@ class MoveEffect(BaseEffect):
                     detail_strings.append(detail)
                     
             formatted_message += "\n" + "\n".join(detail_strings)
+            
+        # Add attack messages directly to the response for instant attacks
+        if attack_messages:
+            formatted_message += "\n" + "\n".join(attack_messages)
+            
+        # Add save messages directly to the response for instant saves
+        if save_messages:
+            formatted_message += "\n" + "\n".join(save_messages)
+        
+        # For instant moves with no follow-up needed, mark for removal
+        if self.state == MoveState.INSTANT and not self.cooldown:
+            self.marked_for_removal = True
         
         self.debug_print(f"on_apply complete, returning formatted message")
-        # Return message (without attack messages that need async)
         return formatted_message
     
-    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Process start of turn effects - returns list of messages"""
+    async def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+        """
+        Process start of turn effects with proper attack roll handling.
+        
+        Includes:
+        - Status display based on current phase
+        - Attack roll processing for active effects
+        - Save processing as needed
+        - Full feedback based on action outcomes
+        """
         # Only process effect changes on the owner's turn
         if character.name != turn_name:
             return []
@@ -598,24 +823,46 @@ class MoveEffect(BaseEffect):
             messages.append(cast_msg)
                 
         elif self.state == MoveState.ACTIVE:
-            # Special handling for when we first become active - always roll regardless of turn count
+            # Special handling for when we first become active or per_turn effects
             just_activated = self.last_roll_round != round_number and self.roll_timing == RollTiming.ACTIVE
+            is_per_turn = self.roll_timing == RollTiming.PER_TURN
             
             # Process attack if needed (PER_TURN or newly ACTIVE)
-            if self.attack_roll and (self.roll_timing == RollTiming.PER_TURN or just_activated):
-                self.debug_print(f"Processing attack roll for state {self.state}, timing {self.roll_timing.value}")
+            if self.attack_roll and (is_per_turn or just_activated):
+                self.debug_print(f"Processing turn start attack roll")
                 self.last_roll_round = round_number
-                self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+                
+                # Process attack directly
+                attack_results = await self.combat.process_attack(
                     source=character,
                     targets=self.targets,
                     attack_roll=self.attack_roll,
                     damage=self.damage,
                     crit_range=self.crit_range,
                     reason=self.name,
-                    enable_heat_tracking=self.enable_heat_tracking
+                    enable_hit_bonus=self.enable_hit_bonus
                 )
+                if attack_results:
+                    messages.extend(attack_results)
             else:
                 self.debug_print(f"Skipping attack roll - timing: {self.roll_timing.value}, last_roll_round: {self.last_roll_round}")
+                
+            # Process saves if needed (PER_TURN or newly ACTIVE)
+            if self.save_type and self.save_dc and (is_per_turn or just_activated):
+                self.debug_print(f"Processing turn start saving throw")
+                
+                # Process save directly
+                save_results = await self.saves.process_save(
+                    source=character,
+                    targets=self.targets,
+                    save_type=self.save_type,
+                    save_dc=self.save_dc,
+                    effect_name=self.name,
+                    half_on_save=self.half_on_save,
+                    damage=self.damage if not self.attack_roll else None  # Only use damage if no attack roll
+                )
+                if save_results:
+                    messages.extend(save_results)
             
             # Show active message
             remaining = self.get_remaining_turns()
@@ -635,7 +882,10 @@ class MoveEffect(BaseEffect):
                 f"{self.name} active",
                 details
             )
-            messages.append(active_msg)
+            # Only add status message if we don't already have combat results to show
+            if not messages or (not any("attack" in msg.lower() for msg in messages) and 
+                               not any("save" in msg.lower() for msg in messages)):
+                messages.append(active_msg)
         
         elif self.state == MoveState.COOLDOWN:
             # Show cooldown status at turn start too
@@ -649,8 +899,15 @@ class MoveEffect(BaseEffect):
         
         return messages
 
-    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Handle phase transitions and duration tracking"""
+    async def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+        """
+        Handle phase transitions and duration tracking with enhanced feedback.
+        
+        Provides:
+        - Clear transition messages between states
+        - Duration tracking for all phases
+        - Proper cleanup handling
+        """
         # Only process for effect owner
         if character.name != turn_name:
             return []
@@ -821,8 +1078,9 @@ class MoveEffect(BaseEffect):
             "conditions": [c.value if hasattr(c, 'value') else str(c) for c in self.conditions] if self.conditions else [],
             "roll_timing": self.roll_timing.value,
             "targets_hit": list(self.combat.targets_hit),
+            "targets_saved": list(self.saves.targets_saved) if hasattr(self.saves, 'targets_saved') else [],
             "aoe_mode": self.combat.aoe_mode,
-            "enable_heat_tracking": self.enable_heat_tracking,
+            "enable_hit_bonus": self.enable_hit_bonus,
             "marked_for_removal": self.marked_for_removal,
             "last_roll_round": self.last_roll_round
         })
@@ -850,7 +1108,7 @@ class MoveEffect(BaseEffect):
             half_on_save = data.get('half_on_save', False)
             conditions = data.get('conditions', [])
             roll_timing_str = data.get('roll_timing', RollTiming.ACTIVE.value)
-            enable_heat_tracking = data.get('enable_heat_tracking', False)
+            enable_hit_bonus = data.get('enable_hit_bonus', False) or data.get('enable_heat_tracking', False)
             
             # Get state machine data
             sm_data = data.get('state_machine', {})
@@ -878,7 +1136,7 @@ class MoveEffect(BaseEffect):
                 conditions=[ConditionType(c) if isinstance(c, str) else c for c in conditions] if conditions else [],
                 roll_timing=roll_timing_str,
                 uses=uses,
-                enable_heat_tracking=enable_heat_tracking
+                enable_hit_bonus=enable_hit_bonus
             )
             
             # Restore state machine if it exists
@@ -891,6 +1149,10 @@ class MoveEffect(BaseEffect):
             # Restore combat state
             effect.combat.targets_hit = set(data.get('targets_hit', []))
             effect.combat.aoe_mode = data.get('aoe_mode', 'single')
+            
+            # Restore save state if available
+            if hasattr(effect, 'saves') and 'targets_saved' in data:
+                effect.saves.targets_saved = set(data.get('targets_saved', []))
             
             # Restore timing information
             if timing_data := data.get('timing'):
@@ -926,5 +1188,15 @@ class MoveEffect(BaseEffect):
                 del self._internal_cache['attack_coroutine']
             except Exception as e:
                 self.debug_print(f"Error processing attack coroutine: {str(e)}")
+                
+        # Process any save coroutines
+        if 'save_coroutine' in self._internal_cache:
+            try:
+                self.debug_print(f"Processing async save coroutine")
+                save_messages = await self._internal_cache['save_coroutine']
+                messages.extend(save_messages)
+                del self._internal_cache['save_coroutine']
+            except Exception as e:
+                self.debug_print(f"Error processing save coroutine: {str(e)}")
                 
         return messages

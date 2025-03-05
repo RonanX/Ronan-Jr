@@ -93,21 +93,40 @@ class DrainEffect(BaseEffect):
             return (new_value - old_value, new_value)
 
     def on_apply(self, character, round_number: int) -> str:
-        """Initial application of drain effect - no immediate drain"""
+        """Initial application of drain effect with improved formatting"""
         self.initialize_timing(round_number, character.name)
         
+        # Create details list
         details = []
-        if self.duration:
-            details.append(f"Duration: {self.duration} turns")
-        details.append(f"Drains {self.amount} {self.resource_type.upper()} per turn")
+        
+        # Add drain details
+        if isinstance(self.amount, str) and 'd' in self.amount.lower():
+            details.append(f"Drains {self.amount} {self.resource_type.upper()} per turn")
+        else:
+            details.append(f"Drains {self.amount} {self.resource_type.upper()} per turn")
+            
+        # Add siphon info
         if self.siphon_target:
             details.append(f"Transfers to {self.siphon_target}")
             
-        return f"{self.emoji[0]} `{character.name} afflicted by {self.name}`{f' {self.emoji[1]}' if self.siphon_target else ''}\n" + \
-               "\n".join(f"• `{detail}`" for detail in details)
+        # Add duration info
+        if self.duration:
+            turns = "turn" if self.duration == 1 else "turns"
+            details.append(f"Duration: {self.duration} {turns}")
+        elif self.permanent:
+            details.append("Duration: Permanent")
+            
+        # Format with proper emojis
+        emoji_pair = f"{self.emoji[0]}" + (f" {self.emoji[1]}" if self.siphon_target else "")
+        
+        return self.format_effect_message(
+            f"{character.name} afflicted by {self.name}",
+            details,
+            emoji=emoji_pair
+        )
 
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Process drain at start of affected character's turn"""
+        """Process drain at start of affected character's turn with improved formatting"""
         if character.name != turn_name:
             return []
             
@@ -117,83 +136,135 @@ class DrainEffect(BaseEffect):
         drained, new_value = self._apply_drain(character, amount)
         self.total_drained += drained
         
+        # Skip if no actual drain occurred
         if drained <= 0:
             return []
             
-        # Format drain message
-        details = [f"Current {self.resource_type.upper()}: {new_value}"]
+        # Format drain message with details
+        details = []
+        resource_label = "HP" if self.resource_type == "hp" else "MP"
+        
+        # Add updated resource value
+        details.append(f"Current {resource_label}: {new_value}")
+        
+        # Add tracking info for ongoing effects
         if self.total_drained > drained:
             details.append(f"Total drained: {self.total_drained}")
             
-        message = f"{self.emoji[0]} `{character.name} loses {drained} {self.resource_type.upper()}`"
+        # Add duration info if applicable
+        if not self.permanent and self.duration:
+            rounds_completed = round_number - self.timing.start_round
+            turns_remaining = max(0, self.duration - rounds_completed)
+            if turns_remaining > 0:
+                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+            
+        # Create message
+        emoji = self.emoji[0]
+        message = self.format_effect_message(
+            f"{character.name} loses {drained} {resource_label}",
+            details,
+            emoji=emoji
+        )
         
-        # Handle siphon
+        # Handle siphon (if any)
+        siphon_message = None
         if self.siphon_target and self.game_state:
             target = self.game_state.get_character(self.siphon_target)
             if target:
                 received, new_target_value = self._apply_siphon(target, drained)
                 if received > 0:
-                    message += f" {self.emoji[1]}"
-                    details.append(
-                        f"{target.name} received {received} "
-                        f"({new_target_value} now)"
+                    emoji = self.emoji[1]
+                    siphon_message = self.format_effect_message(
+                        f"{target.name} receives {received} {resource_label}",
+                        [f"Current {resource_label}: {new_target_value}"],
+                        emoji=emoji
                     )
         
-        return [message + "\n" + "\n".join(f"• `{detail}`" for detail in details)]
+        # Return message(s)
+        if siphon_message:
+            return [message, siphon_message]
+        return [message]
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Track duration and show remaining time"""
-        if character.name == turn_name and not self.permanent:
-            turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        """Track duration and show remaining time with improved formatting"""
+        if character.name != turn_name or self.permanent:
+            return []
             
-            if should_expire:
-                # Mark for cleanup by setting duration to 0
-                if hasattr(self, 'timing'):
-                    self.timing.duration = 0
-                msg = f"{self.name} effect wearing off"
-                if self.total_drained > 0:
-                    msg += f" (Total drained: {self.total_drained})"
-                return [self.format_effect_message(msg)]
+        # Get duration status
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        
+        # Message if expiring after this turn
+        if should_expire:
+            if self.total_drained > 0:
+                suffix = f" (Total drained: {self.total_drained} {self.resource_type.upper()})"
+            else:
+                suffix = ""
+                
+            # Format using base method
+            return [self.format_effect_message(
+                f"{self.name} effect will wear off{suffix}",
+                emoji=self.emoji[0]
+            )]
+        
+        # Show continue message if still active
+        elif turns_remaining > 0:
+            details = [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"]
             
-            if turns_remaining > 0:
-                plural = "s" if turns_remaining != 1 else ""
-                details = [f"{turns_remaining} turn{plural} remaining"]
-                if self.last_amount > 0:
-                    details.append(f"Next drain: {self.amount}")
-                return [f"{self.emoji[0]} `{self.name} continues`\n" + \
-                       "\n".join(f"• `{detail}`" for detail in details)]
+            # Add preview of next drain
+            if isinstance(self.amount, str) and 'd' in self.amount.lower():
+                details.append(f"Next drain: {self.amount}")
+            else:
+                details.append(f"Next drain: {self.amount}")
+                
+            # Format using base method
+            return [self.format_effect_message(
+                f"{self.name} continues",
+                details,
+                emoji=self.emoji[0]
+            )]
+            
         return []
 
     def on_expire(self, character) -> str:
-        """Clean up effect state"""
-        msg = f"{self.name} effect expires from {character.name}"
+        """Clean up effect state with improved message"""
+        # Create summary message with total drained if any
         if self.total_drained > 0:
-            msg += f" (Total drained: {self.total_drained})"
-        return self.format_effect_message(msg)
+            suffix = f" (Total drained: {self.total_drained} {self.resource_type.upper()})"
+        else:
+            suffix = ""
+            
+        return self.format_effect_message(
+            f"{self.name} effect has worn off from {character.name}{suffix}",
+            emoji=self.emoji[0]
+        )
 
     def get_status_text(self, character) -> str:
         """Format effect for status display"""
-        lines = [f"{self.emoji[0]} **{self.name}**"]
-        
-        # Basic effect info
-        if isinstance(self.amount, str):
-            lines.append(f"• Amount per turn: `{self.amount}`")
-        else:
-            lines.append(f"• Amount: `{self.amount}`")
-            
-        # Show progress if any resources drained
-        if self.total_drained > 0:
-            lines.append(f"• Total drained: `{self.total_drained}`")
-            if self.last_amount > 0:
-                lines.append(f"• Last drain: `{self.last_amount}`")
-                
-        # Show siphon target if any
+        emoji = self.emoji[0]
         if self.siphon_target:
-            lines.append(f"• Transferring to: `{self.siphon_target}`")
+            emoji += f" {self.emoji[1]}"
             
-        # Duration info
-        if self.duration:
-            lines.append(f"• Duration: `{self.duration} turns`")
+        lines = [f"{emoji} **{self.name}**"]
+        
+        # Add drain info
+        lines.append(f"• `Amount per turn: {self.amount}`")
+        if self.total_drained > 0:
+            lines.append(f"• `Total drained: {self.total_drained}`")
+            if self.last_amount > 0:
+                lines.append(f"• `Last drain: {self.last_amount}`")
+                
+        # Add siphon target if any
+        if self.siphon_target:
+            lines.append(f"• `Transferring to: {self.siphon_target}`")
+            
+        # Add duration info
+        if self.timing and self.timing.duration is not None:
+            if hasattr(character, 'round_number'):
+                rounds_passed = character.round_number - self.timing.start_round
+                remaining = max(0, self.timing.duration - rounds_passed)
+                lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
+        elif self.permanent:
+            lines.append("• `Permanent`")
             
         return "\n".join(lines)
 

@@ -8385,3 +8385,33 @@ ValueError: Invalid dice component: d4
 2025-03-05 01:13:54,954 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
 2025-03-05 01:13:54,956 - discord.client - INFO - logging in using static token
 2025-03-05 01:13:56,717 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9fe4639610407fde1535ae41a16f38a7).
+2025-03-05 01:36:33,252 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 01:36:33,255 - discord.client - INFO - logging in using static token
+2025-03-05 01:36:34,878 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1c5f09c339ad2b568ddb06e5acb2be76).
+2025-03-05 03:41:02,225 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 1c5f09c339ad2b568ddb06e5acb2be76.
+2025-03-05 10:02:56,552 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-05 10:02:56,893 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-05 10:03:02,389 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1e90fcbbe7ee7fadd9c0f18e7d208991).
+2025-03-05 10:54:51,186 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 10:54:51,189 - discord.client - INFO - logging in using static token
+2025-03-05 10:54:53,136 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 16572b2abe58ee6d44c17e3b4d350a0d).
+2025-03-05 11:17:38,680 - modules.menu.action_handler - ERROR - Error executing move: MoveEffect.__init__() got an unexpected keyword argument 'enable_heat_tracking'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 263, in execute_move
+    move_effect = MoveEffect(
+                  ^^^^^^^^^^^
+TypeError: MoveEffect.__init__() got an unexpected keyword argument 'enable_heat_tracking'
+2025-03-05 12:54:43,376 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-05 12:54:48,850 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 180a8cd98e5a92f34df59e36f3512f83).
+2025-03-05 13:51:37,329 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-05 13:51:37,332 - discord.client - INFO - logging in using static token
+2025-03-05 13:51:38,973 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7d5b453aa5cb1c04421c0e071718831e).
+2025-03-05 13:52:42,099 - core.effects.manager - ERROR - Error applying effect: 'MoveEffect' object has no attribute 'cooldown'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 108, in apply_effect
+    message = await effect.on_apply(character, round_number)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 792, in on_apply
+    if self.state == MoveState.INSTANT and not self.cooldown:
+                                               ^^^^^^^^^^^^^
+AttributeError: 'MoveEffect' object has no attribute 'cooldown'
