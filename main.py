@@ -171,6 +171,7 @@ class GameBot(commands.Bot):
         await self.load_extension("commands.skillcheck")  # Load skill check commands
         await self.load_extension("modules.menu.skill_check_handler")  # Load skill check context menus  
         await self.load_extension("commands.initiative")  # Load initiative commands  
+        await self.load_extension("commands.qol")  # Load QOL commands
         await self.load_extension("commands.moves") # Load move commands
 
         # Get initiative tracker from the cog after loading  
@@ -298,27 +299,35 @@ async def delete_character(interaction: discord.Interaction, name: str):
             ephemeral=True
         )
 
-
 @bot.tree.command(name="check", description="Display a character's stats and status")
-@app_commands.describe(name="Name of the character to check")
-async def check(interaction: discord.Interaction, name: str):
+@app_commands.describe(
+    name="Name of the character to check",
+    ephemeral="Whether to show the result only to you (default: True)"
+)
+async def check(interaction: discord.Interaction, name: str, ephemeral: bool = True):
     """Displays detailed character information using the CharacterViewer"""
     try:
         # Convert name to proper case and check both versions
         proper_name = name.capitalize()
         character = bot.game_state.get_character(name) or bot.game_state.get_character(proper_name)
-       
+        
         if not character:
             await interaction.response.send_message(
                 f"Character '{name}' not found.",
-                ephemeral=True
+                ephemeral=True  # Always make error messages ephemeral
             )
             return
 
-
         # Initialize and show the character viewer
         viewer = CharacterViewer(character)
-        await viewer.show(interaction)
+        await viewer.show(interaction, ephemeral=ephemeral)
+
+    except Exception as e:
+        logger.error(f"Error in check command: {str(e)}", exc_info=True)
+        await interaction.response.send_message(
+            "An error occurred while displaying character information.",
+            ephemeral=True  # Always make error messages ephemeral
+        )
 
 
     except Exception as e:

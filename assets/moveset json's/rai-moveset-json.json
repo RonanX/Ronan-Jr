@@ -1,0 +1,132 @@
+{
+  "reference": "rai_moveset",
+  "moves": {
+    "static zap": {
+      "name": "Static Zap",
+      "description": "Quick finger jolt; Causes momentary shock; Low damage but fast",
+      "mp_cost": 2,
+      "star_cost": 1,
+      "attack_roll": "1d20+dex",
+      "damage": "1d4 lightning",
+      "category": "Offense",
+      "version": 6
+    },
+    "lightning bolt": {
+      "name": "Lightning Bolt",
+      "description": "Shoots a small bolt of electricity; Standard attack; May briefly stun small targets",
+      "mp_cost": 5,
+      "star_cost": 1,
+      "attack_roll": "1d20+dex",
+      "damage": "1d6+dex lightning",
+      "category": "Offense",
+      "version": 6
+    },
+    "speed burst": {
+      "name": "Speed Burst",
+      "description": "Short dash of super speed; Moves quickly to a new position; Can escape danger",
+      "mp_cost": 4,
+      "star_cost": 1,
+      "duration": 0,
+      "category": "Utility",
+      "version": 6
+    },
+    "charged punch": {
+      "name": "Charged Punch",
+      "description": "Electricity-charged melee attack; Follows up well after Speed Burst; Chain combo for extra damage",
+      "mp_cost": 6,
+      "star_cost": 2,
+      "attack_roll": "1d20+str",
+      "damage": "2d4+str lightning, 1d4 bludgeoning",
+      "category": "Offense",
+      "version": 6
+    },
+    "electric field": {
+      "name": "Electric Field",
+      "description": "Creates protective field of electricity; Minor damage to attackers in melee range; DEX save DC 12: half damage on success, full damage on fail",
+      "mp_cost": 8,
+      "star_cost": 2,
+      "duration": 2,
+      "damage": "1d4 lightning",
+      "category": "Defense",
+      "version": 6
+    },
+    "storm dash": {
+      "name": "Storm Dash",
+      "description": "Charge through enemies as living lightning; Damages all in path; Ends at chosen location within range",
+      "mp_cost": 10,
+      "star_cost": 2,
+      "attack_roll": "1d20+dex",
+      "damage": "2d4 lightning",
+      "category": "Offense",
+      "version": 6
+    },
+    "thunder clap": {
+      "name": "Thunder Clap",
+      "description": "Claps hands to create shockwave; Pushes enemies back; DEX save DC 12: knocked back on fail, remain in place on success",
+      "mp_cost": 8,
+      "star_cost": 2,
+      "category": "Defense",
+      "version": 6
+    },
+    "static shield": {
+      "name": "Static Shield",
+      "description": "Forms protective barrier of static electricity; Absorbs incoming damage; +2 AC for duration",
+      "mp_cost": 6,
+      "star_cost": 2,
+      "duration": 2,
+      "category": "Defense",
+      "version": 6
+    },
+    "circuit tracer": {
+      "name": "Circuit Tracer",
+      "description": "Senses electrical currents; Reveals hidden wiring or tech; Can find paths through electronic systems",
+      "mp_cost": 3,
+      "star_cost": 1,
+      "duration": 1,
+      "category": "Utility",
+      "version": 6
+    },
+    "battery charge": {
+      "name": "Battery Charge",
+      "description": "Enters meditative state to recharge inner energy; Restores significant MP; Requires concentration and stillness",
+      "mp_cost": -20,
+      "star_cost": 3,
+      "cooldown": 5,
+      "cast_time": 1,
+      "category": "Utility",
+      "version": 6
+    },
+    "lightning strike": {
+      "name": "Lightning Strike",
+      "description": "Summons bolt from above; Powerful but takes time to charge; DEX save DC 13: half damage on success, full damage and stunned for 1 turn on fail",
+      "mp_cost": 15,
+      "star_cost": 3,
+      "cast_time": 1,
+      "damage": "2d6 lightning",
+      "cooldown": 4,
+      "category": "Offense",
+      "version": 6
+    },
+    "overcharge": {
+      "name": "Overcharge",
+      "description": "Floods body with electrical energy; Boosts speed and attack power; +1 to hit and +1d4 lightning damage for duration",
+      "mp_cost": 12,
+      "star_cost": 3,
+      "duration": 3,
+      "cooldown": 5,
+      "category": "Utility",
+      "version": 6
+    },
+    "thunder bomb": {
+      "name": "Thunder Bomb",
+      "description": "Creates explosive ball of electrical energy; Area effect damage; DEX save DC 13: half damage on success, full damage on fail",
+      "mp_cost": 15,
+      "star_cost": 3,
+      "cast_time": 1,
+      "damage": "2d6 lightning",
+      "cooldown": 4,
+      "category": "Offense",
+      "version": 6
+    }
+  }
+}

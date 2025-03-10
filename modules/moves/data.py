@@ -29,8 +29,10 @@ class MoveData:
     4: Added combat parameters (saves, conditions, roll timing)
     5: Added heat tracking support and target params
     6: Added move category support
+    7: Deprecating save parameters (save_type, save_dc, half_on_save)
+       Use description for save instructions instead
     """
-    CURRENT_VERSION = 6
+    CURRENT_VERSION = 7
 
     # Version 1 parameters (base)
     name: str
@@ -55,6 +57,7 @@ class MoveData:
     targets: Optional[int] = None  # Number of targets (for multi-target)
     
     # Version 4 parameters (combat)
+    # These are deprecated in v7 but kept for backward compatibility
     save_type: Optional[str] = None  # str, dex, con, etc.
     save_dc: Optional[str] = None  # e.g., "8+prof+int"
     half_on_save: bool = False  # Whether save halves damage
@@ -67,6 +70,9 @@ class MoveData:
     
     # Version 6 parameters (UI enhancements)
     category: str = "Offense"    # Move category: "Offense", "Utility", "Defense", or custom
+    
+    # Version 7 parameters
+    # No new fields, just better handling of description for saves
     
     version: int = CURRENT_VERSION
     custom_parameters: Dict[str, Any] = field(default_factory=dict)
@@ -96,7 +102,7 @@ class MoveData:
             "crit_range": self.crit_range,
             "targets": self.targets,
             
-            # Version 4+
+            # Version 4+ (kept for backward compatibility)
             "save_type": self.save_type,
             "save_dc": self.save_dc,
             "half_on_save": self.half_on_save,
@@ -215,7 +221,7 @@ class MoveData:
             if self.uses_remaining is None:
                 self.uses_remaining = self.uses
             if self.uses_remaining <= 0:
-                return False, "No uses remaining"
+                return False, f"No uses remaining (0/{self.uses})"
         
         # Check cooldown
         if (self.cooldown is not None and 

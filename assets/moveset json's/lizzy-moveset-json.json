@@ -1,0 +1,214 @@
+{
+  "reference": "lizzy_moveset",
+  "moves": {
+    "energy propulsion": {
+      "name": "Energy Propulsion",
+      "description": "Propels forward using energy from palms; Grants extra 20ft movement; Next attack has advantage",
+      "mp_cost": 8,
+      "star_cost": 1,
+      "duration": 0,
+      "category": "Utility",
+      "version": 6
+    },
+    "radiant resonance": {
+      "name": "Radiant Resonance",
+      "description": "Emits pulse of energy; Reveals hidden enemies; 30ft radius detection",
+      "mp_cost": 7,
+      "star_cost": 1,
+      "duration": 1,
+      "category": "Utility",
+      "version": 6
+    },
+    "flight": {
+      "name": "Flight",
+      "description": "Take to the air with magical energy; Hover up to 15ft; Gain advantage on ranged attacks; Immune to ground effects; 25% more damage while flying",
+      "mp_cost": 15,
+      "star_cost": 2,
+      "duration": 3,
+      "uses": 2,
+      "uses_remaining": 2,
+      "category": "Utility",
+      "version": 6
+    },
+    "stellar surge": {
+      "name": "Stellar Surge",
+      "description": "Enhances next attack or spell; Adds radiant damage; Lasts until next attack",
+      "mp_cost": 10,
+      "star_cost": 2,
+      "duration": 1,
+      "damage": "1d6 radiant",
+      "category": "Utility",
+      "version": 6
+    },
+    "astral field": {
+      "name": "Astral Field",
+      "description": "Creates shimmering energy field; Grants +2 AC",
+      "mp_cost": 12,
+      "star_cost": 2,
+      "duration": 1,
+      "category": "Defense",
+      "version": 6
+    },
+    "luminous barrage": {
+      "name": "Luminous Barrage",
+      "description": "Channels energy into glowing palms; Fires force projectiles automatically; Targets nearby opponents",
+      "mp_cost": 12,
+      "star_cost": 3,
+      "duration": 3,
+      "cooldown": 5,
+      "attack_roll": "2d20 multihit int",
+      "damage": "1d4 force",
+      "category": "Offense",
+      "version": 6
+    },
+    "photon jab": {
+      "name": "Photon Jab",
+      "description": "Swift energy-infused punch; Critical pushes target back 10ft; Grants 5 MP on hit",
+      "mp_cost": 0,
+      "star_cost": 1,
+      "attack_roll": "1d20+int",
+      "damage": "1d6+int force",
+      "category": "Offense",
+      "version": 6
+    },
+    "pulse flurry": {
+      "name": "Pulse Flurry",
+      "description": "Unleashes flurry of electrified punches; Each hit has chance to stun; Disrupts opponent actions",
+      "mp_cost": 10,
+      "star_cost": 2,
+      "duration": 2,
+      "attack_roll": "3d20 multihit 2",
+      "damage": "1d6 bludgeoning, 1d4 electric",
+      "category": "Offense",
+      "version": 6
+    },
+    "radiant burst": {
+      "name": "Radiant Burst",
+      "description": "Releases short-range burst of energy; 10ft radius; DEX save DC 15: half damage on success, full damage and disadvantage on fail",
+      "mp_cost": 6,
+      "star_cost": 1,
+      "duration": 1,
+      "damage": "2d4 radiant",
+      "category": "Offense",
+      "version": 6
+    },
+    "stellar uppercut": {
+      "name": "Stellar Uppercut",
+      "description": "Energy-infused uppercut; Launches target into air; Improved when used in combo",
+      "mp_cost": 15,
+      "star_cost": 3,
+      "attack_roll": "1d20+str",
+      "damage": "2d6+str force",
+      "cooldown": 4,
+      "category": "Offense",
+      "version": 6
+    },
+    "comet dive": {
+      "name": "Comet Dive",
+      "description": "Powerful downward strike; Only usable against airborne targets; Slams target to ground leaving them prone",
+      "mp_cost": 18,
+      "star_cost": 3,
+      "attack_roll": "1d20+dex",
+      "damage": "2d6+dex force, 1d6 bludgeoning",
+      "cooldown": 4,
+      "category": "Offense",
+      "version": 6
+    },
+    "ethereal needles": {
+      "name": "Ethereal Needles",
+      "description": "Materializes shimmering energy needles; Lasts for 3 turns; Enables special needle attacks",
+      "mp_cost": 10,
+      "star_cost": 1,
+      "duration": 3,
+      "uses": 3,
+      "uses_remaining": 3,
+      "damage": "2d4+str piercing",
+      "category": "Offense",
+      "version": 6
+    },
+    "needle thrust": {
+      "name": "Needle Thrust",
+      "description": "Quick, precise needle jab; Deals half damage; Gains advantage on attack",
+      "mp_cost": 0,
+      "star_cost": 1,
+      "attack_roll": "1d20+str advantage",
+      "damage": "1d4+str piercing",
+      "category": "Offense",
+      "version": 6
+    },
+    "arcane sweep": {
+      "name": "Arcane Sweep",
+      "description": "Sweeping attack with needles; Targets multiple enemies; 15ft arc",
+      "mp_cost": 0,
+      "star_cost": 2,
+      "attack_roll": "1d20+str",
+      "damage": "2d4+str piercing",
+      "category": "Offense",
+      "version": 6
+    },
+    "spectral toss": {
+      "name": "Spectral Toss",
+      "description": "Throws needle with pinpoint accuracy; 25ft range; 50% critical chance",
+      "mp_cost": 0,
+      "star_cost": 2,
+      "attack_roll": "1d20+dex",
+      "damage": "2d4+str piercing",
+      "crit_range": 10,
+      "category": "Offense",
+      "version": 6
+    },
+    "celestial bombardment": {
+      "name": "Celestial Bombardment",
+      "description": "Charges massive energy sphere; Throws at designated area; DEX save DC 15: half damage on success, full damage and disorientation on fail",
+      "mp_cost": 18,
+      "star_cost": 3,
+      "cast_time": 1,
+      "damage": "5d4+int force",
+      "cooldown": 4,
+      "category": "Offense",
+      "version": 6
+    },
+    "supernova": {
+      "name": "Supernova",
+      "description": "Creates massive explosion of stellar energy; 20ft radius; Area remains charged with energy; DEX save DC 15: half damage on success, full damage on fail",
+      "mp_cost": 30,
+      "star_cost": 3,
+      "cast_time": 2,
+      "damage": "5d4+int radiant",
+      "cooldown": 5,
+      "category": "Offense",
+      "version": 6
+    },
+    "aurora wall": {
+      "name": "Aurora Wall",
+      "description": "Conjures radiant wall to repel attacks; CON save vs attack roll: complete negation on success, half damage on failure",
+      "mp_cost": 8,
+      "star_cost": 2,
+      "uses": 2,
+      "uses_remaining": 2,
+      "category": "Defense",
+      "version": 6
+    },
+    "starlight maneuver": {
+      "name": "Starlight Maneuver",
+      "description": "Enhances agility to evade attack; Releases stun bombs toward attacker; +4 AC until next turn; DEX save DC 15 for attacker: stunned on fail, disadvantage on next attack on success",
+      "mp_cost": 10,
+      "star_cost": 2,
+      "uses": 2,
+      "uses_remaining": 2,
+      "category": "Defense",
+      "version": 6
+    },
+    "heat protection": {
+      "name": "Heat Protection",
+      "description": "Conjures protective energy barrier; Absorbs incoming attacks; INT save DC 12: gains temp HP on success, fails to conjure barrier on fail; Grants 3d4+INT temporary HP",
+      "mp_cost": 10,
+      "star_cost": 2,
+      "uses": 2,
+      "uses_remaining": 2,
+      "duration": 2,
+      "category": "Defense",
+      "version": 6
+    }
+  }
+}

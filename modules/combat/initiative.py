@@ -275,120 +275,126 @@ class InitiativeTracker:
         return was_skipped, start_messages
 
     async def start_combat(self, characters: List[Character], interaction: discord.Interaction) -> Tuple[bool, str]:
-        """Start combat with initiative contest"""
-        try:
-            if self.state != CombatState.INACTIVE:
-                return False, "Combat is already in progress"
+            """Start combat with initiative contest"""
+            try:
+                if self.state != CombatState.INACTIVE:
+                    return False, "Combat is already in progress"
 
-            # Initialize logger
-            self.logger.channel_id = interaction.channel_id
-            self.logger.start_combat(characters)
+                # Initialize logger
+                self.logger.channel_id = interaction.channel_id
+                self.logger.start_combat(characters)
 
-            # Clear temporary effects and handle stars
-            cleanup_messages = []
-            for char in characters:
-                # Clear temp effects
-                msgs = await self.clear_combat_effects(char)
-                if msgs:
-                    if isinstance(msgs, list):
-                        cleanup_messages.extend(msgs)
-                    elif isinstance(msgs, str):
-                        cleanup_messages.append(msgs)
-                        
-                # Reset action stars
-                char.refresh_stars()
-                
-                # Clear move cooldowns
-                if hasattr(char, 'moveset'):
-                    for move_name in char.list_moves():
-                        move = char.get_move(move_name)
-                        if move:
-                            move.last_used_round = None
-                
-                await self.bot.db.save_character(char)
-                
-                # Log state changes
-                if self.logger:
-                    self.logger.snapshot_character_state(char)
+                # Clear temporary effects and handle stars
+                cleanup_messages = []
+                for char in characters:
+                    # Clear temp effects
+                    msgs = await self.clear_combat_effects(char)
+                    if msgs:
+                        if isinstance(msgs, list):
+                            cleanup_messages.extend(msgs)
+                        elif isinstance(msgs, str):
+                            cleanup_messages.append(msgs)
+                            
+                    # Reset action stars
+                    char.refresh_stars()
+                    
+                    # Reset move uses for all moves
+                    if hasattr(char, 'moveset') and hasattr(char.moveset, 'moves'):
+                        for move_name, move in char.moveset.moves.items():
+                            if hasattr(move, 'uses') and move.uses is not None:
+                                move.uses_remaining = move.uses
+                    
+                    # Clear move cooldowns
+                    if hasattr(char, 'moveset'):
+                        for move_name in char.list_moves():
+                            move = char.get_move(move_name)
+                            if move:
+                                move.last_used_round = None
+                    
+                    await self.bot.db.save_character(char)
+                    
+                    # Log state changes
+                    if self.logger:
+                        self.logger.snapshot_character_state(char)
 
-            # Show cleanup messages if any
-            if cleanup_messages:
-                formatted_messages = []
-                for msg in cleanup_messages:
-                    if msg and isinstance(msg, str):
-                        if not (msg.startswith('`') and msg.endswith('`')):
-                            msg = f"`{msg}`"
-                        formatted_messages.append(msg)
-                        
-                if formatted_messages:
-                    await interaction.followup.send(
-                        "\n".join(formatted_messages),
-                        ephemeral=True
+                # Show cleanup messages if any
+                if cleanup_messages:
+                    formatted_messages = []
+                    for msg in cleanup_messages:
+                        if msg and isinstance(msg, str):
+                            if not (msg.startswith('`') and msg.endswith('`')):
+                                msg = f"`{msg}`"
+                            formatted_messages.append(msg)
+                            
+                    if formatted_messages:
+                        await interaction.followup.send(
+                            "\n".join(formatted_messages),
+                            ephemeral=True
+                        )
+
+                # Process initiative rolls
+                initiatives: List[Tuple[int, Character]] = []
+                for char in characters:
+                    roll_result, explanation = DiceRoller.roll_dice("1d20+dex", char)
+                    initiatives.append((roll_result, char))
+                    # Log initiative roll
+                    self.logger.add_event(
+                        CombatEventType.SYSTEM_MESSAGE,
+                        message=f"{char.name} rolls {roll_result} for initiative ({explanation})",
+                        character=char.name
                     )
 
-            # Process initiative rolls
-            initiatives: List[Tuple[int, Character]] = []
-            for char in characters:
-                roll_result, explanation = DiceRoller.roll_dice("1d20+dex", char)
-                initiatives.append((roll_result, char))
-                # Log initiative roll
-                self.logger.add_event(
-                    CombatEventType.SYSTEM_MESSAGE,
-                    message=f"{char.name} rolls {roll_result} for initiative ({explanation})",
-                    character=char.name
-                )
+                # Sort by initiative (high to low)
+                initiatives.sort(reverse=True, key=lambda x: x[0])
 
-            # Sort by initiative (high to low)
-            initiatives.sort(reverse=True, key=lambda x: x[0])
+                # Create turn order
+                self.turn_order = [
+                    TurnData(
+                        character_name=char.name,
+                        round_number=1,
+                        initiative_roll=roll
+                    ) for roll, char in initiatives
+                ]
 
-            # Create turn order
-            self.turn_order = [
-                TurnData(
-                    character_name=char.name,
-                    round_number=1,
-                    initiative_roll=roll
-                ) for roll, char in initiatives
-            ]
+                # Set to waiting state - combat will start on first /next
+                self.state = CombatState.WAITING
+                self.round_number = 0  # Will increment to 1 on first /next
+                self.current_index = 0
 
-            # Set to waiting state - combat will start on first /next
-            self.state = CombatState.WAITING
-            self.round_number = 0  # Will increment to 1 on first /next
-            self.current_index = 0
-
-            # Create initiative announcement embed
-            embed = discord.Embed(title="Battle Begins!", color=discord.Color.blue())
-            
-            # Add initiative order
-            order_text = []
-            for roll, char in initiatives:
-                order_text.append(f"{char.name} ({roll})")
+                # Create initiative announcement embed
+                embed = discord.Embed(title="Battle Begins!", color=discord.Color.blue())
                 
-            embed.add_field(
-                name="Initiative Order",
-                value=f"```\n{'\n'.join(order_text)}\n```",
-                inline=False
-            )
-            
-            # Add roll details
-            details = []
-            for roll, char in initiatives:
-                details.append(f"{char.name} - {roll} (DEX: {char.stats.get_modifier(StatType.DEXTERITY):+})")
-            
-            embed.add_field(
-                name="Roll Details",
-                value=f"```\n" + "\n".join(details) + "\n```",
-                inline=False
-            )
-            
-            embed.set_footer(text="Type /next to begin the battle!")
-            
-            await interaction.followup.send(embed=embed)
-            
-            return True, "Combat initialized"
+                # Add initiative order
+                order_text = []
+                for roll, char in initiatives:
+                    order_text.append(f"{char.name} ({roll})")
+                    
+                embed.add_field(
+                    name="Initiative Order",
+                    value=f"```\n{'\n'.join(order_text)}\n```",
+                    inline=False
+                )
+                
+                # Add roll details
+                details = []
+                for roll, char in initiatives:
+                    details.append(f"{char.name} - {roll} (DEX: {char.stats.get_modifier(StatType.DEXTERITY):+})")
+                
+                embed.add_field(
+                    name="Roll Details",
+                    value=f"```\n" + "\n".join(details) + "\n```",
+                    inline=False
+                )
+                
+                embed.set_footer(text="Type /next to begin the battle!")
+                
+                await interaction.followup.send(embed=embed)
+                
+                return True, "Combat initialized"
 
-        except Exception as e:
-            logger.error(f"Error starting combat: {e}", exc_info=True)
-            return False, f"Error starting combat: {str(e)}"
+            except Exception as e:
+                logger.error(f"Error starting combat: {e}", exc_info=True)
+                return False, f"Error starting combat: {str(e)}"
         
     async def clear_combat_effects(self, character: Character) -> List[str]:
         """
@@ -469,103 +475,79 @@ class InitiativeTracker:
         return cleanup_messages
         
     async def set_battle(
-            self,
-            character_names: List[str],
-            interaction: discord.Interaction,
-            round_number: int = 1,
-            current_turn: int = 0
-        ) -> Tuple[bool, str]:
-            """Start combat with manual turn order"""
-            try:
-                if self.state != CombatState.INACTIVE:
-                    return False, "Combat is already in progress"
+                self,
+                character_names: List[str],
+                interaction: discord.Interaction,
+                round_number: int = 1,
+                current_turn: int = 0
+            ) -> Tuple[bool, str]:
+                """Start combat with manual turn order without modifying any character data"""
+                try:
+                    if self.state != CombatState.INACTIVE:
+                        return False, "Combat is already in progress"
 
-                # Important: Set round number before state change
-                self.round_number = round_number
-                
-                # Initialize combat info
-                self.turn_order = [
-                    TurnData(
-                        character_name=name,
-                        round_number=round_number,  # Use the actual round number
-                        current_ip=100
-                    ) for name in character_names
-                ]
-                
-                # Set state and current turn - don't touch round_number again
-                self.state = CombatState.WAITING
-                self.current_index = min(current_turn, len(character_names) - 1)  # Ensure valid turn
+                    # Important: Set round number before state change
+                    self.round_number = round_number
+                    
+                    # Initialize combat info
+                    self.turn_order = [
+                        TurnData(
+                            character_name=name,
+                            round_number=round_number,  # Use the actual round number
+                            current_ip=100
+                        ) for name in character_names
+                    ]
+                    
+                    # Set state and current turn - don't touch round_number again
+                    self.state = CombatState.WAITING
+                    self.current_index = min(current_turn, len(character_names) - 1)  # Ensure valid turn
 
-                # Initialize logger
-                self.logger.channel_id = interaction.channel_id
-                self.logger.start_combat()
+                    # Initialize logger
+                    self.logger.channel_id = interaction.channel_id
+                    self.logger.start_combat()
 
-                # Clear character effects and reset cooldowns
-                cleanup_messages = []
-                for name in character_names:
-                    char = self.bot.game_state.get_character(name)
-                    if char:
-                        msgs = await self.clear_combat_effects(char)
-                        if msgs:
-                            cleanup_messages.extend(msgs)
-                            
-                        # Reset stars
-                        char.refresh_stars()
-                        
-                        # Save changes
-                        await self.bot.db.save_character(char)
-                        
-                        # Log state changes
-                        if self.logger:
-                            self.logger.snapshot_character_state(char)
-                
-                # Show cleanup messages if any
-                if cleanup_messages:
-                    formatted_messages = []
-                    for msg in cleanup_messages:
-                        if msg and isinstance(msg, str):
-                            if not (msg.startswith('`') and msg.endswith('`')):
-                                msg = f"`{msg}`"
-                            formatted_messages.append(msg)
-                            
-                    if formatted_messages:
-                        await interaction.followup.send(
-                            "\n".join(formatted_messages),
-                            ephemeral=True
-                        )
+                    # Verify all characters exist but don't modify them
+                    missing_chars = []
+                    for name in character_names:
+                        char = self.bot.game_state.get_character(name)
+                        if not char:
+                            missing_chars.append(name)
+                    
+                    if missing_chars:
+                        return False, f"The following characters were not found: {', '.join(missing_chars)}"
 
-                # Create initiative embed
-                embed = discord.Embed(title="Initiative Order Set", color=discord.Color.blue())
-                
-                # Add order text
-                order_text = []
-                for i, name in enumerate(character_names):
-                    if i == current_turn:
-                        order_text.append(f"▶️ {name} (Current)")
-                    else:
-                        order_text.append(f"⬜ {name}")
-                
-                embed.add_field(
-                    name="Initiative Order",
-                    value=f"```\n{chr(10).join(order_text)}\n```",
-                    inline=False
-                )
-                
-                current_char = character_names[current_turn]
-                
-                # Make footer clearer about the current state
-                embed.set_footer(
-                    text=f"Starting on Round {self.round_number}, {current_char}'s turn\n"
-                        f"Type /next to continue the battle!"
-                )
-                
-                await interaction.followup.send(embed=embed)
-                
-                return True, "Combat initialized"
-                
-            except Exception as e:
-                logger.error(f"Error setting battle: {e}", exc_info=True)
-                return False, f"Error setting battle: {str(e)}"
+                    # Create initiative embed
+                    embed = discord.Embed(title="Initiative Order Set", color=discord.Color.blue())
+                    
+                    # Add order text
+                    order_text = []
+                    for i, name in enumerate(character_names):
+                        if i == current_turn:
+                            order_text.append(f"▶️ {name} (Current)")
+                        else:
+                            order_text.append(f"⬜ {name}")
+                    
+                    embed.add_field(
+                        name="Initiative Order",
+                        value=f"```\n{chr(10).join(order_text)}\n```",
+                        inline=False
+                    )
+                    
+                    current_char = character_names[current_turn]
+                    
+                    # Make footer clearer about the current state
+                    embed.set_footer(
+                        text=f"Resuming on Round {self.round_number}, {current_char}'s turn\n"
+                            f"Type /next to continue the battle!"
+                    )
+                    
+                    await interaction.followup.send(embed=embed)
+                    
+                    return True, "Combat resumed"
+                    
+                except Exception as e:
+                    logger.error(f"Error setting battle: {e}", exc_info=True)
+                    return False, f"Error setting battle: {str(e)}"
 
     async def next_turn(self, interaction: discord.Interaction) -> Tuple[bool, str, List[str]]:
         """Advance to next turn and process effects"""

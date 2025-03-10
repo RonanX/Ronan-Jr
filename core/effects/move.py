@@ -465,100 +465,111 @@ class MoveEffect(BaseEffect):
     - Hit bonus tracking (replacing heat tracking)
     """
     def __init__(
-            self,
-            name: str,
-            description: str,
-            star_cost: int = 0,
-            mp_cost: int = 0,
-            hp_cost: int = 0,
-            cast_time: Optional[int] = None,
-            duration: Optional[int] = None,
-            cooldown: Optional[int] = None,
-            cast_description: Optional[str] = None,
-            attack_roll: Optional[str] = None,
-            damage: Optional[str] = None,
-            crit_range: int = 20,
-            save_type: Optional[str] = None,
-            save_dc: Optional[str] = None,
-            half_on_save: bool = False,
-            conditions: Optional[List[ConditionType]] = None,
-            roll_timing: str = "active",
-            uses: Optional[int] = None,
-            targets: Optional[List['Character']] = None,
-            enable_hit_bonus: bool = False,
-            enable_heat_tracking: bool = False,  # Added for backward compatibility
-            hit_bonus_value: int = 1  # Added for customizing bonus amount
-        ):
-            # Create specialized state machine and processors
-            self.debug_mode = True
-            self.debug_id = f"MoveEffect-{int(time.time() * 1000) % 10000}"
-            self.debug_print(f"Initializing {name}")
-            
-            self.state_machine = MoveStateMachine(cast_time, duration, cooldown, self.debug_mode)
-            self.combat = CombatProcessor(self.debug_mode)
-            self.saves = SavingThrowProcessor(self.debug_mode)
-            
-            # Set initial duration based on state machine
-            initial_duration = self.state_machine.get_remaining_turns()
-            if initial_duration <= 0:
-                initial_duration = 1  # Minimum duration for INSTANT moves
-            
-            # Initialize base effect
-            super().__init__(
-                name=name,
-                duration=initial_duration,
-                permanent=False,
-                category=EffectCategory.STATUS,
-                description=description,
-                handles_own_expiry=True
-            )
-            
-            # Resource costs
-            self.star_cost = star_cost
-            self.mp_cost = mp_cost
-            self.hp_cost = hp_cost
-            
-            # Usage tracking
-            self.uses = uses
-            self.uses_remaining = uses
-            
-            # Combat parameters
-            self.attack_roll = attack_roll
-            self.damage = damage
-            self.crit_range = crit_range
-            
-            # Save parameters
-            self.save_type = save_type
-            self.save_dc = save_dc
-            self.half_on_save = half_on_save
-            self.conditions = conditions or []
-            
-            # Set roll timing
-            if isinstance(roll_timing, str):
-                try:
-                    self.roll_timing = RollTiming(roll_timing)
-                except ValueError:
-                    self.roll_timing = RollTiming.ACTIVE
-            else:
-                self.roll_timing = roll_timing
-            
-            # Additional properties
-            self.cast_description = cast_description
-            self.targets = targets or []
-            
-            # Support both parameter names for backward compatibility
-            self.enable_hit_bonus = enable_hit_bonus or enable_heat_tracking
-            self.hit_bonus_value = hit_bonus_value
-            
-            # Configure combat settings
-            self.combat.aoe_mode = 'single'
-            
-            # Tracking variables
-            self.marked_for_removal = False
-            self._internal_cache = {}  # Cache for async results
-            self.last_roll_round = None  # Track when we last rolled
-            
-            self.debug_print(f"Initialized with state {self.state}")
+                self,
+                name: str,
+                description: str,
+                star_cost: int = 0,
+                mp_cost: int = 0,
+                hp_cost: int = 0,
+                cast_time: Optional[int] = None,
+                duration: Optional[int] = None,
+                cooldown: Optional[int] = None,
+                cast_description: Optional[str] = None,
+                attack_roll: Optional[str] = None,
+                damage: Optional[str] = None,
+                crit_range: int = 20,
+                save_type: Optional[str] = None,
+                save_dc: Optional[str] = None,
+                half_on_save: bool = False,
+                conditions: Optional[List[ConditionType]] = None,
+                roll_timing: str = "active",
+                uses: Optional[int] = None,
+                targets: Optional[List['Character']] = None,
+                enable_hit_bonus: bool = False,
+                enable_heat_tracking: bool = False,  # Added for backward compatibility
+                hit_bonus_value: int = 1  # Added for customizing bonus amount
+            ):
+                # Create specialized state machine and processors
+                self.debug_mode = True
+                self.debug_id = f"MoveEffect-{int(time.time() * 1000) % 10000}"
+                self.debug_print(f"Initializing {name}")
+                
+                # Ensure cooldown is None if it's 0 or less
+                if cooldown is not None and cooldown <= 0:
+                    cooldown = None
+                    
+                # Create state machine with validated parameters
+                self.state_machine = MoveStateMachine(
+                    cast_time=cast_time if cast_time and cast_time > 0 else None,
+                    duration=duration if duration and duration > 0 else None,
+                    cooldown=cooldown,
+                    debug_mode=self.debug_mode
+                )
+                
+                self.combat = CombatProcessor(self.debug_mode)
+                self.saves = SavingThrowProcessor(self.debug_mode)
+                
+                # Set initial duration based on state machine
+                initial_duration = self.state_machine.get_remaining_turns()
+                if initial_duration <= 0:
+                    initial_duration = 1  # Minimum duration for INSTANT moves
+                
+                # Initialize base effect
+                super().__init__(
+                    name=name,
+                    duration=initial_duration,
+                    permanent=False,
+                    category=EffectCategory.STATUS,
+                    description=description,
+                    handles_own_expiry=True
+                )
+                
+                # Resource costs
+                self.star_cost = star_cost
+                self.mp_cost = mp_cost
+                self.hp_cost = hp_cost
+                
+                # Usage tracking
+                self.uses = uses
+                self.uses_remaining = uses
+                
+                # Combat parameters
+                self.attack_roll = attack_roll
+                self.damage = damage
+                self.crit_range = crit_range
+                
+                # Save parameters
+                self.save_type = save_type
+                self.save_dc = save_dc
+                self.half_on_save = half_on_save
+                self.conditions = conditions or []
+                
+                # Set roll timing
+                if isinstance(roll_timing, str):
+                    try:
+                        self.roll_timing = RollTiming(roll_timing)
+                    except ValueError:
+                        self.roll_timing = RollTiming.ACTIVE
+                else:
+                    self.roll_timing = roll_timing
+                
+                # Additional properties
+                self.cast_description = cast_description
+                self.targets = targets or []
+                
+                # Support both parameter names for backward compatibility
+                self.enable_hit_bonus = enable_hit_bonus or enable_heat_tracking
+                self.hit_bonus_value = hit_bonus_value
+                
+                # Configure combat settings
+                self.combat.aoe_mode = 'single'
+                
+                # Tracking variables
+                self.marked_for_removal = False
+                self._internal_cache = {}  # Cache for async results
+                self.last_roll_round = None  # Track when we last rolled
+                
+                self.debug_print(f"Initialized with state {self.state}")
 
     def debug_print(self, message):
         """Print debug messages if debug mode is enabled"""
@@ -687,11 +698,15 @@ class MoveEffect(BaseEffect):
         cost_messages = self.apply_costs(character)
         for msg in cost_messages:
             if "MP" in msg:
-                costs.append(f"💙 MP: {self.mp_cost}")
+                if self.mp_cost > 0:
+                    costs.append(f"💙 MP: {self.mp_cost}")
+                elif self.mp_cost < 0:
+                    costs.append(f"💙 +{abs(self.mp_cost)} MP")
             elif "HP" in msg and "Heal" not in msg:
-                costs.append(f"❤️ HP: {self.hp_cost}")
-            elif "Heal" in msg:
-                costs.append(f"❤️ Heal: {abs(self.hp_cost)}")
+                if self.hp_cost > 0:
+                    costs.append(f"❤️ HP: {self.hp_cost}")
+                elif self.hp_cost < 0:
+                    costs.append(f"❤️ +{abs(self.hp_cost)} HP")
         
         # Add star cost
         if self.star_cost > 0:
@@ -762,9 +777,36 @@ class MoveEffect(BaseEffect):
         if timing_info:
             info_parts.append(" | ".join(timing_info))
             
-        # Format output
+        # Format info
         if info_parts:
             main_message = f"{main_message} | {' | '.join(info_parts)}"
+            
+        # Add resource updates
+        resource_updates = []
+        
+        # Add MP update
+        if self.mp_cost != 0:
+            resource_updates.append(f"MP: {character.resources.current_mp}/{character.resources.max_mp}")
+            
+        # Add HP update
+        if self.hp_cost != 0:
+            resource_updates.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
+            
+        # Add star update
+        if self.star_cost > 0 and hasattr(character, 'action_stars'):
+            if hasattr(character.action_stars, 'current_stars') and hasattr(character.action_stars, 'max_stars'):
+                resource_updates.append(f"Stars: {character.action_stars.current_stars}/{character.action_stars.max_stars}")
+                
+        # Add uses info if the character has this move in their moveset
+        if hasattr(character, 'get_move'):
+            move = character.get_move(self.name)
+            if move and hasattr(move, 'uses') and move.uses is not None:
+                if hasattr(move, 'uses_remaining') and move.uses_remaining is not None:
+                    resource_updates.append(f"Uses: {move.uses_remaining}/{move.uses}")
+                    
+        # Add resource updates to main message
+        if resource_updates:
+            main_message = f"{main_message} | {' | '.join(resource_updates)}"
             
         # Create the primary formatted message
         formatted_message = self.format_effect_message(main_message)
@@ -789,7 +831,7 @@ class MoveEffect(BaseEffect):
             formatted_message += "\n" + "\n".join(save_messages)
         
         # For instant moves with no follow-up needed, mark for removal
-        if self.state == MoveState.INSTANT and not self.cooldown:
+        if self.state == MoveState.INSTANT and self.state_machine.cooldown is None:
             self.marked_for_removal = True
         
         self.debug_print(f"on_apply complete, returning formatted message")

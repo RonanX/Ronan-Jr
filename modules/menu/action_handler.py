@@ -105,6 +105,10 @@ class UseMoveView(ui.View):
                 
                 # Check if move is on cooldown first
                 existing_cooldown = False
+                
+                # Import MoveState for the check
+                from core.effects.move import MoveState
+                
                 for effect in self.character.effects:
                     if hasattr(effect, 'name') and effect.name == move.name and hasattr(effect, 'state'):
                         if effect.state == MoveState.COOLDOWN:
@@ -179,7 +183,7 @@ class UseMoveView(ui.View):
                             target_name = target_select.values[0]
                             
                             # Now execute the move with the target
-                            await execute_move(target_interaction, move, target_name)
+                            await self.execute_move(target_interaction, move, target_name)
                             
                         target_select.callback = target_callback
                         target_view.add_item(target_select)
@@ -197,7 +201,7 @@ class UseMoveView(ui.View):
                         )
                 else:
                     # Use move directly without a target
-                    await execute_move(interaction, move)
+                    await self.execute_move(interaction, move)
             except (ValueError, IndexError) as e:
                 logger.error(f"Error selecting move: {e}", exc_info=True)
                 await interaction.response.send_message(
@@ -209,118 +213,125 @@ class UseMoveView(ui.View):
         self.move_select.callback = move_selected
         self.add_item(self.move_select)
         
-        async def execute_move(interaction, move, target=None):
-            """Execute a move with or without a target"""
+    async def execute_move(self, interaction, move, target=None):
+        """Execute a move with or without a target"""
+        try:
+            # Always defer first to avoid timeout
             try:
-                # Always defer first to avoid timeout
+                await interaction.response.defer()
+            except:
+                # If already deferred, this will fail but we can continue
+                pass
+            
+            # Find the MoveCommands cog
+            move_cog = None
+            for cog_name, cog in self.bot.cogs.items():
+                if cog_name == "MoveCommands":
+                    move_cog = cog
+                    break
+            
+            if move_cog and hasattr(move_cog, 'use_move'):
+                # Direct call to the use_move method in the cog (preferred method)
                 try:
-                    await interaction.response.defer()
-                except:
-                    # If already deferred, this will fail but we can continue
-                    pass
-                
-                # Find the MoveCommands cog
-                move_cog = None
-                for cog_name, cog in self.bot.cogs.items():
-                    if cog_name == "MoveCommands":
-                        move_cog = cog
-                        break
-                
-                if move_cog and hasattr(move_cog, 'use_move'):
-                    # Direct call to the use_move method in the cog (preferred method)
-                    try:
-                        await move_cog.use_move(
-                            interaction,
-                            self.character.name,
-                            move.name,
-                            target
-                        )
-                        return
-                    except Exception as e:
-                        logger.error(f"Error directly calling use_move: {e}", exc_info=True)
-                        # Continue to fallback
-                
-                # Fallback: Get the character and manually apply the move effect
-                character = self.bot.game_state.get_character(self.character.name)
-                if character:
-                    # Get current round if in combat
-                    current_round = 1
-                    if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                        current_round = self.bot.initiative_tracker.round_number
-                    
-                    # Mark the move as used in moveset for cooldown tracking
-                    move_data = character.get_move(move.name)
-                    if move_data:
-                        move_data.use(current_round)
-                    
-                    # Get target character if specified
-                    target_char = None
-                    if target:
-                        target_char = self.bot.game_state.get_character(target)
-                    
-                    # Create a MoveEffect (don't force active state)
-                    from core.effects.move import MoveEffect, MoveState, RollTiming
-                    move_effect = MoveEffect(
-                        name=move.name,
-                        description=move.description,
-                        mp_cost=move.mp_cost,
-                        hp_cost=move.hp_cost,
-                        star_cost=move.star_cost,
-                        cast_time=move.cast_time,
-                        duration=move.duration,
-                        cooldown=move.cooldown,
-                        attack_roll=move.attack_roll,
-                        damage=move.damage,
-                        crit_range=move.crit_range,
-                        save_type=move.save_type,
-                        save_dc=move.save_dc,
-                        half_on_save=move.half_on_save,
-                        roll_timing=move.roll_timing,
-                        targets=[target_char] if target_char else [],
-                        enable_heat_tracking=getattr(move, 'enable_heat_tracking', False)
+                    await move_cog.use_move(
+                        interaction,
+                        self.character.name,
+                        move.name,
+                        target
                     )
-                    
-                    # Add the effect to the character & let the effect handle state transitions
-                    result_message = character.add_effect(move_effect, current_round)
-                    
-                    # Use action stars
-                    character.use_move_stars(move.star_cost, move.name)
-                    
-                    # If move has cooldown, explicitly register it with action_stars
-                    if move.cooldown:
-                        character.action_stars.start_cooldown(move.name, move.cooldown)
-                    
-                    # Save character
-                    await self.bot.db.save_character(character, debug_paths=['effects', 'action_stars'])
-                    
-                    # Send success message directly to the channel (use the formatted message from MoveEffect)
-                    if interaction.channel:
-                        await interaction.channel.send(result_message)
-                    else:
-                        # Fallback to followup if no channel
-                        await interaction.followup.send(result_message)
-                else:
-                    # Character not found
-                    await interaction.followup.send(
-                        f"❌ Character '{self.character.name}' not found.",
-                        ephemeral=True
-                    )
-                    
-            except Exception as e:
-                logger.error(f"Error executing move: {e}", exc_info=True)
-                # Handle error directly instead of using handle_error function
-                error_embed = discord.Embed(
-                    title="Error Using Move",
-                    description=f"An error occurred: {str(e)}",
-                    color=discord.Color.red()
+                    return
+                except Exception as e:
+                    logger.error(f"Error directly calling use_move: {e}", exc_info=True)
+                    # Continue to fallback
+            
+            # Fallback: Get the character and manually apply the move effect
+            character = self.bot.game_state.get_character(self.character.name)
+            if character:
+                # Get current round if in combat
+                current_round = 1
+                if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
+                    current_round = self.bot.initiative_tracker.round_number
+                
+                # Mark the move as used in moveset for cooldown tracking
+                move_data = character.get_move(move.name)
+                if move_data:
+                    move_data.use(current_round)
+                
+                # Get target character if specified
+                target_char = None
+                if target:
+                    target_char = self.bot.game_state.get_character(target)
+                
+                # Create a MoveEffect (don't force active state)
+                from core.effects.move import MoveEffect, MoveState, RollTiming
+                from core.effects.manager import apply_effect  # Import apply_effect
+                
+                # Handle null or negative cooldown
+                cooldown = move.cooldown
+                if cooldown is not None and cooldown <= 0:
+                    cooldown = None
+                
+                move_effect = MoveEffect(
+                    name=move.name,
+                    description=move.description,
+                    mp_cost=move.mp_cost,
+                    hp_cost=move.hp_cost,
+                    star_cost=move.star_cost,
+                    cast_time=move.cast_time,
+                    duration=move.duration,
+                    cooldown=cooldown,  # Use sanitized cooldown value
+                    attack_roll=move.attack_roll,
+                    damage=move.damage,
+                    crit_range=move.crit_range,
+                    save_type=move.save_type,
+                    save_dc=move.save_dc,
+                    half_on_save=move.half_on_save,
+                    roll_timing=move.roll_timing,
+                    targets=[target_char] if target_char else [],
+                    enable_heat_tracking=getattr(move, 'enable_heat_tracking', False)
                 )
                 
-                try:
-                    await interaction.followup.send(embed=error_embed, ephemeral=True)
-                except:
-                    # Last resort if all else fails
-                    print(f"Critical error executing move: {e}")
-                    
+                # Use action stars
+                character.use_move_stars(move.star_cost, move.name)
+                
+                # If move has cooldown, explicitly register it with action_stars
+                if cooldown:
+                    character.action_stars.start_cooldown(move.name, cooldown)
+                
+                # Add the effect to the character - use apply_effect
+                result_message = await apply_effect(character, move_effect, current_round)
+                
+                # Save character
+                await self.bot.db.save_character(character, debug_paths=['effects', 'action_stars'])
+                
+                # Send success message directly to the channel
+                if interaction.channel:
+                    await interaction.channel.send(result_message)
+                else:
+                    # Fallback to followup if no channel
+                    await interaction.followup.send(result_message)
+            else:
+                # Character not found
+                await interaction.followup.send(
+                    f"❌ Character '{self.character.name}' not found.",
+                    ephemeral=True
+                )
+                
+        except Exception as e:
+            logger.error(f"Error executing move: {e}", exc_info=True)
+            # Handle error directly instead of using handle_error function
+            error_embed = discord.Embed(
+                title="Error Using Move",
+                description=f"An error occurred: {str(e)}",
+                color=discord.Color.red()
+            )
+            
+            try:
+                await interaction.followup.send(embed=error_embed, ephemeral=True)
+            except:
+                # Last resort if all else fails
+                print(f"Critical error executing move: {e}")
+
 class TargetSelectView(ui.View):
     """View for selecting a target for a move"""
     
@@ -400,42 +411,72 @@ class TargetSelectView(ui.View):
                 disabled=True
             ))
 
-class MoveInfoView(ui.View):
-    """View for displaying move info"""
+class MoveSelectMenu(ui.Select):
+    """Select menu for choosing a move"""
     
-    def __init__(self, character: Character, moves: List[MoveData], handler):
-        super().__init__(timeout=60)
-        self.character = character
-        self.moves = moves
-        self.handler = handler
+    def __init__(
+        self, 
+        moves: List[MoveData], 
+        placeholder: str = "Select a move...",
+        max_options: int = 25
+    ):
+        # Create options from moves
+        options = []
+        for i, move in enumerate(moves[:max_options]):
+            # Create cost indicator
+            costs = []
+            if move.star_cost > 0:
+                costs.append(f"⭐{move.star_cost}")
+            if move.mp_cost > 0:
+                costs.append(f"MP:{move.mp_cost}")
+            elif move.mp_cost < 0:
+                # Show MP gain with a + sign
+                costs.append(f"MP:+{abs(move.mp_cost)}")
+            if move.hp_cost > 0:
+                costs.append(f"HP:{move.hp_cost}")
+            elif move.hp_cost < 0:
+                # Show healing with a + sign
+                costs.append(f"HP:+{abs(move.hp_cost)}")
+                
+            cost_text = " | ".join(costs) if costs else ""
+            
+            # Add uses info if available
+            uses_text = ""
+            if move.uses is not None:
+                uses_remaining = move.uses_remaining if hasattr(move, 'uses_remaining') and move.uses_remaining is not None else move.uses
+                uses_text = f" | Uses:{uses_remaining}/{move.uses}"
+            
+            # Create category text
+            category_text = move.category if hasattr(move, 'category') and move.category else ""
+            
+            # Create description with costs, uses, and category
+            description = category_text
+            if cost_text:
+                description += f" | {cost_text}"
+            if uses_text:
+                description += uses_text
+                
+            # Truncate description if too long
+            if len(description) > 50:
+                description = description[:47] + "..."
+            
+            # Create select option
+            options.append(
+                SelectOption(
+                    label=move.name[:25],  # Max 25 chars for label
+                    description=description,  # Include all info
+                    value=str(i)  # Use index as value
+                )
+            )
         
-        # Add move select menu
-        self.move_select = MoveSelectMenu(
-            moves, 
-            placeholder="Select a move for details..."
+        # Create the select menu
+        super().__init__(
+            placeholder=placeholder,
+            options=options[:25],  # Discord limits to 25 options
+            min_values=1,
+            max_values=1
         )
         
-        async def move_selected(interaction: discord.Interaction):
-            # Get selected move
-            try:
-                move_idx = int(self.move_select.values[0])
-                move = self.moves[move_idx]
-                
-                # Show move info
-                info_embed = self.handler.create_move_info_embed(self.character, move)
-                await interaction.response.send_message(
-                    embed=info_embed,
-                    ephemeral=True
-                )
-            except (ValueError, IndexError) as e:
-                await interaction.response.send_message(
-                    "Invalid move selection.",
-                    ephemeral=True
-                )
-                
-        self.move_select.callback = move_selected
-        self.add_item(self.move_select)
-
 class MovesetView(ui.View):
     """View for the moveset display with category filters and pagination"""
     
@@ -777,6 +818,17 @@ class ActionHandler:
                 
             cost_text = " | ".join(costs)
             
+            # Create timing info text
+            timing_info = []
+            if move.cast_time and move.cast_time > 0:
+                timing_info.append(f"🔄 {move.cast_time}T Cast")
+            if move.duration and move.duration > 0:
+                timing_info.append(f"⏳ {move.duration}T Duration")
+            if move.cooldown and move.cooldown > 0:
+                timing_info.append(f"⌛ {move.cooldown}T Cooldown")
+                
+            timing_text = " | ".join(timing_info)
+            
             # Create status text
             status = []
             if move.cooldown and move.last_used_round:
@@ -807,6 +859,10 @@ class ActionHandler:
                 field_value.append(f"`{cost_text}`")
             else:
                 field_value.append("`No cost`")
+                
+            # Add timing info with single backticks
+            if timing_text:
+                field_value.append(f"`{timing_text}`")
             
             # Create the description block with triple backticks
             description_block = []
@@ -918,12 +974,12 @@ class ActionHandler:
             
         # Add timing info
         timing = []
-        if move.cast_time:
-            timing.append(f"Cast Time: {move.cast_time} turn(s)")
-        if move.duration:
-            timing.append(f"Duration: {move.duration} turn(s)")
-        if move.cooldown:
-            timing.append(f"Cooldown: {move.cooldown} turn(s)")
+        if move.cast_time and move.cast_time > 0:
+            timing.append(f"🔄 Cast Time: {move.cast_time} turn(s)")
+        if move.duration and move.duration > 0:
+            timing.append(f"⏳ Duration: {move.duration} turn(s)")
+        if move.cooldown and move.cooldown > 0:
+            timing.append(f"⌛ Cooldown: {move.cooldown} turn(s)")
             
         if timing:
             embed.add_field(

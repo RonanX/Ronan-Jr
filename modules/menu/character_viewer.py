@@ -94,7 +94,7 @@ class CharacterViewer:
         
         return display
 
-    async def show(self, interaction: Interaction) -> None:
+    async def show(self, interaction: Interaction, ephemeral: bool = True) -> None:
         """Initialize and display the character viewer"""
         # Set bot from interaction if available
         if hasattr(interaction, 'client'):
@@ -105,7 +105,7 @@ class CharacterViewer:
             
         self.current_view = CharacterViewerUI(self)
         embed = await self.create_current_embed()
-        await interaction.response.send_message(embed=embed, view=self.current_view)
+        await interaction.response.send_message(embed=embed, view=self.current_view, ephemeral=ephemeral)
 
     async def create_current_embed(self) -> Embed:
         """Create embed based on current page"""
