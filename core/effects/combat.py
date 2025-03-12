@@ -1161,3 +1161,228 @@ class TempHPEffect(BaseEffect):
         effect.applied = data.get('applied', False)
         return effect
     
+class ShockEffect(BaseEffect):
+    """
+    Applies a chance-based shock effect that can damage and stun.
+    
+    Features:
+    - Configurable trigger chance (default 50%)
+    - Support for dice notation in damage
+    - Stun on successful shock proc (skips turn)
+    - Duration tracking
+    - Permanent option
+    """
+    def __init__(
+        self, 
+        damage: str, 
+        chance: int = 50, 
+        duration: Optional[int] = None,
+        permanent: bool = False
+    ):
+        super().__init__(
+            name="Shock",
+            duration=duration,
+            permanent=permanent,
+            category=EffectCategory.COMBAT
+        )
+        self.damage = damage
+        self.chance = min(100, max(0, chance))  # Clamp between 0-100
+        self.last_damage = 0
+        self.triggered_this_turn = False
+        
+    def _roll_damage(self, character) -> int:
+        """Roll damage if dice notation, otherwise return static value"""
+        if isinstance(self.damage, str) and ('d' in self.damage.lower() or 'D' in self.damage):
+            total, _ = DiceRoller.roll_dice(self.damage, character)
+            return total
+        return int(self.damage)
+
+    def on_apply(self, character, round_number: int) -> str:
+        """Apply initial shock effect"""
+        self.initialize_timing(round_number, character.name)
+        
+        # Format duration text
+        details = []
+        details.append(f"Damage: {self.damage} lightning")
+        details.append(f"Shock Chance: {self.chance}%")
+        
+        if self.permanent:
+            details.append("Effect is permanent")
+        elif self.duration:
+            details.append(f"Duration: {self.duration} turns")
+        
+        # Return formatted message using base class method
+        return self.format_effect_message(
+            f"{character.name} is afflicted by Shock",
+            details,
+            emoji="⚡"
+        )
+
+    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Process shock check at start of affected character's turn"""
+        if character.name != turn_name:
+            return []
+            
+        # Reset trigger status for new turn
+        self.triggered_this_turn = False
+            
+        # Skip if rounds completed exceeds duration
+        if not self.permanent and self.duration:
+            rounds_completed = round_number - self.timing.start_round
+            if rounds_completed >= self.duration:
+                return []
+                
+        # Roll to see if shock triggers
+        roll = random.randint(1, 100)
+        messages = []
+        
+        shock_success = roll <= self.chance
+        
+        if shock_success:
+            # Roll/calculate damage
+            damage = self._roll_damage(character)
+            self.last_damage = damage
+            
+            # Apply damage
+            old_hp = character.resources.current_hp
+            
+            # Handle temp HP first
+            absorbed = 0
+            if character.resources.current_temp_hp > 0:
+                absorbed = min(character.resources.current_temp_hp, damage)
+                character.resources.current_temp_hp -= absorbed
+                damage -= absorbed
+                
+            # Apply remaining damage to regular HP
+            character.resources.current_hp = max(0, character.resources.current_hp - damage)
+            
+            # Create message details
+            details = []
+            if absorbed > 0:
+                details.append(f"{absorbed} absorbed by temp HP")
+            details.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
+            
+            # Mark as triggered
+            self.triggered_this_turn = True
+            
+            # Apply skip effect for one turn
+            skip = SkipEffect(duration=1, reason="Shocked")
+            skip_msg = skip.on_apply(character, round_number)
+            
+            # Add to character's effects
+            character.effects.append(skip)
+            
+            # Format shock message
+            shock_msg = self.format_effect_message(
+                f"{character.name} is shocked for {self.last_damage} lightning damage",
+                details,
+                emoji="⚡"
+            )
+            
+            messages.append(shock_msg)
+            messages.append(skip_msg)
+        else:
+            # Only show a message on failed check during combat
+            if hasattr(character, 'round_number') or round_number > 1:
+                messages.append(self.format_effect_message(
+                    f"{character.name} resists shock",
+                    [f"Rolled {roll} (needed {self.chance} or less)"],
+                    emoji="⚡"
+                ))
+        
+        # Get duration info
+        if not self.permanent and self.duration:
+            turns_remaining = max(0, self.duration - (round_number - self.timing.start_round))
+            if turns_remaining > 0:
+                plural = "s" if turns_remaining != 1 else ""
+                details = [f"{turns_remaining} turn{plural} remaining"]
+                if not self.triggered_this_turn:
+                    details.append(f"Next check: {self.chance}% chance")
+                status_msg = self.format_effect_message(
+                    f"Shock effect active",
+                    details,
+                    emoji="⚡"
+                )
+                messages.append(status_msg)
+        
+        return messages
+
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Handle duration tracking at end of turn"""
+        if character.name != turn_name or self.permanent:
+            return []
+            
+        # Calculate remaining turns
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        
+        # Format message based on remaining duration
+        if should_expire:
+            return [self.format_effect_message(
+                f"Shock effect will wear off from {character.name}",
+                emoji="⚡"
+            )]
+        elif turns_remaining > 0:
+            return [self.format_effect_message(
+                f"Shock effect continues",
+                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
+                emoji="⚡"
+            )]
+            
+        return []
+    
+    def on_expire(self, character) -> str:
+        """Clean message when effect expires"""
+        return self.format_effect_message(
+            f"Shock effect has worn off from {character.name}",
+            emoji="⚡"
+        )
+        
+    def get_status_text(self, character) -> str:
+        """Format status text for character sheet display"""
+        lines = [f"⚡ **{self.name}**"]
+        
+        # Add damage and chance info
+        lines.append(f"• `Damage: {self.damage} per trigger`")
+        lines.append(f"• `Trigger Chance: {self.chance}%`")
+        if self.last_damage and self.triggered_this_turn:
+            lines.append(f"• `Last damage: {self.last_damage}`")
+            
+        # Add duration info
+        if self.timing and self.timing.duration is not None:
+            if hasattr(character, 'round_number'):
+                rounds_passed = character.round_number - self.timing.start_round
+                remaining = max(0, self.timing.duration - rounds_passed)
+                lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
+        elif self.permanent:
+            lines.append("• `Permanent`")
+            
+        return "\n".join(lines)
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary for storage"""
+        data = super().to_dict()
+        data.update({
+            "damage": self.damage,
+            "chance": self.chance,
+            "last_damage": self.last_damage,
+            "triggered_this_turn": self.triggered_this_turn
+        })
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'ShockEffect':
+        """Create from dictionary data"""
+        effect = cls(
+            damage=data.get('damage', "1d4"),
+            chance=data.get('chance', 50),
+            duration=data.get('duration'),
+            permanent=data.get('permanent', False)
+        )
+        effect.last_damage = data.get('last_damage', 0)
+        effect.triggered_this_turn = data.get('triggered_this_turn', False)
+        
+        # Restore timing if it exists
+        if timing_data := data.get('timing'):
+            effect.timing = EffectTiming(**timing_data)
+            
+        return effect

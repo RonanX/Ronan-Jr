@@ -4,6 +4,8 @@ Discord commands for managing character effects.
 Message Format Standard:
 All feedback messages should follow the format: `[emoji] [backticked message] [emoji]`
 Example: ✨ `Effect applied to Character` ✨
+
+Adhere to base.py's guidelines so that there are no errors for backticks
 """
 
 import asyncio
@@ -23,9 +25,9 @@ from core.effects.base import EffectRegistry, BaseEffect, EffectCategory, Custom
 from core.effects.manager import apply_effect, remove_effect, get_effect_summary
 from core.effects.combat import (
     BurnEffect, SourceHeatWaveEffect, TargetHeatWaveEffect, 
-    TempHPEffect, ResistanceEffect, VulnerabilityEffect, WeaknessEffect
+    TempHPEffect, ResistanceEffect, VulnerabilityEffect, WeaknessEffect, ShockEffect
 )
-from core.effects.resource import DrainEffect
+from core.effects.resource import DrainEffect, RegenEffect
 from core.effects.status import ACEffect, FrostbiteEffect, SkipEffect
 from core.effects.condition import ConditionEffect, ConditionType, CONDITION_PROPERTIES
 from core.effects.move import MoveEffect
@@ -1353,5 +1355,99 @@ class EffectCommands(commands.GroupCog, name="effect"):
             
         print("\nDebug cleanup complete - all test effects removed")
             
+    @app_commands.command(name="shock")
+    @app_commands.describe(
+        character="Character to apply shock to",
+        damage="Amount of damage per shock (can use dice notation)",
+        chance="Chance to trigger shock effect (default: 50%)",
+        duration="Duration in turns (optional, defaults to 1)",
+        permanent="Whether this effect is permanent"
+    )
+    async def shock(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        damage: str,
+        chance: Optional[int] = 50,
+        duration: Optional[int] = 1,
+        permanent: bool = False
+    ):
+        """Apply a shock effect that has a chance to damage and stun"""
+        try:
+            await interaction.response.defer()
+
+            char = self.bot.game_state.get_character(character)
+            if not char:
+                await interaction.followup.send(f"❌ `Character {character} not found` ❌")
+                return
+
+            # Get current round from initiative tracker
+            current_round = 1
+            if hasattr(self.bot, 'initiative_tracker'):
+                current_round = getattr(self.bot.initiative_tracker, 'round_number', 1)
+
+            effect = ShockEffect(damage, chance, duration, permanent)
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect, current_round)
+
+            await self.bot.db.save_character(char)
+            await interaction.followup.send(message)
+
+        except Exception as e:
+            await handle_error(interaction, e)
+
+    @app_commands.command(name="regen")
+    @app_commands.describe(
+        character="Character to apply regeneration to",
+        resource_type="Type of resource to regenerate (HP/MP)",
+        amount="Amount to regenerate per turn (can use dice notation)",
+        duration="Duration in turns (optional, defaults to 1)",
+        permanent="Whether this effect is permanent"
+    )
+    @app_commands.choices(
+        resource_type=[
+            app_commands.Choice(name="Hit Points (HP)", value="hp"),
+            app_commands.Choice(name="Mana Points (MP)", value="mp")
+        ]
+    )
+    async def regeneration(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        resource_type: app_commands.Choice[str],
+        amount: str,
+        duration: Optional[int] = 1,
+        permanent: bool = False
+    ):
+        """Apply a regeneration effect that restores resources over time"""
+        try:
+            await interaction.response.defer()
+
+            char = self.bot.game_state.get_character(character)
+            if not char:
+                await interaction.followup.send(f"❌ `Character {character} not found` ❌")
+                return
+
+            effect = RegenEffect(
+                amount=amount,
+                resource_type=resource_type.value,
+                duration=duration,
+                permanent=permanent
+            )
+
+            # Get current round from initiative tracker
+            current_round = 1
+            if hasattr(self.bot, 'initiative_tracker'):
+                current_round = getattr(self.bot.initiative_tracker, 'round_number', 1)
+
+            # Apply effect - with proper await
+            message = await apply_effect(char, effect, current_round)
+
+            await self.bot.db.save_character(char)
+            await interaction.followup.send(message)
+
+        except Exception as e:
+            await handle_error(interaction, e)
+
 async def setup(bot):
     await bot.add_cog(EffectCommands(bot))

@@ -24,7 +24,10 @@ import asyncio
 from .base import BaseEffect, EffectRegistry, EffectCategory, CustomEffect
 from .combat import (
     ResistanceEffect, VulnerabilityEffect, WeaknessEffect, TempHPEffect,
-    BurnEffect, SourceHeatWaveEffect, TargetHeatWaveEffect
+    BurnEffect, SourceHeatWaveEffect, TargetHeatWaveEffect, ShockEffect
+)
+from .resource import(
+    DrainEffect, RegenEffect
 )
 from .status import ACEffect, FrostbiteEffect, SkipEffect
 from .move import MoveEffect  # Add MoveEffect import
@@ -39,14 +42,19 @@ def register_effects():
     EffectRegistry.register_effect("weakness", WeaknessEffect)
     EffectRegistry.register_effect("temp_hp", TempHPEffect)
     EffectRegistry.register_effect("burn", BurnEffect)
+    EffectRegistry.register_effect("shock", ShockEffect)
     EffectRegistry.register_effect("heatwave_source", SourceHeatWaveEffect)
     EffectRegistry.register_effect("heatwave_target", TargetHeatWaveEffect)
+    
+    # Resource effects
+    EffectRegistry.register_effect("drain", DrainEffect)
+    EffectRegistry.register_effect("regen", RegenEffect)
     
     # Status effects
     EffectRegistry.register_effect("ac", ACEffect)
     EffectRegistry.register_effect("frostbite", FrostbiteEffect)
     EffectRegistry.register_effect("skip", SkipEffect)
-    EffectRegistry.register_effect("move", MoveEffect)  # Register move effect
+    EffectRegistry.register_effect("move", MoveEffect)
     
     # Custom effects
     EffectRegistry.register_effect("custom", CustomEffect)
