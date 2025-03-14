@@ -9,10 +9,64 @@ Features:
 - Moveset management with global references
 - Backward compatibility with older versions
 - JSON serialization for sharing
+
+Example JSON import:
+
+```json
+{
+  "reference": "character_moveset",
+  "moves": {
+    "quick_strike": {
+      "name": "Quick Strike",
+      "description": "A swift attack; Deals light damage; Can be used to start combos",
+      "mp_cost": 0,
+      "star_cost": 1,
+      "attack_roll": "1d20+dex",
+      "damage": "1d6+dex slashing",
+      "category": "Offense",
+      "version": 8
+    },
+    "power_blast": {
+      "name": "Power Blast",
+      "description": "A powerful energy attack; Pushes targets back; Can hit multiple enemies",
+      "mp_cost": 15,
+      "star_cost": 3,
+      "cooldown": 3,
+      "attack_roll": "1d20+int",
+      "damage": "3d6+int force",
+      "category": "Offense",
+      "advanced_json": {
+        "bonus_on_hit": {"mp": 2, "note": "Power Surge"},
+        "aoe_mode": "single"
+      },
+      "version": 8
+    },
+    "healing_light": {
+      "name": "Healing Light",
+      "description": "Bathes allies in healing light; Restores health; Removes minor conditions",
+      "mp_cost": 10,
+      "hp_cost": -15,
+      "star_cost": 2,
+      "duration": 1,
+      "category": "Defense",
+      "version": 8
+    },
+    "ethereal_dash": {
+      "name": "Ethereal Dash",
+      "description": "Phase through solid matter; Move through obstacles; Escape grapples",
+      "mp_cost": 8,
+      "star_cost": 1,
+      "cooldown": 0,
+      "category": "Utility", 
+      "version": 8
+    }
+  }
+}
+
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,53 +83,83 @@ class MoveData:
     4: Added combat parameters (saves, conditions, roll timing)
     5: Added heat tracking support and target params
     6: Added move category support
-    7: Deprecating save parameters (save_type, save_dc, half_on_save)
-       Use description for save instructions instead
+    7: Deprecated save parameters and heat tracking
+    8: Added bonus_on_hit, removed deprecated parameters
+    
+    Moveset Creation Guidelines:
+    ----------------------------
+    Star Cost Guidelines:
+      - Light/Quick Attack: 1 star
+      - Medium/Combo Attack: 2 stars
+      - Heavy/Raw Heavy Attack: 3-5 stars (based on power level)
+      - Utility/Defense: Varies based on usefulness (typically 1-2 stars)
+    
+    Resource Guidelines:
+      - MP Cost: Primary resource cost for most moves
+      - Cooldowns: Only moves with 3+ stars should have cooldowns
+      - Uses: Alternative to MP cost for limited-use abilities
+      - Some powerful moves may have both MP cost and cooldown
+      - Some character-specific moves may have cooldown but no MP cost
+    
+    Naming/Description:
+      - Move names should be concise and descriptive
+      - Descriptions can use semicolons to separate different aspects
+      - Include damage type in damage field (e.g., "1d6+str slashing")
+      
+    Combat Parameters:
+      - attack_roll: Format as "1d20+stat" or variants
+      - damage: Format as "XdY+stat damage_type"
+      - multihit: Format attack as "XdY multihit Z" where Z is number of attacks
+      - advantage/disadvantage: Add "advantage" or "disadvantage" to attack roll
+    
+    Advanced Parameters:
+      - bonus_on_hit: Use for resource bonuses or effects that trigger on hit
+      - aoe_mode: Use "single" for one roll against multiple targets, "multi" for separate rolls
+
+    Category Guidelines:
+      - Offense: Attacks, damage dealing moves, debuffs
+      - Defense: Healing, shields, protective effects, buffs
+      - Utility: Movement, positioning, resource management, non-combat effects
     """
-    CURRENT_VERSION = 7
+    CURRENT_VERSION = 8
 
     # Version 1 parameters (base)
     name: str
     description: str
-    mp_cost: int = 0
-    hp_cost: int = 0
-    star_cost: int = 0
-    cast_time: Optional[int] = None
-    duration: Optional[int] = None
-    cast_description: Optional[str] = None
+
+    # Add version as a proper field
+    version: int = CURRENT_VERSION
+
+    mp_cost: int = 0  # Primary resource cost - varies based on power
+    hp_cost: int = 0  # Negative for healing effects
+    star_cost: int = 0  # 1=Light, 2=Medium, 3-5=Heavy based on power level
+    cast_time: Optional[int] = None  # Turns required to cast before effect triggers
+    duration: Optional[int] = None  # How many turns the effect lasts after activation
+    cast_description: Optional[str] = None  # Custom text for casting phase
 
     # Version 2 parameters (uses/cooldown)
-    uses: Optional[int] = None
-    uses_remaining: Optional[int] = None
-    cooldown: Optional[int] = None
-    last_used_round: Optional[int] = None
+    uses: Optional[int] = None  # Limited uses per combat (-1 for unlimited)
+    uses_remaining: Optional[int] = None  # Current uses remaining
+    cooldown: Optional[int] = None  # Recommended only for 3+ star moves
+    last_used_round: Optional[int] = None  # Round when last used (for cooldown tracking)
 
     # Version 3 parameters (basic attack)
-    attack_roll: Optional[str] = None  # e.g., "1d20+dex"
+    attack_roll: Optional[str] = None  # e.g., "1d20+dex", "1d20+str advantage", "3d20 multihit 2"
     damage: Optional[str] = None  # e.g., "2d6+str fire, 1d4 poison"
     crit_range: int = 20  # Natural roll needed for crit
     targets: Optional[int] = None  # Number of targets (for multi-target)
     
-    # Version 4 parameters (combat)
-    # These are deprecated in v7 but kept for backward compatibility
-    save_type: Optional[str] = None  # str, dex, con, etc.
-    save_dc: Optional[str] = None  # e.g., "8+prof+int"
-    half_on_save: bool = False  # Whether save halves damage
-    conditions: List[str] = field(default_factory=list)  # Applied conditions from ConditionType
+    # Version 4+ parameters (combat)
+    conditions: List[str] = field(default_factory=list)  # Applied conditions
     roll_timing: str = "active"  # When to apply rolls: "instant", "active" or "per_turn"
     
-    # Version 5 parameters (enhanced combat)
-    enable_heat_tracking: bool = False  # Whether to track heat stacks
-    target_selection: str = "manual"    # How targets are selected: "manual", "random", "closest"
-    
     # Version 6 parameters (UI enhancements)
-    category: str = "Offense"    # Move category: "Offense", "Utility", "Defense", or custom
+    category: str = "Offense"  # Move category: "Offense", "Utility", "Defense", or custom
     
-    # Version 7 parameters
-    # No new fields, just better handling of description for saves
-    
-    version: int = CURRENT_VERSION
-    custom_parameters: Dict[str, Any] = field(default_factory=dict)
+    # Version 8 parameters
+    bonus_on_hit: Optional[Dict[str, Any]] = None  # Resource bonuses on hit
+    aoe_mode: Optional[str] = None  # How AoE is handled: "single" or "multi"
+    custom_parameters: Dict[str, Any] = field(default_factory=dict)  # For extensibility
 
     def to_dict(self) -> dict:
         """Convert to dictionary for database storage"""
@@ -102,19 +186,16 @@ class MoveData:
             "crit_range": self.crit_range,
             "targets": self.targets,
             
-            # Version 4+ (kept for backward compatibility)
-            "save_type": self.save_type,
-            "save_dc": self.save_dc,
-            "half_on_save": self.half_on_save,
+            # Version 4+
             "conditions": self.conditions,
             "roll_timing": self.roll_timing,
             
-            # Version 5+
-            "enable_heat_tracking": self.enable_heat_tracking,
-            "target_selection": self.target_selection,
-            
             # Version 6+
             "category": self.category,
+            
+            # Version 8+
+            "bonus_on_hit": self.bonus_on_hit,
+            "aoe_mode": self.aoe_mode,
             
             "custom_parameters": self.custom_parameters
         }
@@ -161,40 +242,75 @@ class MoveData:
             
         # Version 4+ parameters
         if version >= 4:
-            move.save_type = data.get("save_type")
-            move.save_dc = data.get("save_dc")
-            move.half_on_save = data.get("half_on_save", False)
             move.conditions = data.get("conditions", [])
             move.roll_timing = data.get("roll_timing", "active")
-            
-        # Version 5+ parameters
-        if version >= 5:
-            move.enable_heat_tracking = data.get("enable_heat_tracking", False)
-            move.target_selection = data.get("target_selection", "manual")
             
         # Version 6+ parameters
         if version >= 6:
             move.category = data.get("category", "Offense")
         else:
             # Try to infer category from other fields for older versions
-            if move.attack_roll or (move.damage and not move.save_type):
+            if move.attack_roll or (move.damage and not data.get("save_type")):
                 move.category = "Offense"
-            elif move.save_type and move.save_type in ["str", "dex", "con", "int", "wis", "cha"]:
+            elif data.get("save_type") and data.get("save_type") in ["str", "dex", "con", "int", "wis", "cha"]:
                 move.category = "Offense" 
             elif move.hp_cost < 0:  # Healing moves
                 move.category = "Defense"
             else:
                 # Default for older versions
                 move.category = "Utility"
+        
+        # Special handling for bonus_on_hit to support both direct and nested formats
+        bonus_on_hit = data.get("bonus_on_hit")
+        if bonus_on_hit:
+            # If it's already a dictionary, use it directly
+            if isinstance(bonus_on_hit, dict):
+                move.bonus_on_hit = bonus_on_hit
+            # If it's a string, try to parse it as JSON
+            elif isinstance(bonus_on_hit, str):
+                try:
+                    import json
+                    move.bonus_on_hit = json.loads(bonus_on_hit)
+                except:
+                    # If parsing fails, set a default value
+                    move.bonus_on_hit = {"stars": 1}
+            # Handle other types as needed
+            else:
+                # For any other type, set a default value
+                move.bonus_on_hit = {"stars": 1}
+        else:
+            # Check for legacy parameters
+            if data.get("enable_heat_tracking", False) or data.get("enable_hit_bonus", False):
+                move.bonus_on_hit = {"stars": 1}
+        
+        # Version 8+ parameters
+        if version >= 8:
+            # Only set if not already set by bonus_on_hit handling
+            if not hasattr(move, 'bonus_on_hit') or move.bonus_on_hit is None:
+                move.bonus_on_hit = data.get("bonus_on_hit")
+            move.aoe_mode = data.get("aoe_mode", "single")
+        
+        # Handle advanced_json if present (usually from test harness or Discord commands)
+        advanced_json = data.get("advanced_json")
+        if advanced_json:
+            # Handle nested bonus_on_hit
+            if isinstance(advanced_json, dict) and "bonus_on_hit" in advanced_json:
+                move.bonus_on_hit = advanced_json["bonus_on_hit"]
             
+            # Handle aoe_mode
+            if isinstance(advanced_json, dict) and "aoe_mode" in advanced_json:
+                move.aoe_mode = advanced_json["aoe_mode"]
+        
         # Store any unknown parameters for future versions
         known_keys = {
             "version", "name", "description", "mp_cost", "hp_cost", "star_cost",
             "cast_time", "duration", "cast_description", "uses", "uses_remaining",
             "cooldown", "last_used_round", "attack_roll", "damage", "crit_range",
-            "targets", "save_type", "save_dc", "half_on_save", "conditions",
-            "roll_timing", "enable_heat_tracking", "target_selection", "category",
-            "custom_parameters"
+            "targets", "conditions", "roll_timing", "category", 
+            "bonus_on_hit", "aoe_mode", "custom_parameters", "advanced_json",
+            # Include deprecated keys to prevent them from going to custom_parameters
+            "save_type", "save_dc", "half_on_save", "enable_heat_tracking", 
+            "target_selection", "enable_hit_bonus"
         }
         
         # Store any unrecognized keys in custom_parameters
@@ -211,6 +327,34 @@ class MoveData:
             
         return move
     
+    def validate(self) -> Tuple[bool, Optional[str]]:
+        """
+        Validate the move data according to established guidelines.
+        Returns (is_valid, error_message)
+        """
+        # Validate required fields
+        if not self.name:
+            return False, "Move must have a name"
+            
+        # Validate star costs
+        if self.star_cost < 0 or self.star_cost > 5:
+            return False, "Star cost must be between 0 and 5"
+        
+        # Validate cooldown (should only be present for 3+ star moves)
+        if self.cooldown and self.cooldown > 0 and self.star_cost < 3:
+            return False, "Warning: Cooldowns typically only used for 3+ star moves"
+        
+        # Validate attack_roll format if present
+        if self.attack_roll:
+            if not ("d20" in self.attack_roll.lower() or "d20" in self.attack_roll.lower().split(' ')):
+                return False, "Attack roll must use d20"
+        
+        # Validate damage includes type if present
+        if self.damage and " " not in self.damage:
+            return False, "Damage should include damage type (e.g., '1d6 slashing')"
+        
+        return True, None
+
     def can_use(self, current_round: Optional[int] = None) -> tuple[bool, Optional[str]]:
         """
         Check if move can be used.
@@ -255,7 +399,7 @@ class MoveData:
     @property
     def needs_target(self) -> bool:
         """Whether this move needs a target"""
-        return bool(self.attack_roll or (self.damage and not self.save_type))
+        return bool(self.attack_roll or self.damage)
 
 @dataclass
 class Moveset:

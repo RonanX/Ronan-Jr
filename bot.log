@@ -9572,3 +9572,813 @@ UnboundLocalError: cannot access local variable 'MoveState' where it is not asso
 2025-03-09 14:40:28,999 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
 2025-03-09 14:40:29,009 - discord.client - INFO - logging in using static token
 2025-03-09 14:40:30,259 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e71a295aa3f5d1ff05773bff24e433ca).
+2025-03-09 21:19:23,138 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-09 21:19:23,138 - discord.client - INFO - logging in using static token
+2025-03-09 21:19:24,677 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 885b3361f042e63ea1989c7b0b318b80).
+2025-03-09 21:52:06,382 - discord.ui.view - ERROR - Ignoring exception in view <MovesetView timeout=180 children=7> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=False label='Move Info' emoji=None row=1 sku_id=None>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\ui\view.py", line 430, in _scheduled_task
+    await item.callback(interaction)
+  File "d:\Games\Campaigns\Ronan Jr\modules\menu\action_handler.py", line 592, in info_callback
+    view=MoveInfoView(self.character, current_page_moves, self.handler),
+         ^^^^^^^^^^^^
+NameError: name 'MoveInfoView' is not defined. Did you mean: 'MovesetView'?
+2025-03-09 22:06:44,733 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 885b3361f042e63ea1989c7b0b318b80.
+2025-03-09 23:00:36,098 - core.effects.manager - ERROR - Error processing effects: unsupported operand type(s) for -: 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 273, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\condition.py", line 455, in on_turn_end
+    turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 365, in process_duration
+    turns_remaining = max(0, self.duration - rounds_completed)
+                             ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'NoneType' and 'int'
+2025-03-09 23:13:04,636 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 885b3361f042e63ea1989c7b0b318b80.
+2025-03-09 23:16:58,322 - core.effects.manager - ERROR - Error processing effects: unsupported operand type(s) for -: 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 273, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\condition.py", line 455, in on_turn_end
+    turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 365, in process_duration
+    turns_remaining = max(0, self.duration - rounds_completed)
+                             ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'NoneType' and 'int'
+2025-03-09 23:17:13,113 - core.effects.manager - ERROR - Error processing effects: unsupported operand type(s) for -: 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 273, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\condition.py", line 455, in on_turn_end
+    turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 365, in process_duration
+    turns_remaining = max(0, self.duration - rounds_completed)
+                             ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'NoneType' and 'int'
+2025-03-09 23:23:47,450 - core.effects.manager - ERROR - Error processing effects: unsupported operand type(s) for -: 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 273, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\condition.py", line 455, in on_turn_end
+    turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 365, in process_duration
+    turns_remaining = max(0, self.duration - rounds_completed)
+                             ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'NoneType' and 'int'
+2025-03-09 23:46:00,839 - core.effects.manager - ERROR - Error processing effects: unsupported operand type(s) for -: 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 273, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\condition.py", line 455, in on_turn_end
+    turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 365, in process_duration
+    turns_remaining = max(0, self.duration - rounds_completed)
+                             ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'NoneType' and 'int'
+2025-03-09 23:54:55,729 - core.effects.manager - ERROR - Error processing effects: unsupported operand type(s) for -: 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 273, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\condition.py", line 455, in on_turn_end
+    turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 365, in process_duration
+    turns_remaining = max(0, self.duration - rounds_completed)
+                             ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'NoneType' and 'int'
+2025-03-10 10:28:26,804 - discord.client - ERROR - Attempting a reconnect in 0.29s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-10 10:28:27,851 - discord.client - ERROR - Attempting a reconnect in 3.54s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-10 10:28:31,769 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-10 10:28:37,291 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f0a0f01bb631f8385a5fde41abca5425).
+2025-03-10 11:15:10,611 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f0a0f01bb631f8385a5fde41abca5425.
+2025-03-10 11:53:24,792 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f0a0f01bb631f8385a5fde41abca5425.
+2025-03-10 19:50:05,947 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-10 19:50:05,955 - discord.client - ERROR - Attempting a reconnect in 0.54s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-10 19:50:07,313 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-10 19:50:13,018 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: cbfcccee2e915c322e1c3c676c1bbc0a).
+2025-03-10 22:09:53,645 - discord.gateway - INFO - Shard ID None has successfully RESUMED session cbfcccee2e915c322e1c3c676c1bbc0a.
+2025-03-11 00:27:41,872 - discord.gateway - INFO - Shard ID None has successfully RESUMED session cbfcccee2e915c322e1c3c676c1bbc0a.
+2025-03-11 02:02:13,620 - discord.client - ERROR - Attempting a reconnect in 1.21s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-11 02:02:14,852 - discord.client - ERROR - Attempting a reconnect in 3.92s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1301, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 911, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 948, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\resolver.py", line 37, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\client.py", line 664, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\gateway.py", line 374, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\http.py", line 550, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 931, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client.py", line 657, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 564, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 975, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\connector.py", line 1307, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-03-11 02:02:19,054 - discord.gateway - INFO - Shard ID None has successfully RESUMED session cbfcccee2e915c322e1c3c676c1bbc0a.
+2025-03-11 11:33:55,671 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-11 11:33:57,335 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-11 11:34:02,923 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f62354df6dd8d0129e6e15924aa298bf).
+2025-03-11 13:58:31,835 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f62354df6dd8d0129e6e15924aa298bf.
+2025-03-11 14:59:38,975 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-11 14:59:39,268 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-11 14:59:44,699 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3d18e6e0acdbb5ed7bec6c21c73958a6).
+2025-03-11 16:19:26,838 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-11 16:27:31,207 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-11 16:29:13,856 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-11 19:25:27,631 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-11 22:20:33,231 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-12 00:07:08,316 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-12 00:07:49,772 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-12 00:10:44,569 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-12 00:23:07,365 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-12 01:07:15,881 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3d18e6e0acdbb5ed7bec6c21c73958a6.
+2025-03-12 11:21:56,828 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-12 11:21:57,080 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-12 11:22:02,355 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 5c6a580dd66ef7efa37196e55c0f8580).
+2025-03-12 11:48:03,336 - core.effects.manager - ERROR - Error applying effect: 'Embed' object has no attribute 'items'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 116, in apply_effect
+    message = await effect.on_apply(character, round_number)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 732, in on_apply
+    attack_results = await self.combat.process_attack(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 432, in process_attack
+    for target_name, hit_data in hit_results.items():
+                                 ^^^^^^^^^^^^^^^^^
+AttributeError: 'Embed' object has no attribute 'items'
+2025-03-12 11:48:46,495 - core.effects.manager - ERROR - Error applying effect: 'Embed' object has no attribute 'items'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 116, in apply_effect
+    message = await effect.on_apply(character, round_number)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 732, in on_apply
+    attack_results = await self.combat.process_attack(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move.py", line 432, in process_attack
+    for target_name, hit_data in hit_results.items():
+                                 ^^^^^^^^^^^^^^^^^
+AttributeError: 'Embed' object has no attribute 'items'
+2025-03-12 18:13:10,269 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-12 18:13:10,272 - discord.client - INFO - logging in using static token
+2025-03-12 18:13:12,034 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4daf149946bd3885009213fc86363f11).
+2025-03-12 18:15:00,146 - commands.moves - ERROR - Error in temp_move: MoveEffect.__init__() got an unexpected keyword argument 'save_type'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 662, in temp_move
+    move_effect = MoveEffect(
+                  ^^^^^^^^^^^
+TypeError: MoveEffect.__init__() got an unexpected keyword argument 'save_type'
+2025-03-12 18:15:20,471 - commands.moves - ERROR - Error in temp_move: MoveEffect.__init__() got an unexpected keyword argument 'save_type'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 662, in temp_move
+    move_effect = MoveEffect(
+                  ^^^^^^^^^^^
+TypeError: MoveEffect.__init__() got an unexpected keyword argument 'save_type'
+2025-03-12 18:46:02,347 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-12 18:46:02,351 - discord.client - INFO - logging in using static token
+2025-03-12 22:53:44,067 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-12 22:53:44,070 - discord.client - INFO - logging in using static token
+2025-03-12 22:53:45,536 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ccbb630022a065e1beb3870d0fb8f206).
+2025-03-13 17:14:27,773 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 17:14:27,779 - discord.client - INFO - logging in using static token
+2025-03-13 17:14:28,959 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:14:28,959 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:14:28,968 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:14:28,969 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:14:28,970 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:14:28,972 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:14:29,403 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 75d736fff2ec61e57e12c910353bc076).
+2025-03-13 17:15:52,609 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py:1149> exception=AttributeError("'Interaction' object has no attribute 'send'")>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1283, in _call
+    command, options = self._get_app_command_options(data)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1202, in _get_app_command_options
+    raise CommandNotFound(name, parents)
+discord.app_commands.errors.CommandNotFound: Application command 'temp' not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1153, in wrapper
+    await self._dispatch_error(interaction, e)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1146, in _dispatch_error
+    await self.on_error(interaction, error)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 281, in on_app_command_error
+    await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 272, in handle_command_error
+    await ctx.send(embed=error_embed)
+          ^^^^^^^^
+AttributeError: 'Interaction' object has no attribute 'send'
+2025-03-13 17:15:54,663 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py:1149> exception=AttributeError("'Interaction' object has no attribute 'send'")>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1283, in _call
+    command, options = self._get_app_command_options(data)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1202, in _get_app_command_options
+    raise CommandNotFound(name, parents)
+discord.app_commands.errors.CommandNotFound: Application command 'temp' not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1153, in wrapper
+    await self._dispatch_error(interaction, e)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1146, in _dispatch_error
+    await self.on_error(interaction, error)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 281, in on_app_command_error
+    await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 272, in handle_command_error
+    await ctx.send(embed=error_embed)
+          ^^^^^^^^
+AttributeError: 'Interaction' object has no attribute 'send'
+2025-03-13 17:15:55,164 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py:1149> exception=AttributeError("'Interaction' object has no attribute 'send'")>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1283, in _call
+    command, options = self._get_app_command_options(data)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1202, in _get_app_command_options
+    raise CommandNotFound(name, parents)
+discord.app_commands.errors.CommandNotFound: Application command 'temp' not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1153, in wrapper
+    await self._dispatch_error(interaction, e)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1146, in _dispatch_error
+    await self.on_error(interaction, error)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 281, in on_app_command_error
+    await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 272, in handle_command_error
+    await ctx.send(embed=error_embed)
+          ^^^^^^^^
+AttributeError: 'Interaction' object has no attribute 'send'
+2025-03-13 17:43:48,638 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 17:43:48,643 - discord.client - INFO - logging in using static token
+2025-03-13 17:43:50,656 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:43:50,656 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:43:50,670 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:43:50,671 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:43:50,672 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:43:50,673 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:44:29,369 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 17:44:29,372 - discord.client - INFO - logging in using static token
+2025-03-13 17:44:30,481 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:44:30,486 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:44:30,488 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:44:30,488 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:44:30,490 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:44:30,492 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:44:30,845 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1195ebbfa3e60fdd97127b84a9d3a73c).
+2025-03-13 17:45:06,595 - discord.app_commands.tree - ERROR - Ignoring exception in autocomplete for 'move temp'
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\tree.py", line 1302, in _call
+    await command._invoke_autocomplete(interaction, focused, namespace)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python312\Lib\site-packages\discord\app_commands\commands.py", line 901, in _invoke_autocomplete
+    raise CommandSignatureMismatch(self)
+discord.app_commands.errors.CommandSignatureMismatch: The signature for command 'temp' is different from the one provided by Discord. This can happen because either your code is out of date or you have not synced the commands with Discord, causing the mismatch in data. It is recommended to sync the command tree to fix this issue.
+2025-03-13 17:46:16,013 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:46:16,015 - __main__ - ERROR - Error listing characters: 'NoneType' object has no attribute 'name'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 364, in list_characters
+    bot.game_state.add_character(char)
+  File "d:\Games\Campaigns\Ronan Jr\core\state.py", line 318, in add_character
+    self.characters[character.name] = character
+                  ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'name'
+2025-03-13 17:47:00,963 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 17:47:00,964 - discord.client - INFO - logging in using static token
+2025-03-13 17:47:01,981 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:47:01,993 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:47:01,995 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:47:01,996 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:47:01,997 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:47:01,998 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:47:02,445 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 830b0d974083f0906330789df35d4096).
+2025-03-13 17:47:16,496 - core.character - ERROR - Error reconstructing character: MoveData.__init__() got an unexpected keyword argument 'version'
+2025-03-13 17:47:16,497 - __main__ - ERROR - Error listing characters: 'NoneType' object has no attribute 'name'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 364, in list_characters
+    bot.game_state.add_character(char)
+  File "d:\Games\Campaigns\Ronan Jr\core\state.py", line 318, in add_character
+    self.characters[character.name] = character
+                  ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'name'
+2025-03-13 18:10:21,751 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 18:10:21,755 - discord.client - INFO - logging in using static token
+2025-03-13 18:10:23,536 - core.character - ERROR - Error reconstructing character: non-default argument 'name' follows default argument
+2025-03-13 18:10:23,536 - core.character - ERROR - Error reconstructing character: non-default argument 'name' follows default argument
+2025-03-13 18:10:23,545 - core.character - ERROR - Error reconstructing character: non-default argument 'name' follows default argument
+2025-03-13 18:10:23,545 - core.character - ERROR - Error reconstructing character: non-default argument 'name' follows default argument
+2025-03-13 18:10:23,545 - core.character - ERROR - Error reconstructing character: non-default argument 'name' follows default argument
+2025-03-13 18:10:23,545 - core.character - ERROR - Error reconstructing character: non-default argument 'name' follows default argument
+2025-03-13 18:27:51,087 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 18:27:51,093 - discord.client - INFO - logging in using static token
+2025-03-13 18:27:52,619 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 511ebac9651aae52d0e1414d73af857f).
+2025-03-13 21:55:16,827 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-13 21:55:17,050 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-13 21:55:22,543 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3910ff0feb2032ed513a57c193e5a43f).
+2025-03-13 22:08:05,271 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 22:08:05,274 - discord.client - INFO - logging in using static token
+2025-03-13 22:08:06,864 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1ad8df4b3f56fdc4766720a0ae63d8d1).
+2025-03-13 22:08:14,257 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 3+str
+2025-03-13 22:08:14,258 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: 3+str
+2025-03-13 22:08:14,258 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: 3+str
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 271, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: 3+str
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 338, in process_attack
+    attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 283, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: 3+str
+2025-03-13 22:08:14,260 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str+dex+5
+2025-03-13 22:08:14,260 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str+dex+5
+2025-03-13 22:08:14,260 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str+dex+5
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 271, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str+dex+5
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 338, in process_attack
+    attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 283, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str+dex+5
+2025-03-13 22:08:14,262 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str+dex+wis
+2025-03-13 22:08:14,262 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str+dex+wis
+2025-03-13 22:08:14,262 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str+dex+wis
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 271, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str+dex+wis
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 338, in process_attack
+    attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 283, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str+dex+wis
+2025-03-13 22:08:14,265 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str
+2025-03-13 22:08:14,266 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str
+2025-03-13 22:08:14,266 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 271, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 361, in process_attack
+    damage_rolls = TargetHandler.calculate_damage(damage_components, is_crit)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\target_handler.py", line 244, in calculate_damage
+    total, _, _ = DiceCalculator.calculate_complex(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 283, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str
+2025-03-13 22:08:14,269 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str+15
+2025-03-13 22:08:14,269 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str+15
+2025-03-13 22:08:14,269 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str+15
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 271, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str+15
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 397, in process_attack
+    _, first_formatted, _ = DiceCalculator.calculate_complex(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 283, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str+15
+2025-03-13 22:08:14,272 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: name 'StatType' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 272, in process_attack
+    stat_type = next((s for s in StatType if s.value.startswith(stat_name)), None)
+                                 ^^^^^^^^
+NameError: name 'StatType' is not defined
+2025-03-13 22:20:53,454 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 22:20:53,457 - discord.client - INFO - logging in using static token
+2025-03-13 22:20:54,953 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 370b58b998381ac15dd721e35a716190).
+2025-03-13 22:22:35,553 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 3+str
+2025-03-13 22:22:35,553 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: 3+str
+2025-03-13 22:22:35,553 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: 3+str
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 272, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: 3+str
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 338, in process_attack
+    attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 284, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: 3+str
+2025-03-13 22:22:35,555 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str+dex+5
+2025-03-13 22:22:35,555 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str+dex+5
+2025-03-13 22:22:35,555 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str+dex+5
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 272, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str+dex+5
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 338, in process_attack
+    attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 284, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str+dex+5
+2025-03-13 22:22:35,556 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str+dex+wis
+2025-03-13 22:22:35,556 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str+dex+wis
+2025-03-13 22:22:35,556 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str+dex+wis
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 272, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str+dex+wis
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 338, in process_attack
+    attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 284, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str+dex+wis
+2025-03-13 22:22:35,559 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str
+2025-03-13 22:22:35,559 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str
+2025-03-13 22:22:35,560 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 272, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 361, in process_attack
+    damage_rolls = TargetHandler.calculate_damage(damage_components, is_crit)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\target_handler.py", line 244, in calculate_damage
+    total, _, _ = DiceCalculator.calculate_complex(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 284, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str
+2025-03-13 22:22:35,561 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: str+15
+2025-03-13 22:22:35,562 - utils.advanced_dice.calculator - ERROR - Error calculating complex expression: Invalid dice expression: str+15
+2025-03-13 22:22:35,562 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: Error: Invalid dice expression: str+15
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 272, in calculate_complex
+    breakdown = cls.calculate(expression, character)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 105, in calculate
+    raise ValueError(f"Invalid dice expression: {expression}")
+ValueError: Invalid dice expression: str+15
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 397, in process_attack
+    _, first_formatted, _ = DiceCalculator.calculate_complex(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\calculator.py", line 284, in calculate_complex
+    raise ValueError(f"Error: {str(e)}")
+ValueError: Error: Invalid dice expression: str+15
+2025-03-13 22:22:35,565 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: name 'StatType' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 272, in process_attack
+    stat_type = next((s for s in StatType if s.value.startswith(stat_name)), None)
+                                 ^^^^^^^^
+NameError: name 'StatType' is not defined
+2025-03-13 22:55:04,958 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-13 22:55:04,958 - discord.client - INFO - logging in using static token
+2025-03-13 22:55:06,480 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e80b20f3fcd40f6ac0fb5e7563f15f83).

@@ -272,32 +272,40 @@ class RollCommands(commands.Cog):
 
         # Test scenarios with detailed comments
         scenarios = [
-            # Static number handling
-            {"expr": "15", "char": "test", "target": "test2", "dmg": "1d8"},  # Basic static attack
-            {"expr": "3+str", "char": "test", "target": "test2", "dmg": "2d6"},  # Static + stat mod
-            {"expr": "str+dex+5", "char": "test", "target": "test2", "dmg": "1d8"},  # Multiple stat mods + static
-            {"expr": "str+dex+wis", "char": "test", "target": "test2", "dmg": "1d8"},  # Pure stat combo
+            # Basic rolls for regression testing
+            {"expr": "1d20", "char": "test"},  # Simple d20 roll
+            {"expr": "d20+5", "char": "test"},  # Basic roll with static modifier
+            {"expr": "2d6+str", "char": "test"},  # Basic roll with stat modifier
             
-            # Complex dice combinations
-            {"expr": "2d20+str+5", "char": "test", "target": "test2", "dmg": "1d8+str"},  # Dice + stat + static
-            {"expr": "3d20 advantage", "char": "test", "target": "test2", "dmg": "2d6"},  # Advantage roll
-            {"expr": "d20+str disadvantage", "char": "test", "target": "test2", "dmg": "2d6"},  # Disadvantage with stat
+            # Advantage/Disadvantage testing
+            {"expr": "d20 advantage", "char": "test"},  # Basic advantage
+            {"expr": "d20 disadvantage", "char": "test"},  # Basic disadvantage
+            {"expr": "d20 advantage 2", "char": "test"},  # Advantage with count
+            {"expr": "d20 disadvantage 2", "char": "test"},  # Disadvantage with count
             
-            # Multiple damage types
-            {"expr": "d20+5", "char": "test", "target": "test2", "dmg": "1d8 slash, 2d6 fire, 1d4 cold"},  # Triple damage type
-            {"expr": "15", "char": "test", "target": "test2", "dmg": "str fire, dex cold"},  # Static damage with stats
+            # Basic multihit testing
+            {"expr": "3d20 multihit 2", "char": "test"},  # Basic multihit
+            {"expr": "4d6 multihit 3", "char": "test"},  # Different dice with multihit
             
-            # AoE behavior
-            {"expr": "d20+str", "char": "test", "target": "test2,test3", "dmg": "2d6 fire", "aoe": "single"},  # AoE single with type
-            {"expr": "str+15", "char": "test", "target": "test2,test3", "dmg": "str+5 fire", "aoe": "multi"},  # AoE multi with stat dmg
+            # Multihit + Advantage tests (our focus area)
+            {"expr": "2d20 multihit 2 advantage", "char": "test"},  # Basic multihit advantage
+            {"expr": "3d20 multihit 2 advantage", "char": "test"},  # More dice than advantage picks
+            {"expr": "4d20 multihit 2 advantage 2", "char": "test"},  # Multiple advantage selection
+            {"expr": "5d20 multihit 1 disadvantage", "char": "test"},  # Multihit disadvantage
+            {"expr": "6d20 multihit 3 disadvantage 3", "char": "test"},  # Multiple disadvantage selection
             
-            # Crit testing
-            {"expr": "d20+wis", "char": "test", "target": "test2", "dmg": "2d6+str", "crit": 15},  # Lower crit threshold
-            {"expr": "15", "char": "test", "target": "test2", "dmg": "2d6", "crit": 15},  # Static hit crit
+            # Complex combinations with stats
+            {"expr": "4d20 multihit 2+str advantage", "char": "test"},  # Multihit with stat mod and advantage
+            {"expr": "4d20 multihit 1+dex advantage 2", "char": "test"},  # Multihit with dex mod and multiple advantage
+            {"expr": "3d20 multihit 2+str disadvantage", "char": "test"},  # Multihit with stat mod and disadvantage
             
-            # Multihit combinations
-            {"expr": "3d20 multihit 2", "char": "test", "target": "test2", "dmg": "1d6+str"},  # Basic multihit
-            {"expr": "3d20 multihit str", "char": "test", "target": "test2", "dmg": "1d6 fire"},  # Multihit with stat bonus
+            # Attack variations
+            {"expr": "3d20 multihit 2 advantage", "char": "test", "target": "test2", "dmg": "1d6+str"},  # Attack with multihit advantage
+            {"expr": "4d20 multihit 1+dex advantage 2", "char": "test", "target": "test2", "dmg": "2d4 fire"},  # Complex attack
+            
+            # Edge cases
+            {"expr": "1d20 multihit 3 advantage", "char": "test"},  # Single die with multihit advantage
+            {"expr": "6d20 multihit 2 advantage 6", "char": "test"},  # Advantage count > dice count
         ]
         
         print(f"Running {len(scenarios)} test scenarios...")

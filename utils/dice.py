@@ -19,9 +19,12 @@ class DiceRoller:
         Supports:
         - Standard notation: "2d6", "1d20+5"
         - Multiple dice: "2d6+1d8"
-        - Static modifiers: "+5", "-2"
+        - Static modifiers: "+5", "-2" 
         - Stat modifiers: "str", "dex+2"
         - Combined: "2d6+str+5"
+        - Negative dice: "-2d6" (subtract dice total)
+        - Mixed expressions: "-2d6+int" (negative dice with stat modifier)
+        - Regeneration formulas: "-2d6+wis" (e.g., for mana regeneration)
         """
         dice_str = dice_str.lower().replace(" ", "")
         
@@ -33,13 +36,33 @@ class DiceRoller:
         total = 0
         parts = []
         explanation = []
-
-        # Split into components (e.g., "2d6+dex+5" -> ["2d6", "+dex", "+5"])
+        
+        # Check for complex expressions with embedded stat modifiers
+        complex_expression = False
+        for stat in ["str", "dex", "con", "int", "wis", "cha"]:
+            if stat in dice_str and (("d" in dice_str) or any(op in dice_str for op in ["+", "-", "*", "/"])):
+                complex_expression = True
+                break
+        
+        # Special handling for complex expressions with embedded stat modifiers
+        if complex_expression and character:
+            # First, resolve all stat references
+            for stat in ["str", "dex", "con", "int", "wis", "cha"]:
+                if stat in dice_str:
+                    mod = DiceRoller._get_stat_modifier(stat, character)
+                    dice_str = re.sub(r'\b' + stat + r'\b', str(mod), dice_str)
+                    explanation.append(f"({stat}: {mod})")
+        
+        # Split into components
         components = DiceRoller._split_components(dice_str)
         
         for comp in components:
-            # Handle ability score modifiers
-            if comp.lstrip("+-").lower() in ["str", "dex", "con", "int", "wis", "cha"]:
+            # Skip empty components
+            if not comp:
+                continue
+                
+            # Handle ability score modifiers (standalone)
+            if not complex_expression and comp.lstrip("+-").lower() in ["str", "dex", "con", "int", "wis", "cha"]:
                 if not character:
                     raise ValueError(f"Stat modifier '{comp}' used but no character provided")
                 mod = DiceRoller._get_stat_modifier(comp.lstrip("+-"), character)
@@ -49,36 +72,40 @@ class DiceRoller:
                 parts.append(str(mod) if mod < 0 else f"+{mod}")
                 explanation.append(f"({comp}: {mod})")
                 continue
-
+    
             # Handle standard numbers
             if comp.lstrip("+-").isdigit():
                 num = int(comp)
                 total += num
                 parts.append(str(num) if num < 0 else f"+{num}")
                 continue
-
-            # Handle dice rolls
+    
+            # Handle dice rolls, including negative dice
             match = re.match(r'([+-])?(\d+)d(\d+)', comp)
             if match:
                 sign, num, sides = match.groups()
                 num = int(num)
                 sides = int(sides)
                 
+                # Apply sign to the number of dice
+                negative_roll = sign == "-"
+                
                 # Roll the dice
                 rolls = [random.randint(1, sides) for _ in range(num)]
                 subtotal = sum(rolls)
                 
                 # Apply sign
-                if sign == "-":
+                if negative_roll:
                     subtotal = -subtotal
                     
                 total += subtotal
                 parts.append(str(subtotal) if subtotal < 0 else f"+{subtotal}")
-                explanation.append(f"({num}d{sides}: {rolls})")
+                roll_desc = f"({'-' if negative_roll else ''}{num}d{sides}: {rolls})"
+                explanation.append(roll_desc)
                 continue
-
+    
             raise ValueError(f"Invalid dice component: {comp}")
-
+    
         # Format explanation
         if explanation:
             return total, f"{total} {' '.join(explanation)}"

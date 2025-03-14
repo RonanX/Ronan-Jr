@@ -27,6 +27,7 @@ class RollBreakdown:
     roll_type: Optional[str] = None
     advantage_state: Optional[str] = None
     stat_mods: Dict[str, int] = None  # Track stat modifiers separately
+    pre_advantage_rolls: Optional[List[int]] = None  # Store rolls after modifiers but before advantage selection
 
 class DiceCalculator:
     """Handles calculation and formatting of dice rolls"""
@@ -51,9 +52,10 @@ class DiceCalculator:
                 rolls=[],
                 modified_rolls=[],
                 modifiers_applied=[],
-                stat_mods={}  # Track stat modifiers
+                stat_mods={},  # Track stat modifiers
+                pre_advantage_rolls=[]  # Store rolls after modifiers but before advantage selection
             )
-
+    
             # Handle pure numbers first
             if cls.NUMBER_PATTERN.match(expression):
                 value = int(expression)
@@ -64,13 +66,11 @@ class DiceCalculator:
                     final_result=value,
                     is_standalone=True,
                     modifiers_applied=[],
-                    stat_mods={}
+                    stat_mods={},
+                    pre_advantage_rolls=[]
                 )
-
-            #print("\n=== Stat Modifier Processing Start ===")
-            #print(f"Original expression: {expression}")
-            #print(f"Character provided: {character.name if character else None}")
-            
+    
+            # Process stat modifiers
             total_stat_mod = 0
             for stat_type in StatType:
                 # Map full names to short versions
@@ -88,51 +88,80 @@ class DiceCalculator:
                 
                 # Look for both +stat and -stat patterns
                 stat_pattern = f'[+\-]?{short_name}\\b'
-                #print(f"Looking for pattern: {stat_pattern} in {expression}")
                 if re.search(stat_pattern, expression, re.IGNORECASE):
                     if not character:
                         raise ValueError(f"Stat modifier used but no character provided")
                     
-                    #print(f"\nProcessing {stat_type.value}:")
-                    #print(f"  Found in expression: {re.findall(stat_pattern, expression, re.IGNORECASE)}")
-                    
                     # Use exact same logic as debug output
                     value = character.stats.modified[stat_type]
                     mod = (value - 10) // 2
-                    #print(f"  Character stat value: {value}")
-                    #print(f"  Calculated modifier: {mod}")
                     
                     total_stat_mod += mod
                     breakdown.stat_mods[stat_type.value] = mod
-                    
-                    #print(f"  Running total_stat_mod: {total_stat_mod}")
-                    #print(f"  Current breakdown.stat_mods: {breakdown.stat_mods}")
-
-            #print("\n=== Final Results ===")
-            #print(f"Total stat modifier: {total_stat_mod}")
-            #print(f"Final breakdown.stat_mods: {breakdown.stat_mods}")
-            #print(f"Current breakdown.final_result: {breakdown.final_result}")
-            #print("=== Stat Modifier Processing End ===\n")
-
+    
             # Parse dice expression
             dice_match = cls.DICE_PATTERN.search(expression)
             if not dice_match:
                 raise ValueError(f"Invalid dice expression: {expression}")
-
+    
             # Get base roll parameters
             count = int(dice_match.group(1) or '1')
             sides = int(dice_match.group(2))
-
+    
             # Check for special roll types
             has_advantage = bool(cls.ADVANTAGE_PATTERN.search(expression))
             has_disadvantage = bool(cls.DISADVANTAGE_PATTERN.search(expression))
             multihit_match = cls.MULTIHIT_PATTERN.search(expression)
-
+            
+            # Extract advantage/disadvantage count if specified (e.g., "advantage 2")
+            adv_count = 1
+            if has_advantage:
+                adv_match = re.search(r'advantage\s+(\d+)', expression, re.IGNORECASE)
+                if adv_match:
+                    adv_count = int(adv_match.group(1))
+            
+            disadv_count = 1
+            if has_disadvantage:
+                disadv_match = re.search(r'disadvantage\s+(\d+)', expression, re.IGNORECASE)
+                if disadv_match:
+                    disadv_count = int(disadv_match.group(1))
+    
             if has_advantage and has_disadvantage:
                 raise ValueError("Cannot have both advantage and disadvantage")
-
-            # Handle advantage/disadvantage
-            if has_advantage or has_disadvantage:
+    
+            # Handle multihit with advantage/disadvantage (REVISED APPROACH)
+            if multihit_match and (has_advantage or has_disadvantage):
+                modifier = int(multihit_match.group(1))
+                
+                # Step 1: Roll the base dice
+                rolls = [random.randint(1, sides) for _ in range(count)]
+                breakdown.rolls = rolls.copy()
+                
+                # Step 2: First apply advantage/disadvantage by selecting N highest/lowest base rolls
+                if has_advantage:
+                    # Sort base rolls in descending order and keep adv_count highest
+                    sorted_rolls = sorted(rolls, reverse=True)
+                    selected_rolls = sorted_rolls[:adv_count]
+                    breakdown.advantage_state = 'advantage'
+                else:  # disadvantage
+                    # Sort base rolls in ascending order and keep disadv_count lowest
+                    sorted_rolls = sorted(rolls)
+                    selected_rolls = sorted_rolls[:disadv_count]
+                    breakdown.advantage_state = 'disadvantage'
+                
+                # Store selected rolls before modifier
+                breakdown.pre_advantage_rolls = selected_rolls.copy()
+                
+                # Step 3: Apply the multihit modifier and stat mods to selected rolls
+                modified_rolls = [r + modifier + total_stat_mod for r in selected_rolls]
+                breakdown.modified_rolls = modified_rolls
+                breakdown.multihit_results = modified_rolls
+                breakdown.final_result = sum(modified_rolls)
+                breakdown.roll_type = 'multihit'
+            
+            # Handle regular advantage/disadvantage (not multihit)
+            elif has_advantage or has_disadvantage:
+                # Roll two dice and pick higher (adv) or lower (disadv)
                 rolls = [random.randint(1, sides) for _ in range(2)]
                 breakdown.rolls = rolls.copy()
                 
@@ -142,8 +171,8 @@ class DiceCalculator:
                 breakdown.final_result = selected_roll + total_stat_mod
                 breakdown.advantage_state = 'advantage' if has_advantage else 'disadvantage'
                 breakdown.roll_type = breakdown.advantage_state
-
-            # Handle multihit
+    
+            # Handle regular multihit
             elif multihit_match:
                 modifier = int(multihit_match.group(1))
                 rolls = [random.randint(1, sides) for _ in range(count)]
@@ -155,14 +184,14 @@ class DiceCalculator:
                 breakdown.multihit_results = modified_rolls
                 breakdown.final_result = sum(modified_rolls)
                 breakdown.roll_type = 'multihit'
-
+    
             # Normal roll
             else:
                 rolls = [random.randint(1, sides) for _ in range(count)]
                 breakdown.rolls = rolls.copy()
                 breakdown.final_result = sum(rolls) + total_stat_mod
                 breakdown.modified_rolls = [breakdown.final_result]
-
+    
             # Apply any remaining arithmetic modifiers
             extra_mods = []
             for match in re.finditer(r'[+\-]\d+', expression):
@@ -172,13 +201,13 @@ class DiceCalculator:
             
             if extra_mods:
                 breakdown.modifiers_applied.extend(extra_mods)
-
+    
             return breakdown
-
+    
         except Exception as e:
             logger.error(f"Error in calculate: {e}")
             raise
-
+    
     @classmethod
     def format_roll(cls, breakdown: RollBreakdown, concise: bool = False) -> str:
         """Format roll results with improved clarity"""
@@ -200,11 +229,21 @@ class DiceCalculator:
                 for stat, mod in breakdown.stat_mods.items():
                     parts.append(f"{'+' if mod >= 0 else ''}{mod}")
             
-            # Add advantage/disadvantage handling
-            if breakdown.advantage_state:
+            # Handle multihit with advantage/disadvantage
+            if breakdown.advantage_state and breakdown.multihit_results:
+                if hasattr(breakdown, 'pre_advantage_rolls') and breakdown.pre_advantage_rolls:
+                    # Show the three-stage process: original → selected → modified
+                    parts.append(f" → [{','.join(map(str, breakdown.pre_advantage_rolls))}]")
+                    parts.append(f" → [{','.join(map(str, breakdown.multihit_results))}] ({breakdown.advantage_state})")
+                else:
+                    # Fallback for compatibility with older data
+                    parts.append(f" → [{','.join(map(str, breakdown.multihit_results))}] ({breakdown.advantage_state})")
+            
+            # Regular advantage/disadvantage (not multihit)
+            elif breakdown.advantage_state and not breakdown.multihit_results:
                 parts.append(f" → {breakdown.selected_roll} ({breakdown.advantage_state})")
             
-            # Add multihit results
+            # Add multihit results (regular multihit)
             elif breakdown.multihit_results:
                 parts.append(f" → [{','.join(map(str, breakdown.multihit_results))}]")
             
@@ -212,7 +251,7 @@ class DiceCalculator:
             if breakdown.modifiers_applied:
                 parts.extend(breakdown.modifiers_applied)
             
-            # Add final result for normal rolls
+            # Add final result for normal rolls (non-multihit, non-advantage)
             if not (breakdown.advantage_state or breakdown.multihit_results):
                 parts.append(f" = {breakdown.final_result}")
             

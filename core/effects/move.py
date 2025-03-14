@@ -9,7 +9,8 @@ Key Features:
 - Consistent turn counting
 - Extensive debug logging
 - Immediate attack roll processing for instant moves
-- Support for saving throws with proper feedback
+- Enhanced bonus tracking for hits
+- Streamlined interface for combat feedback
 
 IMPLEMENTATION MANDATES:
 - Always track absolute rounds for transition timing
@@ -347,6 +348,190 @@ class SavingThrowProcessor:
             
         return messages
 
+class BonusOnHit:
+    """
+    Handles applying and tracking bonuses when a move hits.
+    
+    Features:
+    - Resource bonuses (MP, HP, stars) with dice expression support
+    - Custom note tracking
+    - Per-hit and total bonus calculation
+    - Formatted message generation
+    """
+    def __init__(self, 
+                mp_bonus=0, 
+                hp_bonus=0, 
+                star_bonus=0, 
+                custom_note: Optional[str] = None,
+                debug_mode: bool = True):
+        # Store raw values, might be integers or dice expressions
+        self.mp_bonus = mp_bonus
+        self.hp_bonus = hp_bonus
+        self.star_bonus = star_bonus
+        self.custom_note = custom_note
+        self.debug_mode = debug_mode
+        self.hit_count = 0
+        
+    def debug_print(self, message):
+        """Print debug messages if debug mode is enabled"""
+        if self.debug_mode:
+            print(f"[BonusOnHit] {message}")
+    
+    def has_bonuses(self) -> bool:
+        """Check if any bonuses are configured"""
+        return (self.mp_bonus != 0 or 
+                self.hp_bonus != 0 or 
+                self.star_bonus != 0 or 
+                self.custom_note is not None)
+    
+    def register_hit(self):
+        """Register a successful hit"""
+        self.hit_count += 1
+        self.debug_print(f"Registered hit. Total hits: {self.hit_count}")
+    
+    def reset(self):
+        """Reset hit counter"""
+        self.hit_count = 0
+    
+    def apply_bonuses(self, character) -> Tuple[Dict[str, int], str]:
+        """
+        Apply all bonuses to character based on hits.
+        Supports both fixed values and dice expressions.
+        Returns (bonus_totals, formatted_message)
+        """
+        if self.hit_count == 0 or not self.has_bonuses():
+            return {}, ""
+        
+        # Import dice roller here to avoid circular imports
+        from utils.dice import DiceRoller
+        
+        self.debug_print(f"Applying bonuses for {self.hit_count} hits")
+        
+        # Calculate total bonuses
+        totals = {}
+        message_parts = []
+        
+        # MP bonus
+        if self.mp_bonus:
+            # Calculate total MP bonus
+            if isinstance(self.mp_bonus, str) and (('d' in self.mp_bonus.lower()) or any(stat in self.mp_bonus.lower() for stat in ['str', 'dex', 'con', 'int', 'wis', 'cha'])):
+                # It's a dice expression or has stat modifier, roll it for each hit
+                total_mp = 0
+                for _ in range(self.hit_count):
+                    mp_roll, _ = DiceRoller.roll_dice(self.mp_bonus, character)
+                    total_mp += mp_roll
+                self.debug_print(f"Rolled MP bonus {self.mp_bonus} × {self.hit_count} = {total_mp}")
+            else:
+                # It's a fixed number
+                total_mp = int(self.mp_bonus) * self.hit_count
+                
+            totals['mp'] = total_mp
+            
+            # Apply MP bonus (respecting max)
+            old_mp = character.resources.current_mp
+            character.resources.current_mp = min(
+                character.resources.max_mp,
+                old_mp + total_mp
+            )
+            
+            message_parts.append(f"💙 MP: +{total_mp}")
+        
+        # HP bonus
+        if self.hp_bonus:
+            # Calculate total HP bonus
+            if isinstance(self.hp_bonus, str) and ('d' in self.hp_bonus.lower()):
+                # It's a dice expression, roll it for each hit
+                total_hp = 0
+                for _ in range(self.hit_count):
+                    hp_roll, _ = DiceRoller.roll_dice(self.hp_bonus, character)
+                    total_hp += hp_roll
+                self.debug_print(f"Rolled HP dice {self.hp_bonus} × {self.hit_count} = {total_hp}")
+            else:
+                # It's a fixed number
+                total_hp = int(self.hp_bonus) * self.hit_count
+                
+            totals['hp'] = total_hp
+            
+            # Apply HP bonus (respecting max)
+            old_hp = character.resources.current_hp
+            character.resources.current_hp = min(
+                character.resources.max_hp,
+                old_hp + total_hp
+            )
+            
+            message_parts.append(f"❤️ HP: +{total_hp}")
+        
+        # Star bonus
+        if self.star_bonus:
+            # Calculate total star bonus
+            if isinstance(self.star_bonus, str) and ('d' in self.star_bonus.lower()):
+                # It's a dice expression, roll it for each hit
+                total_stars = 0
+                for _ in range(self.hit_count):
+                    stars_roll, _ = DiceRoller.roll_dice(self.star_bonus, character)
+                    total_stars += stars_roll
+                self.debug_print(f"Rolled star dice {self.star_bonus} × {self.hit_count} = {total_stars}")
+            else:
+                # It's a fixed number
+                total_stars = int(self.star_bonus) * self.hit_count
+                
+            totals['stars'] = total_stars
+            
+            # Apply star bonus if character has action_stars
+            if hasattr(character, 'action_stars'):
+                if hasattr(character.action_stars, 'add_bonus_stars'):
+                    character.action_stars.add_bonus_stars(total_stars)
+                elif hasattr(character.action_stars, 'add_stars'):
+                    character.action_stars.add_stars(total_stars)
+                
+            message_parts.append(f"⭐ +{total_stars}")
+        
+        # Custom note
+        if self.custom_note:
+            note = f"📝 {self.custom_note} ({self.hit_count}x)"
+            message_parts.append(note)
+            totals['custom'] = self.hit_count
+        
+        # Format message
+        if message_parts:
+            formatted = f"{self.hit_count} Hits! Bonuses: | {' | '.join(message_parts)}"
+        else:
+            formatted = f"{self.hit_count} Hits!"
+            
+        return totals, formatted
+    
+    @classmethod
+    def from_dict(cls, data: Dict) -> 'BonusOnHit':
+        """Create from dictionary data (typically from bonus_on_hit parameter)"""
+        if not data:
+            return cls()
+        
+        # Debug the incoming data
+        print(f"[BonusOnHit] Creating from data: {data}")
+            
+        # Handle both direct values and nested dictionaries
+        if isinstance(data, dict):
+            return cls(
+                mp_bonus=data.get('mp', 0),     # This can now be an int or dice string
+                hp_bonus=data.get('hp', 0),     # This can now be an int or dice string
+                star_bonus=data.get('stars', 0), # This can now be an int or dice string
+                custom_note=data.get('note')
+            )
+        return cls()  # Return empty instance if data is invalid
+    
+    def to_dict(self) -> Dict:
+        """Convert to dictionary for storage"""
+        data = {}
+        if self.mp_bonus != 0:
+            data['mp'] = self.mp_bonus
+        if self.hp_bonus != 0:
+            data['hp'] = self.hp_bonus
+        if self.star_bonus != 0:
+            data['stars'] = self.star_bonus
+        if self.custom_note:
+            data['note'] = self.custom_note
+        return data
+
 class CombatProcessor:
     """
     Handles attack rolls and damage calculations.
@@ -355,7 +540,8 @@ class CombatProcessor:
     - Attack roll processing
     - Target handling
     - Damage calculation
-    - Hit tracking 
+    - Hit tracking
+    - Bonus application
     
     Supports both sync and async patterns for flexibility.
     """
@@ -377,8 +563,7 @@ class CombatProcessor:
                            damage,
                            crit_range,
                            reason,
-                           enable_hit_bonus=False,
-                           hit_bonus_value=1) -> List[str]:
+                           bonus_on_hit=None) -> List[str]:
         """Process attack roll and damage"""
         # Skip if no attack roll defined
         if not attack_roll:
@@ -391,6 +576,17 @@ class CombatProcessor:
         
         # Import here to avoid circular import
         from utils.advanced_dice.attack_calculator import AttackCalculator, AttackParameters
+        
+        # Always create a fresh BonusOnHit tracker for each attack
+        if isinstance(bonus_on_hit, BonusOnHit):
+            hit_bonus = bonus_on_hit
+            # Reset counter for new attack
+            hit_bonus.reset()
+        else:
+            # Convert dictionary to BonusOnHit
+            hit_bonus = BonusOnHit.from_dict(bonus_on_hit)
+        
+        self.debug_print(f"Using hit bonus tracker: {hit_bonus.__dict__}")
         
         # Handle no targets case
         if not targets:
@@ -421,34 +617,34 @@ class CombatProcessor:
             reason=reason
         )
 
-        # Process attack with all targets - this call is already awaitable
+        # Process attack with all targets - get message and hit data
         self.debug_print(f"Processing attack with {attack_roll} against {len(targets)} targets")
-        message, hit_results = await AttackCalculator.process_attack(params)
+        message, hit_data = await AttackCalculator.process_attack(params)
         messages.append(message)
         
-        # Process hit tracking
-        if hit_results:
-            # Extract hit targets
-            for target_name, hit_data in hit_results.items():
-                if hit_data.get('hit', False):
-                    self.targets_hit.add(target_name)
-                    self.debug_print(f"Target hit: {target_name}")
+        # Debug output for hit data
+        self.debug_print(f"Got hit data: {hit_data}")
         
-        # Handle hit bonus tracking if enabled
-        if enable_hit_bonus and self.targets_hit:
-            # Calculate bonus based on hits, applying the custom value
-            hit_count = len(self.targets_hit)
-            if hit_count > 0:
-                total_bonus = hit_count * hit_bonus_value
-                bonus_message = f"🎯 `{source.name} gains {total_bonus} star bonus from {hit_count} successful hits!`"
-                messages.append(bonus_message)
-                
-                # Access action stars if available and apply bonus
-                if hasattr(source, 'action_stars') and hasattr(source.action_stars, 'add_bonus_stars'):
-                    source.action_stars.add_bonus_stars(total_bonus)
-                elif hasattr(source, 'action_stars') and hasattr(source.action_stars, 'add_stars'):
-                    # Fallback to add_stars if add_bonus_stars doesn't exist
-                    source.action_stars.add_stars(total_bonus)
+        # Process hit tracking
+        if isinstance(hit_data, dict) and hit_data:  # Ensure it's a dictionary with entries
+            # Extract hit targets from attack results
+            hit_count = 0
+            for target_name, target_hit_data in hit_data.items():
+                if target_hit_data.get('hit', False):
+                    self.debug_print(f"Target hit: {target_name}")
+                    self.targets_hit.add(target_name)
+                    hit_bonus.register_hit()
+                    hit_count += 1
+            
+            self.debug_print(f"Total hits: {hit_count}, Has bonuses: {hit_bonus.has_bonuses()}")
+            
+            # Apply bonuses on hit if any hits occurred and we have bonuses configured
+            if hit_count > 0 and hit_bonus.has_bonuses():
+                self.debug_print(f"Applying bonuses for {hit_count} hits")
+                bonus_totals, bonus_message = hit_bonus.apply_bonuses(source)
+                self.debug_print(f"Bonus message: {bonus_message}")
+                if bonus_message:
+                    messages.append(f"• `{bonus_message}`")
         
         return messages
 
@@ -460,9 +656,9 @@ class MoveEffect(BaseEffect):
     - Direct state transitions
     - Predictable turn counting
     - Proper resource handling
-    - Immediate attack roll processing for instant moves
-    - Support for saving throws
-    - Hit bonus tracking (replacing heat tracking)
+    - Improved multihit support
+    - Bonus on hit tracking
+    - Automatic roll timing detection
     """
     def __init__(
                 self,
@@ -478,16 +674,14 @@ class MoveEffect(BaseEffect):
                 attack_roll: Optional[str] = None,
                 damage: Optional[str] = None,
                 crit_range: int = 20,
-                save_type: Optional[str] = None,
-                save_dc: Optional[str] = None,
-                half_on_save: bool = False,
                 conditions: Optional[List[ConditionType]] = None,
                 roll_timing: str = "active",
                 uses: Optional[int] = None,
                 targets: Optional[List['Character']] = None,
-                enable_hit_bonus: bool = False,
-                enable_heat_tracking: bool = False,  # Added for backward compatibility
-                hit_bonus_value: int = 1  # Added for customizing bonus amount
+                bonus_on_hit: Optional[Dict] = None,
+                aoe_mode: str = 'single',
+                enable_heat_tracking: bool = False,  # Legacy parameter
+                enable_hit_bonus: bool = False       # Legacy parameter
             ):
                 # Create specialized state machine and processors
                 self.debug_mode = True
@@ -538,31 +732,48 @@ class MoveEffect(BaseEffect):
                 self.damage = damage
                 self.crit_range = crit_range
                 
-                # Save parameters
-                self.save_type = save_type
-                self.save_dc = save_dc
-                self.half_on_save = half_on_save
+                # Set conditions
                 self.conditions = conditions or []
                 
-                # Set roll timing
-                if isinstance(roll_timing, str):
-                    try:
-                        self.roll_timing = RollTiming(roll_timing)
-                    except ValueError:
-                        self.roll_timing = RollTiming.ACTIVE
-                else:
-                    self.roll_timing = roll_timing
+                # Determine roll timing automatically if needed
+                self.determine_roll_timing(roll_timing)
                 
                 # Additional properties
                 self.cast_description = cast_description
                 self.targets = targets or []
                 
-                # Support both parameter names for backward compatibility
-                self.enable_hit_bonus = enable_hit_bonus or enable_heat_tracking
-                self.hit_bonus_value = hit_bonus_value
+                # Initialize bonus on hit
+                # Convert legacy heat tracking to bonus_on_hit if needed
+                if bonus_on_hit is None and (enable_heat_tracking or enable_hit_bonus):
+                    self.debug_print(f"Converting legacy heat tracking to bonus_on_hit")
+                    bonus_on_hit = {'stars': 1}
+                
+                # Ensure bonus_on_hit is properly initialized
+                self.debug_print(f"Original bonus_on_hit: {bonus_on_hit}")
+                
+                # Special handling for bonus_on_hit parameter
+                if bonus_on_hit is not None:
+                    # Print the raw value for debugging
+                    self.debug_print(f"Raw bonus_on_hit value: {bonus_on_hit}")
+                    
+                    # Handle string values (common in Discord commands)
+                    if isinstance(bonus_on_hit, str):
+                        try:
+                            import json
+                            # Try to parse as JSON
+                            parsed_bonus = json.loads(bonus_on_hit)
+                            self.debug_print(f"Parsed bonus_on_hit from JSON: {parsed_bonus}")
+                            bonus_on_hit = parsed_bonus
+                        except:
+                            # If parsing fails, use a default value
+                            self.debug_print(f"Failed to parse bonus_on_hit from string, using default")
+                            bonus_on_hit = {'stars': 1}
+                
+                self.debug_print(f"Final bonus_on_hit: {bonus_on_hit}")
+                self.bonus_on_hit = BonusOnHit.from_dict(bonus_on_hit)
                 
                 # Configure combat settings
-                self.combat.aoe_mode = 'single'
+                self.combat.aoe_mode = aoe_mode
                 
                 # Tracking variables
                 self.marked_for_removal = False
@@ -575,6 +786,29 @@ class MoveEffect(BaseEffect):
         """Print debug messages if debug mode is enabled"""
         if self.debug_mode:
             print(f"[{self.debug_id}] {message}")
+    
+    def determine_roll_timing(self, roll_timing_str):
+        """
+        Determine roll timing based on input and move parameters.
+        
+        If a move has attack_roll and no cast_time, default to INSTANT.
+        This improves user experience by showing attack results immediately.
+        """
+        # Try to parse provided roll timing
+        try:
+            self.roll_timing = RollTiming(roll_timing_str)
+        except (ValueError, TypeError):
+            # Default to ACTIVE if invalid
+            self.roll_timing = RollTiming.ACTIVE
+        
+        # Auto-detect instant attacks based on configuration
+        if (self.attack_roll and 
+            not self.state_machine.cast_time and 
+            self.roll_timing == RollTiming.ACTIVE):
+            # If a move has an attack roll and no cast time, make it INSTANT by default
+            # unless explicitly specified as something else
+            self.roll_timing = RollTiming.INSTANT
+            self.debug_print(f"Auto-detected INSTANT roll timing for attack roll")
 
     # Property accessors for state
     @property
@@ -600,31 +834,64 @@ class MoveEffect(BaseEffect):
         """Apply resource costs and return messages"""
         messages = []
         
+        # Import dice roller here to avoid circular imports
+        from utils.dice import DiceRoller
+        
         # Apply MP cost
-        if self.mp_cost != 0:
+        if self.mp_cost:
+            mp_cost = self.mp_cost
+            mp_roll_message = None
+            
+            # Check if it's a dice expression or contains stat reference
+            if isinstance(mp_cost, str) and (('d' in mp_cost.lower()) or any(stat in mp_cost.lower() for stat in ['str', 'dex', 'con', 'int', 'wis', 'cha'])):
+                mp_roll, roll_desc = DiceRoller.roll_dice(mp_cost, character)
+                mp_cost = mp_roll
+                mp_roll_message = f"Rolled MP cost: {roll_desc}"
+                self.debug_print(f"Rolled MP cost: {mp_cost} from {self.mp_cost}")
+            
             # Handle MP gain or loss
-            if self.mp_cost > 0:
-                character.resources.current_mp = max(0, character.resources.current_mp - self.mp_cost)
-                messages.append(f"Uses {self.mp_cost} MP")
+            if mp_cost > 0:
+                # MP cost (using mana)
+                character.resources.current_mp = max(0, character.resources.current_mp - mp_cost)
+                messages.append(f"Uses {mp_cost} MP")
+                if mp_roll_message:
+                    messages.append(mp_roll_message)
             else:
+                # MP gain (regenerating mana)
                 character.resources.current_mp = min(
                     character.resources.max_mp, 
-                    character.resources.current_mp - self.mp_cost  # Negative cost = gain
+                    character.resources.current_mp - mp_cost  # Negative cost = gain
                 )
-                messages.append(f"Gains {abs(self.mp_cost)} MP")
+                messages.append(f"Gains {abs(mp_cost)} MP")
+                if mp_roll_message:
+                    messages.append(mp_roll_message)
         
-        # Apply HP cost
-        if self.hp_cost != 0:
+        # Apply HP cost (similar stat enhancement)
+        if self.hp_cost:
+            hp_cost = self.hp_cost
+            hp_roll_message = None
+            
+            # Check if it's a dice expression or contains stat reference
+            if isinstance(hp_cost, str) and (('d' in hp_cost.lower()) or any(stat in hp_cost.lower() for stat in ['str', 'dex', 'con', 'int', 'wis', 'cha'])):
+                hp_roll, roll_desc = DiceRoller.roll_dice(hp_cost, character)
+                hp_cost = hp_roll
+                hp_roll_message = f"Rolled HP cost: {roll_desc}"
+                self.debug_print(f"Rolled HP cost: {hp_cost} from {self.hp_cost}")
+            
             # Handle HP gain or loss
-            if self.hp_cost > 0:
-                character.resources.current_hp = max(0, character.resources.current_hp - self.hp_cost)
-                messages.append(f"Uses {self.hp_cost} HP")
+            if hp_cost > 0:
+                character.resources.current_hp = max(0, character.resources.current_hp - hp_cost)
+                messages.append(f"Uses {hp_cost} HP")
+                if hp_roll_message:
+                    messages.append(hp_roll_message)
             else:
                 character.resources.current_hp = min(
                     character.resources.max_hp, 
-                    character.resources.current_hp - self.hp_cost  # Negative cost = gain
+                    character.resources.current_hp - hp_cost  # Negative cost = gain
                 )
-                messages.append(f"Heals {abs(self.hp_cost)} HP")
+                messages.append(f"Heals {abs(hp_cost)} HP")
+                if hp_roll_message:
+                    messages.append(hp_roll_message)
         
         return messages
 
@@ -661,11 +928,6 @@ class MoveEffect(BaseEffect):
             return state == MoveState.ACTIVE
             
         return False
-        
-    def should_process_save(self, state: MoveState, force_save: bool = False) -> bool:
-        """Determine if we should process saving throw based on timing and state"""
-        # Save checks follow same logic as attack rolls
-        return self.should_roll_attack(state, force_save)
     
     # LIFECYCLE METHODS
     
@@ -692,7 +954,7 @@ class MoveEffect(BaseEffect):
         details = []
         timing_info = []
         attack_messages = []
-        save_messages = []
+        bonus_messages = []
         
         # Apply resource costs
         cost_messages = self.apply_costs(character)
@@ -721,7 +983,9 @@ class MoveEffect(BaseEffect):
             timing_info.append(f"⌛ {self.state_machine.cooldown}T Cooldown")
             
         # Format target info if any
-        if self.targets:
+        if self.targets and not (self.attack_roll and self.roll_timing == RollTiming.INSTANT):
+            # Only add target details for non-instant attacks, since 
+            # instant attacks show targets in the attack output
             target_names = ", ".join(t.name for t in self.targets)
             details.append(f"Target{'s' if len(self.targets) > 1 else ''}: {target_names}")
             
@@ -736,26 +1000,15 @@ class MoveEffect(BaseEffect):
                 damage=self.damage,
                 crit_range=self.crit_range,
                 reason=self.name,
-                enable_hit_bonus=self.enable_hit_bonus
+                bonus_on_hit=self.bonus_on_hit
             )
             if attack_results:
-                attack_messages.extend(attack_results)
-                
-        # Process instant saving throws immediately
-        if self.save_type and self.save_dc and self.roll_timing == RollTiming.INSTANT and self.targets:
-            self.debug_print(f"Processing instant saving throw")
-            # Process saving throw immediately
-            save_results = await self.saves.process_save(
-                source=character,
-                targets=self.targets,
-                save_type=self.save_type,
-                save_dc=self.save_dc,
-                effect_name=self.name,
-                half_on_save=self.half_on_save,
-                damage=self.damage if not self.attack_roll else None  # Only use damage if no attack roll
-            )
-            if save_results:
-                save_messages.extend(save_results)
+                # Separate attack messages and bonus messages
+                for message in attack_results:
+                    if "Hits! Bonuses:" in message:
+                        bonus_messages.append(message)
+                    else:
+                        attack_messages.append(message)
                     
         # Build the primary message
         if self.cast_description:
@@ -804,7 +1057,11 @@ class MoveEffect(BaseEffect):
                 if hasattr(move, 'uses_remaining') and move.uses_remaining is not None:
                     resource_updates.append(f"Uses: {move.uses_remaining}/{move.uses}")
                     
-        # Add resource updates to main message
+        # Format info parts
+        if info_parts:
+            main_message = f"{main_message} | {' | '.join(info_parts)}"
+            
+        # Add resource updates
         if resource_updates:
             main_message = f"{main_message} | {' | '.join(resource_updates)}"
             
@@ -826,9 +1083,9 @@ class MoveEffect(BaseEffect):
         if attack_messages:
             formatted_message += "\n" + "\n".join(attack_messages)
             
-        # Add save messages directly to the response for instant saves
-        if save_messages:
-            formatted_message += "\n" + "\n".join(save_messages)
+        # Add bonus messages after attack messages
+        if bonus_messages:
+            formatted_message += "\n" + "\n".join(bonus_messages)
         
         # For instant moves with no follow-up needed, mark for removal
         if self.state == MoveState.INSTANT and self.state_machine.cooldown is None:
@@ -874,6 +1131,9 @@ class MoveEffect(BaseEffect):
                 self.debug_print(f"Processing turn start attack roll")
                 self.last_roll_round = round_number
                 
+                # Reset bonus tracker for new rolls
+                self.bonus_on_hit.reset()
+                
                 # Process attack directly
                 attack_results = await self.combat.process_attack(
                     source=character,
@@ -882,29 +1142,12 @@ class MoveEffect(BaseEffect):
                     damage=self.damage,
                     crit_range=self.crit_range,
                     reason=self.name,
-                    enable_hit_bonus=self.enable_hit_bonus
+                    bonus_on_hit=self.bonus_on_hit
                 )
                 if attack_results:
                     messages.extend(attack_results)
             else:
                 self.debug_print(f"Skipping attack roll - timing: {self.roll_timing.value}, last_roll_round: {self.last_roll_round}")
-                
-            # Process saves if needed (PER_TURN or newly ACTIVE)
-            if self.save_type and self.save_dc and (is_per_turn or just_activated):
-                self.debug_print(f"Processing turn start saving throw")
-                
-                # Process save directly
-                save_results = await self.saves.process_save(
-                    source=character,
-                    targets=self.targets,
-                    save_type=self.save_type,
-                    save_dc=self.save_dc,
-                    effect_name=self.name,
-                    half_on_save=self.half_on_save,
-                    damage=self.damage if not self.attack_roll else None  # Only use damage if no attack roll
-                )
-                if save_results:
-                    messages.extend(save_results)
             
             # Show active message
             remaining = self.get_remaining_turns()
@@ -1114,15 +1357,12 @@ class MoveEffect(BaseEffect):
             "attack_roll": self.attack_roll,
             "damage": self.damage, 
             "crit_range": self.crit_range,
-            "save_type": self.save_type,
-            "save_dc": self.save_dc,
-            "half_on_save": self.half_on_save,
             "conditions": [c.value if hasattr(c, 'value') else str(c) for c in self.conditions] if self.conditions else [],
             "roll_timing": self.roll_timing.value,
             "targets_hit": list(self.combat.targets_hit),
             "targets_saved": list(self.saves.targets_saved) if hasattr(self.saves, 'targets_saved') else [],
             "aoe_mode": self.combat.aoe_mode,
-            "enable_hit_bonus": self.enable_hit_bonus,
+            "bonus_on_hit": self.bonus_on_hit.to_dict() if hasattr(self.bonus_on_hit, 'to_dict') else None,
             "marked_for_removal": self.marked_for_removal,
             "last_roll_round": self.last_roll_round
         })
@@ -1138,6 +1378,8 @@ class MoveEffect(BaseEffect):
             name = data.get('name', 'Unknown Move')
             description = data.get('description', '')
             star_cost = data.get('star_cost', 0)
+            
+            # Handle mp_cost and hp_cost - preserve string expressions if present
             mp_cost = data.get('mp_cost', 0)
             hp_cost = data.get('hp_cost', 0)
             cast_description = data.get('cast_description')
@@ -1145,18 +1387,25 @@ class MoveEffect(BaseEffect):
             attack_roll = data.get('attack_roll')
             damage = data.get('damage')
             crit_range = data.get('crit_range', 20)
-            save_type = data.get('save_type')
-            save_dc = data.get('save_dc')
-            half_on_save = data.get('half_on_save', False)
             conditions = data.get('conditions', [])
             roll_timing_str = data.get('roll_timing', RollTiming.ACTIVE.value)
-            enable_hit_bonus = data.get('enable_hit_bonus', False) or data.get('enable_heat_tracking', False)
+            
+            # Get bonus on hit data
+            bonus_on_hit = data.get('bonus_on_hit')
+            
+            # Support old heat tracking parameter for backward compatibility
+            if not bonus_on_hit and data.get('enable_heat_tracking', False):
+                # Create a star bonus for backward compatibility
+                bonus_on_hit = {'stars': 1}
             
             # Get state machine data
             sm_data = data.get('state_machine', {})
             cast_time = sm_data.get('cast_time')
             duration = sm_data.get('duration')
             cooldown = sm_data.get('cooldown')
+            
+            # Get AoE mode
+            aoe_mode = data.get('aoe_mode', 'single')
             
             # Create base effect
             effect = cls(
@@ -1172,13 +1421,11 @@ class MoveEffect(BaseEffect):
                 attack_roll=attack_roll,
                 damage=damage, 
                 crit_range=crit_range,
-                save_type=save_type,
-                save_dc=save_dc,
-                half_on_save=half_on_save,
                 conditions=[ConditionType(c) if isinstance(c, str) else c for c in conditions] if conditions else [],
                 roll_timing=roll_timing_str,
                 uses=uses,
-                enable_hit_bonus=enable_hit_bonus
+                bonus_on_hit=bonus_on_hit,
+                aoe_mode=aoe_mode
             )
             
             # Restore state machine if it exists
@@ -1190,7 +1437,7 @@ class MoveEffect(BaseEffect):
             
             # Restore combat state
             effect.combat.targets_hit = set(data.get('targets_hit', []))
-            effect.combat.aoe_mode = data.get('aoe_mode', 'single')
+            effect.combat.aoe_mode = aoe_mode
             
             # Restore save state if available
             if hasattr(effect, 'saves') and 'targets_saved' in data:
