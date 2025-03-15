@@ -950,30 +950,45 @@ class MoveEffect(BaseEffect):
         self.initialize_timing(round_number, character.name)
         
         # Apply costs and format messages
-        costs = []
         details = []
         timing_info = []
         attack_messages = []
         bonus_messages = []
         
-        # Apply resource costs
+        # Apply resource costs and collect messages
         cost_messages = self.apply_costs(character)
-        for msg in cost_messages:
-            if "MP" in msg:
-                if self.mp_cost > 0:
-                    costs.append(f"💙 MP: {self.mp_cost}")
-                elif self.mp_cost < 0:
-                    costs.append(f"💙 +{abs(self.mp_cost)} MP")
-            elif "HP" in msg and "Heal" not in msg:
-                if self.hp_cost > 0:
-                    costs.append(f"❤️ HP: {self.hp_cost}")
-                elif self.hp_cost < 0:
-                    costs.append(f"❤️ +{abs(self.hp_cost)} HP")
+        
+        # Build cost and resource info - FIXED to avoid duplication
+        costs = []
+        if self.mp_cost != 0:
+            if self.mp_cost > 0:
+                costs.append(f"💙 MP: {self.mp_cost}")
+            else:
+                costs.append(f"💙 +{abs(self.mp_cost)} MP")
+        
+        if self.hp_cost != 0:
+            if self.hp_cost > 0:
+                costs.append(f"❤️ HP: {self.hp_cost}")
+            else:
+                costs.append(f"❤️ +{abs(self.hp_cost)} HP")
         
         # Add star cost
         if self.star_cost > 0:
             costs.append(f"⭐ {self.star_cost}")
-            
+        
+        # Add resource status info (but don't duplicate the cost values)
+        resource_updates = []
+        if self.mp_cost != 0:
+            resource_updates.append(f"MP: {character.resources.current_mp}/{character.resources.max_mp}")
+        
+        if self.hp_cost != 0:
+            resource_updates.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
+        
+        # Add star status info
+        if self.star_cost > 0 and hasattr(character, 'action_stars'):
+            if hasattr(character.action_stars, 'current_stars') and hasattr(character.action_stars, 'max_stars'):
+                resource_updates.append(f"Stars: {character.action_stars.current_stars}/{character.action_stars.max_stars}")
+        
         # Add timing info based on state machine
         if self.state_machine.cast_time:
             timing_info.append(f"🔄 {self.state_machine.cast_time}T Cast")
@@ -1034,34 +1049,7 @@ class MoveEffect(BaseEffect):
         if info_parts:
             main_message = f"{main_message} | {' | '.join(info_parts)}"
             
-        # Add resource updates
-        resource_updates = []
-        
-        # Add MP update
-        if self.mp_cost != 0:
-            resource_updates.append(f"MP: {character.resources.current_mp}/{character.resources.max_mp}")
-            
-        # Add HP update
-        if self.hp_cost != 0:
-            resource_updates.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
-            
-        # Add star update
-        if self.star_cost > 0 and hasattr(character, 'action_stars'):
-            if hasattr(character.action_stars, 'current_stars') and hasattr(character.action_stars, 'max_stars'):
-                resource_updates.append(f"Stars: {character.action_stars.current_stars}/{character.action_stars.max_stars}")
-                
-        # Add uses info if the character has this move in their moveset
-        if hasattr(character, 'get_move'):
-            move = character.get_move(self.name)
-            if move and hasattr(move, 'uses') and move.uses is not None:
-                if hasattr(move, 'uses_remaining') and move.uses_remaining is not None:
-                    resource_updates.append(f"Uses: {move.uses_remaining}/{move.uses}")
-                    
-        # Format info parts
-        if info_parts:
-            main_message = f"{main_message} | {' | '.join(info_parts)}"
-            
-        # Add resource updates
+        # Add resource updates - ONLY if they contain different info than costs
         if resource_updates:
             main_message = f"{main_message} | {' | '.join(resource_updates)}"
             

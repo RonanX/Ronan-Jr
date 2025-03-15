@@ -10,9 +10,13 @@ from discord import Embed, Color, ui, ButtonStyle, SelectOption
 from typing import List, Optional, Dict, Any, Tuple, Callable
 import asyncio
 import logging
+import json
+import re
 
 from core.character import Character
 from modules.moves.data import MoveData
+from utils.action_costs import STANDARD_ACTIONS, get_action_info
+from utils.stat_helper import StatHelper, StatType
 
 logger = logging.getLogger(__name__)
 
@@ -21,462 +25,382 @@ MOVES_PER_PAGE = 4
 CATEGORIES = ["All", "Offense", "Utility", "Defense"]
 DEFAULT_CATEGORY = "All"
 
-class MoveSelectMenu(ui.Select):
-    """Select menu for choosing a move"""
+class ActionSelectMenu(ui.Select):
+    """Select menu for choosing an action"""
     
-    def __init__(
-        self, 
-        moves: List[MoveData], 
-        placeholder: str = "Select a move...",
-        max_options: int = 25
-    ):
-        # Create options from moves
-        options = []
-        for i, move in enumerate(moves[:max_options]):
-            # Create cost indicator
-            costs = []
-            if move.star_cost > 0:
-                costs.append(f"⭐{move.star_cost}")
-            if move.mp_cost > 0:
-                costs.append(f"MP:{move.mp_cost}")
-                
-            cost_text = " | ".join(costs) if costs else ""
-            
-            # Create select option
-            options.append(
-                SelectOption(
-                    label=move.name[:25],  # Max 25 chars for label
-                    description=f"{move.category} {cost_text}"[:50],  # Max 50 chars for description
-                    value=str(i)  # Use index as value
-                )
+    def __init__(self, placeholder: str = "Select an action..."):
+        # Create options for standard actions
+        options = [
+            SelectOption(
+                label="Basic Attack",
+                description="Make a basic attack (⭐1)",
+                value="basic_attack",
+                emoji="⚔️"
+            ),
+            SelectOption(
+                label="Dodge",
+                description="Attacks against you have disadvantage (⭐2)",
+                value="dodge",
+                emoji="🛡️"
+            ),
+            SelectOption(
+                label="Dash",
+                description="Double your movement speed (⭐1)",
+                value="dash",
+                emoji="🏃"
+            ),
+            SelectOption(
+                label="Disengage",
+                description="Avoid opportunity attacks (⭐1)",
+                value="disengage",
+                emoji="↪️"
+            ),
+            SelectOption(
+                label="Help",
+                description="Give advantage to an ally (⭐1)",
+                value="help",
+                emoji="🤝"
+            ),
+            SelectOption(
+                label="Hide",
+                description="Attempt to hide (⭐1)",
+                value="hide",
+                emoji="👁️"
             )
+        ]
         
-        # Create the select menu
         super().__init__(
             placeholder=placeholder,
-            options=options[:25],  # Discord limits to 25 options
+            options=options,
             min_values=1,
             max_values=1
         )
 
-class UseMoveView(ui.View):
-    """View for selecting a move to use"""
+class ActionMenuView(ui.View):
+    """View for selecting a standard action to perform"""
     
-    def __init__(self, character: Character, moves: List[MoveData], bot):
+    def __init__(self, character: Character, bot):
         super().__init__(timeout=60)
         self.character = character
-        self.moves = moves
         self.bot = bot
         
-        # Add move select menu
-        self.move_select = MoveSelectMenu(
-            moves, 
-            placeholder="Select a move to use..."
-        )
+        # Add action select menu
+        self.action_select = ActionSelectMenu(placeholder="Select an action...")
         
-        # Define a callback for the move selection
-        async def move_selected(interaction: discord.Interaction):
-            # Get selected move
-            try:
-                move_idx = int(self.move_select.values[0])
-                move = self.moves[move_idx]
-                
-                # Check resource costs first
-                if self.character.resources.current_mp < move.mp_cost:
-                    await interaction.response.send_message(
-                        f"{self.character.name} doesn't have enough MP! (Needs {move.mp_cost}, has {self.character.resources.current_mp})",
-                        ephemeral=True
-                    )
-                    return
-                
-                # Check action stars
-                can_use_stars, stars_reason = self.character.can_use_move(move.star_cost)
-                if not can_use_stars:
-                    await interaction.response.send_message(
-                        f"{self.character.name} can't use this move: {stars_reason}",
-                        ephemeral=True
-                    )
-                    return
-                
-                # Get current round if in combat
-                current_round = 1
-                if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                    current_round = self.bot.initiative_tracker.round_number
-                
-                # Check if move is on cooldown first
-                existing_cooldown = False
-                
-                # Import MoveState for the check
-                from core.effects.move import MoveState
-                
-                for effect in self.character.effects:
-                    if hasattr(effect, 'name') and effect.name == move.name and hasattr(effect, 'state'):
-                        if effect.state == MoveState.COOLDOWN:
-                            # There's already a cooldown effect for this move
-                            phase = effect.phases.get(MoveState.COOLDOWN)
-                            if phase:
-                                remaining = phase.duration - phase.turns_completed
-                                await interaction.response.send_message(
-                                    f"{self.character.name} can't use {move.name}: On cooldown ({remaining} turns remaining)",
-                                    ephemeral=True
-                                )
-                                return
-                            existing_cooldown = True
-                            break
-                
-                # Only check moveset cooldown if no active cooldown effect
-                if not existing_cooldown:
-                    # Check cooldowns in the move data
-                    can_use, reason = move.can_use(current_round)
-                    if not can_use:
-                        await interaction.response.send_message(
-                            f"{self.character.name} can't use {move.name}: {reason}",
-                            ephemeral=True
-                        )
-                        return
-                
-                # Check if move needs a target
-                if move.attack_roll or (move.damage and not move.save_type):
-                    # Show target selector - get all possible targets
-                    targets = []
-                    
-                    # Try to get characters from initiative tracker
-                    if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                        turn_order = getattr(self.bot.initiative_tracker, 'turn_order', [])
-                        for turn in turn_order:
-                            if hasattr(turn, 'character_name'):
-                                target_char = self.bot.game_state.get_character(turn.character_name)
-                                if target_char and target_char.name != character.name:
-                                    targets.append(target_char)
-                    
-                    # If no targets from initiative, try all characters
-                    if not targets and hasattr(self.bot.game_state, 'get_all_characters'):
-                        targets = [c for c in self.bot.game_state.get_all_characters() 
-                                if c.name != character.name]
-                    elif not targets and hasattr(self.bot.game_state, 'characters'):
-                        # Alternative access through characters dictionary
-                        targets = [c for name, c in self.bot.game_state.characters.items() 
-                                if name != character.name]
-                    
-                    if targets:
-                        # Create target options for dropdown
-                        target_options = [
-                            SelectOption(
-                                label=target.name,
-                                description=f"AC: {target.defense.current_ac}" if hasattr(target, 'defense') else ""
-                            )
-                            for target in targets[:25]  # Discord limits to 25 options
-                        ]
-                        
-                        # Create target select menu
-                        target_select = ui.Select(
-                            placeholder="Select a target...",
-                            options=target_options,
-                            min_values=1,
-                            max_values=1
-                        )
-                        
-                        # Create view
-                        target_view = ui.View(timeout=60)
-                        
-                        async def target_callback(target_interaction):
-                            target_name = target_select.values[0]
-                            
-                            # Now execute the move with the target
-                            await self.execute_move(target_interaction, move, target_name)
-                            
-                        target_select.callback = target_callback
-                        target_view.add_item(target_select)
-                        
-                        # Show target selector
-                        await interaction.response.send_message(
-                            f"Select a target for {move.name}:",
-                            view=target_view,
-                            ephemeral=True
-                        )
-                    else:
-                        await interaction.response.send_message(
-                            "No targets available. Add characters or start combat first.",
-                            ephemeral=True
-                        )
-                else:
-                    # Use move directly without a target
-                    await self.execute_move(interaction, move)
-            except (ValueError, IndexError) as e:
-                logger.error(f"Error selecting move: {e}", exc_info=True)
-                await interaction.response.send_message(
-                    "Invalid move selection.",
-                    ephemeral=True
+        # Define a callback for the action selection
+        async def action_selected(interaction: discord.Interaction):
+            action_key = self.action_select.values[0]
+            
+            if action_key == "basic_attack":
+                # Show basic attack form
+                await interaction.response.send_modal(
+                    BasicAttackForm(self.character, self.bot)
                 )
+            else:
+                # Handle standard action
+                await self.execute_standard_action(interaction, action_key)
         
         # Set the callback and add the selection menu to the view
-        self.move_select.callback = move_selected
-        self.add_item(self.move_select)
-        
-    async def execute_move(self, interaction, move, target=None):
-        """Execute a move with or without a target"""
+        self.action_select.callback = action_selected
+        self.add_item(self.action_select)
+    
+    async def execute_standard_action(self, interaction: discord.Interaction, action_key: str):
+        """Execute a standard action directly"""
         try:
-            # Always defer first to avoid timeout
-            try:
-                await interaction.response.defer()
-            except:
-                # If already deferred, this will fail but we can continue
-                pass
-            
-            # Find the MoveCommands cog
-            move_cog = None
-            for cog_name, cog in self.bot.cogs.items():
-                if cog_name == "MoveCommands":
-                    move_cog = cog
-                    break
-            
-            if move_cog and hasattr(move_cog, 'use_move'):
-                # Direct call to the use_move method in the cog (preferred method)
-                try:
-                    await move_cog.use_move(
-                        interaction,
-                        self.character.name,
-                        move.name,
-                        target
-                    )
-                    return
-                except Exception as e:
-                    logger.error(f"Error directly calling use_move: {e}", exc_info=True)
-                    # Continue to fallback
-            
-            # Fallback: Get the character and manually apply the move effect
-            character = self.bot.game_state.get_character(self.character.name)
-            if character:
-                # Get current round if in combat
-                current_round = 1
-                if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                    current_round = self.bot.initiative_tracker.round_number
-                
-                # Mark the move as used in moveset for cooldown tracking
-                move_data = character.get_move(move.name)
-                if move_data:
-                    move_data.use(current_round)
-                
-                # Get target character if specified
-                target_char = None
-                if target:
-                    target_char = self.bot.game_state.get_character(target)
-                
-                # Create a MoveEffect (don't force active state)
-                from core.effects.move import MoveEffect, MoveState, RollTiming
-                from core.effects.manager import apply_effect  # Import apply_effect
-                
-                # Handle null or negative cooldown
-                cooldown = move.cooldown
-                if cooldown is not None and cooldown <= 0:
-                    cooldown = None
-                
-                move_effect = MoveEffect(
-                    name=move.name,
-                    description=move.description,
-                    mp_cost=move.mp_cost,
-                    hp_cost=move.hp_cost,
-                    star_cost=move.star_cost,
-                    cast_time=move.cast_time,
-                    duration=move.duration,
-                    cooldown=cooldown,  # Use sanitized cooldown value
-                    attack_roll=move.attack_roll,
-                    damage=move.damage,
-                    crit_range=move.crit_range,
-                    save_type=move.save_type,
-                    save_dc=move.save_dc,
-                    half_on_save=move.half_on_save,
-                    roll_timing=move.roll_timing,
-                    targets=[target_char] if target_char else [],
-                    enable_heat_tracking=getattr(move, 'enable_heat_tracking', False)
-                )
-                
-                # Use action stars
-                character.use_move_stars(move.star_cost, move.name)
-                
-                # If move has cooldown, explicitly register it with action_stars
-                if cooldown:
-                    character.action_stars.start_cooldown(move.name, cooldown)
-                
-                # Add the effect to the character - use apply_effect
-                result_message = await apply_effect(character, move_effect, current_round)
-                
-                # Save character
-                await self.bot.db.save_character(character, debug_paths=['effects', 'action_stars'])
-                
-                # Send success message directly to the channel
-                if interaction.channel:
-                    await interaction.channel.send(result_message)
-                else:
-                    # Fallback to followup if no channel
-                    await interaction.followup.send(result_message)
-            else:
-                # Character not found
-                await interaction.followup.send(
-                    f"❌ Character '{self.character.name}' not found.",
+            # Get action info
+            action_info = get_action_info(action_key)
+            if not action_info:
+                await interaction.response.send_message(
+                    f"Error: Action '{action_key}' not found.",
                     ephemeral=True
                 )
+                return
                 
-        except Exception as e:
-            logger.error(f"Error executing move: {e}", exc_info=True)
-            # Handle error directly instead of using handle_error function
-            error_embed = discord.Embed(
-                title="Error Using Move",
-                description=f"An error occurred: {str(e)}",
-                color=discord.Color.red()
+            # Check if character has enough stars
+            can_use, reason = self.character.can_use_move(action_info.star_cost, action_info.name)
+            if not can_use:
+                await interaction.response.send_message(
+                    f"Cannot use {action_info.name}: {reason}",
+                    ephemeral=True
+                )
+                return
+            
+            # Defer the response to avoid timeout
+            await interaction.response.defer(ephemeral=True)
+            
+            # Direct approach using manager with improved error handling
+            from core.effects.move import MoveEffect
+            from core.effects.manager import apply_effect
+            
+            # Get character from game state
+            character = self.bot.game_state.get_character(self.character.name)
+            if not character:
+                await interaction.followup.send("Character not found", ephemeral=True)
+                return
+            
+            # Get current round
+            current_round = 1
+            if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
+                current_round = self.bot.initiative_tracker.round_number
+            
+            # Create temporary move effect
+            move_effect = MoveEffect(
+                name=action_info.name,
+                description=action_info.description,
+                star_cost=action_info.star_cost,
+                mp_cost=0,
+                hp_cost=0,
+                duration=0,
+                cooldown=0
             )
             
-            try:
-                await interaction.followup.send(embed=error_embed, ephemeral=True)
-            except:
-                # Last resort if all else fails
-                print(f"Critical error executing move: {e}")
+            # Apply the effect
+            character.use_move_stars(action_info.star_cost, action_info.name)
+            result = await apply_effect(character, move_effect, current_round)
+            
+            # Save character
+            await self.bot.db.save_character(character)
+            
+            # Send result
+            await interaction.followup.send(result)
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error executing standard action: {e}", exc_info=True)
+            
+            # Handle error
+            await interaction.followup.send(
+                f"An error occurred: {str(e)}",
+                ephemeral=True
+            )
 
-class TargetSelectView(ui.View):
-    """View for selecting a target for a move"""
+class BasicAttackForm(ui.Modal, title="Basic Attack"):
+    """Form for configuring a basic attack"""
     
-    def __init__(self, character: Character, move: MoveData, bot):
-        super().__init__(timeout=60)
+    target = ui.TextInput(
+        label="Target(s)",
+        placeholder="Enter target name(s), separated by commas",
+        required=True
+    )
+    
+    attack_type = ui.TextInput(
+        label="Attack Type",
+        placeholder="melee or magic",
+        default="melee",
+        required=True
+    )
+    
+    attack_power = ui.TextInput(
+        label="Attack Power Level (1-5)",
+        placeholder="1=d4, 2=d6, 3=d8, 4=2d4, 5=2d6",
+        default="1",
+        required=True,
+        max_length=1
+    )
+    
+    damage_type = ui.TextInput(
+        label="Damage Type",
+        placeholder="slashing, piercing, fire, force, etc.",
+        required=False
+    )
+    
+    reason = ui.TextInput(
+        label="Description (optional)",
+        placeholder="What does your attack look like?",
+        required=False,
+        max_length=100
+    )
+    
+    def __init__(self, character: Character, bot):
+        super().__init__()
         self.character = character
-        self.move = move
         self.bot = bot
         
-        # Get potential targets
-        targets = []
+        # Set damage type defaults based on attack type
+        self.damage_type.default = "slashing"
         
+        # Calculate available attack powers based on modifiers
+        if hasattr(self.character, 'stats'):
+            # Get the strength mod for melee
+            str_mod = StatHelper.get_stat_modifier(self.character, StatType.STRENGTH)
+            
+            # Get the higher of INT or WIS for magic
+            int_mod = StatHelper.get_stat_modifier(self.character, StatType.INTELLIGENCE)
+            wis_mod = StatHelper.get_stat_modifier(self.character, StatType.WISDOM)
+            magic_mod = max(int_mod, wis_mod)
+            
+            # Calculate max levels
+            max_melee_level = min(5, max(1, str_mod + 2))
+            max_magic_level = min(5, max(1, magic_mod + 2))
+            
+            # Update the label to show available levels
+            self.attack_power.label = f"Attack Power (Melee:1-{max_melee_level}, Magic:1-{max_magic_level})"
+            
+            # Update the placeholder to show available levels
+            self.attack_power.placeholder = f"Melee(1-{max_melee_level}), Magic(1-{max_magic_level})"
+    
+    async def on_submit(self, interaction: discord.Interaction):
         try:
-            if hasattr(bot, 'initiative_tracker') and bot.initiative_tracker.state != 'inactive':
-                # Get characters in current initiative
-                for turn in bot.initiative_tracker.turn_order:
-                    target_char = bot.game_state.get_character(turn.character_name)
-                    if target_char and target_char.name != character.name:
-                        targets.append(target_char)
-            else:
-                # Get all characters as potential targets
-                targets = [c for c in bot.game_state.get_all_characters() 
-                           if c.name != character.name]
-        except Exception as e:
-            logger.error(f"Error getting targets: {e}", exc_info=True)
-            targets = []
+            await interaction.response.defer(ephemeral=True)
             
-        # Add target select menu if we have targets
-        if targets:
-            self.target_select = ui.Select(
-                placeholder="Select a target...",
-                options=[
-                    SelectOption(
-                        label=target.name,
-                        description=f"AC: {target.defense.current_ac}"
-                    )
-                    for target in targets[:25]  # Discord limits to 25 options
-                ],
-                min_values=1,
-                max_values=1
-            )
+            # Get form values
+            targets = self.target.value.strip()
+            attack_type = self.attack_type.value.lower().strip()
             
-            async def target_selected(interaction: discord.Interaction):
-                # Get selected target
-                target_name = self.target_select.values[0]
-                
-                # Use move with target
-                try:
-                    move_cog = self.bot.get_cog('MoveCommands')
-                    if move_cog:
-                        await interaction.response.defer()
-                        await move_cog.use_move(
-                            interaction,
-                            self.character.name,
-                            self.move.name,
-                            target_name
-                        )
-                    else:
-                        await interaction.response.send_message(
-                            "Move system is not available. Please try again later.",
-                            ephemeral=True
-                        )
-                except Exception as e:
-                    logger.error(f"Error using move with target: {e}", exc_info=True)
-                    await interaction.response.send_message(
-                        f"Error using move: {str(e)}",
+            # Validate attack type
+            if attack_type not in ["melee", "magic"]:
+                await interaction.followup.send(
+                    "Invalid attack type. Please use 'melee' or 'magic'.",
+                    ephemeral=True
+                )
+                return
+            
+            # Validate and convert power level to integer
+            try:
+                power_level = int(self.attack_power.value.strip())
+                if power_level < 1 or power_level > 5:
+                    await interaction.followup.send(
+                        "Attack power must be between 1 and 5.",
                         ephemeral=True
                     )
-                    
-            self.target_select.callback = target_selected
-            self.add_item(self.target_select)
-            
-        else:
-            # No targets available
-            self.add_item(ui.Button(
-                label="No targets available",
-                disabled=True
-            ))
-
-class MoveSelectMenu(ui.Select):
-    """Select menu for choosing a move"""
-    
-    def __init__(
-        self, 
-        moves: List[MoveData], 
-        placeholder: str = "Select a move...",
-        max_options: int = 25
-    ):
-        # Create options from moves
-        options = []
-        for i, move in enumerate(moves[:max_options]):
-            # Create cost indicator
-            costs = []
-            if move.star_cost > 0:
-                costs.append(f"⭐{move.star_cost}")
-            if move.mp_cost > 0:
-                costs.append(f"MP:{move.mp_cost}")
-            elif move.mp_cost < 0:
-                # Show MP gain with a + sign
-                costs.append(f"MP:+{abs(move.mp_cost)}")
-            if move.hp_cost > 0:
-                costs.append(f"HP:{move.hp_cost}")
-            elif move.hp_cost < 0:
-                # Show healing with a + sign
-                costs.append(f"HP:+{abs(move.hp_cost)}")
-                
-            cost_text = " | ".join(costs) if costs else ""
-            
-            # Add uses info if available
-            uses_text = ""
-            if move.uses is not None:
-                uses_remaining = move.uses_remaining if hasattr(move, 'uses_remaining') and move.uses_remaining is not None else move.uses
-                uses_text = f" | Uses:{uses_remaining}/{move.uses}"
-            
-            # Create category text
-            category_text = move.category if hasattr(move, 'category') and move.category else ""
-            
-            # Create description with costs, uses, and category
-            description = category_text
-            if cost_text:
-                description += f" | {cost_text}"
-            if uses_text:
-                description += uses_text
-                
-            # Truncate description if too long
-            if len(description) > 50:
-                description = description[:47] + "..."
-            
-            # Create select option
-            options.append(
-                SelectOption(
-                    label=move.name[:25],  # Max 25 chars for label
-                    description=description,  # Include all info
-                    value=str(i)  # Use index as value
+                    return
+            except ValueError:
+                await interaction.followup.send(
+                    "Invalid attack power. Please enter a number between 1 and 5.",
+                    ephemeral=True
                 )
+                return
+                
+            # Get damage type or use default
+            damage_type = self.damage_type.value.strip() if self.damage_type.value else ""
+            reason = self.reason.value.strip()
+            
+            # Default damage types if none provided
+            if not damage_type:
+                damage_type = "slashing" if attack_type == "melee" else "force"
+            
+            # Determine modifier and calculation
+            from utils.stat_helper import StatHelper, StatType
+            
+            if attack_type == "melee":
+                mod_name = "str"
+                mod_value = StatHelper.get_stat_modifier(self.character, StatType.STRENGTH)
+                
+                # Check if power level exceeds character's capability
+                max_melee_level = min(5, max(1, mod_value + 2))
+                if power_level > max_melee_level:
+                    await interaction.followup.send(
+                        f"Your strength only allows up to level {max_melee_level} melee attacks.",
+                        ephemeral=True
+                    )
+                    return
+            else:  # magic
+                # Use the higher of INT or WIS
+                int_mod = StatHelper.get_stat_modifier(self.character, StatType.INTELLIGENCE)
+                wis_mod = StatHelper.get_stat_modifier(self.character, StatType.WISDOM)
+                if int_mod >= wis_mod:
+                    mod_name = "int"
+                    mod_value = int_mod
+                else:
+                    mod_name = "wis"
+                    mod_value = wis_mod
+                    
+                # Check if power level exceeds character's capability
+                max_magic_level = min(5, max(1, mod_value + 2))
+                if power_level > max_magic_level:
+                    await interaction.followup.send(
+                        f"Your spellcasting ability only allows up to level {max_magic_level} magic attacks.",
+                        ephemeral=True
+                    )
+                    return
+            
+            # Set damage based on selected power level
+            if power_level == 1:
+                damage = f"1d4+{mod_name}"
+            elif power_level == 2:
+                damage = f"1d6+{mod_name}"
+            elif power_level == 3:
+                damage = f"1d8+{mod_name}"
+            elif power_level == 4:
+                damage = f"2d4+{mod_name}"
+            else:  # power_level == 5
+                damage = f"2d6+{mod_name}"
+            
+            # Add damage type
+            damage = f"{damage} {damage_type}"
+            
+            # Set attack name
+            attack_name = reason if reason else "Basic Attack"
+            
+            # Get character and target from game state
+            character = self.bot.game_state.get_character(self.character.name)
+            if not character:
+                await interaction.followup.send("Character not found", ephemeral=True)
+                return
+            
+            # Get targets
+            target_chars = []
+            if targets:
+                for target_name in targets.split(','):
+                    target_name = target_name.strip()
+                    target_char = self.bot.game_state.get_character(target_name)
+                    if target_char:
+                        target_chars.append(target_char)
+                    else:
+                        await interaction.followup.send(f"Target not found: {target_name}", ephemeral=True)
+                        return
+            
+            # Get current round
+            current_round = 1
+            if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
+                current_round = self.bot.initiative_tracker.round_number
+            
+            # Import needed modules
+            from core.effects.move import MoveEffect
+            from core.effects.manager import apply_effect  # Import apply_effect directly
+            
+            # Create the move effect
+            move_effect = MoveEffect(
+                name=attack_name,
+                description=f"A {attack_type} attack" + (f": {reason}" if reason else ""),
+                star_cost=1,  # Basic attacks cost 1 star
+                mp_cost=0,
+                hp_cost=0,
+                attack_roll=f"1d20+{mod_name}",
+                damage=damage,
+                targets=target_chars,
+                roll_timing="instant",
+                # Don't include additional text about stars
             )
+            
+            # Use action stars
+            character.use_move_stars(1, attack_name)
+            
+            # Apply the effect directly
+            result = await apply_effect(character, move_effect, current_round)
+            
+            # Save character
+            await self.bot.db.save_character(character)
+            
+            # Save targets if needed
+            for target_char in target_chars:
+                await self.bot.db.save_character(target_char)
+                
+            # Send result
+            await interaction.followup.send(result)
         
-        # Create the select menu
-        super().__init__(
-            placeholder=placeholder,
-            options=options[:25],  # Discord limits to 25 options
-            min_values=1,
-            max_values=1
-        )
-        
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error processing basic attack: {e}", exc_info=True)
+            
+            # Handle error
+            await interaction.followup.send(
+                f"Error processing basic attack: {str(e)}",
+                ephemeral=True
+            )
+
 class MovesetView(ui.View):
     """View for the moveset display with category filters and pagination"""
     
@@ -703,6 +627,7 @@ class ActionHandler:
         """Create embed showing action information"""
         embed = Embed(
             title=f"{character.name}'s Actions",
+            description="Select an action to perform:",
             color=Color.blue()
         )
 
@@ -733,22 +658,53 @@ class ActionHandler:
                 value="\n".join(moves_list),
                 inline=False
             )
+            
+        # Add available attack levels based on modifiers
+        from utils.stat_helper import StatHelper, StatType
+        
+        str_mod = StatHelper.get_stat_modifier(character, StatType.STRENGTH)
+        int_mod = StatHelper.get_stat_modifier(character, StatType.INTELLIGENCE)
+        wis_mod = StatHelper.get_stat_modifier(character, StatType.WISDOM)
+        
+        melee_level = min(5, max(1, str_mod + 2))
+        magic_level = min(5, max(1, max(int_mod, wis_mod) + 2))
+        
+        embed.add_field(
+            name="Combat Abilities",
+            value=(
+                f"**Melee Attack:** Level `{melee_level}` (up to "
+                f"`{ActionHandler._level_to_dice(melee_level)}`)\n"
+                f"**Magic Attack:** Level `{magic_level}` (up to "
+                f"`{ActionHandler._level_to_dice(magic_level)}`)"
+            ),
+            inline=False
+        )
+        
+        # Show damage type examples
+        embed.add_field(
+            name="Common Damage Types",
+            value=(
+                "**Physical:** `slashing`, `piercing`, `bludgeoning`\n"
+                "**Elemental:** `fire`, `ice`, `electric`, `water`, `wind`, `sonic`\n"
+                "**Energy:** `radiant`, `necrotic`, `force`, `psychic`, `thunder`\n"
+                "**Chemical:** `acid`, `poison`"
+            ),
+            inline=False
+        )
         
         # Show standard action costs
         embed.add_field(
             name="Standard Actions",
             value=(
-                "🔹 **Basic Attack** (⭐)\n"
-                "🔹 **Dodge** (⭐⭐)\n"
-                "🔹 **Dash** (⭐)\n"
-                "🔹 **Help** (⭐)\n"
-                "🔹 **Disengage** (⭐)"
+                "🔹 **Basic Attack** (`⭐1`)\n"
+                "🔹 **Dodge** (`⭐2`)\n"
+                "🔹 **Dash** (`⭐1`)\n"
+                "🔹 **Help** (`⭐1`)\n"
+                "🔹 **Disengage** (`⭐1`)\n"
+                "🔹 **Hide** (`⭐1`)"
             ),
             inline=False
         )
-        
-        # Show placeholder for full move system
-        embed.set_footer(text="Use the Moveset tab to view and use character moves")
         
         return embed
     
@@ -948,21 +904,21 @@ class ActionHandler:
         # Add move metadata
         embed.add_field(
             name="Category",
-            value=move.category,
+            value=getattr(move, 'category', 'Uncategorized'),
             inline=True
         )
         
         # Add costs
         costs = []
-        if move.star_cost > 0:
+        if getattr(move, 'star_cost', 0) > 0:
             costs.append(f"⭐ {move.star_cost} stars")
-        if move.mp_cost > 0:
+        if getattr(move, 'mp_cost', 0) > 0:
             costs.append(f"💙 {move.mp_cost} MP")
-        elif move.mp_cost < 0:
+        elif getattr(move, 'mp_cost', 0) < 0:
             costs.append(f"💙 Restores {abs(move.mp_cost)} MP")
-        if move.hp_cost > 0:
+        if getattr(move, 'hp_cost', 0) > 0:
             costs.append(f"❤️ {move.hp_cost} HP")
-        elif move.hp_cost < 0:
+        elif getattr(move, 'hp_cost', 0) < 0:
             costs.append(f"❤️ Heals {abs(move.hp_cost)} HP")
             
         if costs:
@@ -974,11 +930,11 @@ class ActionHandler:
             
         # Add timing info
         timing = []
-        if move.cast_time and move.cast_time > 0:
+        if getattr(move, 'cast_time', None) and move.cast_time > 0:
             timing.append(f"🔄 Cast Time: {move.cast_time} turn(s)")
-        if move.duration and move.duration > 0:
+        if getattr(move, 'duration', None) and move.duration > 0:
             timing.append(f"⏳ Duration: {move.duration} turn(s)")
-        if move.cooldown and move.cooldown > 0:
+        if getattr(move, 'cooldown', None) and move.cooldown > 0:
             timing.append(f"⌛ Cooldown: {move.cooldown} turn(s)")
             
         if timing:
@@ -990,18 +946,21 @@ class ActionHandler:
             
         # Add combat info
         combat = []
-        if move.attack_roll:
+        if getattr(move, 'attack_roll', None):
             combat.append(f"Attack Roll: {move.attack_roll}")
-        if move.damage:
+        if getattr(move, 'damage', None):
             combat.append(f"Damage: {move.damage}")
-        if move.save_type:
+        
+        # Safely check for save_type attribute
+        if hasattr(move, 'save_type') and move.save_type:
             save_text = f"Save: {move.save_type.upper()}"
-            if move.save_dc:
+            if hasattr(move, 'save_dc') and move.save_dc:
                 save_text += f" (DC {move.save_dc})"
-            if move.half_on_save:
+            if hasattr(move, 'half_on_save') and move.half_on_save:
                 save_text += " (Half damage on save)"
             combat.append(save_text)
-        if move.crit_range != 20:
+        
+        if hasattr(move, 'crit_range') and move.crit_range != 20:
             combat.append(f"Crit Range: {move.crit_range}-20")
             
         if combat:
@@ -1013,14 +972,14 @@ class ActionHandler:
             
         # Add usage info
         usage = []
-        if move.uses is not None:
+        if hasattr(move, 'uses') and move.uses is not None:
             uses_text = f"Uses: {move.uses}"
-            if move.uses_remaining is not None:
+            if hasattr(move, 'uses_remaining') and move.uses_remaining is not None:
                 uses_text = f"Uses: {move.uses_remaining}/{move.uses}"
             usage.append(uses_text)
             
         # Check cooldown status
-        if move.cooldown and move.last_used_round:
+        if hasattr(move, 'cooldown') and move.cooldown and hasattr(move, 'last_used_round') and move.last_used_round:
             current_round = 1  # Default
             if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
                 current_round = self.bot.initiative_tracker.round_number
@@ -1074,3 +1033,384 @@ class ActionHandler:
                 f"Error showing moves: {str(e)}",
                 ephemeral=True
             )
+
+    async def show_action_menu(self, interaction: discord.Interaction, character: Character):
+        """Show the action menu for a character"""
+        try:
+            # Create the action menu view
+            view = ActionMenuView(character, self.bot)
+            
+            # Create the embed
+            embed = self.create_action_embed(character)
+            
+            # Show the action menu (edit message if followup, otherwise send new response)
+            if interaction.response.is_done():
+                await interaction.edit_original_message(embed=embed, view=view)
+            else:
+                await interaction.response.edit_message(embed=embed, view=view)
+            
+        except Exception as e:
+            logger.error(f"Error showing action menu: {e}", exc_info=True)
+            # Handle response based on whether response is already done
+            if interaction.response.is_done():
+                await interaction.followup.send(
+                    f"Error showing action menu: {str(e)}",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    f"Error showing action menu: {str(e)}",
+                    ephemeral=True
+                )
+    
+    @staticmethod
+    def _level_to_dice(level: int) -> str:
+        """Convert a level to dice notation"""
+        if level == 1:
+            return "d4"
+        elif level == 2:
+            return "d6"
+        elif level == 3:
+            return "d8"
+        elif level == 4:
+            return "2d4"
+        else:  # level 5
+            return "2d6"
+
+class MoveSelectMenu(ui.Select):
+    """Select menu for choosing a move"""
+    
+    def __init__(
+        self, 
+        moves: List[MoveData], 
+        placeholder: str = "Select a move...",
+        max_options: int = 25
+    ):
+        # Create options from moves
+        options = []
+        for i, move in enumerate(moves[:max_options]):
+            # Create cost indicator
+            costs = []
+            if move.star_cost > 0:
+                costs.append(f"⭐{move.star_cost}")
+            if move.mp_cost > 0:
+                costs.append(f"MP:{move.mp_cost}")
+            elif move.mp_cost < 0:
+                # Show MP gain with a + sign
+                costs.append(f"MP:+{abs(move.mp_cost)}")
+            if move.hp_cost > 0:
+                costs.append(f"HP:{move.hp_cost}")
+            elif move.hp_cost < 0:
+                # Show healing with a + sign
+                costs.append(f"HP:+{abs(move.hp_cost)}")
+                
+            cost_text = " | ".join(costs) if costs else ""
+            
+            # Add uses info if available
+            uses_text = ""
+            if move.uses is not None:
+                uses_remaining = move.uses_remaining if hasattr(move, 'uses_remaining') and move.uses_remaining is not None else move.uses
+                uses_text = f" | Uses:{uses_remaining}/{move.uses}"
+            
+            # Create category text
+            category_text = move.category if hasattr(move, 'category') and move.category else ""
+            
+            # Create description with costs, uses, and category
+            description = category_text
+            if cost_text:
+                description += f" | {cost_text}"
+            if uses_text:
+                description += uses_text
+                
+            # Truncate description if too long
+            if len(description) > 50:
+                description = description[:47] + "..."
+            
+            # Create select option
+            options.append(
+                SelectOption(
+                    label=move.name[:25],  # Max 25 chars for label
+                    description=description,  # Include all info
+                    value=str(i)  # Use index as value
+                )
+            )
+        
+        # Create the select menu
+        super().__init__(
+            placeholder=placeholder,
+            options=options[:25],  # Discord limits to 25 options
+            min_values=1,
+            max_values=1
+        )
+
+class UseMoveView(ui.View):
+    """View for selecting a move to use"""
+    
+    def __init__(self, character: Character, moves: List[MoveData], bot):
+        super().__init__(timeout=60)
+        self.character = character
+        self.moves = moves
+        self.bot = bot
+        
+        # Add move select menu
+        self.move_select = MoveSelectMenu(
+            moves, 
+            placeholder="Select a move to use..."
+        )
+        
+        # Define a callback for the move selection
+        async def move_selected(interaction: discord.Interaction):
+            # Get selected move
+            try:
+                move_idx = int(self.move_select.values[0])
+                move = self.moves[move_idx]
+                
+                # Check resource costs first
+                if self.character.resources.current_mp < move.mp_cost:
+                    await interaction.response.send_message(
+                        f"{self.character.name} doesn't have enough MP! (Needs {move.mp_cost}, has {self.character.resources.current_mp})",
+                        ephemeral=True
+                    )
+                    return
+                
+                # Check action stars
+                can_use_stars, stars_reason = self.character.can_use_move(move.star_cost)
+                if not can_use_stars:
+                    await interaction.response.send_message(
+                        f"{self.character.name} can't use this move: {stars_reason}",
+                        ephemeral=True
+                    )
+                    return
+                
+                # Get current round if in combat
+                current_round = 1
+                if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
+                    current_round = self.bot.initiative_tracker.round_number
+                
+                # Check if move is on cooldown first
+                existing_cooldown = False
+                
+                # Import MoveState for the check
+                from core.effects.move import MoveState
+                
+                for effect in self.character.effects:
+                    if hasattr(effect, 'name') and effect.name == move.name and hasattr(effect, 'state'):
+                        if effect.state == MoveState.COOLDOWN:
+                            # There's already a cooldown effect for this move
+                            phase = effect.phases.get(MoveState.COOLDOWN)
+                            if phase:
+                                remaining = phase.duration - phase.turns_completed
+                                await interaction.response.send_message(
+                                    f"{self.character.name} can't use {move.name}: On cooldown ({remaining} turns remaining)",
+                                    ephemeral=True
+                                )
+                                return
+                            existing_cooldown = True
+                            break
+                
+                # Only check moveset cooldown if no active cooldown effect
+                if not existing_cooldown:
+                    # Check cooldowns in the move data
+                    can_use, reason = move.can_use(current_round)
+                    if not can_use:
+                        await interaction.response.send_message(
+                            f"{self.character.name} can't use {move.name}: {reason}",
+                            ephemeral=True
+                        )
+                        return
+                
+                # Check if move needs a target
+                if move.attack_roll or (move.damage and not getattr(move, 'save_type', None)):
+                    # Show target selector - get all possible targets
+                    targets = []
+                    
+                    # Try to get characters from initiative tracker
+                    if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
+                        turn_order = getattr(self.bot.initiative_tracker, 'turn_order', [])
+                        for turn in turn_order:
+                            if hasattr(turn, 'character_name'):
+                                target_char = self.bot.game_state.get_character(turn.character_name)
+                                if target_char and target_char.name != character.name:
+                                    targets.append(target_char)
+                    
+                    # If no targets from initiative, try all characters
+                    if not targets and hasattr(self.bot.game_state, 'get_all_characters'):
+                        targets = [c for c in self.bot.game_state.get_all_characters() 
+                                if c.name != character.name]
+                    elif not targets and hasattr(self.bot.game_state, 'characters'):
+                        # Alternative access through characters dictionary
+                        targets = [c for name, c in self.bot.game_state.characters.items() 
+                                if name != character.name]
+                    
+                    if targets:
+                        # Create target options for dropdown
+                        target_options = [
+                            SelectOption(
+                                label=target.name,
+                                description=f"AC: {target.defense.current_ac}" if hasattr(target, 'defense') else ""
+                            )
+                            for target in targets[:25]  # Discord limits to 25 options
+                        ]
+                        
+                        # Create target select menu
+                        target_select = ui.Select(
+                            placeholder="Select a target...",
+                            options=target_options,
+                            min_values=1,
+                            max_values=1
+                        )
+                        
+                        # Create view
+                        target_view = ui.View(timeout=60)
+                        
+                        async def target_callback(target_interaction):
+                            target_name = target_select.values[0]
+                            
+                            # Now execute the move with the target
+                            await self.execute_move(target_interaction, move, target_name)
+                            
+                        target_select.callback = target_callback
+                        target_view.add_item(target_select)
+                        
+                        # Show target selector
+                        await interaction.response.send_message(
+                            f"Select a target for {move.name}:",
+                            view=target_view,
+                            ephemeral=True
+                        )
+                    else:
+                        await interaction.response.send_message(
+                            "No targets available. Add characters or start combat first.",
+                            ephemeral=True
+                        )
+                else:
+                    # Use move directly without a target
+                    await self.execute_move(interaction, move)
+            except (ValueError, IndexError) as e:
+                logger.error(f"Error selecting move: {e}", exc_info=True)
+                await interaction.response.send_message(
+                    "Invalid move selection.",
+                    ephemeral=True
+                )
+        
+        # Set the callback and add the selection menu to the view
+        self.move_select.callback = move_selected
+        self.add_item(self.move_select)
+        
+    async def execute_move(self, interaction, move, target=None):
+        """Execute a move with or without a target"""
+        try:
+            # Always defer first to avoid timeout
+            try:
+                await interaction.response.defer()
+            except:
+                # If already deferred, this will fail but we can continue
+                pass
+            
+            # Get character and target from game state
+            character = self.bot.game_state.get_character(self.character.name)
+            if not character:
+                await interaction.followup.send("Character not found", ephemeral=True)
+                return
+                
+            # Get target character
+            target_char = None
+            if target:
+                target_char = self.bot.game_state.get_character(target)
+                
+            # Get current round
+            current_round = 1
+            if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
+                current_round = self.bot.initiative_tracker.round_number
+                
+            # Import needed modules
+            from core.effects.move import MoveEffect
+            from core.effects.manager import apply_effect  # Import apply_effect directly
+            
+            # Create the effect
+            move_effect = MoveEffect(
+                name=move.name,
+                description=move.description,
+                mp_cost=move.mp_cost,
+                hp_cost=move.hp_cost,
+                star_cost=move.star_cost,
+                cast_time=getattr(move, 'cast_time', None),
+                duration=getattr(move, 'duration', None),
+                cooldown=getattr(move, 'cooldown', None),
+                attack_roll=getattr(move, 'attack_roll', None),
+                damage=getattr(move, 'damage', None),
+                crit_range=getattr(move, 'crit_range', 20),
+                roll_timing=getattr(move, 'roll_timing', 'active'),
+                targets=[target_char] if target_char else [],
+                bonus_on_hit=getattr(move, 'bonus_on_hit', None),
+                aoe_mode=getattr(move, 'aoe_mode', 'single')
+            )
+            
+            # Apply the effect directly using apply_effect
+            character.use_move_stars(move.star_cost, move.name)
+            result = await apply_effect(character, move_effect, current_round)
+            
+            # Mark as used
+            if hasattr(move, 'use'):
+                move.use(current_round)
+            
+            # Save character
+            await self.bot.db.save_character(character)
+            
+            # Save target if needed
+            if target_char:
+                await self.bot.db.save_character(target_char)
+                
+            # Send result
+            await interaction.followup.send(result)
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error executing move: {e}", exc_info=True)
+            
+            # Handle error
+            await interaction.followup.send(
+                f"Error executing move: {str(e)}",
+                ephemeral=True
+            )
+
+class MoveInfoView(ui.View):
+    """View for showing move info"""
+    def __init__(self, character: Character, moves: List[MoveData], handler):
+        super().__init__(timeout=60)
+        self.character = character
+        self.moves = moves
+        self.handler = handler
+        
+        # Add move select menu
+        self.move_select = MoveSelectMenu(
+            moves, 
+            placeholder="Select a move for details..."
+        )
+        
+        # Define a callback for the selection
+        async def move_selected(interaction: discord.Interaction):
+            try:
+                # Get selected move
+                move_idx = int(self.move_select.values[0])
+                move = self.moves[move_idx]
+                
+                # Create an embed with move details
+                embed = self.handler.create_move_info_embed(self.character, move)
+                
+                # Show the details
+                await interaction.response.send_message(
+                    embed=embed,
+                    ephemeral=True
+                )
+            except (ValueError, IndexError) as e:
+                logger.error(f"Error showing move info: {e}", exc_info=True)
+                await interaction.response.send_message(
+                    f"Error showing move info: {str(e)}",
+                    ephemeral=True
+                )
+                
+        # Set the callback and add the selection menu to the view
+        self.move_select.callback = move_selected
+        self.add_item(self.move_select)

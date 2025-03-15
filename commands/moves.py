@@ -19,6 +19,7 @@ from typing import Optional, List, Dict, Any, Tuple
 
 from core.character import Character, StatType
 from core.effects.move import MoveEffect, MoveState, RollTiming
+from core.effects.manager import apply_effect  # Import apply_effect directly
 from modules.moves.data import MoveData, Moveset
 from utils.formatting import MessageFormatter
 from utils.dice import DiceRoller
@@ -34,6 +35,64 @@ class MoveCommands(commands.GroupCog, name="move"):
         self.pending_attacks = {}
         super().__init__()
     
+    async def character_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        """Autocomplete for character names"""
+        try:
+            # Get all characters from the database
+            chars = await self.bot.db._refs['characters'].get()
+            if not chars:
+                return []
+            
+            # Filter based on current input
+            matches = [
+                app_commands.Choice(name=name, value=name)
+                for name in chars.keys()
+                if name != "combat_state" and current.lower() in name.lower()
+            ]
+            return matches[:25]  # Discord limits to 25 choices
+        except Exception as e:
+            logger.error(f"Error in character autocomplete: {e}", exc_info=True)
+            return []
+    
+    async def move_name_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        """Autocomplete for move names based on selected character"""
+        try:
+            # Get the character name from the interaction
+            char_name = interaction.namespace.character
+            if not char_name:
+                return []
+            
+            # Try to get character from game state
+            char = self.bot.game_state.get_character(char_name)
+            if not char:
+                # If not in memory, try to load from database
+                char_data = await self.bot.db._refs['characters'].child(char_name).get()
+                if not char_data or 'moveset' not in char_data or 'moves' not in char_data['moveset']:
+                    return []
+                
+                # Get moves from database
+                moves = char_data['moveset']['moves']
+                choices = []
+                for key, move_data in moves.items():
+                    name = move_data.get('name', key)
+                    if current.lower() in name.lower():
+                        choices.append(app_commands.Choice(name=name, value=name))
+                return choices[:25]
+            
+            # Get moves from character in memory
+            if hasattr(char, 'moveset') and hasattr(char.moveset, 'list_moves'):
+                moves = char.list_moves()
+                return [
+                    app_commands.Choice(name=name, value=name)
+                    for name in moves
+                    if current.lower() in name.lower()
+                ][:25]
+            
+            return []
+        except Exception as e:
+            logger.error(f"Error in move name autocomplete: {e}", exc_info=True)
+            return []
+    
     @app_commands.command(name="use", description="Use a stored move")
     @app_commands.describe(
         character="Character using the move",
@@ -42,6 +101,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         roll_timing="When to process attack roll: instant, active, or per_turn",
         aoe_mode="How to handle multiple targets: single (one roll) or multi (roll per target)"
     )
+    @app_commands.autocomplete(character=character_autocomplete, name=move_name_autocomplete)
     async def use_move(
         self,
         interaction: discord.Interaction,
@@ -153,9 +213,8 @@ class MoveCommands(commands.GroupCog, name="move"):
             await interaction.followup.send(result)
             
         except Exception as e:
-            error_msg, traceback = handle_error(e, "Error using move")
-            logger.error(traceback)
-            await interaction.followup.send(error_msg, ephemeral=True)
+            error_msg = await handle_error(interaction, e)
+            logger.error(f"Error using move: {str(e)}", exc_info=True)
     
     @app_commands.command(name="temp", description="Use a temporary move (not saved)")
     @app_commands.describe(
@@ -175,6 +234,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         roll_timing="When to process attack roll: instant, active, or per_turn",
         advanced_json="Advanced parameters in JSON format"
     )
+    @app_commands.autocomplete(character=character_autocomplete)
     async def temp_move(
         self,
         interaction: discord.Interaction,
@@ -267,8 +327,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 aoe_mode=aoe_mode
             )
             
-            # Apply effect and get feedback message
-            result = await self.bot.game_state.apply_effect(
+            # Apply effect and get feedback message - Fix: use apply_effect directly
+            result = await apply_effect(
                 char,
                 move_effect,
                 current_round
@@ -289,9 +349,9 @@ class MoveCommands(commands.GroupCog, name="move"):
             await interaction.followup.send(result)
             
         except Exception as e:
-            error_msg, traceback = handle_error(e, "Error in temp_move")
-            logger.error(traceback)
-            await interaction.followup.send(error_msg, ephemeral=True)
+            # Fix: Proper error handling
+            logger.error(f"Error in temp_move: {str(e)}", exc_info=True)
+            await handle_error(interaction, e)
 
     @app_commands.command(name="create", description="Create a new move for a character")
     @app_commands.describe(
@@ -312,6 +372,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         uses="Number of uses per combat (-1 for unlimited)",
         advanced_json="Advanced parameters in JSON format"
     )
+    @app_commands.autocomplete(character=character_autocomplete)
     async def create_move(
         self,
         interaction: discord.Interaction,
@@ -472,9 +533,8 @@ class MoveCommands(commands.GroupCog, name="move"):
             await interaction.followup.send(embed=embed)
             
         except Exception as e:
-            error_msg, traceback = handle_error(e, "Error creating move")
-            logger.error(traceback)
-            await interaction.followup.send(error_msg, ephemeral=True)
+            logger.error(f"Error creating move: {str(e)}", exc_info=True)
+            await handle_error(interaction, e)
     
     @app_commands.command(name="update", description="Update an existing move")
     @app_commands.describe(
@@ -495,6 +555,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         uses="New number of uses per combat (-1 for unlimited)",
         advanced_json="New advanced parameters in JSON format"
     )
+    @app_commands.autocomplete(character=character_autocomplete, name=move_name_autocomplete)
     async def update_move(
         self,
         interaction: discord.Interaction,
@@ -665,15 +726,15 @@ class MoveCommands(commands.GroupCog, name="move"):
             await interaction.followup.send(embed=embed)
             
         except Exception as e:
-            error_msg, traceback = handle_error(e, "Error updating move")
-            logger.error(traceback)
-            await interaction.followup.send(error_msg, ephemeral=True)
+            logger.error(f"Error updating move: {str(e)}", exc_info=True)
+            await handle_error(interaction, e)
     
     @app_commands.command(name="delete", description="Delete a move from a character")
     @app_commands.describe(
         character="Character to remove the move from",
         name="Name of the move to delete"
     )
+    @app_commands.autocomplete(character=character_autocomplete, name=move_name_autocomplete)
     async def delete_move(
         self,
         interaction: discord.Interaction,
@@ -707,15 +768,15 @@ class MoveCommands(commands.GroupCog, name="move"):
             await interaction.followup.send(f"Move '{name}' deleted from {character}'s moveset.")
             
         except Exception as e:
-            error_msg, traceback = handle_error(e, "Error deleting move")
-            logger.error(traceback)
-            await interaction.followup.send(error_msg, ephemeral=True)
+            logger.error(f"Error deleting move: {str(e)}", exc_info=True)
+            await handle_error(interaction, e)
     
     @app_commands.command(name="list", description="List all moves for a character")
     @app_commands.describe(
         character="Character to list moves for",
         category="Filter by category (leave empty for all)"
     )
+    @app_commands.autocomplete(character=character_autocomplete)
     async def list_moves(
         self,
         interaction: discord.Interaction,
@@ -807,15 +868,15 @@ class MoveCommands(commands.GroupCog, name="move"):
             await interaction.followup.send(embed=embed)
             
         except Exception as e:
-            error_msg, traceback = handle_error(e, "Error listing moves")
-            logger.error(traceback)
-            await interaction.followup.send(error_msg, ephemeral=True)
+            logger.error(f"Error listing moves: {str(e)}", exc_info=True)
+            await handle_error(interaction, e)
     
     @app_commands.command(name="info", description="Show detailed information about a move")
     @app_commands.describe(
         character="Character that has the move",
         name="Name of the move"
     )
+    @app_commands.autocomplete(character=character_autocomplete, name=move_name_autocomplete)
     async def move_info(
         self,
         interaction: discord.Interaction,
@@ -844,38 +905,45 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Create embed
             embed = discord.Embed(
                 title=f"{move.name}",
-                description=move.description,
+                description=move.description.replace(';', '\n• ') if move.description else "No description",
                 color=discord.Color.blue()
             )
             
-            # Basic parameters
-            basics = []
-            if move.mp_cost != 0:
-                sign = '-' if move.mp_cost > 0 else '+'
-                basics.append(f"MP: {sign}{abs(move.mp_cost)}")
-            if move.hp_cost != 0:
-                sign = '-' if move.hp_cost > 0 else '+'
-                basics.append(f"HP: {sign}{abs(move.hp_cost)}")
-            if move.star_cost > 0:
-                basics.append(f"Stars: {move.star_cost}")
-            if move.uses is not None:
-                basics.append(f"Uses: {move.uses_remaining}/{move.uses}")
+            # Add move metadata
+            embed.add_field(
+                name="Category",
+                value=getattr(move, 'category', 'Uncategorized'),
+                inline=True
+            )
+            
+            # Add costs
+            costs = []
+            if getattr(move, 'star_cost', 0) > 0:
+                costs.append(f"⭐ {move.star_cost} stars")
+            if getattr(move, 'mp_cost', 0) > 0:
+                costs.append(f"💙 {move.mp_cost} MP")
+            elif getattr(move, 'mp_cost', 0) < 0:
+                costs.append(f"💙 Restores {abs(move.mp_cost)} MP")
+            if getattr(move, 'hp_cost', 0) > 0:
+                costs.append(f"❤️ {move.hp_cost} HP")
+            elif getattr(move, 'hp_cost', 0) < 0:
+                costs.append(f"❤️ Heals {abs(move.hp_cost)} HP")
                 
-            if basics:
+            if costs:
                 embed.add_field(
-                    name="Resource Costs",
-                    value="\n".join(basics),
+                    name="Costs",
+                    value="\n".join(costs),
                     inline=True
                 )
                 
-            # Timing parameters
+            # Add timing info
             timing = []
-            if move.cast_time:
-                timing.append(f"Cast Time: {move.cast_time} turn(s)")
-            if move.duration:
-                timing.append(f"Duration: {move.duration} turn(s)")
-            if move.cooldown:
-                timing.append(f"Cooldown: {move.cooldown} turn(s)")
+            if getattr(move, 'cast_time', None) and move.cast_time > 0:
+                timing.append(f"🔄 Cast Time: {move.cast_time} turn(s)")
+            if getattr(move, 'duration', None) and move.duration > 0:
+                timing.append(f"⏳ Duration: {move.duration} turn(s)")
+            if getattr(move, 'cooldown', None) and move.cooldown > 0:
+                timing.append(f"⌛ Cooldown: {move.cooldown} turn(s)")
                 
                 # Show cooldown status if applicable
                 if (move.last_used_round and 
@@ -895,46 +963,62 @@ class MoveCommands(commands.GroupCog, name="move"):
                     inline=True
                 )
                 
-            # Combat parameters
+            # Add combat info
             combat = []
-            if move.attack_roll:
-                combat.append(f"Attack: {move.attack_roll}")
-            if move.damage:
+            if getattr(move, 'attack_roll', None):
+                combat.append(f"Attack Roll: {move.attack_roll}")
+            if getattr(move, 'damage', None):
                 combat.append(f"Damage: {move.damage}")
-            if move.crit_range != 20:
-                combat.append(f"Crit Range: {move.crit_range}+")
-            if move.roll_timing:
-                combat.append(f"Roll Timing: {move.roll_timing}")
+            
+            # Safely check for save_type attribute
+            if hasattr(move, 'save_type') and move.save_type:
+                save_text = f"Save: {move.save_type.upper()}"
+                if hasattr(move, 'save_dc') and move.save_dc:
+                    save_text += f" (DC {move.save_dc})"
+                if hasattr(move, 'half_on_save') and move.half_on_save:
+                    save_text += " (Half damage on save)"
+                combat.append(save_text)
+            
+            if hasattr(move, 'crit_range') and move.crit_range != 20:
+                combat.append(f"Crit Range: {move.crit_range}-20")
                 
             if combat:
                 embed.add_field(
                     name="Combat",
                     value="\n".join(combat),
-                    inline=True
-                )
-                
-            # Advanced parameters
-            advanced = []
-            if move.bonus_on_hit:
-                advanced.append(f"Bonus on Hit: {move.bonus_on_hit}")
-            if move.aoe_mode and move.aoe_mode != 'single':
-                advanced.append(f"AoE Mode: {move.aoe_mode}")
-            if move.conditions:
-                advanced.append(f"Conditions: {', '.join(move.conditions)}")
-                
-            if advanced:
-                embed.add_field(
-                    name="Advanced Parameters",
-                    value="\n".join(advanced),
                     inline=False
                 )
-            
+                
+            # Add usage info
+            usage = []
+            if hasattr(move, 'uses') and move.uses is not None:
+                uses_text = f"Uses: {move.uses}"
+                if hasattr(move, 'uses_remaining') and move.uses_remaining is not None:
+                    uses_text = f"Uses: {move.uses_remaining}/{move.uses}"
+                usage.append(uses_text)
+                
+            # Check cooldown status
+            if hasattr(move, 'cooldown') and move.cooldown and hasattr(move, 'last_used_round') and move.last_used_round:
+                current_round = 1  # Default
+                if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
+                    current_round = self.bot.initiative_tracker.round_number
+                    
+                if move.last_used_round >= current_round - move.cooldown:
+                    rounds_left = move.cooldown - (current_round - move.last_used_round)
+                    usage.append(f"On Cooldown: {rounds_left} round(s) remaining")
+                    
+            if usage:
+                embed.add_field(
+                    name="Usage",
+                    value="\n".join(usage),
+                    inline=False
+                )
+                
             await interaction.followup.send(embed=embed)
             
         except Exception as e:
-            error_msg, traceback = handle_error(e, "Error showing move info")
-            logger.error(traceback)
-            await interaction.followup.send(error_msg, ephemeral=True)
+            logger.error(f"Error showing move info: {str(e)}", exc_info=True)
+            await handle_error(interaction, e)
 
 async def setup(bot):
     await bot.add_cog(MoveCommands(bot))

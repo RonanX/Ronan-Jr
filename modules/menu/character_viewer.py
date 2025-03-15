@@ -4,12 +4,13 @@ src/modules/menu/character_viewer.py
 Main class to handle character information display and interaction.
 """
 
+import discord
 from discord import Interaction, Embed, ButtonStyle, Color, SelectOption
 from discord.ui import View, Button, Select
 from typing import Optional, Dict, Any, List, Tuple
 
 from core.character import Character
-from .defense_handler import DefenseHandler
+from modules.menu.defense_handler import DefenseHandler
 
 class CharacterViewer:
     """Main class to handle character information display and interaction."""
@@ -94,17 +95,24 @@ class CharacterViewer:
         
         return display
 
-    async def show(self, interaction: Interaction, ephemeral: bool = True) -> None:
+    async def show(self, interaction: discord.Interaction, ephemeral: bool = True) -> None:
         """Initialize and display the character viewer"""
         # Set bot from interaction if available
         if hasattr(interaction, 'client'):
             self.bot = interaction.client
-            # Initialize action handler if bot is available
-            from .action_handler import ActionHandler
-            self.action_handler = ActionHandler(self.bot)
             
+            # Initialize action handler if needed
+            if not self.action_handler:
+                from modules.menu.action_handler import ActionHandler
+                self.action_handler = ActionHandler(self.bot)
+        
+        # Create the main UI
         self.current_view = CharacterViewerUI(self)
+        
+        # Generate the embed
         embed = await self.create_current_embed()
+        
+        # Send the message with the view
         await interaction.response.send_message(embed=embed, view=self.current_view, ephemeral=ephemeral)
 
     async def create_current_embed(self) -> Embed:
@@ -271,7 +279,8 @@ class CharacterViewer:
         
         # Fallback if ActionHandler not available
         from .action_handler import ActionHandler
-        return ActionHandler.create_action_embed(self.character)
+        self.action_handler = ActionHandler(self.bot)
+        return self.action_handler.create_action_embed(self.character)
 
     async def _create_moveset_embed(self) -> Embed:
         """Create moveset page with ActionHandler"""
@@ -380,6 +389,36 @@ class NavButton(Button):
     async def callback(self, interaction: Interaction) -> None:
         viewer = self.view.viewer  # type: CharacterViewer
         
+        # Special handling for actions tab to use ActionHandler
+        if self.page_id == "actions" and viewer.action_handler:
+            # Get the action menu view
+            from modules.menu.action_handler import ActionMenuView
+            action_view = ActionMenuView(viewer.character, viewer.bot)
+            
+            # Create the embed
+            embed = viewer.action_handler.create_action_embed(viewer.character)
+            
+            # Update the UI with highlighted button
+            viewer.current_page = self.page_id
+            for item in self.view.children:
+                if isinstance(item, NavButton):
+                    item.style = ButtonStyle.primary if item.page_id == self.page_id else ButtonStyle.secondary
+            
+            # Add the action selection menu to the current view
+            current_view = CharacterViewerUI(viewer)
+            
+            # Update all button states first
+            for item in current_view.children:
+                if isinstance(item, NavButton) and item.page_id == self.page_id:
+                    item.style = ButtonStyle.primary
+            
+            # Add action selector to the view
+            current_view.add_item(action_view.action_select)
+            
+            # Update the message
+            await interaction.response.edit_message(embed=embed, view=current_view)
+            return
+        
         # Special handling for moveset tab with ActionHandler
         if self.page_id == "moveset" and viewer.action_handler and hasattr(viewer.character, 'list_moves'):
             # Check if there are moves before showing the specialized view
@@ -397,12 +436,20 @@ class NavButton(Button):
                 # Create the view
                 from .action_handler import MovesetView
                 view = MovesetView(viewer.character, handler=viewer.action_handler)
+                view.viewer = viewer  # Set the viewer for back functionality
                 
-                # Update the message - use edit_message instead of sending a new message
+                # Update the message
                 await interaction.response.edit_message(embed=embed, view=view)
                 return
         
         # Default tab behavior
         viewer.current_page = self.page_id
+        
+        # Update button states
+        for item in self.view.children:
+            if isinstance(item, NavButton):
+                item.style = ButtonStyle.primary if item.page_id == self.page_id else ButtonStyle.secondary
+        
+        # Update the view
         embed = await viewer.create_current_embed()
         await interaction.response.edit_message(embed=embed, view=self.view)

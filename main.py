@@ -173,6 +173,7 @@ class GameBot(commands.Bot):
         await self.load_extension("commands.initiative")  # Load initiative commands  
         await self.load_extension("commands.qol")  # Load QOL commands
         await self.load_extension("commands.moves") # Load move commands
+        await self.load_extension("commands.actions") # Load action commands
 
         # Get initiative tracker from the cog after loading  
         initiative_cog = self.get_cog('InitiativeCommands')  
