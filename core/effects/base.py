@@ -1,5 +1,5 @@
 """
-src/core/effects/base.py:
+src/core/effects/base.py
 
 Base effect system classes and registry.
 This module contains the core functionality that all effects build upon.
@@ -113,9 +113,10 @@ class EffectTiming:
     duration has elapsed. This ensures they get their full duration
     regardless of when in the turn order they were applied.
     """
-    start_round: int
-    start_turn: str  # Character name whose turn it was applied on
-    duration: Optional[int] = None  # Number of rounds, None for permanent
+    def __init__(self, start_round: int, start_turn: str, duration: Optional[int] = None):
+        self.start_round = start_round
+        self.start_turn = start_turn
+        self.duration = duration
     
     def should_expire(self, current_round: int, current_turn: str) -> bool:
         """
@@ -125,24 +126,20 @@ class EffectTiming:
         1. We're on the same character's turn as when effect was applied
         2. The required number of rounds have passed
         
-        Example:
-        Effect applied on Bob's turn in round 1 with 2 round duration:
-        - Round 1, Alice's turn: False (not Bob's turn)
-        - Round 1, Bob's turn: False (just applied)
-        - Round 2, Alice's turn: False (not Bob's turn) 
-        - Round 2, Bob's turn: False (one round passed)
-        - Round 3, Alice's turn: False (not Bob's turn)
-        - Round 3, Bob's turn: True (two rounds passed, Bob's turn)
+        Fix: Don't expire effects in the same round they were applied.
         """
         if self.duration is None:
             return False
-            
-        # Calculate completed rounds since effect start
+        
+        # Different logic based on round
+        if current_round == self.start_round:
+            # Same round as when effect was applied - never expire immediately
+            return False
+        
+        # Calculate completed rounds since effect start (without the +1 that caused early expiry)
         rounds_completed = current_round - self.start_round
-        if current_turn == self.start_turn:
-            # If we're back to the start turn, count the current round
-            rounds_completed += 1
-            
+        
+        # Only expire on the character's turn and when duration has passed
         return rounds_completed >= self.duration and current_turn == self.start_turn
     
 class BaseEffect:
@@ -170,7 +167,8 @@ class BaseEffect:
         permanent: bool = False,
         category: EffectCategory = None,
         description: Optional[str] = None,
-        handles_own_expiry: bool = False
+        handles_own_expiry: bool = False,
+        emoji: Optional[str] = None
     ):
         """
         Initialize a new effect instance.
@@ -182,6 +180,7 @@ class BaseEffect:
         - category: Which EffectCategory it belongs to
         - description: Optional description for UI display
         - handles_own_expiry: If True, effect manages its own expiry logic
+        - emoji: Optional custom emoji for messages
         """
         self.name = name
         self.category = category
@@ -189,7 +188,15 @@ class BaseEffect:
         self.permanent = permanent
         self._duration = duration  # Store as protected variable
         self.timing: Optional[EffectTiming] = None
-        self._handles_own_expiry = handles_own_expiry  # New flag
+        self._handles_own_expiry = handles_own_expiry  # Flag for special effects
+        self._marked_for_expiry = False  # Flag to mark for expiry
+        self._will_expire_next = False   # Signals that effect will expire next turn
+        self._custom_emoji = emoji       # Custom emoji override
+        
+        # New tracking fields for improved duration handling
+        self._application_round = None   # When effect was first applied
+        self._application_turn = None    # Whose turn it was when applied
+        self._expiry_message_sent = False  # Track if expiry message has been sent
     
     @property
     def duration(self) -> Optional[int]:
@@ -209,6 +216,10 @@ class BaseEffect:
             start_turn=character_name,
             duration=None if self.permanent else self._duration
         )
+        
+        # Store application info for improved duration handling
+        self._application_round = round_number
+        self._application_turn = character_name
     
     def on_apply(self, character, round_number: int) -> str:
         """
@@ -236,6 +247,9 @@ class BaseEffect:
         Returns list of effect messages to display.
         Override in subclasses to add turn start behavior.
         """
+        # Default implementation: show status message on affected character's turn
+        if character.name == turn_name:
+            return [self.get_turn_start_message(character, round_number)]
         return []
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
@@ -250,6 +264,40 @@ class BaseEffect:
         Returns list of effect messages to display.
         Override in subclasses to add turn end behavior.
         """
+        # Only process on character's turn, skip permanent effects
+        if character.name != turn_name or self.permanent:
+            return []
+            
+        # Use standardized duration tracking
+        turns_remaining, will_expire_next, should_expire_now = self.process_duration(
+            round_number, turn_name
+        )
+        
+        # Handle expiry with standardized flag
+        if should_expire_now:
+            if not self._expiry_message_sent:
+                self._expiry_message_sent = True
+                self._marked_for_expiry = True
+                return [self.format_effect_message(
+                    f"{self.name} has worn off from {character.name}"
+                )]
+        
+        # Handle final turn warning
+        if will_expire_next:
+            self._will_expire_next = True
+            return [self.format_effect_message(
+                f"{self.name} continues",
+                [f"Final turn - will expire after this turn"]
+            )]
+            
+        # Regular duration update
+        if turns_remaining is not None and turns_remaining > 0:
+            s = "s" if turns_remaining != 1 else ""
+            return [self.format_effect_message(
+                f"{self.name} continues",
+                [f"{turns_remaining} turn{s} remaining"]
+            )]
+            
         return []
 
     def on_expire(self, character) -> str:
@@ -300,6 +348,7 @@ class BaseEffect:
         - Category and description
         - Duration and permanent status
         - Timing information
+        - All expiry state flags
         
         Override in subclasses to store additional attributes.
         """
@@ -310,7 +359,14 @@ class BaseEffect:
             "description": self.description,
             "duration": self._duration,
             "permanent": self.permanent,
-            "timing": self.timing.__dict__ if self.timing else None
+            "timing": self.timing.__dict__ if self.timing else None,
+            "_marked_for_expiry": self._marked_for_expiry,
+            "_will_expire_next": self._will_expire_next,
+            "_custom_emoji": self._custom_emoji,
+            "_handles_own_expiry": self._handles_own_expiry,
+            "_application_round": self._application_round,
+            "_application_turn": self._application_turn,
+            "_expiry_message_sent": self._expiry_message_sent
         }
 
     @property
@@ -319,15 +375,20 @@ class BaseEffect:
         Check if effect has expired based on timing.
         
         An effect is expired if:
-        1. It's not permanent AND
-        2. It has timing tracking AND
-        3. Its duration has completed
+        1. It's explicitly marked for expiry OR
+        2. It's not permanent AND
+        3. It has timing tracking AND
+        4. Its duration has completed
         
         Effects that handle their own expiry (like compound moves)
         will return False and handle expiry in their own logic.
         """
         if self._handles_own_expiry:
             return False
+            
+        # Marked for expiry
+        if self._marked_for_expiry:
+            return True
             
         # Not expired if permanent
         if self.permanent:
@@ -344,26 +405,159 @@ class BaseEffect:
         # Check if duration completed
         return self.timing.duration <= 0
     
-    def process_duration(self, round_number: int, turn_name: str) -> Tuple[int, bool]:
+    def process_duration(self, round_number: int, turn_name: str) -> Tuple[int, bool, bool]:
         """
-        Process standard duration tracking.
+        Improved duration calculation that accounts for application timing.
         
-        Calculates:
-        1. How many turns remain
-        2. Whether effect should expire
+        Returns:
+        - turns_remaining: How many turns remain after this one
+        - will_expire_next: Whether effect will expire next turn
+        - should_expire_now: Whether effect should expire now
         
-        Returns tuple of (turns_remaining, should_expire)
-        Helpful utility for subclasses to handle timing.
+        This method standardizes duration tracking across all effects.
         """
         if self.permanent or not self.timing:
-            return (None, False)
+            return (None, False, False)
             
-        rounds_completed = round_number - self.timing.start_round
-        if turn_name == self.timing.start_turn:
-            rounds_completed += 1
+        # Skip processing if not on the character's turn
+        if turn_name != self.timing.start_turn:
+            return (None, False, False)
             
-        turns_remaining = max(0, self.duration - rounds_completed)
-        return (turns_remaining, turns_remaining <= 0)
+        # Calculate elapsed turns
+        turns_elapsed = round_number - self.timing.start_round
+        
+        # Special case: For effects applied BEFORE character's turn but in the same round,
+        # they should expire at the end of their first turn
+        if (self._application_round == self.timing.start_round and 
+            self._application_turn != self.timing.start_turn and 
+            turns_elapsed >= 1):
+            return (0, False, True)  # Should expire now
+        
+        # Special case: For effects applied DURING character's turn,
+        # we don't count the first turn_end processing toward duration
+        first_turn_processing = (round_number == self._application_round and 
+                                turn_name == self._application_turn)
+                                
+        # Calculate remaining turns, adjust for first turn special case
+        turns_remaining = max(0, self.duration - turns_elapsed)
+        if not first_turn_processing:
+            turns_remaining -= 1
+        
+        # Determine expiry state
+        will_expire_next = turns_remaining == 0 
+        should_expire_now = turns_remaining < 0 or (turns_elapsed >= self.duration and not first_turn_processing)
+        
+        # Debug output for duration tracking (commented out)
+        # print(f"DURATION DEBUG: effect={self.name}, elapsed={turns_elapsed}, duration={self.duration}")
+        # print(f"DURATION DEBUG: first_turn={first_turn_processing}, remaining={turns_remaining}")
+        # print(f"DURATION DEBUG: will_expire={will_expire_next}, should_expire={should_expire_now}")
+        
+        return (turns_remaining, will_expire_next, should_expire_now)
+    
+    def get_turn_start_message(self, character, round_number: int) -> str:
+        """
+        Get standardized turn start message.
+        
+        This helper creates consistent status messages for effects
+        that don't need custom formatting.
+        """
+        # Skip for permanent effects
+        if self.permanent:
+            return self.format_effect_message(
+                f"{self.name} is active on {character.name}",
+                ["Permanent effect"]
+            )
+        
+        # Calculate remaining turns
+        turns_remaining = None
+        will_expire_after_turn = False
+        
+        if self.timing and self.timing.duration:
+            # Calculate based on rounds elapsed
+            turns_remaining, will_expire_next, should_expire_now = self.process_duration(round_number, character.name)
+            will_expire_after_turn = self._will_expire_next
+        
+        # Format the details
+        details = []
+        
+        # If the description exists, add it first
+        if self.description:
+            details.append(self.description)
+        
+        # Add duration info
+        if will_expire_after_turn:
+            details.append("Final turn - will expire after this turn")
+        elif turns_remaining is not None:
+            details.append(f"{turns_remaining+1} turn{'s' if turns_remaining != 0 else ''} remaining")
+        
+        # Return the formatted message
+        return self.format_effect_message(
+            f"{self.name} active",
+            details
+        )
+    
+    def get_turn_end_message(self, character, turns_remaining: int, will_expire_next: bool) -> str:
+        """
+        Get standardized turn end message.
+        
+        This helper creates consistent duration messages based on remaining turns.
+        """
+        # Only show continuing message - expiry is handled separately
+        if turns_remaining is not None and turns_remaining > 0:
+            # Still has duration left
+            s = "s" if turns_remaining != 1 else ""
+            return self.format_effect_message(
+                f"{self.name} continues on {character.name}",
+                [f"{turns_remaining} turn{s} remaining"]
+            )
+        
+        # Default case - generic continue message
+        return self.format_effect_message(
+            f"{self.name} continues on {character.name}"
+        )
+        
+    def handle_duration_tracking(self, character, round_number: int, turn_name: str) -> List[str]:
+        """
+        Standardized duration tracking for all effects.
+        Legacy helper maintained for compatibility with old effects.
+        New effects should use process_duration directly.
+        
+        Returns duration messages or empty list if not applicable.
+        """
+        # Skip for permanent effects or when not on character's turn 
+        if self.permanent or character.name != turn_name:
+            return []
+            
+        # Process duration tracking
+        turns_remaining, will_expire_next, should_expire_now = self.process_duration(round_number, turn_name)
+        messages = []
+        
+        # Handle expiry with standardized flag
+        if should_expire_now:
+            if not self._expiry_message_sent:
+                self._expiry_message_sent = True
+                self._marked_for_expiry = True
+                return [self.format_effect_message(
+                    f"{self.name} has worn off from {character.name}"
+                )]
+        
+        # Handle final turn warning
+        if will_expire_next:
+            self._will_expire_next = True
+            return [self.format_effect_message(
+                f"{self.name} continues",
+                [f"Final turn - will expire after this turn"]
+            )]
+            
+        # Regular duration update
+        if turns_remaining is not None and turns_remaining > 0:
+            s = "s" if turns_remaining != 1 else ""
+            messages.append(self.format_effect_message(
+                f"{self.name} continues",
+                [f"{turns_remaining} turn{s} remaining"]
+            ))
+            
+        return messages
 
     def format_effect_message(
         self,
@@ -388,7 +582,7 @@ class BaseEffect:
         
         # Get emoji based on category if not provided
         if not emoji:
-            emoji = {
+            emoji = self._custom_emoji or {
                 EffectCategory.COMBAT: "⚔️",
                 EffectCategory.RESOURCE: "💫",
                 EffectCategory.STATUS: "✨",
@@ -515,7 +709,7 @@ class BaseEffect:
                     
                 # Handle expiry in end phase for regular effects
                 if not self._handles_own_expiry:
-                    if self.timing and self.timing.should_expire(round_number, turn_name):
+                    if self._marked_for_expiry or (self.timing and self.timing.should_expire(round_number, turn_name)):
                         if msg := self.on_expire(character):
                             messages.append(msg)
                         character.effects.remove(self)
@@ -582,54 +776,61 @@ class CustomEffect(BaseEffect):
         elif self.description:
             details.append(self.description)
             
-        return [f"✨ {self.name}\n" + \
-                "\n".join(f"• {detail}" for detail in details)]
+        # Add remaining turns if duration is set
+        if self.duration and not self.permanent:
+            turns_remaining, will_expire_next, _ = self.process_duration(round_number, turn_name)
+            if will_expire_next:
+                details.append("Final turn - will expire after this turn")
+            elif turns_remaining is not None and turns_remaining >= 0:
+                plural = "s" if turns_remaining != 0 else ""
+                details.append(f"{turns_remaining+1} turn{plural} remaining")
+            
+        return [self.format_effect_message(
+            f"{self.name}",
+            details
+        )]
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """Track duration and show remaining time"""
+        # Only process on character's own turn, skip for permanent effects
         if character.name != turn_name or self.permanent:
             return []
             
-        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        # Use standardized duration tracking
+        turns_remaining, will_expire_next, should_expire_now = self.process_duration(round_number, turn_name)
         
-        if should_expire:
-            # Mark for cleanup
-            if hasattr(self, 'timing'):
-                self.timing.duration = 0
-            return [f"✨ `{self.name} will wear off from {character.name}`"]
+        # Handle expiry with standardized flag
+        if should_expire_now:
+            if not self._expiry_message_sent:
+                self._expiry_message_sent = True
+                self._marked_for_expiry = True
+                return [self.format_effect_message(
+                    f"{self.name} has worn off from {character.name}"
+                )]
+        
+        # Handle final turn warning
+        if will_expire_next:
+            self._will_expire_next = True
+            return [self.format_effect_message(
+                f"{self.name} continues",
+                [f"Final turn - will expire after this turn"]
+            )]
             
-        if turns_remaining > 0:
-            details = [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"]
-            if self.bullets:
-                details.extend(self.bullets)
-            elif self.description:
-                details.append(self.description)
+        # Regular duration update
+        if turns_remaining is not None and turns_remaining > 0:
+            s = "s" if turns_remaining != 1 else ""
+            return [self.format_effect_message(
+                f"{self.name} continues",
+                [f"{turns_remaining} turn{s} remaining"]
+            )]
                 
-            return [f"✨ `{self.name} continues`\n" + \
-                   "\n".join(f"• `{detail}`" for detail in details)]
         return []
-
-    def on_apply(self, character, round_number: int) -> str:
-        """Initial application of effect"""
-        self.initialize_timing(round_number, character.name)
-        
-        details = []
-        if self.bullets:
-            details.extend(self.bullets)
-        elif self.description:
-            details.append(self.description)
-            
-        if self.duration:
-            details.append(f"Duration: {self.duration} turns")
-        elif self.permanent:
-            details.append("Duration: Permanent")
-            
-        return f"✨ `{character.name} is affected by {self.name}`\n" + \
-               "\n".join(f"• `{detail}`" for detail in details)
 
     def on_expire(self, character) -> str:
         """Handle effect expiry"""
-        return f"✨ `{self.name} has worn off from {character.name}`"
+        return self.format_effect_message(
+            f"{self.name} has worn off from {character.name}"
+        )
 
     def get_status_text(self, character) -> str:
         """
@@ -678,6 +879,7 @@ class CustomEffect(BaseEffect):
             "bullets": self.bullets,
             "description": self.description
         })
+        return data
 
     @classmethod
     def from_dict(cls, data: dict) -> 'CustomEffect':
@@ -691,6 +893,11 @@ class CustomEffect(BaseEffect):
         )
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
+        effect._marked_for_expiry = data.get('_marked_for_expiry', False)
+        effect._will_expire_next = data.get('_will_expire_next', False)
+        effect._application_round = data.get('_application_round')
+        effect._application_turn = data.get('_application_turn')
+        effect._expiry_message_sent = data.get('_expiry_message_sent', False)
         return effect
 
     def can_affect(self, character) -> Tuple[bool, Optional[str]]:
@@ -886,15 +1093,25 @@ class EffectRegistry:
                 description=data.get('description')
             )
             
-            # Reconstruct timing information if it was saved
+            # Restore timing information if it was saved
             if timing_data := data.get('timing'):
                 print(f"  Restoring timing: {timing_data}")
                 effect.timing = EffectTiming(**timing_data)
+            
+            # Restore effect flags
+            effect._marked_for_expiry = data.get('_marked_for_expiry', False)
+            effect._will_expire_next = data.get('_will_expire_next', False)
+            effect._custom_emoji = data.get('_custom_emoji')
+            effect._application_round = data.get('_application_round')
+            effect._application_turn = data.get('_application_turn')
+            effect._expiry_message_sent = data.get('_expiry_message_sent', False)
                 
             # Restore any additional effect-specific attributes
             for key, value in data.items():
                 if key not in ['name', 'type', 'duration', 'permanent', 'category', 
-                            'description', 'timing', 'source_character', 'stacks']:
+                            'description', 'timing', 'source_character', 'stacks',
+                            '_marked_for_expiry', '_will_expire_next', '_custom_emoji',
+                            '_application_round', '_application_turn', '_expiry_message_sent']:
                     print(f"  Restoring attribute: {key} = {value}")
                     setattr(effect, key, value)
                     

@@ -242,10 +242,10 @@ class RollCommands(commands.Cog):
     @app_commands.command(name="debugroll")
     @app_commands.checks.has_permissions(administrator=True)  # Admin only
     async def debug_roll(self, interaction: discord.Interaction):
-        """Run test scenarios for roll command debugging"""
+        """Run test scenarios for roll command and roll modifier debugging"""
         await interaction.response.defer(ephemeral=True)
         
-        print("\n=== Starting Roll Debug Test Suite ===\n")
+        print("\n=== Starting Roll & Roll Modifier Debug Test Suite ===\n")
         
         # Get required test characters
         test_char = self.bot.game_state.get_character("test")
@@ -268,120 +268,245 @@ class RollCommands(commands.Cog):
                 print(f"  {stat}: {value} (mod: {(value-10)//2})")
             print(f"AC: {char.defense.current_ac}")
             
-        print("\n=== Starting Test Scenarios ===\n")
-
-        # Test scenarios with detailed comments
-        scenarios = [
-            # Basic rolls for regression testing
-            {"expr": "1d20", "char": "test"},  # Simple d20 roll
-            {"expr": "d20+5", "char": "test"},  # Basic roll with static modifier
-            {"expr": "2d6+str", "char": "test"},  # Basic roll with stat modifier
-            
-            # Advantage/Disadvantage testing
-            {"expr": "d20 advantage", "char": "test"},  # Basic advantage
-            {"expr": "d20 disadvantage", "char": "test"},  # Basic disadvantage
-            {"expr": "d20 advantage 2", "char": "test"},  # Advantage with count
-            {"expr": "d20 disadvantage 2", "char": "test"},  # Disadvantage with count
-            
-            # Basic multihit testing
-            {"expr": "3d20 multihit 2", "char": "test"},  # Basic multihit
-            {"expr": "4d6 multihit 3", "char": "test"},  # Different dice with multihit
-            
-            # Multihit + Advantage tests (our focus area)
-            {"expr": "2d20 multihit 2 advantage", "char": "test"},  # Basic multihit advantage
-            {"expr": "3d20 multihit 2 advantage", "char": "test"},  # More dice than advantage picks
-            {"expr": "4d20 multihit 2 advantage 2", "char": "test"},  # Multiple advantage selection
-            {"expr": "5d20 multihit 1 disadvantage", "char": "test"},  # Multihit disadvantage
-            {"expr": "6d20 multihit 3 disadvantage 3", "char": "test"},  # Multiple disadvantage selection
-            
-            # Complex combinations with stats
-            {"expr": "4d20 multihit 2+str advantage", "char": "test"},  # Multihit with stat mod and advantage
-            {"expr": "4d20 multihit 1+dex advantage 2", "char": "test"},  # Multihit with dex mod and multiple advantage
-            {"expr": "3d20 multihit 2+str disadvantage", "char": "test"},  # Multihit with stat mod and disadvantage
-            
-            # Attack variations
-            {"expr": "3d20 multihit 2 advantage", "char": "test", "target": "test2", "dmg": "1d6+str"},  # Attack with multihit advantage
-            {"expr": "4d20 multihit 1+dex advantage 2", "char": "test", "target": "test2", "dmg": "2d4 fire"},  # Complex attack
-            
-            # Edge cases
-            {"expr": "1d20 multihit 3 advantage", "char": "test"},  # Single die with multihit advantage
-            {"expr": "6d20 multihit 2 advantage 6", "char": "test"},  # Advantage count > dice count
-        ]
+        print("\n=== Starting Roll Modifier Tests ===\n")
         
-        print(f"Running {len(scenarios)} test scenarios...")
-
-        # Debug function for stat parsing
-        def debug_stat_parse(expr: str, char: Optional['Character']):
-            print(f"\nDebug Stat Parse for: {expr}")
-            if char:
-                print(f"Character stats:")
-                for stat in StatType:
-                    value = StatHelper.get_stat_value(char, stat)
-                    mod = StatHelper.get_stat_modifier(char, stat)
-                    print(f"  {stat.name}: {value} (mod: {mod})")
-                    
-                # Debug DiceRoller parsing
-                try:
-                    total, explanation = DiceRoller.roll_dice(expr, char)
-                    print(f"DiceRoller parsed result:")
-                    print(f"  Total: {total}")
-                    print(f"  Explanation: {explanation}")
-                except Exception as e:
-                    print(f"DiceRoller error: {e}")
-                    
-                # Debug Calculator parsing
-                try:
-                    result, formatted, _ = DiceCalculator.calculate_complex(expr, char)
-                    print(f"Calculator parsed result:")
-                    print(f"  Result: {result}")
-                    print(f"  Formatted: {formatted}")
-                except Exception as e:
-                    print(f"Calculator error: {e}")
-
-        for i, scenario in enumerate(scenarios, 1):
-            print(f"\n=== Scenario {i} ===")
-            
-            # Build command string
-            cmd = f"/roll expression: {scenario['expr']}"
-            if 'char' in scenario:
-                cmd += f" character: {scenario['char']}"
-            if 'target' in scenario:
-                cmd += f" targets: {scenario['target']}"
-            if 'dmg' in scenario:
-                cmd += f" damage: {scenario['dmg']}"
-            if 'aoe' in scenario:
-                cmd += f" aoe: {scenario['aoe']}"
-            if 'reason' in scenario:
-                cmd += f" reason: {scenario['reason']}"
-                
-            print(f"Command: {cmd}")
-            
-            # Run the roll
-            try:
-                if 'target' in scenario or 'dmg' in scenario:
-                    # Attack roll
-                    params = AttackParameters(
-                        roll_expression=scenario['expr'],
-                        character=self.bot.game_state.get_character(scenario.get('char')),
-                        targets=[self.bot.game_state.get_character(t.strip()) 
-                                for t in scenario.get('target', '').split(',') if t.strip()],
-                        damage_str=scenario.get('dmg'),
-                        aoe_mode=scenario.get('aoe', 'single'),
-                        reason=scenario.get('reason')
-                    )
-                    message, _ = await AttackCalculator.process_attack(params)
-                else:
-                    # Basic roll
-                    char = self.bot.game_state.get_character(scenario.get('char')) if 'char' in scenario else None
-                    _, message, _ = DiceCalculator.calculate_complex(scenario['expr'], char)
-                    
-                print(f"Result: {message}")
-                
-            except Exception as e:
-                print(f"Error: {str(e)}")
-                
-        print("\n=== Roll Debug Complete ===")
-        await interaction.followup.send("Roll debug complete - check console for results")
+        # --- PART 1: Basic Roll Modifier Tests ---
+        print("\n--- PART 1: Basic Roll Modifier Tests ---")
+        
+        # Initialize characters for testing
+        test_char.custom_parameters = {}  # Clear any existing modifiers
+        test_target.custom_parameters = {}
+        test_target2.custom_parameters = {}
+        
+        # Import necessary components for testing
+        from core.effects.rollmod import RollModifierEffect, RollModifierType
+        from utils.advanced_dice.calculator import DiceCalculator
+        
+        # Test 1: Basic Bonus
+        print("\nTest 1: Basic Bonus")
+        # Create and apply a +3 bonus effect
+        bonus_effect = RollModifierEffect(
+            name="Test Bonus +3",
+            modifier_type=RollModifierType.BONUS,
+            value=3
+        )
+        # Apply to test character's roll_modifiers list
+        if 'roll_modifiers' not in test_char.custom_parameters:
+            test_char.custom_parameters['roll_modifiers'] = []
+        test_char.custom_parameters['roll_modifiers'].append(bonus_effect)
+        
+        # Test basic roll with the effect
+        roll_expr = "d20+str"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Expression: {roll_expr}")
+        print(f"Result with +3 bonus: {formatted}")
+        print(f"Expected: Should add +3 to the roll total")
+        
+        # Test 2: Basic Advantage
+        print("\nTest 2: Basic Advantage")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Create and apply advantage effect
+        adv_effect = RollModifierEffect(
+            name="Test Advantage",
+            modifier_type=RollModifierType.ADVANTAGE,
+            value=1
+        )
+        test_char.custom_parameters['roll_modifiers'].append(adv_effect)
+        
+        # Test roll with advantage
+        roll_expr = "d20+dex"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Expression: {roll_expr}")
+        print(f"Result with advantage: {formatted}")
+        print(f"Expected: Should convert to advantage roll (2d20 take highest)")
+        
+        # Test 3: Next Roll Only
+        print("\nTest 3: Next Roll Only")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Create and apply next-roll-only effect
+        next_roll_effect = RollModifierEffect(
+            name="Test Next Roll +5",
+            modifier_type=RollModifierType.BONUS,
+            value=5,
+            next_roll_only=True
+        )
+        test_char.custom_parameters['roll_modifiers'].append(next_roll_effect)
+        
+        # First roll should use the bonus
+        roll_expr = "d20+str"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"First roll: {roll_expr}")
+        print(f"Result with +5 bonus: {formatted}")
+        
+        # Second roll should not have the bonus
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Second roll: {roll_expr}")
+        print(f"Result (bonus should be gone): {formatted}")
+        print(f"Expected: First roll should have +5, second should not")
+        
+        # --- PART 2: Stacking Tests ---
+        print("\n--- PART 2: Stacking Tests ---")
+        
+        # Test 4: Stacking Bonuses
+        print("\nTest 4: Stacking Bonuses")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Add multiple bonus effects
+        bonus1 = RollModifierEffect(
+            name="Bonus +2",
+            modifier_type=RollModifierType.BONUS,
+            value=2
+        )
+        bonus2 = RollModifierEffect(
+            name="Bonus +3",
+            modifier_type=RollModifierType.BONUS,
+            value=3
+        )
+        test_char.custom_parameters['roll_modifiers'] = [bonus1, bonus2]
+        
+        # Test roll with stacked bonuses
+        roll_expr = "d20+str"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Expression: {roll_expr}")
+        print(f"Result with stacked bonuses (+2 and +3): {formatted}")
+        print(f"Expected: Should add +5 total to the roll")
+        
+        # Test 5: Stacking Advantage
+        print("\nTest 5: Stacking Advantage")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Add multiple advantage effects
+        adv1 = RollModifierEffect(
+            name="Advantage 1",
+            modifier_type=RollModifierType.ADVANTAGE,
+            value=1
+        )
+        adv2 = RollModifierEffect(
+            name="Advantage 2",
+            modifier_type=RollModifierType.ADVANTAGE,
+            value=2
+        )
+        test_char.custom_parameters['roll_modifiers'] = [adv1, adv2]
+        
+        # Test roll with stacked advantage
+        roll_expr = "d20+str"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Expression: {roll_expr}")
+        print(f"Result with stacked advantage (1+2): {formatted}")
+        print(f"Expected: Should become 'advantage 3' (4d20 take highest)")
+        
+        # Test 6: Advantage + Disadvantage
+        print("\nTest 6: Advantage + Disadvantage")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Add contradicting effects
+        adv = RollModifierEffect(
+            name="Advantage 2",
+            modifier_type=RollModifierType.ADVANTAGE,
+            value=2
+        )
+        disadv = RollModifierEffect(
+            name="Disadvantage 1",
+            modifier_type=RollModifierType.DISADVANTAGE,
+            value=1
+        )
+        test_char.custom_parameters['roll_modifiers'] = [adv, disadv]
+        
+        # Test roll with contradicting effects
+        roll_expr = "d20+str"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Expression: {roll_expr}")
+        print(f"Result with advantage 2 vs disadvantage 1: {formatted}")
+        print(f"Expected: Should become 'advantage 1' (net positive)")
+        
+        # Test 7: Enhance existing advantage
+        print("\nTest 7: Enhance Existing Advantage")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Add advantage effect
+        adv = RollModifierEffect(
+            name="Advantage 1",
+            modifier_type=RollModifierType.ADVANTAGE,
+            value=1
+        )
+        test_char.custom_parameters['roll_modifiers'] = [adv]
+        
+        # Test roll with manual advantage + effect advantage
+        roll_expr = "d20+str advantage"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Expression: {roll_expr} (with advantage effect active)")
+        print(f"Result: {formatted}")
+        print(f"Expected: Should become 'advantage 2' (3d20 take highest)")
+        
+        # --- PART 3: Attack Roll Integration ---
+        print("\n--- PART 3: Attack Roll Integration ---")
+        
+        # Test 8: Roll Modifier with Attack Roll
+        print("\nTest 8: Roll Modifier with Attack Roll")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Add advantage effect
+        adv = RollModifierEffect(
+            name="Attack Advantage",
+            modifier_type=RollModifierType.ADVANTAGE,
+            value=1
+        )
+        test_char.custom_parameters['roll_modifiers'] = [adv]
+        
+        # Set up attack parameters
+        from utils.advanced_dice.attack_calculator import AttackParameters
+        params = AttackParameters(
+            roll_expression="d20+str",
+            character=test_char,
+            targets=[test_target],
+            damage_str="2d6 slashing",
+            reason="Roll Modifier Test"
+        )
+        
+        # Process the attack roll with advantage effect
+        from utils.advanced_dice.attack_calculator import AttackCalculator
+        message, _ = await AttackCalculator.process_attack(params)
+        print("Attack with advantage effect active:")
+        print(message)
+        print("Expected: Attack roll should have advantage applied")
+        
+        # Test 9: Next-Roll with Advantage
+        print("\nTest 9: Next-Roll with Multihit")
+        # Clear previous modifiers
+        test_char.custom_parameters['roll_modifiers'] = []
+        
+        # Add next-roll advantage
+        next_adv = RollModifierEffect(
+            name="Next Roll Advantage",
+            modifier_type=RollModifierType.ADVANTAGE,
+            value=1,
+            next_roll_only=True
+        )
+        test_char.custom_parameters['roll_modifiers'] = [next_adv]
+        
+        # Test multihit with advantage
+        roll_expr = "3d20 multihit str"
+        total, formatted, _ = DiceCalculator.calculate_complex(roll_expr, test_char)
+        print(f"Multihit roll with next-roll advantage: {formatted}")
+        print(f"Expected: Should apply advantage to multihit (complex interaction)")
+        
+        # Verify next-roll was consumed
+        if len(test_char.custom_parameters['roll_modifiers']) == 0:
+            print("Next-roll effect was properly consumed")
+        else:
+            print("ERROR: Next-roll effect was not consumed")
+        
+        print("\n=== Roll Modifier Debug Complete ===")
+        await interaction.followup.send("Roll modifier debug complete - check console for results")
 
     @app_commands.command(name="rollhelp")
     async def roll_help(self, interaction: discord.Interaction):

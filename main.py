@@ -191,7 +191,6 @@ bot = GameBot()
 # Setup error handler
 error_handler_setup(bot)
 
-
 @bot.hybrid_command(name='sync', description='Synchronize the bot with the predefined guilds.')
 @commands.is_owner()
 async def sync(ctx: commands.Context):
@@ -201,7 +200,7 @@ async def sync(ctx: commands.Context):
         await ctx.send(f"{len(global_commands)} global commands synced.")
 
 
-        # Sync guild-specific commands
+        # Sync guild-specific commands  
         for guild_id in GUILD_IDS:
             guild = discord.Object(id=guild_id)
             guild_commands = await bot.tree.sync(guild=guild)

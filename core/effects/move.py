@@ -27,6 +27,7 @@ import time
 import random
 
 from core.effects.base import BaseEffect, EffectCategory, EffectTiming
+from core.effects.rollmod import RollModifierType, RollModifierEffect
 from core.effects.condition import ConditionType
 from utils.advanced_dice.calculator import DiceCalculator
 from core.character import StatType
@@ -661,126 +662,162 @@ class MoveEffect(BaseEffect):
     - Automatic roll timing detection
     """
     def __init__(
-                self,
-                name: str,
-                description: str,
-                star_cost: int = 0,
-                mp_cost: int = 0,
-                hp_cost: int = 0,
-                cast_time: Optional[int] = None,
-                duration: Optional[int] = None,
-                cooldown: Optional[int] = None,
-                cast_description: Optional[str] = None,
-                attack_roll: Optional[str] = None,
-                damage: Optional[str] = None,
-                crit_range: int = 20,
-                conditions: Optional[List[ConditionType]] = None,
-                roll_timing: str = "active",
-                uses: Optional[int] = None,
-                targets: Optional[List['Character']] = None,
-                bonus_on_hit: Optional[Dict] = None,
-                aoe_mode: str = 'single',
-                enable_heat_tracking: bool = False,  # Legacy parameter
-                enable_hit_bonus: bool = False       # Legacy parameter
-            ):
-                # Create specialized state machine and processors
-                self.debug_mode = True
-                self.debug_id = f"MoveEffect-{int(time.time() * 1000) % 10000}"
-                self.debug_print(f"Initializing {name}")
-                
-                # Ensure cooldown is None if it's 0 or less
-                if cooldown is not None and cooldown <= 0:
-                    cooldown = None
-                    
-                # Create state machine with validated parameters
-                self.state_machine = MoveStateMachine(
-                    cast_time=cast_time if cast_time and cast_time > 0 else None,
-                    duration=duration if duration and duration > 0 else None,
-                    cooldown=cooldown,
-                    debug_mode=self.debug_mode
-                )
-                
-                self.combat = CombatProcessor(self.debug_mode)
-                self.saves = SavingThrowProcessor(self.debug_mode)
-                
-                # Set initial duration based on state machine
-                initial_duration = self.state_machine.get_remaining_turns()
-                if initial_duration <= 0:
-                    initial_duration = 1  # Minimum duration for INSTANT moves
-                
-                # Initialize base effect
-                super().__init__(
-                    name=name,
-                    duration=initial_duration,
-                    permanent=False,
-                    category=EffectCategory.STATUS,
-                    description=description,
-                    handles_own_expiry=True
-                )
-                
-                # Resource costs
-                self.star_cost = star_cost
-                self.mp_cost = mp_cost
-                self.hp_cost = hp_cost
-                
-                # Usage tracking
-                self.uses = uses
-                self.uses_remaining = uses
-                
-                # Combat parameters
-                self.attack_roll = attack_roll
-                self.damage = damage
-                self.crit_range = crit_range
-                
-                # Set conditions
-                self.conditions = conditions or []
-                
-                # Determine roll timing automatically if needed
-                self.determine_roll_timing(roll_timing)
-                
-                # Additional properties
-                self.cast_description = cast_description
-                self.targets = targets or []
-                
-                # Initialize bonus on hit
-                # Convert legacy heat tracking to bonus_on_hit if needed
-                if bonus_on_hit is None and (enable_heat_tracking or enable_hit_bonus):
-                    self.debug_print(f"Converting legacy heat tracking to bonus_on_hit")
+        self, 
+        name: str,
+        description: str,
+        star_cost: int = 0,
+        mp_cost: int = 0,
+        hp_cost: int = 0,
+        cast_time: Optional[int] = None,
+        duration: Optional[int] = None,
+        cooldown: Optional[int] = None,
+        cast_description: Optional[str] = None,
+        attack_roll: Optional[str] = None,
+        damage: Optional[str] = None,
+        crit_range: int = 20,
+        conditions: Optional[List[ConditionType]] = None,
+        roll_timing: str = "active",
+        uses: Optional[int] = None,
+        targets: Optional[List['Character']] = None,
+        bonus_on_hit: Optional[Dict] = None,
+        aoe_mode: str = 'single',
+        enable_heat_tracking: bool = False,  # Legacy parameter
+        enable_hit_bonus: bool = False,      # Legacy parameter
+        roll_modifier: Optional[Dict[str, Any]] = None  # Roll modifier to apply
+    ):
+        # Create specialized state machine and processors
+        self.debug_mode = True
+        self.debug_id = f"MoveEffect-{int(time.time() * 1000) % 10000}"
+        self.debug_print(f"Initializing {name}")
+        
+        # Ensure cooldown is None if it's 0 or less
+        if cooldown is not None and cooldown <= 0:
+            cooldown = None
+            
+        # Create state machine with validated parameters
+        self.state_machine = MoveStateMachine(
+            cast_time=cast_time if cast_time and cast_time > 0 else None,
+            duration=duration if duration and duration > 0 else None,
+            cooldown=cooldown,
+            debug_mode=self.debug_mode
+        )
+        
+        self.combat = CombatProcessor(self.debug_mode)
+        self.saves = SavingThrowProcessor(self.debug_mode)
+        
+        # Set initial duration based on state machine
+        initial_duration = self.state_machine.get_remaining_turns()
+        if initial_duration <= 0:
+            initial_duration = 1  # Minimum duration for INSTANT moves
+        
+        # Initialize base effect
+        super().__init__(
+            name=name,
+            duration=initial_duration,
+            permanent=False,
+            category=EffectCategory.STATUS,
+            description=description,
+            handles_own_expiry=True
+        )
+        
+        # Resource costs
+        self.star_cost = star_cost
+        self.mp_cost = mp_cost
+        self.hp_cost = hp_cost
+        
+        # Usage tracking
+        self.uses = uses
+        self.uses_remaining = uses
+        
+        # Combat parameters
+        self.attack_roll = attack_roll
+        self.damage = damage
+        self.crit_range = crit_range
+        
+        # Set conditions
+        self.conditions = conditions or []
+        
+        # Determine roll timing automatically if needed
+        self.determine_roll_timing(roll_timing)
+        
+        # Additional properties
+        self.cast_description = cast_description
+        self.targets = targets or []
+        
+        # Initialize bonus on hit
+        # Convert legacy heat tracking to bonus_on_hit if needed
+        if bonus_on_hit is None and (enable_heat_tracking or enable_hit_bonus):
+            self.debug_print(f"Converting legacy heat tracking to bonus_on_hit")
+            bonus_on_hit = {'stars': 1}
+        
+        # Ensure bonus_on_hit is properly initialized
+        self.debug_print(f"Original bonus_on_hit: {bonus_on_hit}")
+        
+        # Special handling for bonus_on_hit parameter
+        if bonus_on_hit is not None:
+            # Print the raw value for debugging
+            self.debug_print(f"Raw bonus_on_hit value: {bonus_on_hit}")
+            
+            # Handle string values (common in Discord commands)
+            if isinstance(bonus_on_hit, str):
+                try:
+                    import json
+                    # Try to parse as JSON
+                    parsed_bonus = json.loads(bonus_on_hit)
+                    self.debug_print(f"Parsed bonus_on_hit from JSON: {parsed_bonus}")
+                    bonus_on_hit = parsed_bonus
+                except:
+                    # If parsing fails, use a default value
+                    self.debug_print(f"Failed to parse bonus_on_hit from string, using default")
                     bonus_on_hit = {'stars': 1}
-                
-                # Ensure bonus_on_hit is properly initialized
-                self.debug_print(f"Original bonus_on_hit: {bonus_on_hit}")
-                
-                # Special handling for bonus_on_hit parameter
-                if bonus_on_hit is not None:
-                    # Print the raw value for debugging
-                    self.debug_print(f"Raw bonus_on_hit value: {bonus_on_hit}")
-                    
-                    # Handle string values (common in Discord commands)
-                    if isinstance(bonus_on_hit, str):
-                        try:
-                            import json
-                            # Try to parse as JSON
-                            parsed_bonus = json.loads(bonus_on_hit)
-                            self.debug_print(f"Parsed bonus_on_hit from JSON: {parsed_bonus}")
-                            bonus_on_hit = parsed_bonus
-                        except:
-                            # If parsing fails, use a default value
-                            self.debug_print(f"Failed to parse bonus_on_hit from string, using default")
-                            bonus_on_hit = {'stars': 1}
-                
-                self.debug_print(f"Final bonus_on_hit: {bonus_on_hit}")
-                self.bonus_on_hit = BonusOnHit.from_dict(bonus_on_hit)
-                
-                # Configure combat settings
-                self.combat.aoe_mode = aoe_mode
-                
-                # Tracking variables
-                self.marked_for_removal = False
-                self._internal_cache = {}  # Cache for async results
-                self.last_roll_round = None  # Track when we last rolled
-                
-                self.debug_print(f"Initialized with state {self.state}")
+        
+        self.debug_print(f"Final bonus_on_hit: {bonus_on_hit}")
+        self.bonus_on_hit = BonusOnHit.from_dict(bonus_on_hit)
+        
+        # Initialize roll modifier if provided
+        self.roll_modifier_data = roll_modifier
+        self.roll_modifier_effect = None
+
+        # Apply roll modifier if specified
+        if roll_modifier:
+            self.debug_print(f"Processing roll modifier data: {roll_modifier}")
+            
+            # Expected format: {"type": "bonus|advantage|disadvantage", "value": int, "next_roll": bool}
+            mod_type = roll_modifier.get("type", "bonus").lower()
+            mod_value = roll_modifier.get("value", 1)
+            next_roll_only = roll_modifier.get("next_roll", False)
+            mod_name = roll_modifier.get("name", f"{name} Roll Effect")
+            
+            # Convert string type to enum
+            modifier_type = None
+            for t in RollModifierType:
+                if t.value == mod_type:
+                    modifier_type = t
+                    break
+            
+            if not modifier_type:
+                modifier_type = RollModifierType.BONUS
+            
+            # Create the effect but don't add it yet - will be added during on_apply
+            self.roll_modifier_effect = RollModifierEffect(
+                name=mod_name,
+                modifier_type=modifier_type,
+                value=mod_value,
+                next_roll_only=next_roll_only,
+                duration=None if next_roll_only else duration,
+                permanent=False,
+                description=f"From {name}"
+            )
+        
+        # Configure combat settings
+        self.combat.aoe_mode = aoe_mode
+        
+        # Tracking variables
+        self.marked_for_removal = False
+        self._internal_cache = {}  # Cache for async results
+        self.last_roll_round = None  # Track when we last rolled
+        
+        self.debug_print(f"Initialized with state {self.state}")
 
     def debug_print(self, message):
         """Print debug messages if debug mode is enabled"""
@@ -1066,6 +1103,35 @@ class MoveEffect(BaseEffect):
                     detail_strings.append(detail)
                     
             formatted_message += "\n" + "\n".join(detail_strings)
+            
+        # Apply roll modifier effect if configured
+        if self.roll_modifier_effect:
+            # Ensure it gets proper timing setup
+            self.roll_modifier_effect.initialize_timing(round_number, character.name)
+            
+            # Add to character's custom parameters
+            if 'roll_modifiers' not in character.custom_parameters:
+                character.custom_parameters['roll_modifiers'] = []
+                
+            character.custom_parameters['roll_modifiers'].append(self.roll_modifier_effect)
+            
+            # Add info to message
+            if isinstance(self.roll_modifier_effect.modifier_type, RollModifierType):
+                if self.roll_modifier_effect.modifier_type == RollModifierType.BONUS:
+                    sign = "+" if self.roll_modifier_effect.value >= 0 else ""
+                    msg = f"{sign}{self.roll_modifier_effect.value} to rolls"
+                else:
+                    msg = f"{self.roll_modifier_effect.modifier_type.value}"
+                    if self.roll_modifier_effect.value > 1:
+                        msg += f" {self.roll_modifier_effect.value}"
+                    msg += " to rolls"
+                    
+                if self.roll_modifier_effect.next_roll_only:
+                    msg += " (next roll only)"
+                else:
+                    msg += f" for {self.roll_modifier_effect.duration} turns"
+                    
+                formatted_message += f"\n• `{msg}`"
             
         # Add attack messages directly to the response for instant attacks
         if attack_messages:

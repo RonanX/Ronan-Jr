@@ -13,6 +13,7 @@ IMPLEMENTATION MANDATES:
 """
 
 import random
+import logging
 from core.effects.base import BaseEffect, EffectCategory, EffectTiming
 from core.effects.status import ACEffect
 from datetime import datetime
@@ -21,168 +22,8 @@ from enum import Enum, auto
 from dataclasses import dataclass
 from utils.dice import DiceRoller
 
-class BurnEffect(BaseEffect):
-    """Applies burn damage at the start of each turn"""
-    def __init__(self, damage: str, duration: Optional[int] = None):
-        super().__init__(
-            name="Burn",
-            duration=duration,
-            permanent=False,
-            category=EffectCategory.COMBAT
-        )
-        self.damage = damage
-        self.last_damage = 0  # Track last damage dealt for messages
+logger = logging.getLogger(__name__)
         
-    def _roll_damage(self, character) -> int:
-        """Roll damage if dice notation, otherwise return static value"""
-        if isinstance(self.damage, str) and ('d' in self.damage.lower() or 'D' in self.damage):
-            total, _ = DiceRoller.roll_dice(self.damage, character)
-            return total
-        return int(self.damage)
-
-    def on_apply(self, character, round_number: int) -> str:
-        """Apply burn effect with formatted message"""
-        self.initialize_timing(round_number, character.name)
-        
-        # Format duration text
-        duration_text = ""
-        if self.duration:
-            turns = "turn" if self.duration == 1 else "turns"
-            duration_text = f"for {self.duration} {turns}"
-        elif self.permanent:
-            duration_text = "permanently"
-        
-        # Return formatted message using base class method
-        return self.format_effect_message(
-            f"{character.name} is burning",
-            [
-                f"Taking {self.damage} fire damage per turn",
-                duration_text
-            ],
-            emoji="🔥"
-        )
-
-    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Process burn damage at start of affected character's turn"""
-        if character.name != turn_name:
-            return []
-            
-        # Skip if rounds completed exceeds duration
-        rounds_completed = round_number - self.timing.start_round
-        if not self.permanent and self.duration and rounds_completed >= self.duration:
-            return []
-                
-        # Roll/calculate damage
-        damage = self._roll_damage(character)
-        self.last_damage = damage
-        
-        # Apply damage
-        old_hp = character.resources.current_hp
-        
-        # Handle temp HP first
-        absorbed = 0
-        if character.resources.current_temp_hp > 0:
-            absorbed = min(character.resources.current_temp_hp, damage)
-            character.resources.current_temp_hp -= absorbed
-            damage -= absorbed
-            
-        # Apply remaining damage to regular HP
-        character.resources.current_hp = max(0, character.resources.current_hp - damage)
-        
-        # Create message details
-        details = []
-        if absorbed > 0:
-            details.append(f"{absorbed} absorbed by temp HP")
-        details.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
-        
-        # Get duration info
-        if not self.permanent and self.duration:
-            turns_remaining = max(0, self.duration - rounds_completed)
-            if turns_remaining > 0:
-                plural = "s" if turns_remaining != 1 else ""
-                details.append(f"{turns_remaining} turn{plural} remaining")
-        
-        # Return formatted message
-        return [self.format_effect_message(
-            f"{character.name} takes {self.last_damage} fire damage from burn",
-            details,
-            emoji="🔥"
-        )]
-
-    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Handle duration tracking at end of turn"""
-        if character.name != turn_name or self.permanent:
-            return []
-            
-        # Calculate remaining turns
-        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
-        
-        # Format message based on remaining duration
-        if should_expire:
-            return [self.format_effect_message(
-                f"Burn effect will wear off from {character.name}",
-                emoji="🔥"
-            )]
-        elif turns_remaining > 0:
-            return [self.format_effect_message(
-                f"Burn effect continues",
-                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
-                emoji="🔥"
-            )]
-            
-        return []
-    
-    def on_expire(self, character) -> str:
-        """Clean message when effect expires"""
-        return self.format_effect_message(
-            f"Burn effect has worn off from {character.name}",
-            emoji="🔥"
-        )
-        
-    def get_status_text(self, character) -> str:
-        """Format status text for character sheet display"""
-        lines = [f"🔥 **{self.name}**"]
-        
-        # Add damage info
-        lines.append(f"• `Damage: {self.damage} per turn`")
-        if self.last_damage:
-            lines.append(f"• `Last damage: {self.last_damage}`")
-            
-        # Add duration info
-        if self.timing and self.timing.duration is not None:
-            if hasattr(character, 'round_number'):
-                rounds_passed = character.round_number - self.timing.start_round
-                remaining = max(0, self.timing.duration - rounds_passed)
-                lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
-        elif self.permanent:
-            lines.append("• `Permanent`")
-            
-        return "\n".join(lines)
-    
-    def to_dict(self) -> dict:
-        """Convert to dictionary for storage"""
-        data = super().to_dict()
-        data.update({
-            "damage": self.damage,
-            "last_damage": self.last_damage
-        })
-        return data
-
-    @classmethod
-    def from_dict(cls, data: dict) -> 'BurnEffect':
-        """Create from dictionary data"""
-        effect = cls(
-            damage=data.get('damage', "1d4"),
-            duration=data.get('duration')
-        )
-        effect.last_damage = data.get('last_damage', 0)
-        
-        # Restore timing if it exists
-        if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
-            
-        return effect
-    
 class SourceHeatWaveEffect(BaseEffect):
     """
     Phoenix Pursuit effect for the source character.
@@ -216,23 +57,45 @@ class SourceHeatWaveEffect(BaseEffect):
         self.initialize_timing(round_number, character.name)
         self.last_refresh = round_number
         
-        return f"🔥 `Phoenix energy builds within {character.name}`\n" + \
-               f"• `Heat Level: {self.stacks}/3`"
+        return self.format_effect_message(
+            f"Phoenix energy builds within {character.name}",
+            [f"Heat Level: {self.stacks}/3"],
+            emoji="🔥"
+        )
 
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
         """Show pursuit status at start of turn"""
         if character.name != turn_name:
             return []
 
+        details = []
+        
+        # Calculate remaining duration
+        if not self.permanent:
+            rounds_since_refresh = round_number - self.last_refresh
+            turns_remaining = max(0, self.duration - rounds_since_refresh)
+            if turns_remaining > 0:
+                details.append(f"{turns_remaining} turns remaining")
+
         if self.activated:
-            return [f"🔥 Phoenix Pursuit Active on {character.name}\n" + \
-                   "• Movement Speed +5 ft\n" + \
-                   "• DEX Score +4\n" + \
-                   "• Quick Attack MP -2\n" + \
-                   "• Ember Shift available"]
+            details.extend([
+                "Movement Speed +5 ft",
+                "DEX Score +4",
+                "Quick Attack MP -2",
+                "Ember Shift available"
+            ])
+            return [self.format_effect_message(
+                f"Phoenix Pursuit Active",
+                details,
+                emoji="🔥"
+            )]
         else:
-            return [f"🔥 Heat Attunement: {self.stacks}/3\n" + \
-                   "• Awaiting full attunement"]
+            details.append(f"Awaiting full attunement")
+            return [self.format_effect_message(
+                f"Heat Attunement: {self.stacks}/3",
+                details,
+                emoji="🔥"
+            )]
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """Handle duration tracking and state updates"""
@@ -241,43 +104,65 @@ class SourceHeatWaveEffect(BaseEffect):
 
         # Calculate remaining duration
         rounds_since_refresh = round_number - self.last_refresh
-        if turn_name == self.timing.start_turn:
-            rounds_since_refresh += 1
         turns_remaining = max(0, self.duration - rounds_since_refresh)
 
+        # Check if effect should expire
         if turns_remaining <= 0:
             # If we're not activated and duration expires, reduce stacks
             if not self.activated:
+                old_stacks = self.stacks
                 self.stacks = max(0, self.stacks - 1)
+                
+                # Reset duration if we still have stacks
                 if self.stacks > 0:
-                    # Reset duration if we still have stacks
                     self.last_refresh = round_number
                     self.timing.duration = 3
-                    return [f"🔥 `Heat Level reduced to {self.stacks}/3`"]
+                    return [self.format_effect_message(
+                        f"Heat Level reduced to {self.stacks}/3",
+                        [f"Heat dissipating"],
+                        emoji="🔥"
+                    )]
                 else:
                     # Mark for removal if no stacks
-                    self.timing.duration = 0
-                    return [f"🔥 `Heat dissipates from {character.name}`"]
+                    self._marked_for_expiry = True
+                    return [self.format_effect_message(
+                        f"Heat will dissipate from {character.name}",
+                        emoji="🔥"
+                    )]
             else:
                 # Mark activated state for removal
-                self.timing.duration = 0
-                return [f"🔥 `Phoenix Pursuit fades from {character.name}`"]
+                self._marked_for_expiry = True
+                return [self.format_effect_message(
+                    f"Phoenix Pursuit will fade from {character.name}",
+                    emoji="🔥"
+                )]
         
         # Still active - show status
         if self.activated:
-            return [f"🔥 `Phoenix Pursuit Active`\n" + \
-                   f"• `{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining`"]
+            return [self.format_effect_message(
+                f"Phoenix Pursuit Active",
+                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
+                emoji="🔥"
+            )]
         else:
-            return [f"🔥 `Heat Attunement: {self.stacks}/3`\n" + \
-                   f"• `{turns_remaining} turn{'s' if turns_remaining != 1 else ''} until reset`"]
+            return [self.format_effect_message(
+                f"Heat Attunement: {self.stacks}/3",
+                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} until reset"],
+                emoji="🔥"
+            )]
 
     def on_expire(self, character) -> str:
         """Clean up effect state"""
-        msg = "🔥 `"
         if self.activated:
-            msg += f"Phoenix Pursuit has worn off from {character.name}`"
+            msg = self.format_effect_message(
+                f"Phoenix Pursuit has worn off from {character.name}",
+                emoji="🔥"
+            )
         else:
-            msg += f"Heat has dissipated from {character.name}`"
+            msg = self.format_effect_message(
+                f"Heat has dissipated from {character.name}",
+                emoji="🔥"
+            )
             
         # Clear state
         self.stacks = 0
@@ -299,9 +184,14 @@ class SourceHeatWaveEffect(BaseEffect):
             self.timing.duration = 3
             self.last_refresh = self.timing.start_round
             
-            return f"🔥 `{character.name}'s Phoenix Pursuit activates!`\n" + \
-                   "• `Movement and combat abilities enhanced`\n" + \
-                   "• `Duration: 3 turns`"
+            return self.format_effect_message(
+                f"{character.name}'s Phoenix Pursuit activates!",
+                [
+                    "Movement and combat abilities enhanced",
+                    "Duration: 3 turns"
+                ],
+                emoji="🔥"
+            )
         
         elif was_activated:
             # Already activated - refresh duration
@@ -309,11 +199,17 @@ class SourceHeatWaveEffect(BaseEffect):
             self.timing.duration = 3
             self.last_refresh = self.timing.start_round
             
-            return f"🔥 `{character.name}'s Phoenix Pursuit refreshed`\n" + \
-                   "• `Duration reset to 3 turns`"
+            return self.format_effect_message(
+                f"{character.name}'s Phoenix Pursuit refreshed",
+                ["Duration reset to 3 turns"],
+                emoji="🔥"
+            )
         else:
-            return f"🔥 `{character.name}'s heat increases`\n" + \
-                   f"• `Heat Level: {self.stacks}/3`"
+            return self.format_effect_message(
+                f"{character.name}'s heat increases",
+                [f"Heat Level: {self.stacks}/3"],
+                emoji="🔥"
+            )
 
     def add_target(self, target_name: str) -> None:
         """Track a new target affected by the heat"""
@@ -351,10 +247,10 @@ class SourceHeatWaveEffect(BaseEffect):
                 if self.timing.start_round:
                     rounds_passed = character.round_number - self.last_refresh
                 remaining = max(0, self.duration - rounds_passed)
-                text.append(f"\n• `Duration: {remaining} turn{'s' if remaining != 1 else ''}`")
+                text.append(f"• `Duration: {remaining} turn{'s' if remaining != 1 else ''}`")
                 
             if self.targets:
-                text.append("\n**Active Targets:**")
+                text.append("**Active Targets:**")
                 for target in sorted(self.targets):
                     text.append(f"• `{target}`")
                 
@@ -384,6 +280,10 @@ class SourceHeatWaveEffect(BaseEffect):
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
             
+        # Restore marked for expiry flag if it exists
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
         return effect
 
 class TargetHeatWaveEffect(BaseEffect):
@@ -407,9 +307,16 @@ class TargetHeatWaveEffect(BaseEffect):
         character.modify_ac(self.effect_id, -self.stacks, priority=50)
         
         messages = []
+        details = [f"AC reduced by {self.stacks}"]
+        
+        # Add duration information
+        if self.duration:
+            details.append(f"Duration: {self.duration} turns")
+        
         messages.append(self.format_effect_message(
             f"Heat effect on {character.name} ({self.stacks}/3)",
-            [f"AC reduced by {self.stacks}"]
+            details,
+            emoji="🔥"
         ))
         
         # Apply fire vulnerability at 3 stacks
@@ -417,7 +324,8 @@ class TargetHeatWaveEffect(BaseEffect):
             character.defense.damage_vulnerabilities["fire"] = 50
             messages.append(self.format_effect_message(
                 "Maximum heat reached!",
-                ["Now vulnerable to fire damage"]
+                ["Now vulnerable to fire damage"],
+                emoji="🔥"
             ))
         
         return "\n".join(messages)
@@ -426,12 +334,21 @@ class TargetHeatWaveEffect(BaseEffect):
         """Show heat status at start of turn"""
         if character.name == turn_name:
             details = [f"AC reduced by {self.stacks}"]
+            
+            # Calculate remaining duration
+            turns_remaining = None
+            if not self.permanent and self.duration:
+                turns_remaining, _ = self.process_duration(round_number, turn_name)
+                if turns_remaining > 0:
+                    details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+            
             if self.stacks >= 3:
                 details.append("Vulnerable to fire")
                 
             return [self.format_effect_message(
                 f"Heat Level: {self.stacks}/3",
-                details
+                details,
+                emoji="🔥"
             )]
         return []
 
@@ -441,21 +358,51 @@ class TargetHeatWaveEffect(BaseEffect):
             turns_remaining, should_expire = self.process_duration(round_number, turn_name)
             messages = []
             
-            if turns_remaining and turns_remaining > 0:
+            # If effect should expire
+            if should_expire:
+                # Mark for expiry
+                self._marked_for_expiry = True
+                return [self.format_effect_message(
+                    f"Heat effect will wear off from {character.name}",
+                    [f"Current level: {self.stacks}/3"],
+                    emoji="🔥"
+                )]
+            
+            # Handle stack reduction first (separate from duration)
+            if self.stacks > 0:
+                # Every 2 turns, reduce heat by 1 stack
+                rounds_since_start = round_number - self.timing.start_round
+                if rounds_since_start > 0 and rounds_since_start % 2 == 0:
+                    old_stacks = self.stacks
+                    self.stacks = max(0, self.stacks - 1)
+                    
+                    # Update AC through manager
+                    character.modify_ac(self.effect_id, -self.stacks, priority=50)
+                    
+                    # Remove vulnerability if it was applied and stacks reduced below 3
+                    if old_stacks >= 3 and self.stacks < 3:
+                        if "fire" in character.defense.damage_vulnerabilities:
+                            del character.defense.damage_vulnerabilities["fire"]
+                    
+                    messages.append(self.format_effect_message(
+                        f"Heat reduced to {self.stacks}/3", 
+                        [f"AC penalty reduced to {self.stacks}"],
+                        emoji="🔥"
+                    ))
+            
+            # Show continue message if still active and has remaining duration
+            if turns_remaining > 0:
                 details = [
-                    f"{turns_remaining} turns remaining",
+                    f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining",
                     f"AC reduced by {self.stacks}"
                 ]
                 if self.stacks >= 3:
                     details.append("Vulnerable to fire")
+                
                 messages.append(self.format_effect_message(
                     f"Heat Level: {self.stacks}/3",
-                    details
-                ))
-            elif should_expire:
-                messages.append(self.format_effect_message(
-                    f"Heat effect wearing off from {character.name}",
-                    [f"Current level: {self.stacks}/3"]
+                    details,
+                    emoji="🔥"
                 ))
             
             return messages
@@ -471,13 +418,17 @@ class TargetHeatWaveEffect(BaseEffect):
             if self.stacks >= 3 and "fire" in character.defense.damage_vulnerabilities:
                 del character.defense.damage_vulnerabilities["fire"]
                 
-            return self.format_effect_message(f"Heat effect has worn off from {character.name}")
+            return self.format_effect_message(
+                f"Heat effect has worn off from {character.name}",
+                emoji="🔥"
+            )
             
         except Exception as e:
             logger.error(f"Error cleaning up Heat effect: {str(e)}")
             return self.format_effect_message(
                 f"Heat effect expired from {character.name}",
-                ["(Cleanup error occurred)"]
+                ["(Cleanup error occurred)"],
+                emoji="🔥"
             )
 
     def add_stacks(self, amount: int, character) -> str:
@@ -496,16 +447,55 @@ class TargetHeatWaveEffect(BaseEffect):
                 f"{character.name} burning up!",
                 [f"Heat Level {new_stacks}/3",
                  f"AC reduced by {new_stacks}",
-                 "Now vulnerable to fire"]
+                 "Now vulnerable to fire"],
+                emoji="🔥"
             ))
         else:
             messages.append(self.format_effect_message(
                 f"{character.name}'s heat increases",
                 [f"Level {new_stacks}/3",
-                 f"AC reduced by {new_stacks}"]
+                 f"AC reduced by {new_stacks}"],
+                emoji="🔥"
             ))
+        
+        # Reset duration when stacks are added
+        if hasattr(self, 'timing') and self.timing:
+            self.timing.duration = self.duration
             
         return "\n".join(messages)
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary for storage"""
+        data = super().to_dict()
+        data.update({
+            "stacks": self.stacks,
+            "source": self.source,
+            "effect_id": self.effect_id
+        })
+        return data
+        
+    @classmethod
+    def from_dict(cls, data: dict) -> 'TargetHeatWaveEffect':
+        """Create from dictionary data"""
+        effect = cls(
+            source_character=data.get('source', "Unknown"),
+            stacks=data.get('stacks', 0),
+            duration=data.get('duration', 3)
+        )
+        
+        # Restore timing if it exists
+        if timing_data := data.get('timing'):
+            effect.timing = EffectTiming(**timing_data)
+        
+        # Restore effect_id if it exists
+        if 'effect_id' in data:
+            effect.effect_id = data['effect_id']
+            
+        # Restore marked for expiry flag if it exists
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
+        return effect
     
 class DamageCategory(Enum):
     """Categories for grouping damage types"""
@@ -737,9 +727,8 @@ class ResistanceEffect(BaseEffect):
             
         # Add duration info if applicable
         if not self.permanent and self.duration:
-            rounds_completed = round_number - self.timing.start_round
-            turns_remaining = max(0, self.duration - rounds_completed)
-            if turns_remaining > 0:
+            turns_remaining, _ = self.process_duration(round_number, turn_name)
+            if turns_remaining is not None and turns_remaining > 0:
                 details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
         
         # Return formatted message
@@ -756,22 +745,24 @@ class ResistanceEffect(BaseEffect):
             
         # Calculate remaining turns
         turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        messages = []
         
         # Create expiry warning if needed
         if should_expire:
-            return [self.format_effect_message(
+            self._marked_for_expiry = True
+            messages.append(self.format_effect_message(
                 f"{self.damage_type} resistance will wear off from {character.name}",
                 emoji="🛡️"
-            )]
-        elif turns_remaining > 0:
+            ))
+        elif turns_remaining is not None and turns_remaining > 0:
             # Format with duration
-            return [self.format_effect_message(
+            messages.append(self.format_effect_message(
                 f"{self.damage_type} resistance continues",
                 [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
                 emoji="🛡️"
-            )]
+            ))
             
-        return []
+        return messages
 
     def on_expire(self, character) -> str:
         """Remove resistance and show remaining"""
@@ -847,6 +838,11 @@ class ResistanceEffect(BaseEffect):
         # Restore timing if it exists
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
+            
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
         return effect
 
 class VulnerabilityEffect(BaseEffect):
@@ -925,9 +921,8 @@ class VulnerabilityEffect(BaseEffect):
             
         # Add duration info if applicable
         if not self.permanent and self.duration:
-            rounds_completed = round_number - self.timing.start_round
-            turns_remaining = max(0, self.duration - rounds_completed)
-            if turns_remaining > 0:
+            turns_remaining, _ = self.process_duration(round_number, turn_name)
+            if turns_remaining is not None and turns_remaining > 0:
                 details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
         
         # Return formatted message
@@ -944,22 +939,24 @@ class VulnerabilityEffect(BaseEffect):
             
         # Calculate remaining turns
         turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        messages = []
         
         # Create expiry warning if needed
         if should_expire:
-            return [self.format_effect_message(
+            self._marked_for_expiry = True
+            messages.append(self.format_effect_message(
                 f"{self.damage_type} vulnerability will wear off from {character.name}",
                 emoji="⚠️"
-            )]
-        elif turns_remaining > 0:
+            ))
+        elif turns_remaining is not None and turns_remaining > 0:
             # Format with duration
-            return [self.format_effect_message(
+            messages.append(self.format_effect_message(
                 f"{self.damage_type} vulnerability continues",
                 [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
                 emoji="⚠️"
-            )]
+            ))
             
-        return []
+        return messages
 
     def on_expire(self, character) -> str:
         """Remove vulnerability and show remaining"""
@@ -1035,6 +1032,11 @@ class VulnerabilityEffect(BaseEffect):
         # Restore timing if it exists
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
+            
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
         return effect
     
 class WeaknessEffect(BaseEffect):
@@ -1058,6 +1060,105 @@ class WeaknessEffect(BaseEffect):
             (self.damage_type.get_category() == damage_type.get_category() and 
              damage_type != DamageType.TRUE)
         )
+        
+    def on_apply(self, character, round_number: int) -> str:
+        """Apply weakness with formatted message"""
+        self.initialize_timing(round_number, character.name)
+        
+        # Format details
+        details = [f"Damage reduced by {self.percentage}%"]
+        
+        # Add duration info
+        if self.duration:
+            details.append(f"Duration: {self.duration} turns")
+        elif self.permanent:
+            details.append("Duration: Permanent")
+            
+        return self.format_effect_message(
+            f"{character.name} weakened against {self.damage_type} damage",
+            details,
+            emoji="💔"
+        )
+        
+    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Show weakness at start of turn"""
+        if character.name != turn_name:
+            return []
+            
+        # Format details
+        details = [f"Damage reduced by {self.percentage}%"]
+        
+        # Add duration info
+        if not self.permanent and self.duration:
+            turns_remaining, _ = self.process_duration(round_number, turn_name)
+            if turns_remaining is not None and turns_remaining > 0:
+                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+                
+        return [self.format_effect_message(
+            f"Weakened against {self.damage_type} damage",
+            details,
+            emoji="💔"
+        )]
+        
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Track duration and show expiry warning"""
+        if character.name != turn_name or self.permanent:
+            return []
+            
+        # Calculate remaining turns
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        messages = []
+        
+        # Create expiry warning if needed
+        if should_expire:
+            self._marked_for_expiry = True
+            messages.append(self.format_effect_message(
+                f"{self.damage_type} weakness will wear off from {character.name}",
+                emoji="💔"
+            ))
+        elif turns_remaining is not None and turns_remaining > 0:
+            # Format with duration
+            messages.append(self.format_effect_message(
+                f"{self.damage_type} weakness continues",
+                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
+                emoji="💔"
+            ))
+            
+        return messages
+        
+    def on_expire(self, character) -> str:
+        """Clean message when effect expires"""
+        return self.format_effect_message(
+            f"{character.name} is no longer weak against {self.damage_type} damage",
+            emoji="💔"
+        )
+        
+    def to_dict(self) -> dict:
+        """Convert to dictionary for storage"""
+        data = super().to_dict()
+        data.update({
+            "damage_type": str(self.damage_type),
+            "percentage": self.percentage
+        })
+        return data
+        
+    @classmethod
+    def from_dict(cls, data: dict) -> 'WeaknessEffect':
+        """Create from dictionary data"""
+        effect = cls(
+            damage_type=data.get('damage_type', 'generic'),
+            percentage=data.get('percentage', 0),
+            duration=data.get('duration')
+        )
+        # Restore timing if it exists
+        if timing_data := data.get('timing'):
+            effect.timing = EffectTiming(**timing_data)
+            
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
+        return effect
 
 class TempHPEffect(BaseEffect):
     """Provides temporary hit points that absorb damage"""
@@ -1081,18 +1182,84 @@ class TempHPEffect(BaseEffect):
             character.resources.max_temp_hp = self.amount
             self.applied = True
             
+            details = []
             if self.permanent:
-                return f"💟 `{character.name} gained {self.amount} temporary HP shield`"
-            return f"💟 `{character.name} gained {self.amount} temporary HP shield for {self.duration} turns`"
+                details.append("Shield is permanent")
+            elif self.duration:
+                details.append(f"Duration: {self.duration} turns")
+                
+            return self.format_effect_message(
+                f"{character.name} gained {self.amount} temporary HP shield",
+                details,
+                emoji="💟"
+            )
         return ""
+    
+    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Show shield status at turn start"""
+        if character.name != turn_name:
+            return []
+            
+        # Only show if shield has meaningful amount
+        if self.remaining <= 0:
+            return []
+            
+        # Calculate shield percentage
+        percentage = round((self.remaining / self.amount) * 100)
+        
+        # Format details
+        details = [f"Shield integrity: {self.remaining}/{self.amount} ({percentage}%)"]
+        
+        # Add duration info if applicable
+        if not self.permanent and self.duration:
+            turns_remaining, _ = self.process_duration(round_number, turn_name)
+            if turns_remaining is not None and turns_remaining > 0:
+                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+                
+        return [self.format_effect_message(
+            f"Temporary HP Shield active",
+            details,
+            emoji="💟"
+        )]
     
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """Handle duration tracking"""
-        if character.name == turn_name and not self.permanent:
-            turns_remaining = self.process_duration(round_number, turn_name)[0]
-            if turns_remaining > 0:
-                return [f"Shield will last {turns_remaining} more turn{'s' if turns_remaining != 1 else ''}"]
-        return []
+        if character.name != turn_name or self.permanent:
+            return []
+            
+        # Skip if shield is depleted
+        if self.remaining <= 0:
+            self._marked_for_expiry = True
+            return [self.format_effect_message(
+                f"Shield depleted and will dissipate from {character.name}",
+                emoji="💟"
+            )]
+            
+        # Calculate remaining turns
+        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        messages = []
+        
+        # Create expiry warning if needed
+        if should_expire:
+            self._marked_for_expiry = True
+            messages.append(self.format_effect_message(
+                f"Temporary HP shield will wear off from {character.name}",
+                [f"Remaining shield: {self.remaining}/{self.amount}"],
+                emoji="💟"
+            ))
+        elif turns_remaining is not None and turns_remaining > 0:
+            # Format with duration and status
+            percentage = round((self.remaining / self.amount) * 100)
+            messages.append(self.format_effect_message(
+                f"Shield continues",
+                [
+                    f"Integrity: {self.remaining}/{self.amount} ({percentage}%)",
+                    f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"
+                ],
+                emoji="💟"
+            ))
+            
+        return messages
 
     def on_expire(self, character) -> str:
         """Clean up temp HP when effect expires"""
@@ -1100,7 +1267,10 @@ class TempHPEffect(BaseEffect):
             character.resources.current_temp_hp = 0
             character.resources.max_temp_hp = 0
             self.applied = False
-            return f"💟 `Temporary HP Shield has worn off from {character.name}`"
+            return self.format_effect_message(
+                f"Temporary HP Shield has worn off from {character.name}",
+                emoji="💟"
+            )
         return ""
 
     def absorb_damage(self, damage: int) -> Tuple[int, int]:
@@ -1159,6 +1329,15 @@ class TempHPEffect(BaseEffect):
         )
         effect.remaining = data.get('remaining', effect.amount)
         effect.applied = data.get('applied', False)
+        
+        # Restore timing if it exists
+        if timing_data := data.get('timing'):
+            effect.timing = EffectTiming(**timing_data)
+            
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
         return effect
     
 class ShockEffect(BaseEffect):
@@ -1228,8 +1407,8 @@ class ShockEffect(BaseEffect):
             
         # Skip if rounds completed exceeds duration
         if not self.permanent and self.duration:
-            rounds_completed = round_number - self.timing.start_round
-            if rounds_completed >= self.duration:
+            turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+            if turns_remaining <= 0 or should_expire:
                 return []
                 
         # Roll to see if shock triggers
@@ -1261,11 +1440,13 @@ class ShockEffect(BaseEffect):
             if absorbed > 0:
                 details.append(f"{absorbed} absorbed by temp HP")
             details.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
+            details.append("Character is stunned for this turn")
             
             # Mark as triggered
             self.triggered_this_turn = True
             
             # Apply skip effect for one turn
+            from core.effects.status import SkipEffect
             skip = SkipEffect(duration=1, reason="Shocked")
             skip_msg = skip.on_apply(character, round_number)
             
@@ -1292,7 +1473,7 @@ class ShockEffect(BaseEffect):
         
         # Get duration info
         if not self.permanent and self.duration:
-            turns_remaining = max(0, self.duration - (round_number - self.timing.start_round))
+            turns_remaining, _ = self.process_duration(round_number, turn_name)
             if turns_remaining > 0:
                 plural = "s" if turns_remaining != 1 else ""
                 details = [f"{turns_remaining} turn{plural} remaining"]
@@ -1317,14 +1498,18 @@ class ShockEffect(BaseEffect):
         
         # Format message based on remaining duration
         if should_expire:
+            self._marked_for_expiry = True
             return [self.format_effect_message(
                 f"Shock effect will wear off from {character.name}",
                 emoji="⚡"
             )]
-        elif turns_remaining > 0:
+        elif turns_remaining is not None and turns_remaining > 0:
             return [self.format_effect_message(
                 f"Shock effect continues",
-                [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"],
+                [
+                    f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining",
+                    f"Trigger chance: {self.chance}%"
+                ],
                 emoji="⚡"
             )]
             
@@ -1384,5 +1569,9 @@ class ShockEffect(BaseEffect):
         # Restore timing if it exists
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
+            
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
             
         return effect

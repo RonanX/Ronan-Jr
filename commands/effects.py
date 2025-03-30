@@ -24,11 +24,13 @@ from utils.formatting import MessageFormatter
 from core.effects.base import EffectRegistry, BaseEffect, EffectCategory, CustomEffect
 from core.effects.manager import apply_effect, remove_effect, get_effect_summary
 from core.effects.combat import (
-    BurnEffect, SourceHeatWaveEffect, TargetHeatWaveEffect, 
+    SourceHeatWaveEffect, TargetHeatWaveEffect, 
     TempHPEffect, ResistanceEffect, VulnerabilityEffect, WeaknessEffect, ShockEffect
 )
+from core.effects.burn_effect import BurnEffect
 from core.effects.resource import DrainEffect, RegenEffect
 from core.effects.status import ACEffect, FrostbiteEffect, SkipEffect
+from core.effects.rollmod import RollModifierEffect, RollModifierType
 from core.effects.condition import ConditionEffect, ConditionType, CONDITION_PROPERTIES
 from core.effects.move import MoveEffect
 
@@ -176,6 +178,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         reason: Optional[str] = None
     ):
         """Apply a resource drain effect that can optionally siphon to another character"""
+        # Log command usage
+        print(f"Command used: /effect drain character:{character} resource_type:{resource_type.value} amount:{amount} siphon_target:{siphon_target} duration:{duration} reason:{reason}")
+        
         try:
             await interaction.response.defer()
 
@@ -280,6 +285,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         duration: Optional[int] = None
     ):
         """Apply conditions to a character"""
+        # Log command usage
+        print(f"Command used: /effect condition target:{target} conditions:{conditions} duration:{duration}")
+        
         await interaction.response.defer()
         
         try:
@@ -425,6 +433,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         effect_name: str
     ):
         """Remove an effect from a character"""
+        # Log command usage
+        print(f"Command used: /effect remove character:{character} effect_name:{effect_name}")
+        
         await interaction.response.defer()
         
         char = self.bot.game_state.get_character(character)
@@ -632,8 +643,10 @@ class EffectCommands(commands.GroupCog, name="effect"):
         character: str
     ):
         """List all active effects on a character"""
+        # Log command usage
+        print(f"Command used: /effect list character:{character}")
+        
         await interaction.response.send_message("Fetching effects...", ephemeral=True)
-        print(f"Command used: /effect list {character}")
 
         char = self.bot.game_state.get_character(character)
         if not char:
@@ -669,6 +682,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         permanent: bool = False
     ):
         """Apply an AC modification effect"""
+        # Log command usage
+        print(f"Command used: /effect ac character:{character} amount:{amount} duration:{duration} permanent:{permanent}")
+        
         try:
             await interaction.response.defer()
 
@@ -714,6 +730,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         duration: Optional[int] = None
     ):
         """Add damage resistance to a character"""
+        # Log command usage
+        print(f"Command used: /effect resistance character:{character} damage_type:{damage_type} percentage:{percentage} duration:{duration}")
+        
         try:
             await interaction.response.defer()
 
@@ -752,6 +771,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         duration: Optional[int] = None
     ):
         """Add damage vulnerability to a character"""
+        # Log command usage
+        print(f"Command used: /effect vulnerability character:{character} damage_type:{damage_type} percentage:{percentage} duration:{duration}")
+        
         try:
             await interaction.response.defer()
 
@@ -790,6 +812,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         duration: Optional[int] = None
     ):
         """Add damage weakness to a character"""
+        # Log command usage
+        print(f"Command used: /effect weakness character:{character} damage_type:{damage_type} percentage:{percentage} duration:{duration}")
+        
         try:
             await interaction.response.defer()
 
@@ -826,6 +851,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         duration: Optional[int] = None
     ):
         """Apply a burning effect that deals damage each turn"""
+        # Log command usage
+        print(f"Command used: /effect burn character:{character} damage:{damage} duration:{duration}")
+        
         try:
             await interaction.response.defer()
 
@@ -843,7 +871,15 @@ class EffectCommands(commands.GroupCog, name="effect"):
             message = await apply_effect(char, effect, current_round)
 
             await self.bot.db.save_character(char)
-            await interaction.followup.send(message)
+            
+            # Use a simplified message format that acknowledges parameters
+            turns_text = f"for {duration} {'turn' if duration == 1 else 'turns'}" if duration else "permanently"
+            embed = discord.Embed(
+                description=f"🔥 `Applied {damage} fire damage per turn to {character} {turns_text}` 🔥",
+                color=discord.Color.red()
+            )
+            
+            await interaction.followup.send(embed=embed)
 
         except Exception as e:
             await handle_error(interaction, e)
@@ -860,6 +896,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         stacks: int = 1
     ):
         """Apply frostbite stacks to a character"""
+        # Log command usage
+        print(f"Command used: /effect frostbite character:{character} stacks:{stacks}")
+        
         try:
             await interaction.response.defer()
 
@@ -896,6 +935,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         permanent: bool = False
     ):
         """Apply a custom effect with optional bullet points"""
+        # Log command usage
+        print(f"Command used: /effect custom character:{character} name:{name} description:{description} duration:{duration} permanent:{permanent}")
+        
         try:
             await interaction.response.defer()
 
@@ -930,6 +972,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         stacks: int = 1
     ):
         """Apply Heat Wave effect between characters"""
+        # Log command usage
+        print(f"Command used: /effect heatwave source:{source} target:{target} stacks:{stacks}")
+        
         try:
             await interaction.response.defer()
 
@@ -1001,6 +1046,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         remove: bool = False
     ):
         """Add or remove natural damage resistance"""
+        # Log command usage
+        print(f"Command used: /effect natural_resistance character:{character} damage_type:{damage_type} percentage:{percentage} remove:{remove}")
+        
         try:
             await interaction.response.defer()
 
@@ -1046,6 +1094,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         remove: bool = False
     ):
         """Add or remove natural damage vulnerability"""
+        # Log command usage
+        print(f"Command used: /effect natural_vulnerability character:{character} damage_type:{damage_type} percentage:{percentage} remove:{remove}")
+        
         try:
             await interaction.response.defer()
 
@@ -1089,6 +1140,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         reason: Optional[str] = None
     ) -> None:
         """Apply skip effect to a character"""
+        # Log command usage
+        print(f"Command used: /effect skip character:{character} duration:{duration} reason:{reason}")
+        
         await interaction.response.defer()
         
         try:
@@ -1119,6 +1173,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
     @app_commands.checks.has_permissions(administrator=True)
     async def debug_effects(self, interaction: discord.Interaction):
         """Run test scenarios for effect system debugging"""
+        # Log command usage
+        print(f"Command used: /effect debugeffects")
+        
         try:
             await interaction.response.defer()
             
@@ -1373,6 +1430,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         permanent: bool = False
     ):
         """Apply a shock effect that has a chance to damage and stun"""
+        # Log command usage
+        print(f"Command used: /effect shock character:{character} damage:{damage} chance:{chance} duration:{duration} permanent:{permanent}")
+        
         try:
             await interaction.response.defer()
 
@@ -1420,6 +1480,9 @@ class EffectCommands(commands.GroupCog, name="effect"):
         permanent: bool = False
     ):
         """Apply a regeneration effect that restores resources over time"""
+        # Log command usage
+        print(f"Command used: /effect regen character:{character} resource_type:{resource_type.value} amount:{amount} duration:{duration} permanent:{permanent}")
+        
         try:
             await interaction.response.defer()
 
@@ -1441,6 +1504,88 @@ class EffectCommands(commands.GroupCog, name="effect"):
                 current_round = getattr(self.bot.initiative_tracker, 'round_number', 1)
 
             # Apply effect - with proper await
+            message = await apply_effect(char, effect, current_round)
+
+            await self.bot.db.save_character(char)
+            await interaction.followup.send(message)
+
+        except Exception as e:
+            await handle_error(interaction, e)
+
+    @app_commands.command(name="rollmod")
+    @app_commands.describe(
+        character="Character to modify rolls for",
+        modifier_type="Type of roll modifier to apply",
+        value="Bonus amount or advantage/disadvantage count",
+        duration="Duration in turns (optional)",
+        next_roll_only="Whether it only applies to next roll",
+        name="Custom name for the effect (optional)"
+    )
+    @app_commands.choices(
+        modifier_type=[
+            app_commands.Choice(name="Bonus/Penalty", value="bonus"),
+            app_commands.Choice(name="Advantage", value="advantage"),
+            app_commands.Choice(name="Disadvantage", value="disadvantage")
+        ]
+    )
+    async def rollmod(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        modifier_type: app_commands.Choice[str],
+        value: int = 1,
+        duration: Optional[int] = None,
+        next_roll_only: bool = False,
+        name: Optional[str] = None
+    ):
+        """Apply a roll modifier effect that changes dice rolls"""
+        # Log command usage
+        print(f"Command used: /effect rollmod character:{character} modifier_type:{modifier_type.value} value:{value} duration:{duration} next_roll_only:{next_roll_only} name:{name}")
+        
+        try:
+            await interaction.response.defer()
+
+            char = self.bot.game_state.get_character(character)
+            if not char:
+                await interaction.followup.send(f"❌ `Character {character} not found` ❌")
+                return
+
+            # Convert string type to enum
+            mod_type = None
+            for t in RollModifierType:
+                if t.value == modifier_type.value:
+                    mod_type = t
+                    break
+            
+            if not mod_type:
+                await interaction.followup.send(f"❌ `Invalid modifier type: {modifier_type.value}` ❌")
+                return
+
+            # Generate default name if not provided
+            if not name:
+                if mod_type == RollModifierType.BONUS:
+                    prefix = "Bonus" if value >= 0 else "Penalty"
+                    name = f"Roll {prefix} {'+' if value >= 0 else ''}{value}"
+                else:
+                    name = f"Roll {mod_type.value.title()}"
+                    if value > 1:
+                        name += f" {value}"
+
+            # Create roll modifier effect
+            effect = RollModifierEffect(
+                name=name,
+                modifier_type=mod_type,
+                value=value,
+                duration=duration,
+                next_roll_only=next_roll_only
+            )
+
+            # Get current round if in combat
+            current_round = 1
+            if hasattr(self.bot, 'initiative_tracker'):
+                current_round = getattr(self.bot.initiative_tracker, 'round_number', 1)
+
+            # Apply effect
             message = await apply_effect(char, effect, current_round)
 
             await self.bot.db.save_character(char)

@@ -121,7 +121,7 @@ class MoveData:
       - Defense: Healing, shields, protective effects, buffs
       - Utility: Movement, positioning, resource management, non-combat effects
     """
-    CURRENT_VERSION = 8
+    CURRENT_VERSION = 9
 
     # Version 1 parameters (base)
     name: str
@@ -161,6 +161,9 @@ class MoveData:
     aoe_mode: Optional[str] = None  # How AoE is handled: "single" or "multi"
     custom_parameters: Dict[str, Any] = field(default_factory=dict)  # For extensibility
 
+    # Version 9 parameters
+    roll_modifier: Optional[Dict[str, Any]] = None  # Roll modifier effect to apply
+
     def to_dict(self) -> dict:
         """Convert to dictionary for database storage"""
         data = {
@@ -196,6 +199,9 @@ class MoveData:
             # Version 8+
             "bonus_on_hit": self.bonus_on_hit,
             "aoe_mode": self.aoe_mode,
+
+            # Version 9+
+            "roll_modifier": self.roll_modifier,
             
             "custom_parameters": self.custom_parameters
         }
@@ -290,6 +296,10 @@ class MoveData:
                 move.bonus_on_hit = data.get("bonus_on_hit")
             move.aoe_mode = data.get("aoe_mode", "single")
         
+        # Version 9+ parameters
+        if version >= 9:
+            move.roll_modifier = data.get("roll_modifier")
+
         # Handle advanced_json if present (usually from test harness or Discord commands)
         advanced_json = data.get("advanced_json")
         if advanced_json:
@@ -300,6 +310,10 @@ class MoveData:
             # Handle aoe_mode
             if isinstance(advanced_json, dict) and "aoe_mode" in advanced_json:
                 move.aoe_mode = advanced_json["aoe_mode"]
+            
+            # Handle roll_modifier
+            if isinstance(advanced_json, dict) and "roll_modifier" in advanced_json:
+                move.roll_modifier = advanced_json["roll_modifier"]
         
         # Store any unknown parameters for future versions
         known_keys = {
@@ -307,7 +321,7 @@ class MoveData:
             "cast_time", "duration", "cast_description", "uses", "uses_remaining",
             "cooldown", "last_used_round", "attack_roll", "damage", "crit_range",
             "targets", "conditions", "roll_timing", "category", 
-            "bonus_on_hit", "aoe_mode", "custom_parameters", "advanced_json",
+            "bonus_on_hit", "aoe_mode", "custom_parameters", "advanced_json", "roll_modifier",
             # Include deprecated keys to prevent them from going to custom_parameters
             "save_type", "save_dc", "half_on_save", "enable_heat_tracking", 
             "target_selection", "enable_hit_bonus"
@@ -352,6 +366,15 @@ class MoveData:
         # Validate damage includes type if present
         if self.damage and " " not in self.damage:
             return False, "Damage should include damage type (e.g., '1d6 slashing')"
+        
+        # Validate roll_modifier format if present
+        if self.roll_modifier:
+            if not isinstance(self.roll_modifier, dict):
+                return False, "Roll modifier must be a dictionary"
+            if "type" not in self.roll_modifier:
+                return False, "Roll modifier must include 'type' field"
+            if self.roll_modifier["type"] not in ["bonus", "advantage", "disadvantage"]:
+                return False, "Roll modifier type must be 'bonus', 'advantage', or 'disadvantage'"
         
         return True, None
 

@@ -73,6 +73,12 @@ class ACManager:
             sign = '+' if amount > 0 else ''
             info.append(f"{effect_id}: {sign}{amount} (Priority: {priority})")
         return info
+        
+    def reset(self) -> int:
+        """Clear all modifiers and return base AC"""
+        self.modifiers.clear()
+        self.current_ac = self.base_ac
+        return self.current_ac
 
 class ACEffect(BaseEffect):
     """Handles AC modifications with stacking"""
@@ -108,7 +114,8 @@ class ACEffect(BaseEffect):
         
         return self.format_effect_message(
             f"{character.name}'s AC modified by {sign}{self.amount}",
-            details
+            details,
+            emoji="🛡️"
         )
 
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
@@ -116,11 +123,25 @@ class ACEffect(BaseEffect):
         if character.name != turn_name:
             return []
             
+        # Calculate turns remaining
+        turns_remaining = None
+        if not self.permanent and self.timing and self.timing.duration is not None:
+            turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+            if turns_remaining <= 0:
+                return []  # Skip display if effect is about to expire
+            
         sign = '+' if self.amount > 0 else ''
-        # Let effect formatter handle backticks
+        details = [f"Current AC: {character.defense.current_ac}"]
+        
+        # Add duration info if applicable
+        if turns_remaining is not None and turns_remaining > 0:
+            details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+        
+        # Return formatted message
         return [self.format_effect_message(
             f"AC Modified: {sign}{self.amount}",
-            [f"Current AC: {character.defense.current_ac}"]
+            details,
+            emoji="🛡️"
         )]
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
@@ -128,37 +149,44 @@ class ACEffect(BaseEffect):
         if character.name != turn_name or self.permanent:
             return []
             
-        # Get duration status
+        # Calculate remaining turns
         turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        messages = []
         
+        # Create expiry warning if needed
         if should_expire:
-            # Mark for removal at end of turn
-            if hasattr(self, 'timing'):
-                self.timing.duration = 0
-                # Let effect formatter handle backticks
-                return [self.format_effect_message(
-                    f"AC modification will wear off",
-                    [f"Current AC: {character.defense.current_ac}"]
-                )]
-        elif turns_remaining > 0:
-            # Show remaining duration
+            self._marked_for_expiry = True
             sign = '+' if self.amount > 0 else ''
-            # Let effect formatter handle backticks
-            return [self.format_effect_message(
-                f"AC modification continues", 
-                [f"{turns_remaining} {'turn' if turns_remaining == 1 else 'turns'} remaining"]
-            )]
+            messages.append(self.format_effect_message(
+                f"AC modification ({sign}{self.amount}) will wear off from {character.name}",
+                emoji="🛡️"
+            ))
+        elif turns_remaining is not None and turns_remaining > 0:
+            # Format with duration
+            sign = '+' if self.amount > 0 else ''
+            messages.append(self.format_effect_message(
+                f"AC modification continues",
+                [
+                    f"Amount: {sign}{self.amount}",
+                    f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"
+                ],
+                emoji="🛡️"
+            ))
             
-        return []
+        return messages
 
     def on_expire(self, character) -> str:
         """Clean up AC modification"""
         character.remove_ac_modifier(self.effect_id)
         sign = '+' if self.amount > 0 else ''
-        # Let effect formatter handle backticks
+        
         return self.format_effect_message(
             f"AC modification expired from {character.name}",
-            [f"Was {sign}{self.amount}"]
+            [
+                f"Was {sign}{self.amount}",
+                f"Current AC: {character.defense.current_ac}"
+            ],
+            emoji="🛡️"
         )
 
     def to_dict(self) -> dict:
@@ -181,8 +209,13 @@ class ACEffect(BaseEffect):
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
         effect.effect_id = data.get('effect_id', f"ac_mod_{id(effect)}")
+        
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
         return effect
-
+    
 class FrostbiteEffect(BaseEffect):
     """
     Frostbite effect that stacks up to 3 times:
@@ -201,6 +234,7 @@ class FrostbiteEffect(BaseEffect):
         self.last_stack_reduction = 0  # Track when stacks were last reduced
         self.effect_id = f"frostbite_ac_{id(self)}"  # Unique ID for AC manager
         self.skip_applied = False  # Track if we've applied a skip effect
+        self.turns_active = 0  # Track how many turns this effect has been active
 
     def on_apply(self, character, round_number: int) -> str:
         """Apply initial frostbite effect"""
@@ -208,11 +242,16 @@ class FrostbiteEffect(BaseEffect):
         
         # Apply penalties based on stacks
         messages = []
+        details = [
+            f"Movement: -{self.stacks * 5} ft",
+            f"STR/DEX Saves: -{self.stacks}",
+            f"Duration: {self.duration} turns"
+        ]
+        
         messages.append(self.format_effect_message(
             f"{character.name} is afflicted by Frostbite {self.stacks}/3",
-            [f"Movement: -{self.stacks * 5} ft",
-             f"STR/DEX Saves: -{self.stacks}",
-             f"Duration: {self.duration} turns"]
+            details,
+            emoji="❄️"
         ))
         
         # Check for freeze threshold
@@ -230,7 +269,8 @@ class FrostbiteEffect(BaseEffect):
                 f"{character.name} is frozen solid!",
                 ["Cannot take actions",
                  "AC reduced to 5",
-                 "Attacks have advantage"]
+                 "Attacks have advantage"],
+                emoji="❄️"
             ))
             
         return "\n".join(messages)
@@ -241,21 +281,37 @@ class FrostbiteEffect(BaseEffect):
             return []
 
         messages = []
+        details = []
+        
+        # Add duration info based on tracking, not calculated
+        remaining_turns = max(0, self.duration - self.turns_active)
+        if remaining_turns > 0:
+            details.append(f"{remaining_turns} turn{'s' if remaining_turns != 1 else ''} remaining")
         
         # Show frozen state if applicable
         if self.stacks >= 3:
+            details.extend([
+                "Cannot take actions or reactions",
+                "AC reduced to 5",
+                "Automatically fails STR/DEX saves",
+                "Vulnerable to critical hits"
+            ])
+            
             messages.append(self.format_effect_message(
                 "Frozen Solid",
-                ["Cannot take actions or reactions",
-                 "AC reduced to 5",
-                 "Automatically fails STR/DEX saves",
-                 "Vulnerable to critical hits"]
+                details,
+                emoji="❄️"
             ))
         else:
+            details.extend([
+                f"Movement: -{self.stacks * 5} ft",
+                f"STR/DEX Saves: -{self.stacks}"
+            ])
+            
             messages.append(self.format_effect_message(
                 f"Frostbite Penalties ({self.stacks}/3)",
-                [f"Movement: -{self.stacks * 5} ft",
-                 f"STR/DEX Saves: -{self.stacks}"]
+                details,
+                emoji="❄️"
             ))
             
         return messages
@@ -267,16 +323,21 @@ class FrostbiteEffect(BaseEffect):
             
         messages = []
         
-        # Process duration tracking first
-        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        # Increment our active turns counter
+        self.turns_active += 1
         
-        # If effect should expire
-        if should_expire:
-            self.stacks = 0  # Clear stacks to ensure cleanup
-            if self.effect_id in getattr(character.ac_manager, 'modifiers', {}):
+        # Check if we've reached our duration limit
+        if self.turns_active >= self.duration:
+            # Mark for expiry
+            self._marked_for_expiry = True
+            
+            # Clean up AC effects if applied
+            if self.stacks >= 3 and self.effect_id in getattr(character.ac_manager, 'modifiers', {}):
                 character.remove_ac_modifier(self.effect_id)
+            
             messages.append(self.format_effect_message(
-                f"Frostbite will wear off from {character.name}"
+                f"Frostbite will wear off from {character.name}",
+                emoji="❄️"
             ))
             return messages
             
@@ -287,7 +348,9 @@ class FrostbiteEffect(BaseEffect):
             if self.effect_id in getattr(character.ac_manager, 'modifiers', {}):
                 character.remove_ac_modifier(self.effect_id)
             messages.append(self.format_effect_message(
-                f"Frostbite reduced to {self.stacks}/3 stacks"
+                f"Frostbite reduced to {self.stacks}/3 stacks",
+                [f"Character unfreezes but remains affected"],
+                emoji="❄️"
             ))
         # Otherwise handle normal stack reduction (every turn)
         elif self.stacks > 0 and round_number > self.last_stack_reduction:
@@ -296,19 +359,27 @@ class FrostbiteEffect(BaseEffect):
             self.last_stack_reduction = round_number
             
             if self.stacks <= 0:
+                # Mark for expiry if no stacks left
+                self._marked_for_expiry = True
                 messages.append(self.format_effect_message(
-                    f"Frostbite will wear off from {character.name}"
+                    f"Frostbite will wear off from {character.name}",
+                    emoji="❄️"
                 ))
             else:
                 messages.append(self.format_effect_message(
-                    f"Frostbite reduced to {self.stacks}/3 stacks"
+                    f"Frostbite reduced to {self.stacks}/3 stacks",
+                    [f"Movement: -{self.stacks * 5} ft",
+                     f"STR/DEX Saves: -{self.stacks}"],
+                    emoji="❄️"
                 ))
                 
-        # Show remaining turns if any
-        if turns_remaining > 0 and self.stacks > 0:
+        # Show remaining turns if any stacks remain and not marked for removal
+        remaining_turns = max(0, self.duration - self.turns_active)
+        if remaining_turns > 0 and self.stacks > 0 and not self._marked_for_expiry:
             messages.append(self.format_effect_message(
                 f"Frostbite continues",
-                [f"{turns_remaining} {'turn' if turns_remaining == 1 else 'turns'} remaining"]
+                [f"{remaining_turns} {'turn' if remaining_turns == 1 else 'turns'} remaining"],
+                emoji="❄️"
             ))
             
         return messages
@@ -338,8 +409,14 @@ class FrostbiteEffect(BaseEffect):
         
         # Create appropriate message based on severity
         if self.stacks >= 3:
-            return self.format_effect_message(f"{character.name} has thawed out")
-        return self.format_effect_message(f"Frostbite has worn off from {character.name}")
+            return self.format_effect_message(
+                f"{character.name} has thawed out",
+                emoji="❄️"
+            )
+        return self.format_effect_message(
+            f"Frostbite has worn off from {character.name}",
+            emoji="❄️"
+        )
 
     def add_stacks(self, amount: int, character) -> str:
         """Add frostbite stacks"""
@@ -363,18 +440,23 @@ class FrostbiteEffect(BaseEffect):
                 f"{character.name} is frozen solid!",
                 ["Movement halted",
                  "AC reduced to 5",
-                 "Cannot take actions"]
+                 "Cannot take actions"],
+                emoji="❄️"
             ))
         else:
             messages.append(self.format_effect_message(
                 f"Frostbite increased to {self.stacks}/3 on {character.name}",
                 [f"Movement: -{self.stacks * 5} ft",
-                 f"STR/DEX Saves: -{self.stacks}"]
+                 f"STR/DEX Saves: -{self.stacks}"],
+                emoji="❄️"
             ))
             
         # Reset duration when stacks are added
         if hasattr(self, 'timing'):
             self.timing.duration = self.duration
+            
+        # Reset turns active counter when adding stacks
+        self.turns_active = 0
             
         return "\n".join(messages)
         
@@ -385,7 +467,8 @@ class FrostbiteEffect(BaseEffect):
             'stacks': self.stacks,
             'effect_id': self.effect_id,
             'last_stack_reduction': self.last_stack_reduction,
-            'skip_applied': self.skip_applied
+            'skip_applied': self.skip_applied,
+            'turns_active': self.turns_active
         })
         return data
 
@@ -401,6 +484,12 @@ class FrostbiteEffect(BaseEffect):
         effect.effect_id = data.get('effect_id', f"frostbite_ac_{id(effect)}")
         effect.last_stack_reduction = data.get('last_stack_reduction', 0)
         effect.skip_applied = data.get('skip_applied', False)
+        effect.turns_active = data.get('turns_active', 0)
+        
+        # Restore marked for expiry flag if it exists
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
         return effect
     
 class SkipEffect(BaseEffect):
@@ -414,51 +503,116 @@ class SkipEffect(BaseEffect):
         )
         self.reason = reason
         self.turns_remaining = duration
+        self.skips_turn = True  # Special flag checked by initiative.py
+        self.turns_skipped = 0  # Count how many turns we've skipped
 
     def on_apply(self, character, round_number: int) -> str:
+        """Initialize timing and provide feedback"""
         self.initialize_timing(round_number, character.name)
+        
+        # Format base message
         msg = f"⏭️ `{character.name}'s turns will be skipped"
         if self.duration > 1:
             msg += f" for {self.duration} rounds"
         msg += "`"
+        
+        # Add reason if provided
         if self.reason:
-            msg += f"\n╰─ `{self.reason}`"
+            msg += f"\n• `{self.reason}`"
+            
         return msg
 
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
         """Process skip at start of affected character's turn"""
         if character.name == turn_name:
-            messages = [f"⏭️ `{character.name}'s turn is skipped!`"]
-            if self.reason:
-                messages.append(f"╰─ `{self.reason}`")
-            return messages
+            # Only skip if we haven't hit our duration yet
+            if self.turns_skipped < self.duration:
+                self.turns_skipped += 1
+                
+                # For the final turn, add a different message
+                if self.turns_skipped == self.duration:
+                    details = ["Last skipped turn"]
+                    if self.reason:
+                        details.append(self.reason)
+                    return [self.format_effect_message(
+                        f"{character.name}'s turn is skipped!",
+                        details,
+                        emoji="⏭️"
+                    )]
+                else:
+                    # For standard turns, show remaining skips
+                    remaining = self.duration - self.turns_skipped
+                    details = [f"{remaining} {'skips' if remaining > 1 else 'skip'} remaining"]
+                    if self.reason:
+                        details.append(self.reason)
+                    return [self.format_effect_message(
+                        f"{character.name}'s turn is skipped!",
+                        details,
+                        emoji="⏭️"
+                    )]
+            else:
+                # If we've skipped enough turns, no longer skip
+                self.skips_turn = False
+                
+            return []
         return []
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
-        """Update duration tracking"""
+        """Update duration tracking and mark for removal if needed"""
         if character.name != turn_name:
             return []
+        
+        # If we've skipped all our turns, mark for removal
+        if self.turns_skipped >= self.duration:
+            self._marked_for_expiry = True
+            return [self.format_effect_message(
+                f"Skip effect will wear off from {character.name}",
+                emoji="⏭️"
+            )]
             
-        messages = []
-        rounds_completed = round_number - self.timing.start_round
-        if turn_name == self.timing.start_turn:
-            rounds_completed += 1
-            
-        self.turns_remaining = max(0, self.duration - rounds_completed)
-            
-        if self.turns_remaining <= 0:
-            messages.append(f"⏭️ `Skip effect will wear off from {character.name}`")
-            self._mark_for_removal()
-            
-        return messages
+        return []
 
-    def _mark_for_removal(self):
-        """Mark effect for removal at end of turn"""
-        if hasattr(self, 'timing'):
-            self.timing.duration = 0
+    def on_expire(self, character) -> str:
+        """Clean up message when effect expires"""
+        return self.format_effect_message(
+            f"Skip effect has worn off from {character.name}",
+            emoji="⏭️"
+        )
 
     def get_status_text(self, character) -> str:
-        base = f"⏭️ **Turn Skip** ({self.turns_remaining} {'turn' if self.turns_remaining == 1 else 'turns'} remaining)"
+        """Format status text for display"""
+        remaining = self.duration - self.turns_skipped
+        base = f"⏭️ **Turn Skip** ({remaining} {'turn' if remaining == 1 else 'turns'} remaining)"
         if self.reason:
-            return f"{base}\n╰─ `{self.reason}`"
+            return f"{base}\n• `{self.reason}`"
         return base
+        
+    def to_dict(self) -> dict:
+        """Convert to dictionary for storage"""
+        data = super().to_dict()
+        data.update({
+            "reason": self.reason,
+            "turns_skipped": self.turns_skipped,
+            "turns_remaining": self.turns_remaining
+        })
+        return data
+        
+    @classmethod
+    def from_dict(cls, data: dict) -> 'SkipEffect':
+        """Create from dictionary data"""
+        effect = cls(
+            duration=data.get('duration', 1),
+            reason=data.get('reason')
+        )
+        effect.turns_skipped = data.get('turns_skipped', 0)
+        effect.turns_remaining = data.get('turns_remaining', effect.duration)
+        
+        # Restore timing if it exists
+        if timing_data := data.get('timing'):
+            effect.timing = EffectTiming(**timing_data)
+            
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
+        return effect

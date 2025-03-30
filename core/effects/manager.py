@@ -7,6 +7,7 @@ Handles:
 - Effect processing
 - Combat logging integration
 - Resource change tracking
+- Effect feedback system
 
 IMPLEMENTATION MANDATES:
 - All effect processing MUST use inspect.iscoroutinefunction()
@@ -17,44 +18,39 @@ IMPLEMENTATION MANDATES:
 """
 
 from typing import List, Tuple, Optional, Dict, Any
+from enum import Enum
 import inspect
 import logging
 import asyncio
 
 from .base import BaseEffect, EffectRegistry, EffectCategory, CustomEffect
-from .combat import (
-    ResistanceEffect, VulnerabilityEffect, WeaknessEffect, TempHPEffect,
-    BurnEffect, SourceHeatWaveEffect, TargetHeatWaveEffect, ShockEffect
-)
-from .resource import(
-    DrainEffect, RegenEffect
-)
-from .status import ACEffect, FrostbiteEffect, SkipEffect
-from .move import MoveEffect  # Add MoveEffect import
+from .burn_effect import BurnEffect
+
+# We'll import other effects as needed
+# This is just to demonstrate registration
 
 logger = logging.getLogger(__name__)
+
+class EffectLifecycle(str, Enum):
+    """
+    Tracks effect lifecycle stages.
+    This is maintained for backward compatibility with systems that might use it.
+    New code should directly use elapsed turns vs duration in effect classes.
+    """
+    ACTIVE = "active"
+    FINAL_TURN = "final_turn"
+    READY_TO_EXPIRE = "ready_to_expire"
+    EXPIRED = "expired"
 
 def register_effects():
     """Register all available effect types with the registry"""
     # Combat effects
-    EffectRegistry.register_effect("resistance", ResistanceEffect)
-    EffectRegistry.register_effect("vulnerability", VulnerabilityEffect)
-    EffectRegistry.register_effect("weakness", WeaknessEffect)
-    EffectRegistry.register_effect("temp_hp", TempHPEffect)
     EffectRegistry.register_effect("burn", BurnEffect)
-    EffectRegistry.register_effect("shock", ShockEffect)
-    EffectRegistry.register_effect("heatwave_source", SourceHeatWaveEffect)
-    EffectRegistry.register_effect("heatwave_target", TargetHeatWaveEffect)
     
-    # Resource effects
-    EffectRegistry.register_effect("drain", DrainEffect)
-    EffectRegistry.register_effect("regen", RegenEffect)
-    
-    # Status effects
-    EffectRegistry.register_effect("ac", ACEffect)
-    EffectRegistry.register_effect("frostbite", FrostbiteEffect)
-    EffectRegistry.register_effect("skip", SkipEffect)
-    EffectRegistry.register_effect("move", MoveEffect)
+    # Add other effect registrations here
+    # EffectRegistry.register_effect("resistance", ResistanceEffect)
+    # EffectRegistry.register_effect("vulnerability", VulnerabilityEffect)
+    # etc.
     
     # Custom effects
     EffectRegistry.register_effect("custom", CustomEffect)
@@ -121,7 +117,7 @@ async def apply_effect(
         character.effects.append(effect)
         
         # Special case for MoveEffect - process any stored async operations
-        if isinstance(effect, MoveEffect):
+        if hasattr(effect, 'process_async_results'):
             # Get attack messages (if any)
             attack_messages = await effect.process_async_results()
             if attack_messages:
@@ -206,9 +202,10 @@ async def process_effects(
     combat_logger = None
 ) -> Tuple[bool, List[str], List[str]]:
     """
-    Process all effects for a character's turn.
+    Process all effects for a character's turn with improved expiry message handling.
     
     This function handles both sync and async effect methods properly.
+    Also processes effect feedback for reliable expiry messages.
     
     Args:
         character: Character to process
@@ -229,8 +226,32 @@ async def process_effects(
     start_messages = []
     end_messages = []
     was_skipped = False
+    effects_to_remove = []  # Track effects to remove at the end
+    print(f"DEBUG: Processing effects for {character.name} in round {round_number}, turn: {turn_name}")
+    print(f"DEBUG: Character has {len(character.effects)} active effects")
     
     try:
+        # Check for pending effect feedback from previous turn
+        if character.name == turn_name:
+            pending_feedback = character.get_pending_feedback()
+            if pending_feedback:
+                print(f"DEBUG: Found {len(pending_feedback)} pending feedback messages")
+                for feedback in pending_feedback:
+                    if feedback.expiry_message and not feedback.displayed:
+                        # Add feedback message to start_messages or end_messages based on timing
+                        # If feedback is from this character's turn, add to start_messages
+                        # Otherwise add to end_messages
+                        if feedback.turn_expired == character.name:
+                            start_messages.append(feedback.expiry_message)
+                        else:
+                            end_messages.append(feedback.expiry_message)
+                
+                # Mark all feedback as displayed
+                character.mark_feedback_displayed()
+                
+                # Clear displayed feedback (optional, can be done later)
+                character.clear_old_feedback()
+        
         # Only process if it's this character's turn
         if character.name == turn_name:
             # Add character round number for easier access in effects
@@ -238,6 +259,12 @@ async def process_effects(
             
             # Process start of turn effects
             for effect in character.effects[:]:  # Copy to avoid modification issues
+                # Skip processing if effect is already marked for removal
+                if hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
+                    print(f"DEBUG: Effect {effect.name} already marked for expiry, tracking for removal")
+                    effects_to_remove.append(effect)
+                    continue
+                    
                 # Call on_turn_start if it exists
                 if hasattr(effect, 'on_turn_start'):
                     # Check if method is async
@@ -254,16 +281,26 @@ async def process_effects(
                             start_messages.append(start_result)
                     
                     # Special case for MoveEffect - process any stored async operations
-                    if isinstance(effect, MoveEffect):
+                    if hasattr(effect, 'process_async_results'):
                         attack_messages = await effect.process_async_results()
                         start_messages.extend(attack_messages)
                 
                 # Check if this effect causes the turn to be skipped
                 if hasattr(effect, 'skips_turn') and effect.skips_turn:
                     was_skipped = True
+                    
+                # Check if effect was marked for expiry during start phase
+                if hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
+                    if not effect in effects_to_remove:
+                        print(f"DEBUG: Effect {effect.name} marked for expiry during start phase")
+                        effects_to_remove.append(effect)
             
             # Process end of turn effects
             for effect in character.effects[:]:  # Copy to avoid modification issues
+                # Skip processing if effect is already marked for removal
+                if effect in effects_to_remove:
+                    continue
+                    
                 # Call on_turn_end if it exists
                 if hasattr(effect, 'on_turn_end'):
                     # Check if method is async
@@ -280,50 +317,37 @@ async def process_effects(
                             end_messages.append(end_result)
                     
                     # Special case for MoveEffect - process any stored async operations
-                    if isinstance(effect, MoveEffect):
+                    if hasattr(effect, 'process_async_results'):
                         attack_messages = await effect.process_async_results()
                         if attack_messages:
                             end_messages.extend(attack_messages)
-                
-                # Check if effect should expire
-                should_expire = False
-                
-                # If effect doesn't handle its own expiry
-                if not getattr(effect, '_handles_own_expiry', False):
-                    # Check timing-based expiry
-                    if hasattr(effect, 'timing') and effect.timing:
-                        should_expire = effect.timing.should_expire(round_number, turn_name)
-                else:
-                    # For effects that handle their own expiry (like moves)
-                    if hasattr(effect, 'is_expired'):
-                        if callable(getattr(effect, 'is_expired')):
-                            should_expire = effect.is_expired()
-                        else:
-                            should_expire = effect.is_expired
-                
-                # Handle expiry if needed
-                if should_expire:
+                            
+                # Check if effect should expire after on_turn_end processing
+                if hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
+                    if not effect in effects_to_remove:  # Avoid duplicate processing
+                        print(f"DEBUG: Effect {effect.name} marked for expiry during end phase")
+                        effects_to_remove.append(effect)
+            
+            # Process effect removal and generate expiry messages
+            for effect in effects_to_remove:
+                if effect in character.effects:  # Check that it still exists
                     # Call on_expire - handle async or sync
+                    expire_msg = ""
                     if inspect.iscoroutinefunction(effect.on_expire):
                         expire_msg = await effect.on_expire(character)
                     else:
                         expire_msg = effect.on_expire(character)
                     
+                    # Add the expiry message if it's not empty and not already in the messages
                     if expire_msg:
-                        end_messages.append(expire_msg)
+                        print(f"DEBUG: Adding expiry message: {expire_msg}")
+                        # Add to end messages for end-of-turn expiry
+                        if expire_msg not in end_messages:
+                            end_messages.append(expire_msg)
                     
-                    # Remove effect from character
-                    if effect in character.effects:  # Check still exists
-                        character.effects.remove(effect)
-                        
-                    # Log effect removal if we have a logger
-                    if combat_logger and expire_msg:
-                        combat_logger.add_event(
-                            "EFFECT_EXPIRED",
-                            message=expire_msg,
-                            character=character.name,
-                            details={"effect": effect.name}
-                        )
+                    print(f"DEBUG: Removing effect {effect.name} from {character.name}")
+                    # Remove from character's effects list
+                    character.effects.remove(effect)
             
             # Clean up the character round number
             if hasattr(character, 'round_number'):
@@ -333,10 +357,12 @@ async def process_effects(
         if combat_logger:
             combat_logger.snapshot_character_state(character)
             
+        print(f"DEBUG: Returning: was_skipped={was_skipped}, start_msgs={len(start_messages)}, end_msgs={len(end_messages)}")
         return was_skipped, start_messages, end_messages
         
     except Exception as e:
         logger.error(f"Error processing effects: {str(e)}", exc_info=True)
+        print(f"DEBUG: Error processing effects: {str(e)}")
         
         # Clean up the character round number in case of error
         if hasattr(character, 'round_number'):
@@ -344,7 +370,7 @@ async def process_effects(
             
         # Return empty results on error
         return False, [], []
-
+    
 def get_effect_summary(character) -> List[str]:
     """
     Get a formatted list of all active effects on a character.
@@ -395,6 +421,15 @@ def get_effect_summary(character) -> List[str]:
         summary.append("Custom Effects:")
         for effect in custom_effects:
             summary.append(effect.get_status_text(character))
+    
+    # Add pending effect feedback if any exists
+    pending_feedback = [f for f in character.effect_feedback if not f.displayed]
+    if pending_feedback:
+        if summary: summary.append("")
+        summary.append("Recent Effect Updates:")
+        for feedback in pending_feedback:
+            # Simply append the expiry message, which is already formatted
+            summary.append(f"• {feedback.effect_name} has worn off")
             
     return summary
 

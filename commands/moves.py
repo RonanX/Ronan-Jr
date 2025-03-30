@@ -6,6 +6,7 @@ Features:
 - Move creation and modification
 - Attack roll processing
 - Turn phase handling
+- Roll modifier effect handling
 """
 
 import discord
@@ -19,6 +20,7 @@ from typing import Optional, List, Dict, Any, Tuple
 
 from core.character import Character, StatType
 from core.effects.move import MoveEffect, MoveState, RollTiming
+from core.effects.rollmod import RollModifierType, RollModifierEffect
 from core.effects.manager import apply_effect  # Import apply_effect directly
 from modules.moves.data import MoveData, Moveset
 from utils.formatting import MessageFormatter
@@ -111,7 +113,18 @@ class MoveCommands(commands.GroupCog, name="move"):
         roll_timing: Optional[str] = None,
         aoe_mode: Optional[str] = "single"
     ):
-        """Use a stored move from a character's moveset"""
+        """
+        Use a stored move from a character's moveset.
+        
+        This command:
+        - Retrieves a move from the character's saved moveset in Firebase
+        - Creates a MoveEffect with all the stored parameters
+        - Applies the effect to the character
+        - Handles resource costs, cooldowns, and usage tracking
+        - Tracks database state changes
+        
+        The stored move remains in the character's moveset for future use.
+        """
         try:
             await interaction.response.defer()
             
@@ -189,7 +202,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 uses=move.uses,
                 targets=targets,
                 bonus_on_hit=move.bonus_on_hit if hasattr(move, 'bonus_on_hit') else None,
-                aoe_mode=aoe_mode or getattr(move, 'aoe_mode', 'single')
+                aoe_mode=aoe_mode or getattr(move, 'aoe_mode', 'single'),
+                roll_modifier=move.roll_modifier if hasattr(move, 'roll_modifier') else None
             )
             
             # Apply effect and get feedback message
@@ -254,7 +268,19 @@ class MoveCommands(commands.GroupCog, name="move"):
         roll_timing: str = "active",
         advanced_json: Optional[str] = None
     ):
-        """Use a temporary move without saving it to character's moveset"""
+        """
+        Use a temporary move without saving it to character's moveset.
+        
+        This command:
+        - Creates a one-time-use move effect with the specified parameters
+        - Does NOT save the move to the character's moveset in Firebase
+        - Applies the effect to handle combat interactions
+        - Processes any advanced parameters like roll modifiers
+        
+        Temporary moves are ideal for situational actions or testing new moves.
+        For attack rolls with no cast time/duration, the "instant" roll timing
+        will automatically generate attack results in the initial response.
+        """
         try:
             await interaction.response.defer()
             
@@ -305,6 +331,7 @@ class MoveCommands(commands.GroupCog, name="move"):
             bonus_on_hit = extra_params.get('bonus_on_hit')
             aoe_mode = extra_params.get('aoe_mode', 'single')
             conditions = extra_params.get('conditions', [])
+            roll_modifier = extra_params.get('roll_modifier')
                 
             # Create move effect
             move_effect = MoveEffect(
@@ -324,7 +351,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 roll_timing=roll_timing,
                 targets=targets,
                 bonus_on_hit=bonus_on_hit,
-                aoe_mode=aoe_mode
+                aoe_mode=aoe_mode,
+                roll_modifier=roll_modifier
             )
             
             # Apply effect and get feedback message - Fix: use apply_effect directly
@@ -393,7 +421,18 @@ class MoveCommands(commands.GroupCog, name="move"):
         uses: int = -1,
         advanced_json: Optional[str] = None
     ):
-        """Create a new move and add it to a character's moveset"""
+        """
+        Create a new move and add it to a character's moveset.
+        
+        This command:
+        - Creates a persistent move and saves it to the character's moveset in Firebase
+        - Supports all move parameters including advanced ones
+        - Validates move parameters before saving
+        - Prevents duplicates with same name
+        
+        Created moves appear in autocomplete and can be referenced by name in
+        the `/move use` command for convenient access during gameplay.
+        """
         try:
             await interaction.response.defer()
             
@@ -423,6 +462,11 @@ class MoveCommands(commands.GroupCog, name="move"):
                     )
                     return
             
+            # Extract roll_modifier from advanced JSON if present
+            roll_modifier = None
+            if 'roll_modifier' in extra_params:
+                roll_modifier = extra_params['roll_modifier']
+            
             # Create move data
             move_data = MoveData(
                 name=name,
@@ -443,7 +487,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 uses_remaining=None if uses < 0 else uses,
                 bonus_on_hit=extra_params.get('bonus_on_hit'),
                 aoe_mode=extra_params.get('aoe_mode', 'single'),
-                conditions=extra_params.get('conditions', [])
+                conditions=extra_params.get('conditions', []),
+                roll_modifier=roll_modifier
             )
             
             # Add move to character
@@ -522,6 +567,12 @@ class MoveCommands(commands.GroupCog, name="move"):
                     advanced.append(f"AoE Mode: {extra_params['aoe_mode']}")
                 if 'conditions' in extra_params:
                     advanced.append(f"Conditions: {', '.join(extra_params['conditions'])}")
+                if 'roll_modifier' in extra_params:
+                    mod = extra_params['roll_modifier']
+                    mod_type = mod.get('type', 'bonus')
+                    mod_value = mod.get('value', 1)
+                    next_only = " (next roll only)" if mod.get('next_roll', False) else ""
+                    advanced.append(f"Roll Modifier: {mod_type} {mod_value}{next_only}")
                     
                 if advanced:
                     embed.add_field(
@@ -642,6 +693,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 move.aoe_mode = extra_params['aoe_mode']
             if 'conditions' in extra_params:
                 move.conditions = extra_params['conditions']
+            if 'roll_modifier' in extra_params:
+                move.roll_modifier = extra_params['roll_modifier']
             
             # Save character state
             await self.bot.db.save_character(char)
@@ -715,6 +768,12 @@ class MoveCommands(commands.GroupCog, name="move"):
                 advanced.append(f"AoE Mode: {move.aoe_mode}")
             if move.conditions:
                 advanced.append(f"Conditions: {', '.join(move.conditions)}")
+            if hasattr(move, 'roll_modifier') and move.roll_modifier:
+                mod = move.roll_modifier
+                mod_type = mod.get('type', 'bonus')
+                mod_value = mod.get('value', 1)
+                next_only = " (next roll only)" if mod.get('next_roll', False) else ""
+                advanced.append(f"Roll Modifier: {mod_type} {mod_value}{next_only}")
                 
             if advanced:
                 embed.add_field(
@@ -857,6 +916,16 @@ class MoveCommands(commands.GroupCog, name="move"):
                             remaining = move.cooldown - rounds_since
                             line += f" (CD: {remaining})"
                     
+                    # Add roll modifier info if present
+                    if hasattr(move, 'roll_modifier') and move.roll_modifier:
+                        mod = move.roll_modifier
+                        mod_type = mod.get('type', 'bonus')
+                        mod_value = mod.get('value', 1)
+                        mod_text = f"{mod_type}:{mod_value}"
+                        if mod.get('next_roll', False):
+                            mod_text += " (next)"
+                        line += f" [{mod_text}]"
+                    
                     move_lines.append(line)
                 
                 embed.add_field(
@@ -981,6 +1050,16 @@ class MoveCommands(commands.GroupCog, name="move"):
             
             if hasattr(move, 'crit_range') and move.crit_range != 20:
                 combat.append(f"Crit Range: {move.crit_range}-20")
+                
+            # Add roll modifier info if present
+            if hasattr(move, 'roll_modifier') and move.roll_modifier:
+                mod = move.roll_modifier
+                mod_type = mod.get('type', 'bonus')
+                mod_value = mod.get('value', 1)
+                mod_text = f"Roll Modifier: {mod_type} {mod_value}"
+                if mod.get('next_roll', False):
+                    mod_text += " (next roll only)"
+                combat.append(mod_text)
                 
             if combat:
                 embed.add_field(

@@ -81,7 +81,8 @@ class CombatLogger:
         """Log command usage with parameters"""
         if not self.show_commands:
             return
-            
+        
+        # Build a neat formatted parameter list for display
         param_list = []
         for key, value in params.items():
             if value is None:
@@ -90,8 +91,11 @@ class CombatLogger:
                 # Truncate long values
                 value = value[:47] + "..."
             param_list.append(f"{key}:{value}")
+        
+        cmd_str = f"Command used: /{command_name}"
+        if param_list:
+            cmd_str += f" {' '.join(param_list)}"
             
-        cmd_str = f"Command used: /{command_name} {' '.join(param_list)}"
         print(f"\n{cmd_str}")
 
     def start_combat(self, characters: List['Character'] = None) -> None:
@@ -144,28 +148,77 @@ class CombatLogger:
         title = self._clean_message(title)
         if title and self._should_log(title):
             print(f"\n{title}")
-        
+           
         logged_lines = set()
+         
+        # Handle effects field specially for better visibility
+        if "Effects" in fields:
+            effects_content = fields.get("Effects", "")
+            if effects_content:
+                print("\nEffect Messages:")
+                effect_lines = effects_content.split('\n')
+                for line in effect_lines:
+                    line = self._clean_message(line.strip())
+                    if line:
+                        print(f"  {line}")
+                        logged_lines.add(line)
         
+        # Handle duration updates specifically
+        if "Duration Updates" in fields:
+            updates_content = fields.get("Duration Updates", "")
+            if updates_content:
+                print("\nEffect Updates:")
+                update_lines = updates_content.split('\n')
+                for line in update_lines:
+                    line = self._clean_message(line.strip())
+                    if line:
+                        print(f"  {line}")
+                        logged_lines.add(line)
+                        
+        # Handle will expire next specifically
+        if "Will Expire Next Turn" in fields:
+            expire_content = fields.get("Will Expire Next Turn", "")
+            if expire_content:
+                print("\nEffect Expiry Warnings:")
+                expire_lines = expire_content.split('\n')
+                for line in expire_lines:
+                    line = self._clean_message(line.strip())
+                    if line:
+                        print(f"  {line}")
+                        logged_lines.add(line)
+                        
+        # Handle expired effects specifically
+        if "Effects Expired" in fields:
+            expired_content = fields.get("Effects Expired", "")
+            if expired_content:
+                print("\nEffects Expired:")
+                expired_lines = expired_content.split('\n')
+                for line in expired_lines:
+                    line = self._clean_message(line.strip())
+                    if line:
+                        print(f"  {line}")
+                        logged_lines.add(line)
+         
+        # Process other fields
         for name, value in fields.items():
-            if not value or name == "Turn":  # Skip turn fields to avoid duplication
+            if not value or name in ["Turn", "Effects", "Duration Updates", "Will Expire Next Turn", "Effects Expired"]:
                 continue
-                
+                 
+            field_title = self._clean_message(name)
+            print(f"\n{field_title}:")
+             
             value = self._clean_message(value)
             lines = value.split('\n')
-            
+               
             for line in lines:
                 line = line.strip()
                 if line and line not in logged_lines:
                     if line.startswith('•'):
-                        msg = f"  {line}"
+                        print(f"  {line}")
                     else:
-                        msg = line
-                        
-                    if self._should_log(msg):
-                        print(msg)
+                        print(f"  {line}")
                     logged_lines.add(line)
-        
+                     
         # Add a blank line after field output
         print("")
 

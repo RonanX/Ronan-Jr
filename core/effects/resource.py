@@ -44,6 +44,7 @@ class DrainEffect(BaseEffect):
         self.game_state = game_state
         self.total_drained = 0
         self.last_amount = 0
+        self.turns_active = 0  # Track how many turns this effect has been active
         
         # Emoji mapping for resource types
         self.emoji = {
@@ -132,7 +133,7 @@ class DrainEffect(BaseEffect):
         if character.name != turn_name:
             return []
             
-        # Calculate and apply drain
+        # Calculate drain
         amount = self._calculate_drain(character)
         self.last_amount = amount
         drained, new_value = self._apply_drain(character, amount)
@@ -155,10 +156,10 @@ class DrainEffect(BaseEffect):
             
         # Add duration info if applicable
         if not self.permanent and self.duration:
-            rounds_completed = round_number - self.timing.start_round
-            turns_remaining = max(0, self.duration - rounds_completed)
-            if turns_remaining > 0:
-                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+            remaining_turns = max(0, self.duration - self.turns_active)
+            if remaining_turns > 0:
+                plural = "s" if remaining_turns != 1 else ""
+                details.append(f"{remaining_turns} turn{plural} remaining")
             
         # Create message
         emoji = self.emoji[0]
@@ -189,42 +190,50 @@ class DrainEffect(BaseEffect):
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """Track duration and show remaining time with improved formatting"""
-        if character.name != turn_name or self.permanent:  # Skip for permanent effects
+        # Skip processing for different characters or permanent effects
+        if character.name != turn_name or self.permanent:
             return []
             
-        # Get duration status
-        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        # Increment turns active counter
+        self.turns_active += 1
         
-        # Message if expiring after this turn
-        if should_expire:
+        # Check if effect has reached its duration
+        if self.duration and self.turns_active >= self.duration:
+            # Mark for expiry
+            self._marked_for_expiry = True
+            
+            # Return will expire message with total stats
             if self.total_drained > 0:
-                suffix = f" (Total drained: {self.total_drained} {self.resource_type.upper()})"
+                details = [f"Total drained: {self.total_drained} {self.resource_type.upper()}"]
+                return [self.format_effect_message(
+                    f"{self.name} effect will wear off from {character.name}",
+                    details,
+                    emoji=self.emoji[0]
+                )]
             else:
-                suffix = ""
-                
-            # Format using base method
-            return [self.format_effect_message(
-                f"{self.name} effect will wear off{suffix}",
-                emoji=self.emoji[0]
-            )]
+                return [self.format_effect_message(
+                    f"{self.name} effect will wear off from {character.name}",
+                    emoji=self.emoji[0]
+                )]
         
-        # Show continue message if still active
-        elif turns_remaining > 0:
-            details = [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"]
-            
-            # Add preview of next drain
-            if isinstance(self.amount, str) and 'd' in self.amount.lower():
-                details.append(f"Next drain: {self.amount}")
-            else:
-                details.append(f"Next drain: {self.amount}")
+        # If still active, show remaining duration
+        elif self.duration:
+            remaining_turns = max(0, self.duration - self.turns_active)
+            if remaining_turns > 0:
+                details = [f"{remaining_turns} turn{'s' if remaining_turns != 1 else ''} remaining"]
                 
-            # Format using base method
-            return [self.format_effect_message(
-                f"{self.name} continues",
-                details,
-                emoji=self.emoji[0]
-            )]
-            
+                # Add preview of next drain
+                if isinstance(self.amount, str) and 'd' in self.amount.lower():
+                    details.append(f"Next drain: {self.amount}")
+                else:
+                    details.append(f"Next drain: {self.amount}")
+                    
+                return [self.format_effect_message(
+                    f"{self.name} continues",
+                    details,
+                    emoji=self.emoji[0]
+                )]
+        
         return []
 
     def on_expire(self, character) -> str:
@@ -259,13 +268,11 @@ class DrainEffect(BaseEffect):
         if self.siphon_target:
             lines.append(f"• `Transferring to: {self.siphon_target}`")
             
-        # Add duration info
-        if self.timing and self.timing.duration is not None:
-            if hasattr(character, 'round_number'):
-                rounds_passed = character.round_number - self.timing.start_round
-                remaining = max(0, self.timing.duration - rounds_passed)
-                lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
-        elif self.permanent:  # Add permanent indicator
+        # Add duration info based on turns active
+        if self.duration:
+            remaining = max(0, self.duration - self.turns_active)
+            lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
+        elif self.permanent:
             lines.append("• `Permanent`")
             
         return "\n".join(lines)
@@ -278,7 +285,8 @@ class DrainEffect(BaseEffect):
             "resource_type": self.resource_type,
             "siphon_target": self.siphon_target,
             "total_drained": self.total_drained,
-            "last_amount": self.last_amount
+            "last_amount": self.last_amount,
+            "turns_active": self.turns_active
         })
         return data
 
@@ -294,13 +302,18 @@ class DrainEffect(BaseEffect):
         )
         effect.total_drained = data.get('total_drained', 0)
         effect.last_amount = data.get('last_amount', 0)
+        effect.turns_active = data.get('turns_active', 0)
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
             
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
+            
         return effect
-        
+            
 class RegenEffect(BaseEffect):
     """
     Effect that regenerates HP/MP over time.
@@ -330,6 +343,7 @@ class RegenEffect(BaseEffect):
         self.resource_type = resource_type.lower()
         self.total_regenerated = 0
         self.last_amount = 0
+        self.turns_active = 0  # Track how many turns this effect has been active
         
         # Emoji mapping for resource types
         self.emoji = {
@@ -412,12 +426,11 @@ class RegenEffect(BaseEffect):
         if self.total_regenerated > regenerated:
             details.append(f"Total regenerated: {self.total_regenerated}")
             
-        # Add duration info if applicable
+        # Add duration info using turns active counter
         if not self.permanent and self.duration:
-            rounds_completed = round_number - self.timing.start_round
-            turns_remaining = max(0, self.duration - rounds_completed)
-            if turns_remaining > 0:
-                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
+            remaining_turns = max(0, self.duration - self.turns_active)
+            if remaining_turns > 0:
+                details.append(f"{remaining_turns} turn{'s' if remaining_turns != 1 else ''} remaining")
             
         # Create message
         message = self.format_effect_message(
@@ -433,38 +446,42 @@ class RegenEffect(BaseEffect):
         if character.name != turn_name or self.permanent:
             return []
             
-        # Get duration status
-        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+        # Increment turns active counter
+        self.turns_active += 1
         
-        # Message if expiring after this turn
-        if should_expire:
+        # Check if effect has reached its duration
+        if self.duration and self.turns_active >= self.duration:
+            # Mark for expiry
+            self._marked_for_expiry = True
+            
+            # Format expiry message with total regenerated
             if self.total_regenerated > 0:
                 suffix = f" (Total regenerated: {self.total_regenerated} {self.resource_type.upper()})"
             else:
                 suffix = ""
                 
-            # Format using base method
             return [self.format_effect_message(
                 f"{self.name} effect will wear off{suffix}",
                 emoji=self.emoji
             )]
         
-        # Show continue message if still active
-        elif turns_remaining > 0:
-            details = [f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"]
-            
-            # Add preview of next regen
-            if isinstance(self.amount, str) and 'd' in self.amount.lower():
-                details.append(f"Next regeneration: {self.amount}")
-            else:
-                details.append(f"Next regeneration: {self.amount}")
+        # If still active, show remaining duration
+        elif self.duration:
+            remaining_turns = max(0, self.duration - self.turns_active)
+            if remaining_turns > 0:
+                details = [f"{remaining_turns} turn{'s' if remaining_turns != 1 else ''} remaining"]
                 
-            # Format using base method
-            return [self.format_effect_message(
-                f"{self.name} continues",
-                details,
-                emoji=self.emoji
-            )]
+                # Add preview of next regen
+                if isinstance(self.amount, str) and 'd' in self.amount.lower():
+                    details.append(f"Next regeneration: {self.amount}")
+                else:
+                    details.append(f"Next regeneration: {self.amount}")
+                    
+                return [self.format_effect_message(
+                    f"{self.name} continues",
+                    details,
+                    emoji=self.emoji
+                )]
             
         return []
 
@@ -492,12 +509,10 @@ class RegenEffect(BaseEffect):
             if self.last_amount > 0:
                 lines.append(f"• `Last regeneration: {self.last_amount}`")
                 
-        # Add duration info
-        if self.timing and self.timing.duration is not None:
-            if hasattr(character, 'round_number'):
-                rounds_passed = character.round_number - self.timing.start_round
-                remaining = max(0, self.timing.duration - rounds_passed)
-                lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
+        # Add duration info based on turns active
+        if self.duration:
+            remaining = max(0, self.duration - self.turns_active)
+            lines.append(f"• `{remaining} turn{'s' if remaining != 1 else ''} remaining`")
         elif self.permanent:
             lines.append("• `Permanent`")
             
@@ -510,7 +525,8 @@ class RegenEffect(BaseEffect):
             "amount": self.amount,
             "resource_type": self.resource_type,
             "total_regenerated": self.total_regenerated,
-            "last_amount": self.last_amount
+            "last_amount": self.last_amount,
+            "turns_active": self.turns_active
         })
         return data
 
@@ -525,9 +541,14 @@ class RegenEffect(BaseEffect):
         )
         effect.total_regenerated = data.get('total_regenerated', 0)
         effect.last_amount = data.get('last_amount', 0)
+        effect.turns_active = data.get('turns_active', 0)
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
             effect.timing = EffectTiming(**timing_data)
+            
+        # Restore marked for expiry flag
+        if '_marked_for_expiry' in data:
+            effect._marked_for_expiry = data['_marked_for_expiry']
             
         return effect
