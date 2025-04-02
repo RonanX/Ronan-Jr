@@ -37,6 +37,54 @@ class MoveCommands(commands.GroupCog, name="move"):
         self.pending_attacks = {}
         super().__init__()
     
+    # This helper function is used to adjust the duration of a move effect phase based on the turn timing
+    # It checks if the move is being used during the character's turn and adjusts the phase duration accordingly
+    def _adjust_timing_parameters(self, character_name, cast_time, duration, cooldown):
+        """
+        Adjust all timing parameters based on whether the move is used during the character's turn or not.
+        
+        If a move is used during a character's turn, we need to add 1 to all timing parameters
+        so they don't immediately decrement to 0 and move to the next phase too early.
+        
+        Args:
+            character_name: Name of character receiving the effect
+            cast_time: Original cast time value (can be None)
+            duration: Original duration value (can be None)
+            cooldown: Original cooldown value (can be None)
+            
+        Returns:
+            Tuple of (adjusted_cast_time, adjusted_duration, adjusted_cooldown)
+        """
+        # If initiative tracker not available, no adjustment needed
+        if not hasattr(self.bot, 'initiative_tracker'):
+            return cast_time, duration, cooldown
+            
+        # Check if we're in combat
+        tracker = self.bot.initiative_tracker
+        if not tracker or tracker.state.value not in ['active', 'waiting']:
+            return cast_time, duration, cooldown
+            
+        # Check if there's a current turn and it matches our character
+        is_characters_turn = False
+        if tracker.current_turn and tracker.current_turn.character_name == character_name:
+            is_characters_turn = True
+            
+        # If it's the character's turn, add 1 to all timing parameters
+        if is_characters_turn:
+            # Adjust cast time if present and > 0
+            if cast_time is not None and cast_time > 0:
+                cast_time += 1
+                
+            # Adjust duration if present and > 0
+            if duration is not None and duration > 0:
+                duration += 1
+                
+            # Adjust cooldown if present and > 0
+            if cooldown is not None and cooldown > 0:
+                cooldown += 1
+                
+        return cast_time, duration, cooldown
+
     async def character_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         """Autocomplete for character names"""
         try:
@@ -182,6 +230,11 @@ class MoveCommands(commands.GroupCog, name="move"):
                 if not can_use:
                     await interaction.followup.send(f"Cannot use {name}: {reason}")
                     return
+
+            # Adjust all timing parameters
+            adjusted_cast_time, adjusted_duration, adjusted_cooldown = self._adjust_timing_parameters(
+                character, move.cast_time, move.duration, move.cooldown
+            )
                 
             # Create move effect with all parameters
             move_effect = MoveEffect(
@@ -190,9 +243,9 @@ class MoveCommands(commands.GroupCog, name="move"):
                 star_cost=move.star_cost,
                 mp_cost=move.mp_cost,
                 hp_cost=move.hp_cost,
-                cast_time=move.cast_time,
-                duration=move.duration,
-                cooldown=move.cooldown,
+                cast_time=adjusted_cast_time,  # Use adjusted cast time
+                duration=adjusted_duration,    # Use adjusted duration
+                cooldown=adjusted_cooldown,    # Use adjusted cooldown
                 cast_description=move.cast_description,
                 attack_roll=move.attack_roll,
                 damage=move.damage,
@@ -305,7 +358,7 @@ class MoveCommands(commands.GroupCog, name="move"):
             
             # Check if we're in combat
             in_combat = (hasattr(self.bot, 'initiative_tracker') and 
-                         self.bot.initiative_tracker.state.value == 'active')
+                        self.bot.initiative_tracker.state.value == 'active')
             current_round = self.bot.initiative_tracker.round_number if in_combat else 0
                 
             # Check action star cost
@@ -332,6 +385,11 @@ class MoveCommands(commands.GroupCog, name="move"):
             aoe_mode = extra_params.get('aoe_mode', 'single')
             conditions = extra_params.get('conditions', [])
             roll_modifier = extra_params.get('roll_modifier')
+            
+            # Adjust all timing parameters
+            adjusted_cast_time, adjusted_duration, adjusted_cooldown = self._adjust_timing_parameters(
+                character, cast_time, duration, cooldown
+            )
                 
             # Create move effect
             move_effect = MoveEffect(
@@ -340,9 +398,9 @@ class MoveCommands(commands.GroupCog, name="move"):
                 star_cost=star_cost,
                 mp_cost=mp_cost,  # Can be negative for mana regen
                 hp_cost=hp_cost,  # Can be negative for healing
-                cast_time=cast_time,
-                duration=duration,
-                cooldown=cooldown,
+                cast_time=adjusted_cast_time,  # Use adjusted cast time
+                duration=adjusted_duration,    # Use adjusted duration
+                cooldown=adjusted_cooldown,    # Use adjusted cooldown
                 cast_description=extra_params.get('cast_description'),
                 attack_roll=attack_roll,
                 damage=damage,
@@ -355,7 +413,7 @@ class MoveCommands(commands.GroupCog, name="move"):
                 roll_modifier=roll_modifier
             )
             
-            # Apply effect and get feedback message - Fix: use apply_effect directly
+            # Apply effect and get feedback message - use apply_effect directly
             result = await apply_effect(
                 char,
                 move_effect,
@@ -377,7 +435,7 @@ class MoveCommands(commands.GroupCog, name="move"):
             await interaction.followup.send(result)
             
         except Exception as e:
-            # Fix: Proper error handling
+            # Proper error handling
             logger.error(f"Error in temp_move: {str(e)}", exc_info=True)
             await handle_error(interaction, e)
 

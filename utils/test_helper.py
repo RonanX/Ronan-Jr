@@ -7,11 +7,12 @@ Also contains debug test methods for various systems.
 from core.character import Character, Stats, Resources, DefenseStats, StatType
 from core.effects.move import MoveEffect, MoveState, RollTiming
 from core.effects.status import SkipEffect, FrostbiteEffect, ACEffect
-from core.effects.manager import process_effects
+from core.effects.manager import process_effects, apply_effect  # Added apply_effect import
 from modules.combat.initiative import CombatState
 from typing import List, Dict, Optional, Tuple, Any
 import logging
 import asyncio
+import inspect
 
 # Function for quickly deleting and recreating test-test4
 async def recreate_test_characters(bot) -> List[str]:
@@ -119,6 +120,22 @@ async def run_move_effect_tests(bot, interaction):
         # Restore original debug mode setting
         bot.db.debug_mode = was_debug_enabled
 
+# Safely handle async functions
+async def safe_awaitable(func, *args, **kwargs):
+    """Safely await a function that might or might not be awaitable"""
+    if func is None:
+        return None
+        
+    try:
+        # Check if it's awaitable using inspect
+        if asyncio.iscoroutinefunction(func) or inspect.isawaitable(func):
+            return await func(*args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+    except Exception as e:
+        print(f"Error calling function {func.__name__ if hasattr(func, '__name__') else func}: {e}")
+        return None
+
 # Helper for processing turns in test scenarios
 async def process_turns(bot, interaction, char_names: list, turns: int):
     """Process a specific number of turns for testing"""
@@ -197,8 +214,22 @@ async def process_turns(bot, interaction, char_names: list, turns: int):
                         # Show move-specific details
                         if hasattr(effect, 'state'):
                             print(f"    - State: {effect.state}")
-                            # Show phase information if available
-                            if hasattr(effect, 'phases'):
+                            
+                            # Show phase information for state_machine
+                            if hasattr(effect, 'state_machine'):
+                                print(f"    - State machine: {effect.state_machine.get_current_state().value}")
+                                print(f"    - Remaining turns: {effect.state_machine.get_remaining_turns()}")
+                                
+                                # Display all phase information if available
+                                if hasattr(effect, 'cast_time'):
+                                    print(f"    - Cast time: {effect.cast_time}")
+                                if hasattr(effect, 'duration'):
+                                    print(f"    - Duration: {effect.duration}")
+                                if hasattr(effect, 'cooldown'):
+                                    print(f"    - Cooldown: {effect.cooldown}")
+                            
+                            # For backward compatibility - old phase structure
+                            elif hasattr(effect, 'phases'):
                                 for state, phase in effect.phases.items():
                                     if phase:
                                         print(f"    - {state} phase: {phase.duration} turns, {phase.turns_completed} completed")
@@ -242,10 +273,17 @@ async def process_turns(bot, interaction, char_names: list, turns: int):
         # Brief pause for readability
         await asyncio.sleep(0.2)
     
-    # End combat when done
-    tracker.end_combat()
-    print("\n=== Combat Ended ===")
-    print("Test combat complete")
+    # End combat when done - use test method to avoid needing interaction
+    if hasattr(tracker, 'end_combat_test'):
+        tracker.end_combat_test()
+    else:
+        # Fallback method if end_combat_test isn't available
+        tracker.state = CombatState.INACTIVE
+        tracker.turn_order = []
+        tracker.current_index = 0
+        tracker.round_number = 0
+        print("\n=== Combat Ended ===")
+        print("Test combat complete")
 
 ### Helpers for move debugging ###
 async def test_instant_move(bot, interaction):
@@ -278,8 +316,8 @@ async def test_instant_move(bot, interaction):
     )
     
     print("\nApplying instant move...")
-    # Use current round 1 for non-combat testing
-    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move, 1)
     print(f"Apply result: {result}")
     
     # Apply star cost manually (this should now be handled in the MoveEffect)
@@ -295,11 +333,14 @@ async def test_instant_move(bot, interaction):
     has_effect = any(e.name == move.name for e in char.effects)
     print(f"Still has effect: {has_effect} (expected: False for instant moves)")
     
-    # If it's still there, manually transition state to simulate completion
+    # If it's still there, manually clean up but handle async safely
     for effect in char.effects[:]:
         if effect.name == move.name:
             print("Manually cleaning up instant move effect (should happen automatically)")
-            expire_result = await effect.on_expire(char)  # IMPORTANT: Added await here
+            # Use our safe_awaitable helper to handle both async and sync on_expire
+            expire_result = await safe_awaitable(effect.on_expire, char)
+            if expire_result:
+                print(f"Expire result: {expire_result}")
             char.effects.remove(effect)
     
     # Save character
@@ -337,7 +378,8 @@ async def test_cast_time_move(bot, interaction):
     )
     
     print("\nApplying cast time move...")
-    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move, 1)
     print(f"Apply result: {result}")
     
     # Apply star cost manually (should be handled by the effect now)
@@ -375,7 +417,8 @@ async def test_cast_time_move(bot, interaction):
         print("Manually cleaning up cast time move effect")
         for effect in char.effects[:]:
             if effect.name == move.name:
-                await effect.on_expire(char)  # IMPORTANT: Added await here
+                # Use our safe_awaitable helper
+                await safe_awaitable(effect.on_expire, char)
                 char.effects.remove(effect)
         await bot.db.save_character(char)
     
@@ -411,7 +454,8 @@ async def test_duration_move(bot, interaction):
     )
     
     print("\nApplying duration move...")
-    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move, 1)
     print(f"Apply result: {result}")
     
     # Apply star cost manually
@@ -449,7 +493,8 @@ async def test_duration_move(bot, interaction):
         print("Manually cleaning up duration move effect")
         for effect in char.effects[:]:
             if effect.name == move.name:
-                await effect.on_expire(char)  # IMPORTANT: Added await here
+                # Use our safe_awaitable helper
+                await safe_awaitable(effect.on_expire, char)
                 char.effects.remove(effect)
         await bot.db.save_character(char)
     
@@ -485,7 +530,8 @@ async def test_cooldown_move(bot, interaction):
     )
     
     print("\nApplying cooldown move...")
-    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move, 1)
     print(f"Apply result: {result}")
     
     # Apply star cost manually
@@ -500,21 +546,34 @@ async def test_cooldown_move(bot, interaction):
     move_effect = next((e for e in char.effects if e.name == move.name), None)
     if move_effect:
         print(f"Move state: {move_effect.state} (expected: COOLDOWN)")
-        # Check if cooldown phase exists
-        cooldown_phase = move_effect.phases.get(MoveState.COOLDOWN)
-        if cooldown_phase:
-            print(f"Cooldown phase: {cooldown_phase.duration} turns, {cooldown_phase.turns_completed} completed")
+        
+        # FIX: Get cooldown info using various possible approaches
+        cooldown_duration = 2  # Default fallback
+        
+        # Try state_machine first - new approach
+        if hasattr(move_effect, 'state_machine'):
+            print(f"Using state_machine - Remaining turns: {move_effect.state_machine.get_remaining_turns()}")
+            # For cooldown duration, check in order:
+            if hasattr(move_effect, 'cooldown') and move_effect.cooldown is not None:
+                cooldown_duration = move_effect.cooldown
+            elif hasattr(move_effect.state_machine, 'cooldown') and move_effect.state_machine.cooldown is not None:
+                cooldown_duration = move_effect.state_machine.cooldown
+            
+        # Fallback to older phases implementation
+        elif hasattr(move_effect, 'phases'):
+            cooldown_phase = move_effect.phases.get(MoveState.COOLDOWN)
+            if cooldown_phase:
+                print(f"Using phases - Cooldown phase: {cooldown_phase.duration} turns, {cooldown_phase.turns_completed} completed")
+                cooldown_duration = cooldown_phase.duration
+            else:
+                print("No cooldown phase found in effect")
         else:
-            print("No cooldown phase found in effect")
+            print("No cooldown tracking found (using default cooldown duration)")
     else:
         print("Move effect not found (expected to be in cooldown state)")
     
     # Register move in action stars system (normally done by the move command)
-    # Use the correct parameter - get duration from the phase
-    cooldown_duration = 2  # Default in case phase doesn't exist
-    if move_effect and move_effect.phases.get(MoveState.COOLDOWN):
-        cooldown_duration = move_effect.phases[MoveState.COOLDOWN].duration
-        
+    # Use the safely extracted cooldown_duration
     char.action_stars.start_cooldown(move.name, cooldown_duration)
     
     # Save character
@@ -541,7 +600,8 @@ async def test_cooldown_move(bot, interaction):
     )
     
     print("\nAttempting to use move again after cooldown...")
-    result = await move2.on_apply(char, 4)  # Using round 4 now, IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move2, 4)  # Using round 4 now
     print(f"Apply result: {result}")
     
     # Apply star cost manually
@@ -584,7 +644,8 @@ async def test_full_phase_move(bot, interaction):
     )
     
     print("\nApplying full phase move...")
-    result = await move.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move, 1)
     print(f"Apply result: {result}")
     
     # Check post-application state
@@ -597,10 +658,34 @@ async def test_full_phase_move(bot, interaction):
     if move_effect:
         print(f"Move state: {move_effect.state} (expected: CASTING)")
         
-        # Show phase info
-        for state, phase in move_effect.phases.items():
-            if phase:
-                print(f"  {state} phase: {phase.duration} turns, {phase.turns_completed} completed")
+        # FIX: Handle both state_machine and phases implementations
+        if hasattr(move_effect, 'state_machine'):
+            print(f"Using state_machine:")
+            print(f"  Current state: {move_effect.state_machine.get_current_state().value}")
+            print(f"  Remaining turns: {move_effect.state_machine.get_remaining_turns()}")
+            
+            # Display all phase information if available
+            if hasattr(move_effect, 'cast_time'):
+                print(f"  Cast time: {move_effect.cast_time}")
+            if hasattr(move_effect, 'duration'):
+                print(f"  Duration: {move_effect.duration}")
+            if hasattr(move_effect, 'cooldown'):
+                print(f"  Cooldown: {move_effect.cooldown}")
+            
+            # Also try to get from state_machine
+            if hasattr(move_effect.state_machine, 'cast_time'):
+                print(f"  SM Cast time: {move_effect.state_machine.cast_time}")
+            if hasattr(move_effect.state_machine, 'duration'):
+                print(f"  SM Duration: {move_effect.state_machine.duration}")
+            if hasattr(move_effect.state_machine, 'cooldown'):
+                print(f"  SM Cooldown: {move_effect.state_machine.cooldown}")
+            
+        elif hasattr(move_effect, 'phases'):
+            # Fallback for older implementation
+            print("Using phases:")
+            for state, phase in move_effect.phases.items():
+                if phase:
+                    print(f"  {state} phase: {phase.duration} turns, {phase.turns_completed} completed")
     
     # Save character
     await bot.db.save_character(char)
@@ -654,7 +739,8 @@ async def test_resource_costs(bot, interaction):
     
     print("\nApplying MP cost move...")
     initial_mp = char.resources.current_mp
-    result = await move_mp.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move_mp, 1)
     print(f"Apply result: {result}")
     print(f"MP change: {initial_mp} → {char.resources.current_mp} (expected: -{move_mp.mp_cost})")
     
@@ -668,7 +754,8 @@ async def test_resource_costs(bot, interaction):
     
     print("\nApplying HP cost move...")
     initial_hp = char.resources.current_hp
-    result = await move_hp.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move_hp, 1)
     print(f"Apply result: {result}")
     print(f"HP change: {initial_hp} → {char.resources.current_hp} (expected: -{move_hp.hp_cost})")
     
@@ -682,7 +769,8 @@ async def test_resource_costs(bot, interaction):
     
     print("\nApplying star cost move...")
     initial_stars = char.action_stars.current_stars
-    result = await move_star.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move_star, 1)
     print(f"Apply result: {result}")
     print(f"Stars change: {initial_stars} → {char.action_stars.current_stars} (expected: -{move_star.star_cost})")
     
@@ -701,7 +789,8 @@ async def test_resource_costs(bot, interaction):
     initial_mp = char.resources.current_mp
     initial_stars = char.action_stars.current_stars
     
-    result = await move_all.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move_all, 1)
     print(f"Apply result: {result}")
     
     print(f"Resource changes:")
@@ -729,7 +818,8 @@ async def test_resource_costs(bot, interaction):
     
     # Should still work since MoveEffect doesn't validate resources directly
     # In the real command, validation would happen first
-    result = await move_expensive.on_apply(char, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(char, move_expensive, 1)
     print(f"Apply result: {result}")
     
     # Save character
@@ -773,7 +863,8 @@ async def test_attack_move(bot, interaction):
     )
     
     print("\nApplying instant attack move...")
-    result = await instant_attack.on_apply(source, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(source, instant_attack, 1)
     print(f"Apply result: {result}")
     
     # Test Active Phase Attack
@@ -791,7 +882,8 @@ async def test_attack_move(bot, interaction):
     )
     
     print("\nApplying active attack move (with cast time)...")
-    result = await active_attack.on_apply(source, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(source, active_attack, 1)
     print(f"Apply result: {result}")
     
     # Save characters
@@ -825,7 +917,8 @@ async def test_attack_move(bot, interaction):
     )
     
     print("\nApplying per-turn attack move...")
-    result = await per_turn_attack.on_apply(source, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(source, per_turn_attack, 1)
     print(f"Apply result: {result}")
     
     # Save characters
@@ -878,7 +971,8 @@ async def test_multi_target_move(bot, interaction):
     )
     
     print("\nApplying multi-target move...")
-    result = await move.on_apply(source, 1)  # IMPORTANT: Added await here
+    # Use apply_effect instead of direct on_apply
+    result = await apply_effect(source, move, 1)
     print(f"Apply result: {result}")
     
     # Check if targets were affected (they should be when passed to the constructor)
@@ -936,7 +1030,8 @@ async def test_cleanup(bot, interaction):
                 duration=2,
                 cooldown=1
             )
-            await move.on_apply(char, 1)  # IMPORTANT: Added await here
+            # Use apply_effect instead of direct on_apply
+            await apply_effect(char, move, 1)
             print(f"Applied full-phase move to {char.name}")
             
         elif i == 1:
@@ -947,7 +1042,8 @@ async def test_cleanup(bot, interaction):
                 mp_cost=5,
                 duration=3
             )
-            await move.on_apply(char, 1)  # IMPORTANT: Added await here
+            # Use apply_effect instead of direct on_apply
+            await apply_effect(char, move, 1)
             print(f"Applied duration-only move to {char.name}")
             
         elif i == 2:
@@ -959,7 +1055,8 @@ async def test_cleanup(bot, interaction):
                 hp_cost=5,
                 star_cost=2
             )
-            await move.on_apply(char, 1)  # IMPORTANT: Added await here
+            # Use apply_effect instead of direct on_apply
+            await apply_effect(char, move, 1)
             print(f"Applied resource-cost move to {char.name}")
             
         else:
@@ -968,7 +1065,8 @@ async def test_cleanup(bot, interaction):
                 name="Instant Test Move",
                 description="An instant move for cleanup testing"
             )
-            await move.on_apply(char, 1)  # IMPORTANT: Added await here
+            # Use apply_effect instead of direct on_apply
+            await apply_effect(char, move, 1)
             print(f"Applied instant move to {char.name}")
     
     # Save characters with effects
@@ -996,11 +1094,8 @@ async def test_cleanup(bot, interaction):
         # Process cleanup
         cleanup_msgs = []
         for effect in char.effects[:]:  # Copy list since we're modifying it
-            # Handle async or sync on_expire
-            if hasattr(effect.on_expire, '__await__'):
-                msg = await effect.on_expire(char)  # IMPORTANT: Added await here
-            else:
-                msg = effect.on_expire(char)
+            # Handle both async and sync on_expire using our safe helper
+            msg = await safe_awaitable(effect.on_expire, char)
                 
             if msg:
                 cleanup_msgs.append(msg)

@@ -14493,3 +14493,420 @@ aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host gateway-u
 2025-03-29 18:30:17,748 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
 2025-03-29 18:30:17,751 - discord.client - INFO - logging in using static token
 2025-03-29 18:30:19,409 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 14929ed6ed48c36612059977ab385344).
+2025-03-29 22:26:56,611 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-29 22:26:56,614 - discord.client - INFO - logging in using static token
+2025-03-29 22:26:58,424 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a40b322aad9278d36cd16f11cb43d9ce).
+2025-03-30 14:38:56,504 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-30 14:38:56,507 - discord.client - INFO - logging in using static token
+2025-03-30 14:38:57,974 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9a94e775b38da646bbeb18899f8ca3a4).
+2025-03-30 14:52:46,086 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-30 14:52:46,089 - discord.client - INFO - logging in using static token
+2025-03-30 14:52:47,063 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 98a0403741afe0c466498c0556813681).
+2025-03-31 07:42:32,924 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 07:42:32,927 - discord.client - INFO - logging in using static token
+2025-03-31 07:42:34,475 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 377065e9d676560e1bd8036f59151410).
+2025-03-31 07:43:06,263 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 44, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 07:44:09,093 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 44, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 07:44:09,850 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 44, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 07:44:10,834 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 44, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 07:46:55,340 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 07:46:55,345 - discord.client - INFO - logging in using static token
+2025-03-31 07:46:56,716 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 8f76e55a1f7321dda134b3f570a1e42c).
+2025-03-31 07:50:27,460 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 07:50:27,463 - discord.client - INFO - logging in using static token
+2025-03-31 07:50:29,136 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: cad445982c5a571d1d6005f2bf75cb51).
+2025-03-31 07:52:21,112 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 07:52:21,114 - discord.client - INFO - logging in using static token
+2025-03-31 07:52:22,822 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e7302445ab8e4145429bf41e7313ea70).
+2025-03-31 08:11:37,276 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 08:11:37,279 - discord.client - INFO - logging in using static token
+2025-03-31 08:11:38,787 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: dbf773b2ba7be1abe15e8dfbb9802137).
+2025-03-31 08:17:27,831 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 08:17:27,834 - discord.client - INFO - logging in using static token
+2025-03-31 08:17:29,699 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 15172405a6092ba6b4aa089eb9341075).
+2025-03-31 08:18:02,261 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 44, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 08:18:03,596 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 44, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 08:18:03,793 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 44, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 08:29:38,515 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 08:29:38,518 - discord.client - INFO - logging in using static token
+2025-03-31 08:29:40,509 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 192f80fc5bc8273a860b6cbe9112a556).
+2025-03-31 08:30:31,321 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 08:30:31,324 - discord.client - INFO - logging in using static token
+2025-03-31 08:30:32,694 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c7cc572d84e3b184318b5d824d007fa0).
+2025-03-31 08:59:49,456 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 08:59:49,458 - discord.client - INFO - logging in using static token
+2025-03-31 08:59:50,850 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 8a3c4764aa356ec1e6f4eef1183f7b44).
+2025-03-31 09:20:33,267 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 09:20:33,270 - discord.client - INFO - logging in using static token
+2025-03-31 09:20:34,775 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 556ba1548a2359ab35cb45f4f90ef303).
+2025-03-31 09:21:37,318 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 80, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 09:21:38,634 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 80, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 09:21:39,510 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 80, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 10:36:30,530 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 10:36:30,533 - discord.client - INFO - logging in using static token
+2025-03-31 10:36:32,208 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a21a4cec211a62fae0564675b23b3d2f).
+2025-03-31 10:37:09,255 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 10:37:09,971 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 10:37:10,840 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:12:45,061 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 11:12:45,063 - discord.client - INFO - logging in using static token
+2025-03-31 11:12:46,689 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2601eb72ee203c8af547df110e627cb5).
+2025-03-31 11:14:16,972 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 11:14:16,975 - discord.client - INFO - logging in using static token
+2025-03-31 11:14:20,278 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9a511ef98eddb5e4b6d8b362fc3a2358).
+2025-03-31 11:14:31,592 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:14:32,554 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:14:33,552 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:15:08,163 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:15:08,929 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:15:10,020 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:32:33,092 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 11:32:33,094 - discord.client - INFO - logging in using static token
+2025-03-31 11:32:34,535 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: d7003fa5b7bb98e88e4c6d232d2b4e54).
+2025-03-31 11:35:40,193 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 11:35:40,195 - discord.client - INFO - logging in using static token
+2025-03-31 11:35:41,511 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 273a557c3b489fd4370d4df0b8809277).
+2025-03-31 11:44:04,535 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 11:44:04,537 - discord.client - INFO - logging in using static token
+2025-03-31 11:44:06,305 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b19e83e8eb571ef595b2fe34857307eb).
+2025-03-31 11:47:23,166 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 11:47:26,849 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-03-31 14:43:32,767 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-03-31 14:43:32,985 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-31 14:43:38,319 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 52e921c7a266d5748558c3f02a35a4b0).
+2025-03-31 15:19:14,245 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 52e921c7a266d5748558c3f02a35a4b0.
+2025-03-31 15:56:10,992 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 15:56:10,994 - discord.client - INFO - logging in using static token
+2025-03-31 15:56:12,610 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a1edd34de4337e967ce2ef52734c9ee9).
+2025-03-31 16:02:58,955 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 16:02:58,958 - discord.client - INFO - logging in using static token
+2025-03-31 16:03:00,698 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7cc77e6a8a0ef2f3a6b1b36b2d6b16b7).
+2025-03-31 16:05:37,620 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 16:05:37,624 - discord.client - INFO - logging in using static token
+2025-03-31 16:05:39,109 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0845c066d346e2350022135b05df7f86).
+2025-03-31 16:21:52,614 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 16:21:52,616 - discord.client - INFO - logging in using static token
+2025-03-31 16:21:54,112 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c65bb0c6a62ef7749ea284c064460fee).
+2025-03-31 16:40:42,300 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 16:40:42,302 - discord.client - INFO - logging in using static token
+2025-03-31 16:40:43,866 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 481d908c56dff3ca91b4ff9468ac2762).
+2025-03-31 16:48:13,702 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-31 16:48:13,706 - discord.client - INFO - logging in using static token
+2025-03-31 16:48:15,398 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a54e5b84b3c002cb1b855dab963ea85a).
+2025-04-01 14:24:00,969 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-01 14:24:00,972 - discord.client - INFO - logging in using static token
+2025-04-01 14:24:02,695 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: fe4522b36d5c2a8287819325b365b93e).
+2025-04-01 14:24:58,254 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-01 14:24:58,257 - discord.client - INFO - logging in using static token
+2025-04-01 14:25:01,611 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c85f63bc9078539dfa8ecf7d943c2cc8).
+2025-04-01 14:50:09,359 - discord.gateway - INFO - Shard ID None has successfully RESUMED session c85f63bc9078539dfa8ecf7d943c2cc8.
+2025-04-01 18:42:57,288 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-01 18:42:57,535 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-01 18:43:02,838 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0f9c8bd831260b97f3ac2f1c9325abf5).
+2025-04-01 18:45:22,991 - discord.client - ERROR - Attempting a reconnect in 1.30s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-01 18:45:24,673 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 0f9c8bd831260b97f3ac2f1c9325abf5.
+2025-04-01 19:24:01,859 - discord.client - ERROR - Attempting a reconnect in 1.79s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-01 19:24:04,186 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-01 19:24:09,768 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f8d6a034306b705b3b4e7b120f3e6bdd).
+2025-04-01 19:26:41,186 - discord.client - ERROR - Attempting a reconnect in 0.70s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-01 19:26:42,136 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f8d6a034306b705b3b4e7b120f3e6bdd.

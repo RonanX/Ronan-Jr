@@ -169,127 +169,66 @@ class InitiativeTracker:
             )
 
     async def send_effect_update(self, interaction: discord.Interaction, effect_msgs: List[str], expiry_msgs: List[str] = None):
-        """
-        Send effect update embed via followup with improved formatting.
-        
-        Enhanced to ensure expiry messages are always displayed prominently,
-        including those from the feedback system.
-        
-        Args:
-            interaction: Discord interaction
-            effect_msgs: Regular effect messages (duration updates, etc.)
-            expiry_msgs: Messages specifically for effects that have expired
-        """
+        """Send effect update embed via followup with improved formatting"""
         # Initialize message categories
-        duration_msgs = []       # Regular duration updates
-        expiry_warning_msgs = [] # Effects that WILL expire after this turn
-        final_turn_msgs = []     # Effects on their final turn
-        expiry_msgs = expiry_msgs or []  # Explicit expiry messages (has worn off)
-
-        # DEBUG: Print all messages received to help with debugging
-        if not self.quiet_mode:
-            self.debug_print("\n=== DEBUG: Effect Messages Received ===")
-            for i, msg in enumerate(effect_msgs):
-                self.debug_print(f"Effect msg {i}: {msg}")
-            if expiry_msgs:
-                for i, msg in enumerate(expiry_msgs):
-                    self.debug_print(f"Explicit expiry msg {i}: {msg}")
+        duration_msgs = []
+        expiry_warning_msgs = []
+        final_turn_msgs = []
+        expiry_msgs = expiry_msgs or []
         
-        # Update the pending expiry list with any new warnings
-        if expiry_msgs:
-            self.expiry_pending_msgs = []  # Clear the pending list when expiry messages are processed
-        
-        # IMPROVED: First prioritize finding any "worn off" or expiry messages 
-        # and ensure they're categorized properly
-        for msg in effect_msgs[:]:
-            if not msg:
-                continue
-                
-            # Look for expiry messages using more flexible matching
-            if any(phrase in msg.lower() for phrase in ["worn off", "expired", "has ended", "wears off"]):
-                # This is an expiry message - add to expiry_msgs and remove from effect_msgs
-                if msg not in expiry_msgs:  # Avoid duplicates
-                    self.debug_print(f"Found expiry message in effect_msgs: {msg}")
-                    expiry_msgs.append(msg)
-                if msg in effect_msgs:
-                    effect_msgs.remove(msg)  # Remove to avoid double-processing
-        
-        # Now categorize the remaining effect messages    
+        # FIXED: Process each message and categorize appropriately
         for msg in effect_msgs:
             if not msg:
                 continue
-                
-            # Skip if message is already in a category (avoid duplicates)
-            if (msg in duration_msgs or msg in expiry_warning_msgs or 
-                msg in expiry_msgs or msg in self.expiry_pending_msgs or
-                msg in final_turn_msgs):
+            
+            # FIXED: Improved pattern matching for expiry messages
+            if any(pattern in msg.lower() for pattern in 
+                ["worn off", "expired", "has ended", "wears off", "has worn off"]):
+                if msg not in expiry_msgs:
+                    expiry_msgs.append(msg)
                 continue
                 
-            # More flexible matching that works with formatted messages containing backticks and emojis
-            # Check if this is an expiry warning (will wear off)
+            # Check for final turn warnings
             if "final turn" in msg.lower() or "will expire" in msg.lower():
                 if "final turn" in msg.lower():
-                    self.debug_print(f"Categorizing as final turn message: {msg}")
                     final_turn_msgs.append(msg)
                 else:
-                    self.debug_print(f"Categorizing as expiry warning: {msg}")
                     expiry_warning_msgs.append(msg)
-                    # Add to pending list so we can track it
-                    self.expiry_pending_msgs.append(msg)
-            # Regular duration update
             else:
-                self.debug_print(f"Categorizing as duration message: {msg}")
                 duration_msgs.append(msg)
         
-        # Skip if no messages at all
-        if not duration_msgs and not expiry_warning_msgs and not expiry_msgs and not final_turn_msgs:
-            self.debug_print("No messages to show, skipping effect update")
-            return
-            
         # Create embed for all effect updates
         embed = discord.Embed(title="Effects Update", color=discord.Color.gold())
         
         # Add fields for each message type if they exist
-        field_data = [
-            # Name, messages list, icon prefix
-            ("Effects Continuing", duration_msgs, ""),
-            ("Final Turn Effects", final_turn_msgs, "⚠️ "),
-            ("Will Expire Next Turn", expiry_warning_msgs, "⏱️ "),
-            ("Effects Expired", expiry_msgs, "❌ ")
-        ]
+        if duration_msgs:
+            embed.add_field(
+                name="Effects Continuing",
+                value="\n".join(duration_msgs),
+                inline=False
+            )
         
-        # DEBUG: Show what's going into each field
-        if not self.quiet_mode:
-            self.debug_print("\n=== DEBUG: Message Categorization ===")
-            for name, msgs, _ in field_data:
-                self.debug_print(f"{name}: {len(msgs)} messages")
-                for msg in msgs:
-                    self.debug_print(f"  {msg}")
+        if final_turn_msgs:
+            embed.add_field(
+                name="Final Turn Effects",
+                value="\n".join(final_turn_msgs),
+                inline=False
+            )
         
-        # Process each field
-        for field_name, messages, icon in field_data:
-            if not messages:
-                continue
-                
-            formatted_msgs = []
-            for msg in messages:
-                # Add icon prefix if specified and not at start already
-                if icon and not msg.startswith(icon) and not any(msg.startswith(emoji) for emoji in ["🔥", "❄️", "⚡", "✨", "🛡️", "⚔️"]):
-                    msg = f"{icon}{msg}"
-                    
-                # Add backticks if needed
-                if '`' not in msg:
-                    msg = f"`{msg}`"
-                    
-                formatted_msgs.append(msg)
-            
-            if formatted_msgs:
-                embed.add_field(
-                    name=field_name,
-                    value="\n".join(formatted_msgs),
-                    inline=False
-                )
-                
+        if expiry_warning_msgs:
+            embed.add_field(
+                name="Will Expire Next Turn",
+                value="\n".join(expiry_warning_msgs),
+                inline=False
+            )
+        
+        if expiry_msgs:
+            embed.add_field(
+                name="Effects Expired",
+                value="\n".join(expiry_msgs),
+                inline=False
+            )
+        
         # Only send if there's content
         if len(embed.fields) > 0:
             await interaction.followup.send(embed=embed)
@@ -307,8 +246,23 @@ class InitiativeTracker:
         current_char_name = self.current_turn.character_name
         current_char = self.bot.game_state.get_character(current_char_name)
         
+        # FIXED: Initialize message lists
+        end_effect_messages = []
+        expiry_messages = []
+        
         # Process end-of-turn effects for skipped character
         if current_char:
+            # FIXED: Check for pending effect feedback first
+            pending_feedback = current_char.get_pending_feedback()
+            if pending_feedback:
+                for feedback in pending_feedback:
+                    if feedback.expiry_message and not feedback.displayed:
+                        expiry_messages.append(feedback.expiry_message)
+                
+                # Mark feedback as displayed
+                current_char.mark_feedback_displayed()
+            
+            # Process effects - properly await the call
             was_skipped, start_msgs, end_msgs = await process_effects(
                 current_char,
                 self.round_number,
@@ -316,24 +270,30 @@ class InitiativeTracker:
                 self.logger
             )
             
-            # Store end messages for expiry tracking
-            self.previous_turn_end_msgs = end_msgs
+            # FIXED: Improved expiry message detection
+            for msg in end_msgs:
+                if not msg:
+                    continue
+                    
+                # Enhanced pattern matching for expiry messages
+                is_expiry = False
+                if any(pattern in msg.lower() for pattern in 
+                    ["worn off", "expired", "has ended", "wears off", "has worn off"]):
+                    is_expiry = True
+                    
+                if is_expiry:
+                    if msg not in expiry_messages:  # Avoid duplicates
+                        expiry_messages.append(msg)
+                else:
+                    end_effect_messages.append(msg)
             
             # Show end effects if any
-            if end_msgs:
-                # Check if there's feedback to include as expiry messages
-                feedback_expiry_msgs = []
-                
-                # Look for expiry messages in feedback
-                for feedback in current_char.get_pending_feedback():
-                    if feedback.expiry_message and not feedback.displayed:
-                        feedback_expiry_msgs.append(feedback.expiry_message)
-                
+            if end_effect_messages or expiry_messages:
                 # Send the update with separated expiry messages
-                await self.send_effect_update(interaction, end_msgs, feedback_expiry_msgs)
-                
-                # Mark feedback as displayed
-                current_char.mark_feedback_displayed()
+                await self.send_effect_update(interaction, end_effect_messages, expiry_messages)
+            
+            # Save character state
+            await self.bot.db.save_character(current_char)
         
         # Advance to next turn
         self.current_index += 1
@@ -352,19 +312,44 @@ class InitiativeTracker:
         
         new_char = self.bot.game_state.get_character(self.current_turn.character_name)
         if new_char:
-            # Process effects - properly await the call
-            was_skipped, start_msgs, end_msgs = await process_effects(
+            # FIXED: Check for pending effect feedback first
+            start_effect_messages = []
+            pending_feedback = new_char.get_pending_feedback()
+            if pending_feedback:
+                for feedback in pending_feedback:
+                    if feedback.expiry_message and not feedback.displayed:
+                        start_effect_messages.append(feedback.expiry_message)
+                
+                # Mark feedback as displayed
+                new_char.mark_feedback_displayed()
+            
+            # Process new turn - properly await the call
+            was_skipped, start_msgs, _ = await process_effects(
                 new_char,
                 self.round_number,
                 new_char.name,
                 self.logger
             )
                 
+            # Update skip status
             self.current_turn.skipped = was_skipped
-            await self.bot.db.save_character(new_char)
-            await self.announce_turn(interaction, start_msgs)
             
-            return True, "", start_msgs
+            # Handle effect messages
+            if start_msgs:
+                start_effect_messages.extend(start_msgs)
+                
+            # Save character state
+            await self.bot.db.save_character(new_char)
+            
+            # Announce turn
+            await self.announce_turn(interaction, start_effect_messages)
+            
+            # Handle another skipped turn if needed
+            if was_skipped:
+                return await self.process_skipped_turn(interaction)
+                
+            return True, "", start_effect_messages
+        
         return True, "", []
 
     async def process_turn_effects(self, character: Character) -> Tuple[bool, List[str]]:
@@ -713,7 +698,7 @@ class InitiativeTracker:
                 current_char = self.bot.game_state.get_character(self.current_turn.character_name)
                 if current_char:
                     # Process effects - properly await the call
-                    was_skipped, start_msgs, end_msgs = await process_effects(
+                    was_skipped, start_msgs, _ = await process_effects(
                         current_char,
                         self.round_number,
                         current_char.name,
@@ -764,12 +749,8 @@ class InitiativeTracker:
                         if feedback.expiry_message and not feedback.displayed:
                             self.debug_print(f"Adding feedback expiry message: {feedback.expiry_message}")
                             expiry_messages.append(feedback.expiry_message)
-                    
-                    # Mark feedback as displayed
-                    current_char.mark_feedback_displayed()
                 
-                # CRITICAL IMPROVEMENT: Better identification of expiry messages in end_msgs
-                # Use a more comprehensive check to find worn off/expired messages
+                # IMPROVED HANDLING: Better identification of expiry messages in end_msgs
                 for msg in end_msgs:
                     if not msg:
                         continue
@@ -784,18 +765,16 @@ class InitiativeTracker:
                         
                     if is_expiry:
                         self.debug_print(f"Found expiry message: {msg}")
-                        expiry_messages.append(msg)
+                        if msg not in expiry_messages:  # Avoid duplicates
+                            expiry_messages.append(msg)
                     else:
                         self.debug_print(f"Regular end message: {msg}")
                         end_effect_messages.append(msg)
                 
-                # Store end messages for expiry tracking
-                self.previous_turn_end_msgs = end_msgs
-                
                 # Save the character after processing effects
                 await self.bot.db.save_character(current_char)
                 
-                # IMPROVEMENT: More clear logging for effect update processing
+                # IMPROVED: More clear logging for effect update processing
                 self.debug_print(f"Sending effect update with:")
                 self.debug_print(f"- Regular messages: {len(end_effect_messages)}")
                 self.debug_print(f"- Expiry messages: {len(expiry_messages)}")
@@ -834,12 +813,13 @@ class InitiativeTracker:
             if new_char:
                 # Check for pending effect feedback first
                 pending_feedback = new_char.get_pending_feedback()
-                for feedback in pending_feedback:
-                    if feedback.expiry_message and not feedback.displayed:
-                        start_effect_messages.append(feedback.expiry_message)
+                if pending_feedback:
+                    for feedback in pending_feedback:
+                        if feedback.expiry_message and not feedback.displayed:
+                            start_effect_messages.append(feedback.expiry_message)
                 
                 # Process new turn - properly await the call
-                was_skipped, start_msgs, end_msgs = await process_effects(
+                was_skipped, start_msgs, _ = await process_effects(
                     new_char,
                     self.round_number,
                     new_char.name,
@@ -881,6 +861,58 @@ class InitiativeTracker:
             self.debug_print(f"Error in next_turn: {str(e)}")
             return False, f"Error processing turn: {str(e)}", []
         
+    async def end_combat(self, interaction: discord.Interaction = None) -> Tuple[bool, str]:
+        """
+        End the current combat session without modifying character states.
+        """
+        try:
+            # Check if combat is active
+            if self.state == CombatState.INACTIVE:
+                return False, "No combat is currently active"
+            
+            # Log combat end
+            if self.logger:
+                self.logger.end_combat()
+                
+            # Reset tracker state
+            self.state = CombatState.INACTIVE
+            self.turn_order = []
+            self.current_index = 0
+            self.round_number = 0
+            
+            # Only send message if interaction is provided (not in tests)
+            if interaction:
+                # Create combat end embed and send it
+                embed = discord.Embed(
+                    title="⚔️ Combat Ended ⚔️",
+                    description="`The battle has concluded!`",
+                    color=discord.Color.dark_red()
+                )
+                
+                embed.set_footer(text="Character states have been preserved")
+                await interaction.followup.send(embed=embed)
+            
+            return True, "Combat ended successfully"
+            
+        except Exception as e:
+            logger.error(f"Error ending combat: {e}", exc_info=True)
+            return False, f"Error ending combat: {str(e)}"
+        
+    def end_combat_test(self):
+        """End combat without interaction - for testing only"""
+        # Log combat end if logger exists
+        if self.logger:
+            self.logger.end_combat()
+            
+        # Reset tracker state
+        self.state = CombatState.INACTIVE
+        self.turn_order = []
+        self.current_index = 0
+        self.round_number = 0
+        
+        print("\n=== Combat Ended ===")
+        print("Test combat complete")
+
     def _get_current_state(self) -> Dict:
         """Get the current combat state for undo functionality"""
         return {

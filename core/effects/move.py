@@ -57,6 +57,7 @@ class MoveStateMachine:
     - Explicit state transitions based on turn counts
     - Prevention of double-processing
     - Detailed state tracking
+    - Fixed transitions that properly set the removal flag
     """
     def __init__(self, cast_time=None, duration=None, cooldown=None, debug_mode=True):
         self.debug_mode = debug_mode
@@ -85,7 +86,15 @@ class MoveStateMachine:
             
         self.last_processed_round = None
         self.last_processed_turn = None
-        self.was_just_activated = False  # Track if we just entered the active state
+        self.was_just_activated = False    # Track if we just entered the active state
+        self.should_be_removed = False     # Flag to indicate removal is needed
+        self.transition_message = None     # Store the last transition message
+        
+        # FIX: Track whether this move was used during the character's own turn
+        self.used_during_own_turn = False
+        # FIX: Track internal duration adjustments
+        self.duration_adjusted = False
+        
         self.debug_print(f"Starting in state: {self.state.value} with {self.turns_remaining} turns remaining")
     
     def debug_print(self, message):
@@ -103,8 +112,10 @@ class MoveStateMachine:
     
     def process_turn(self, round_number, turn_name) -> Tuple[bool, Optional[str]]:
         """
-        Process a turn for this state machine.
+        Process a turn for this state machine with fixed transition logic.
         Returns (did_transition, transition_message)
+        
+        FIX: Fixed transition logic between phases
         """
         # Prevent double-processing
         if (self.last_processed_round == round_number and 
@@ -117,6 +128,7 @@ class MoveStateMachine:
         
         # Reset activation tracking
         self.was_just_activated = False
+        self.transition_message = None
         
         # Only instant state has no turns remaining
         if self.state == MoveState.INSTANT:
@@ -126,13 +138,22 @@ class MoveStateMachine:
         self.debug_print(f"Processing turn from {self.turns_remaining} turns remaining")
         self.turns_remaining -= 1
         
-        # Check for transition
-        if self.turns_remaining <= 0:
+        # FIX: Handle the case where turns_remaining is negative
+        # This means the effect should be removed after this turn
+        if self.turns_remaining < 0:
+            self.debug_print("Turns remaining < 0, marking for removal")
+            self.should_be_removed = True
+            # Return True to indicate a transition occurred (final transition)
+            return True, "final removal"
+        
+        # Check for transition between phases (when turns_remaining becomes 0)
+        if self.turns_remaining == 0:
             old_state = self.state
             message = None
             
-            # Handle transitions based on current state
+            # FIX: Properly handle transitions between states
             if self.state == MoveState.CASTING:
+                # After casting, go to ACTIVE if there's duration, or COOLDOWN if not
                 if self.duration and self.duration > 0:
                     self.state = MoveState.ACTIVE
                     self.turns_remaining = self.duration
@@ -143,20 +164,30 @@ class MoveStateMachine:
                     self.turns_remaining = self.cooldown
                     message = "enters cooldown"
                 else:
+                    # No further phases - mark for removal and use "completes" message
                     message = "completes"
+                    self.should_be_removed = True
                     
             elif self.state == MoveState.ACTIVE:
+                # After active, go to COOLDOWN if there is one, otherwise remove
                 if self.cooldown and self.cooldown > 0:
                     self.state = MoveState.COOLDOWN
                     self.turns_remaining = self.cooldown
                     message = "enters cooldown"
                 else:
+                    # No cooldown phase - mark for removal and use "wears off" message
                     message = "wears off"
+                    self.should_be_removed = True
                     
             elif self.state == MoveState.COOLDOWN:
+                # After cooldown, always remove the effect
                 message = "cooldown has ended"
-                
+                self.should_be_removed = True
+            
+            self.transition_message = message
             self.debug_print(f"Transition: {old_state.value} → {self.state.value} with message: {message}")
+            if self.should_be_removed:
+                self.debug_print("Effect marked for removal during transition")
             return True, message
             
         self.debug_print(f"No transition needed. Remaining turns: {self.turns_remaining}")
@@ -171,7 +202,11 @@ class MoveStateMachine:
             "duration": self.duration,
             "cooldown": self.cooldown,
             "last_processed_round": self.last_processed_round,
-            "last_processed_turn": self.last_processed_turn
+            "last_processed_turn": self.last_processed_turn,
+            "should_be_removed": self.should_be_removed,
+            # FIX: Save the adjusted duration tracking
+            "used_during_own_turn": self.used_during_own_turn,
+            "duration_adjusted": self.duration_adjusted
         }
         
     @classmethod
@@ -186,6 +221,10 @@ class MoveStateMachine:
         sm.turns_remaining = data.get('turns_remaining', 0)
         sm.last_processed_round = data.get('last_processed_round')
         sm.last_processed_turn = data.get('last_processed_turn')
+        sm.should_be_removed = data.get('should_be_removed', False)
+        # FIX: Load the duration adjustment tracking
+        sm.used_during_own_turn = data.get('used_during_own_turn', False)
+        sm.duration_adjusted = data.get('duration_adjusted', False)
         return sm
 
 class SavingThrowProcessor:
@@ -817,6 +856,14 @@ class MoveEffect(BaseEffect):
         self._internal_cache = {}  # Cache for async results
         self.last_roll_round = None  # Track when we last rolled
         
+        # FIX: Add a transition counter to track how many times we've transitioned
+        # This helps prevent infinite transition chains
+        self.transition_count = 0
+        
+        # FIX: Add tracking for turn-based application and duration
+        self.applied_during_own_turn = False
+        self.displayed_duration = initial_duration  # For user-facing display
+        
         self.debug_print(f"Initialized with state {self.state}")
 
     def debug_print(self, message):
@@ -930,6 +977,22 @@ class MoveEffect(BaseEffect):
                 if hp_roll_message:
                     messages.append(hp_roll_message)
         
+        # FIX: Apply star cost consistently
+        if self.star_cost and self.star_cost > 0:
+            # Apply star cost if character has action_stars
+            if hasattr(character, 'action_stars'):
+                if hasattr(character.action_stars, 'use_stars'):
+                    # Use the standard method that should handle all the tracking
+                    character.action_stars.use_stars(self.star_cost, self.name)
+                    self.debug_print(f"Applied star cost: {self.star_cost} for move: {self.name}")
+                else:
+                    # Fallback to simpler approach if use_stars is not available
+                    if hasattr(character.action_stars, 'current_stars'):
+                        character.action_stars.current_stars = max(0, character.action_stars.current_stars - self.star_cost)
+                        self.debug_print(f"Applied star cost using direct attribute: {self.star_cost}")
+                    
+            messages.append(f"Uses {self.star_cost} Stars")
+        
         return messages
 
     def can_use(self, round_number: Optional[int] = None) -> tuple[bool, Optional[str]]:
@@ -970,21 +1033,39 @@ class MoveEffect(BaseEffect):
     
     async def on_apply(self, character, round_number: int) -> str:
         """
-        Initial effect application - synchronous interface.
-        This method handles the async operations internally.
+        Initial effect application with turn-based duration adjustment.
         
-        For instant moves with attack rolls:
-        - Processes attack rolls immediately
-        - Includes results in the initial message
-        
-        For other moves:
-        - Sets up the effect state
-        - Returns appropriate status message
+        FIX: Added special handling for moves used during character's own turn
         """
         self.debug_print(f"on_apply called for {character.name} on round {round_number}")
         
         # Initialize timing
         self.initialize_timing(round_number, character.name)
+        
+        # FIX: Check if this move is being used during character's own turn
+        self.applied_during_own_turn = False
+        # Check if we're in combat with an initiative tracker
+        if hasattr(character, 'game_state') and hasattr(character.game_state, 'initiative_tracker'):
+            tracker = character.game_state.initiative_tracker
+            if tracker.state != "inactive":  # Check if combat is active
+                # Check if it's this character's turn
+                if (hasattr(tracker, 'current_turn') and tracker.current_turn and 
+                    tracker.current_turn.character_name == character.name):
+                    self.debug_print(f"Move used during character's own turn")
+                    self.applied_during_own_turn = True
+                    self.state_machine.used_during_own_turn = True
+                    
+                    # If we have an active phase or will transition to active, adjust duration
+                    if self.state == MoveState.ACTIVE and self.state_machine.duration:
+                        # Add 1 to internal turns_remaining but keep display duration the same
+                        self.state_machine.turns_remaining += 1
+                        self.displayed_duration = self.state_machine.duration  # Original value
+                        self.state_machine.duration_adjusted = True
+                        self.debug_print(f"Adjusted internal duration: +1 (now {self.state_machine.turns_remaining}) but displayed as {self.displayed_duration}")
+                    elif self.state == MoveState.CASTING and self.state_machine.duration:
+                        # Mark for later adjustment when move becomes active
+                        self.state_machine.duration_adjusted = True
+                        self.debug_print(f"Marked for duration adjustment when active")
         
         # Apply costs and format messages
         details = []
@@ -1029,8 +1110,14 @@ class MoveEffect(BaseEffect):
         # Add timing info based on state machine
         if self.state_machine.cast_time:
             timing_info.append(f"🔄 {self.state_machine.cast_time}T Cast")
+        
+        # FIX: Use displayed_duration for messaging if it was adjusted
         if self.state_machine.duration:
-            timing_info.append(f"⏳ {self.state_machine.duration}T Duration")
+            # If a move is used during a character's turn, we internally adjust duration 
+            # but still display the original value to the user
+            display_duration = self.displayed_duration if self.applied_during_own_turn else self.state_machine.duration
+            timing_info.append(f"⏳ {display_duration}T Duration")
+            
         if self.state_machine.cooldown:
             timing_info.append(f"⌛ {self.state_machine.cooldown}T Cooldown")
             
@@ -1176,6 +1263,15 @@ class MoveEffect(BaseEffect):
             messages.append(cast_msg)
                 
         elif self.state == MoveState.ACTIVE:
+            # FIX: Check if we need to adjust duration when moving from CASTING to ACTIVE
+            if (self.state_machine.used_during_own_turn and 
+                self.state_machine.duration_adjusted and
+                self.state_machine.was_just_activated):
+                self.debug_print(f"Adding +1 to duration after transitioning to active state")
+                self.state_machine.turns_remaining += 1
+                self.displayed_duration = self.state_machine.duration  # Original value
+                self.state_machine.duration_adjusted = True
+                
             # Special handling for when we first become active or per_turn effects
             just_activated = self.last_roll_round != round_number and self.roll_timing == RollTiming.ACTIVE
             is_per_turn = self.roll_timing == RollTiming.PER_TURN
@@ -1215,7 +1311,14 @@ class MoveEffect(BaseEffect):
                 else:
                     details.append(self.description)
             
-            details.append(f"{remaining} turn{'s' if remaining != 1 else ''} remaining")
+            # FIX: Use displayed_duration for consistent user-facing info
+            if self.applied_during_own_turn and self.state_machine.duration_adjusted:
+                # Find out how many display turns remain
+                display_remaining = max(0, remaining - 1)
+                details.append(f"{display_remaining} turn{'s' if display_remaining != 1 else ''} remaining")
+                self.debug_print(f"Showing {display_remaining} turns remaining (internal: {remaining})")
+            else:
+                details.append(f"{remaining} turn{'s' if remaining != 1 else ''} remaining")
             
             active_msg = self.format_effect_message(
                 f"{self.name} active",
@@ -1242,10 +1345,7 @@ class MoveEffect(BaseEffect):
         """
         Handle phase transitions and duration tracking with enhanced feedback.
         
-        Provides:
-        - Clear transition messages between states
-        - Duration tracking for all phases
-        - Proper cleanup handling
+        FIX: Improved handling for state transitions and expiry
         """
         # Only process for effect owner
         if character.name != turn_name:
@@ -1258,25 +1358,74 @@ class MoveEffect(BaseEffect):
         old_state = self.state
         old_remaining = self.get_remaining_turns()
         
+        # FIX: Check if already marked for removal
+        if self.marked_for_removal or self.state_machine.should_be_removed:
+            self.debug_print(f"Effect already marked for removal, skipping further processing")
+            # FIX: Add to feedback system with proper expiry message
+            expiry_msg = self.format_effect_message(
+                f"{self.name} has worn off from {character.name}"
+            )
+            self._add_expiry_feedback(character, expiry_msg, round_number)
+            return []
+        
+        # Check transition count to prevent infinite transitions
+        if self.transition_count > 10:  # Set a reasonable limit
+            self.debug_print(f"Too many transitions detected ({self.transition_count}), forcing removal")
+            self.marked_for_removal = True
+            return []
+        
         # Process state machine transition
         did_transition, transition_msg = self.state_machine.process_turn(round_number, turn_name)
+        
+        # Check if the state machine now indicates removal
+        if self.state_machine.should_be_removed:
+            self.debug_print(f"State machine indicates removal is needed after transition")
+            self.marked_for_removal = True
+            
+            # FIX: Add a proper expiry message that will show up in the effect update
+            expiry_msg = self.format_effect_message(
+                f"{self.name} has worn off from {character.name}",
+                ["Effect complete"]
+            )
+            self._add_expiry_feedback(character, expiry_msg, round_number)
+            
+            # Return special wears off message for final cleanup
+            if transition_msg == "wears off" or transition_msg == "final removal":
+                messages.append(self.format_effect_message(
+                    f"{self.name} wears off",
+                    [f"Effect has ended"]
+                ))
+            return messages
         
         # Handle non-transition updates (normal duration tracking)
         if not did_transition:
             # Show duration update for active and cooldown phases
             if self.state in [MoveState.ACTIVE, MoveState.COOLDOWN] and old_remaining > 0:
                 remaining = self.get_remaining_turns()
-                state_name = "active effect" if self.state == MoveState.ACTIVE else "cooldown"
-                continue_msg = self.format_effect_message(
-                    f"{self.name} {state_name} continues",
-                    [f"{remaining} turn{'s' if remaining != 1 else ''} remaining"]
-                )
+                
+                # FIX: Handle display remaining turns differently based on whether 
+                # the move was used during the character's own turn
+                if self.applied_during_own_turn and self.state == MoveState.ACTIVE and self.state_machine.duration_adjusted:
+                    # The real remaining turns is one more than what we show
+                    display_remaining = max(0, remaining - 1)
+                    continue_msg = self.format_effect_message(
+                        f"{self.name} continues",
+                        [f"{display_remaining} turn{'s' if display_remaining != 1 else ''} remaining"]
+                    )
+                    self.debug_print(f"Showing {display_remaining} turns remaining (internal: {remaining})")
+                else:
+                    # Normal display of remaining turns
+                    continue_msg = self.format_effect_message(
+                        f"{self.name} continues",
+                        [f"{remaining} turn{'s' if remaining != 1 else ''} remaining"]
+                    )
                 messages.append(continue_msg)
+                
             # Show casting continuation
             elif self.state == MoveState.CASTING and old_remaining > 0:
                 remaining = self.get_remaining_turns()
                 cast_msg = self.format_effect_message(
-                    f"Continuing to cast {self.name}",
+                    f"Casting {self.name}",
                     [f"{remaining} turn{'s' if remaining != 1 else ''} remaining"]
                 )
                 messages.append(cast_msg)
@@ -1284,15 +1433,23 @@ class MoveEffect(BaseEffect):
         # Show transition message if needed - with enhanced formatting
         if did_transition and transition_msg:
             self.debug_print(f"State transition: {transition_msg}")
+            self.transition_count += 1
             
             # Format transition message based on new state
             if self.state == MoveState.ACTIVE:
                 # Casting to Active transition
+                # FIX: For moves used during character's own turn, duration needs adjustment
+                if self.applied_during_own_turn and self.state_machine.duration_adjusted:
+                    display_duration = self.displayed_duration
+                    self.debug_print(f"Showing {display_duration} display duration (internal: {self.state_machine.duration}) for transition to active")
+                else:
+                    display_duration = self.get_remaining_turns()
+                
                 msg = self.format_effect_message(
                     f"{self.name} {transition_msg}",
                     [
                         f"Cast time complete!",
-                        f"Effect active for {self.get_remaining_turns()} turn{'s' if self.get_remaining_turns() != 1 else ''}"
+                        f"Effect active for {display_duration} turn{'s' if display_duration != 1 else ''}"
                     ],
                     emoji="✨"
                 )
@@ -1309,44 +1466,42 @@ class MoveEffect(BaseEffect):
             elif transition_msg == "cooldown has ended":
                 # Cooldown ended
                 msg = self.format_effect_message(
-                    f"{self.name} ready to use again",
-                    ["Cooldown has ended"],
+                    f"{self.name} cooldown has ended",
+                    ["Ready to use again"],
                     emoji="✅"
                 )
-                # Delay removal until next turn to ensure message is seen
-                # self.marked_for_removal = True  # Commented out to delay removal
+                # FIX: Mark for removal at the end of cooldown
+                self.marked_for_removal = True
+            elif transition_msg == "wears off" or transition_msg == "final removal":
+                # Effect wears off (no further phases)
+                msg = self.format_effect_message(
+                    f"{self.name} wears off",
+                    ["Effect has ended"],
+                    emoji="✨"
+                )
+                # FIX: Mark for removal when wearing off
+                self.marked_for_removal = True
             else:
                 # Generic transition
                 msg = self.format_effect_message(f"{self.name} {transition_msg}")
                 
             messages.append(msg)
             
-            # Mark for removal if cooldown ended - now delayed until after message is shown
-            if self.state == MoveState.COOLDOWN and transition_msg == "cooldown has ended":
-                # Instead of immediately marking for removal, set a flag to remove next turn
-                self.debug_print(f"Marking for removal due to cooldown end (delayed)")
-                self._remove_after_cooldown_msg = True
-                # self.marked_for_removal = True  # Commented out to delay removal
-                
-            # Or if active effect wore off with no cooldown
-            elif self.state == MoveState.ACTIVE and transition_msg == "wears off":
-                self.debug_print(f"Marking for removal due to active effect expiry")
-                self.marked_for_removal = True
-        
-        # Check if we need to remove after showing cooldown message
-        if hasattr(self, '_remove_after_cooldown_msg') and self._remove_after_cooldown_msg:
-            self.marked_for_removal = True
-            self._remove_after_cooldown_msg = False
+            # FIX: Add to feedback system if this is a final transition
+            if self.marked_for_removal:
+                self.debug_print(f"Adding to feedback system for final transition")
+                self._add_expiry_feedback(character, msg, round_number)
         
         return messages
 
+    # Override the is_expired property to use the state machine's removal flag
     @property
     def is_expired(self) -> bool:
         """
         A move is expired when:
         1. It's marked for removal, OR
         2. It's an INSTANT effect that has been processed, OR
-        3. It's in COOLDOWN phase and has completed the full cooldown
+        3. The state machine indicates it should be removed (turns_remaining == -1)
         """
         # If explicitly marked for removal
         if self.marked_for_removal:
@@ -1358,17 +1513,9 @@ class MoveEffect(BaseEffect):
             self.debug_print(f"is_expired: True (INSTANT state)")
             return True
             
-        # Move has no remaining turns and is in final state
-        if (self.state == MoveState.COOLDOWN and 
-            self.get_remaining_turns() <= 0):
-            self.debug_print(f"is_expired: True (COOLDOWN complete)")
-            return True
-            
-        # Move has no remaining turns, not in cooldown, and has no cooldown parameter
-        if (self.state == MoveState.ACTIVE and 
-            self.get_remaining_turns() <= 0 and 
-            not self.state_machine.cooldown):
-            self.debug_print(f"is_expired: True (ACTIVE complete, no cooldown)")
+        # If state machine says to remove
+        if hasattr(self.state_machine, 'should_be_removed') and self.state_machine.should_be_removed:
+            self.debug_print(f"is_expired: True (state machine says to remove)")
             return True
         
         # Otherwise, not expired
@@ -1388,11 +1535,21 @@ class MoveEffect(BaseEffect):
         # Mark for removal to ensure it gets deleted
         self.marked_for_removal = True
         
-        # Set duration to 0 to ensure it gets removed
+        # Set should_be_removed to True in the state machine too
+        self.state_machine.should_be_removed = True
+        
+        # FIX: Set duration to 0 to ensure it gets removed
         if hasattr(self, 'timing'):
             self.timing.duration = 0
             
-        return self.format_effect_message(f"{self.name} has ended")
+        # FIX: Add consistent expiry message format
+        message = self.format_effect_message(f"{self.name} has worn off from {character.name}")
+        
+        # FIX: Add final turn with turn remaining = -1 to state machine
+        # This ensures proper transition through the states
+        self.state_machine.turns_remaining = -1
+        
+        return message
     
     # Serialization methods
     def to_dict(self) -> dict:
@@ -1418,7 +1575,11 @@ class MoveEffect(BaseEffect):
             "aoe_mode": self.combat.aoe_mode,
             "bonus_on_hit": self.bonus_on_hit.to_dict() if hasattr(self.bonus_on_hit, 'to_dict') else None,
             "marked_for_removal": self.marked_for_removal,
-            "last_roll_round": self.last_roll_round
+            "last_roll_round": self.last_roll_round,
+            "transition_count": getattr(self, 'transition_count', 0),  # Track transition count
+            # FIX: Save turn-based duration adjustment tracking
+            "applied_during_own_turn": self.applied_during_own_turn,
+            "displayed_duration": self.displayed_duration
         })
         
         # Remove None values to save space
@@ -1496,16 +1657,25 @@ class MoveEffect(BaseEffect):
             # Restore save state if available
             if hasattr(effect, 'saves') and 'targets_saved' in data:
                 effect.saves.targets_saved = set(data.get('targets_saved', []))
-            
+                
             # Restore timing information
             if timing_data := data.get('timing'):
                 effect.timing = EffectTiming(**timing_data)
                 
-            effect.last_roll_round = data.get('last_roll_round')
+            # FIX: Restore marked_for_removal flag
             effect.marked_for_removal = data.get('marked_for_removal', False)
+            
+            # FIX: Restore transition count
+            effect.transition_count = data.get('transition_count', 0)
+                
+            effect.last_roll_round = data.get('last_roll_round')
+                
+            # FIX: Restore turn-based duration adjustment tracking
+            effect.applied_during_own_turn = data.get('applied_during_own_turn', False)
+            effect.displayed_duration = data.get('displayed_duration', effect.state_machine.duration or 0)
                 
             return effect
-            
+                
         except Exception as e:
             print(f"Error reconstructing MoveEffect: {str(e)}")
             return None

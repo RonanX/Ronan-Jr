@@ -431,22 +431,18 @@ class InitiativeCommands(commands.GroupCog, name="initiative"):
         except Exception as e:
             await handle_error(interaction, e)
 
-    @app_commands.command(name="endcombat")
-    async def end_combat(
-        self,
-        interaction: discord.Interaction
-    ):
-        """End the current combat"""
+    @app_commands.command(name="endcombat", description="End the current combat")
+    async def end_combat(self, interaction: discord.Interaction):
+        """End the current combat session"""
         try:
             await interaction.response.defer()
             
-            self.debug_print("\n=== Ending Combat ===")
+            # Fixed: Pass the interaction to the end_combat method
+            success, message = await self.tracker.end_combat(interaction)
             
-            success, message = self.tracker.end_combat()
-            await interaction.followup.send(
-                "⚔️ `Combat ended!` ⚔️" if success else f"❌ `{message}` ❌"
-            )
-
+            if not success:
+                await interaction.followup.send(f"❌ {message}", ephemeral=True)
+                
         except Exception as e:
             await handle_error(interaction, e)
 

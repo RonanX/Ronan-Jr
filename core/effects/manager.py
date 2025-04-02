@@ -202,173 +202,210 @@ async def process_effects(
     combat_logger = None
 ) -> Tuple[bool, List[str], List[str]]:
     """
-    Process all effects for a character's turn with improved expiry message handling.
+    Process all effects for a character's turn with improved feedback handling.
     
-    This function handles both sync and async effect methods properly.
-    Also processes effect feedback for reliable expiry messages.
+    This function:
+    1. Processes each effect's turn start phase
+    2. Checks for effects that would skip the turn
+    3. Processes each effect's turn end phase
+    4. Properly removes expired effects
+    5. Maintains effect feedback for reliable expiry messages
     
     Args:
-        character: Character to process
+        character: Character being processed
         round_number: Current round number
         turn_name: Name of character whose turn it is
         combat_logger: Optional combat logger
         
     Returns:
-        Tuple of:
-        - was_skipped: Whether turn should be skipped
-        - start_messages: Messages from start of turn effects
-        - end_messages: Messages from end of turn effects
+        Tuple of (was_turn_skipped, start_messages, end_messages)
     """
-    # Take a snapshot of character state before processing
-    if combat_logger:
-        combat_logger.snapshot_character_state(character)
-        
     start_messages = []
     end_messages = []
     was_skipped = False
-    effects_to_remove = []  # Track effects to remove at the end
-    print(f"DEBUG: Processing effects for {character.name} in round {round_number}, turn: {turn_name}")
-    print(f"DEBUG: Character has {len(character.effects)} active effects")
+    effects_to_remove = []
     
     try:
-        # Check for pending effect feedback from previous turn
-        if character.name == turn_name:
+        # ===== TURN START PHASE =====
+        
+        # FIXED: Check for pending effect feedback at the START of processing
+        if character.name == turn_name and hasattr(character, 'effect_feedback'):
             pending_feedback = character.get_pending_feedback()
             if pending_feedback:
-                print(f"DEBUG: Found {len(pending_feedback)} pending feedback messages")
                 for feedback in pending_feedback:
                     if feedback.expiry_message and not feedback.displayed:
-                        # Add feedback message to start_messages or end_messages based on timing
-                        # If feedback is from this character's turn, add to start_messages
-                        # Otherwise add to end_messages
-                        if feedback.turn_expired == character.name:
-                            start_messages.append(feedback.expiry_message)
-                        else:
-                            end_messages.append(feedback.expiry_message)
+                        # Add to start messages so it shows at turn start
+                        start_messages.append(feedback.expiry_message)
                 
-                # Mark all feedback as displayed
-                character.mark_feedback_displayed()
-                
-                # Clear displayed feedback (optional, can be done later)
-                character.clear_old_feedback()
+                # Mark feedback as displayed only on this character's turn
+                if character.name == turn_name:
+                    character.mark_feedback_displayed()
         
-        # Only process if it's this character's turn
+        # Only process effect logic on character's turn
         if character.name == turn_name:
-            # Add character round number for easier access in effects
+            # Add round number for easier access in effects
             character.round_number = round_number
             
             # Process start of turn effects
-            for effect in character.effects[:]:  # Copy to avoid modification issues
-                # Skip processing if effect is already marked for removal
+            for effect in character.effects[:]:
+                # Skip if already marked for removal
                 if hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
-                    print(f"DEBUG: Effect {effect.name} already marked for expiry, tracking for removal")
                     effects_to_remove.append(effect)
                     continue
-                    
-                # Call on_turn_start if it exists
+                
+                # FIXED: Check also for MoveEffect marked_for_removal
+                if hasattr(effect, 'marked_for_removal') and effect.marked_for_removal:
+                    effects_to_remove.append(effect)
+                    continue
+                
+                # Skip if state machine indicates effect should be removed
+                if hasattr(effect, 'state_machine') and hasattr(effect.state_machine, 'should_be_removed') and effect.state_machine.should_be_removed:
+                    effects_to_remove.append(effect)
+                    continue
+                
+                # Call on_turn_start
                 if hasattr(effect, 'on_turn_start'):
-                    # Check if method is async
                     if inspect.iscoroutinefunction(effect.on_turn_start):
                         start_result = await effect.on_turn_start(character, round_number, turn_name)
                     else:
                         start_result = effect.on_turn_start(character, round_number, turn_name)
                     
-                    # Add messages to our collection
+                    # Add messages to collection
                     if start_result:
                         if isinstance(start_result, list):
                             start_messages.extend(start_result)
                         else:
                             start_messages.append(start_result)
-                    
-                    # Special case for MoveEffect - process any stored async operations
-                    if hasattr(effect, 'process_async_results'):
-                        attack_messages = await effect.process_async_results()
-                        start_messages.extend(attack_messages)
                 
-                # Check if this effect causes the turn to be skipped
+                # Check for skip effect
                 if hasattr(effect, 'skips_turn') and effect.skips_turn:
                     was_skipped = True
-                    
-                # Check if effect was marked for expiry during start phase
-                if hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
-                    if not effect in effects_to_remove:
-                        print(f"DEBUG: Effect {effect.name} marked for expiry during start phase")
+                
+                # Check for is_expired directly
+                if hasattr(effect, 'is_expired') and effect.is_expired:
+                    effects_to_remove.append(effect)
+                # Track effects marked for expiry during start phase
+                elif hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
+                    if effect not in effects_to_remove:
                         effects_to_remove.append(effect)
-            
-            # Process end of turn effects
-            for effect in character.effects[:]:  # Copy to avoid modification issues
-                # Skip processing if effect is already marked for removal
-                if effect in effects_to_remove:
-                    continue
-                    
-                # Call on_turn_end if it exists
-                if hasattr(effect, 'on_turn_end'):
-                    # Check if method is async
-                    if inspect.iscoroutinefunction(effect.on_turn_end):
-                        end_result = await effect.on_turn_end(character, round_number, turn_name)
-                    else:
-                        end_result = effect.on_turn_end(character, round_number, turn_name)
-                    
-                    # Add messages to our collection
-                    if end_result:
-                        if isinstance(end_result, list):
-                            end_messages.extend(end_result)
-                        else:
-                            end_messages.append(end_result)
-                    
-                    # Special case for MoveEffect - process any stored async operations
-                    if hasattr(effect, 'process_async_results'):
-                        attack_messages = await effect.process_async_results()
-                        if attack_messages:
-                            end_messages.extend(attack_messages)
-                            
-                # Check if effect should expire after on_turn_end processing
-                if hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
-                    if not effect in effects_to_remove:  # Avoid duplicate processing
-                        print(f"DEBUG: Effect {effect.name} marked for expiry during end phase")
+                # FIXED: Also check for MoveEffect marked_for_removal
+                elif hasattr(effect, 'marked_for_removal') and effect.marked_for_removal:
+                    if effect not in effects_to_remove:
                         effects_to_remove.append(effect)
-            
-            # Process effect removal and generate expiry messages
+
+            # FIXED: Process effects marked for removal after turn start
             for effect in effects_to_remove:
-                if effect in character.effects:  # Check that it still exists
-                    # Call on_expire - handle async or sync
-                    expire_msg = ""
+                if effect in character.effects:
+                    # Call on_expire
                     if inspect.iscoroutinefunction(effect.on_expire):
                         expire_msg = await effect.on_expire(character)
                     else:
                         expire_msg = effect.on_expire(character)
                     
-                    # Add the expiry message if it's not empty and not already in the messages
-                    if expire_msg:
-                        print(f"DEBUG: Adding expiry message: {expire_msg}")
-                        # Add to end messages for end-of-turn expiry
-                        if expire_msg not in end_messages:
-                            end_messages.append(expire_msg)
+                    # Add expiry message to start messages if it exists
+                    if expire_msg and expire_msg not in start_messages:
+                        start_messages.append(expire_msg)
                     
-                    print(f"DEBUG: Removing effect {effect.name} from {character.name}")
-                    # Remove from character's effects list
+                    # FIXED: Explicitly remove effect from character's list
                     character.effects.remove(effect)
             
-            # Clean up the character round number
+            # Clear list to track end-phase removals separately
+            effects_to_remove = []
+            
+        # ===== TURN END PHASE =====
+        
+        # Process end of turn effects
+        if character.name == turn_name:
+            for effect in character.effects[:]:
+                # Skip if already in removal list
+                if effect in effects_to_remove:
+                    continue
+                
+                # Skip if state machine indicates effect should be removed
+                if hasattr(effect, 'state_machine') and hasattr(effect.state_machine, 'should_be_removed') and effect.state_machine.should_be_removed:
+                    effects_to_remove.append(effect)
+                    continue
+                
+                # Call on_turn_end
+                if hasattr(effect, 'on_turn_end'):
+                    if inspect.iscoroutinefunction(effect.on_turn_end):
+                        end_result = await effect.on_turn_end(character, round_number, turn_name)
+                    else:
+                        end_result = effect.on_turn_end(character, round_number, turn_name)
+                    
+                    # IMPROVED: Collect all end messages
+                    if end_result:
+                        if isinstance(end_result, list):
+                            for msg in end_result:
+                                if not msg:
+                                    continue
+                                end_messages.append(msg)
+                        else:
+                            end_messages.append(end_result)
+                
+                # Check for is_expired at end of turn
+                if hasattr(effect, 'is_expired') and effect.is_expired:
+                    effects_to_remove.append(effect)
+                # Track effects marked for expiry during end phase
+                elif hasattr(effect, '_marked_for_expiry') and effect._marked_for_expiry:
+                    if effect not in effects_to_remove:
+                        effects_to_remove.append(effect)
+                # FIXED: Also check for MoveEffect marked_for_removal
+                elif hasattr(effect, 'marked_for_removal') and effect.marked_for_removal:
+                    if effect not in effects_to_remove:
+                        effects_to_remove.append(effect)
+            
+            # FIXED: Process effect removal for end-phase expirations
+            for effect in effects_to_remove:
+                if effect in character.effects:
+                    # FIXED: Check if it's a move effect and already added expiry message
+                    if hasattr(effect, 'marked_for_removal') and effect.marked_for_removal:
+                        # Call on_expire only if it hasn't already added to feedback
+                        perform_expire = True
+                        
+                        if hasattr(character, 'effect_feedback'):
+                            for feedback in character.effect_feedback:
+                                if feedback.effect_name == effect.name and not feedback.displayed:
+                                    # We already have pending feedback, don't call on_expire again
+                                    perform_expire = False
+                                    break
+                        
+                        if perform_expire:
+                            # Call on_expire
+                            if inspect.iscoroutinefunction(effect.on_expire):
+                                expire_msg = await effect.on_expire(character)
+                            else:
+                                expire_msg = effect.on_expire(character)
+                            
+                            # Add expiry message to the list if it exists and not already there
+                            if expire_msg and expire_msg not in end_messages:
+                                end_messages.append(expire_msg)
+                    else:
+                        # Standard effect - always call on_expire
+                        if inspect.iscoroutinefunction(effect.on_expire):
+                            expire_msg = await effect.on_expire(character)
+                        else:
+                            expire_msg = effect.on_expire(character)
+                        
+                        # Add expiry message to the list if it exists
+                        if expire_msg and expire_msg not in end_messages:
+                            end_messages.append(expire_msg)
+                    
+                    # FIXED: Always remove the effect from character's list
+                    character.effects.remove(effect)
+            
+            # Clean up round number
             if hasattr(character, 'round_number'):
                 delattr(character, 'round_number')
-        
-        # Take another snapshot after processing
-        if combat_logger:
-            combat_logger.snapshot_character_state(character)
             
-        print(f"DEBUG: Returning: was_skipped={was_skipped}, start_msgs={len(start_messages)}, end_msgs={len(end_messages)}")
+            # FIXED: No need to append expiry messages here - already handled above
+        
         return was_skipped, start_messages, end_messages
         
     except Exception as e:
         logger.error(f"Error processing effects: {str(e)}", exc_info=True)
-        print(f"DEBUG: Error processing effects: {str(e)}")
-        
-        # Clean up the character round number in case of error
         if hasattr(character, 'round_number'):
             delattr(character, 'round_number')
-            
-        # Return empty results on error
         return False, [], []
     
 def get_effect_summary(character) -> List[str]:
