@@ -96,35 +96,36 @@ from modules.menu.defense_handler import DefenseHandler
 from utils.error_handler import setup as error_handler_setup
 
 
-# Load environment variables
+# Load environment variables  
 load_dotenv('secrets.env')
+# Verify variables are loaded
+print("Environment Variables Loaded:")
+print(f"DMTOKEN exists: {os.getenv('DMTOKEN') is not None}")
+print(f"DATABASEURL: {os.getenv('DATABASEURL')}")
 
+# Get the token and Firebase config from environment variables  
+TOKEN = os.getenv('DMTOKEN')  # Use the environment variable
+DATABASEURL = os.getenv('DATABASEURL')
+APIKEY = os.getenv('APIKEY')
+AUTHDOMAIN = os.getenv('AUTHDOMAIN')
+PROJECTID = os.getenv('PROJECTID')
+STORAGEBUCKET = os.getenv('STORAGEBUCKET')
+MESSAGINGSENDERID = os.getenv('MESSAGINGSENDERID')
+APPID = os.getenv('APPID')
+MEASUREMENTID = os.getenv('MEASUREMENTID')
 
-# Get the token and Firebase config from environment variables
-TOKEN = "MTE1MjQ0Mzc1Mjg3OTc1MTI5Mg.GLZp2d.uDIu0Hhy2ivGJ2dgiirjqIE9HF5mBFajuacc9g"
-DATABASEURL = "https://ronan-jr-s-brain-default-rtdb.firebaseio.com"
-APIKEY = "AIzaSyBAl5wjW1D6KY_7ZEZVz_HJPGLUDeK9mXs"
-AUTHDOMAIN = "ronan-jr-s-brain.firebaseapp.com"
-PROJECTID = "ronan-jr-s-brain"
-STORAGEBUCKET = "ronan-jr-s-brain.appspot.com"
-MESSAGINGSENDERID = "367079247693"
-APPID = "1:367079247693:web:cb031f1b79229ef1007104"
-MEASUREMENTID = "G-6PQ2DEH8BV"
-
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('bot.log'),
-        logging.StreamHandler()
-    ]
-)
+# Configure logging  
+logging.basicConfig(  
+    level=logging.INFO,  
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  
+    handlers=[  
+        logging.FileHandler('bot.log'),  
+        logging.StreamHandler()  
+    ]  
+)  
 logger = logging.getLogger(__name__)
 
-
-# List of guild IDs where commands will be available
+# List of guild IDs where commands will be available  
 GUILD_IDS = [421424814952284160, 968588058133942312]
 
 class GameBot(commands.Bot):  

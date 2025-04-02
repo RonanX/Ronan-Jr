@@ -14910,3 +14910,576 @@ Traceback (most recent call last):
     raise ClientConnectorDNSError(req.connection_key, exc) from exc
 aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
 2025-04-01 19:26:42,136 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f8d6a034306b705b3b4e7b120f3e6bdd.
+2025-04-01 19:31:44,508 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-01 19:31:44,510 - discord.client - INFO - logging in using static token
+2025-04-01 19:31:46,024 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: d1997ba427afc3f8a943d96f88b0305f).
+2025-04-01 19:49:09,019 - discord.client - ERROR - Attempting a reconnect in 1.86s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-01 19:49:11,123 - discord.gateway - INFO - Shard ID None has successfully RESUMED session d1997ba427afc3f8a943d96f88b0305f.
+2025-04-02 00:14:16,501 - discord.client - ERROR - Attempting a reconnect in 1.85s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-02 00:14:18,432 - discord.client - ERROR - Attempting a reconnect in 1.87s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-02 00:14:20,311 - discord.client - ERROR - Attempting a reconnect in 3.94s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-02 00:14:24,473 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-02 00:14:29,793 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2cfc17c1a865ff6e279f6d1070d399cc).
+2025-04-02 00:57:57,164 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 2cfc17c1a865ff6e279f6d1070d399cc.
+2025-04-02 01:35:20,602 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-02 01:39:43,024 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-02 01:39:43,026 - discord.client - INFO - logging in using static token
+2025-04-02 01:44:24,672 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-02 01:44:24,674 - discord.client - INFO - logging in using static token
+2025-04-02 01:44:25,467 - core.database - ERROR - Error during migration: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 170, in _check_and_migrate
+    old_base_stats = db.reference('base_stats').get()
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 221, in get
+    return self._client.body('get', self._add_suffix(), params=params)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 136, in body
+    resp = self.request(method, url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 929, in request
+    return super(_Client, self).request(method, url, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 123, in request
+    resp = self._session.request(method, self.base_url + url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\transport\requests.py", line 533, in request
+    self.credentials.before_request(auth_request, method, url, request_headers)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 239, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 202, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\service_account.py", line 448, in refresh
+    access_token, expiry, _ = _client.jwt_grant(
+                              ~~~~~~~~~~~~~~~~~^
+        request, self._token_uri, assertion
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 299, in jwt_grant
+    response_data = _token_endpoint_request(
+        request,
+    ...<5 lines>...
+        },
+    )
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 270, in _token_endpoint_request
+    _handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 69, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+2025-04-02 01:44:25,536 - core.database - ERROR - Failed to initialize database: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 63, in initialize
+    await self._check_and_migrate()
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 170, in _check_and_migrate
+    old_base_stats = db.reference('base_stats').get()
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 221, in get
+    return self._client.body('get', self._add_suffix(), params=params)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 136, in body
+    resp = self.request(method, url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 929, in request
+    return super(_Client, self).request(method, url, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 123, in request
+    resp = self._session.request(method, self.base_url + url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\transport\requests.py", line 533, in request
+    self.credentials.before_request(auth_request, method, url, request_headers)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 239, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 202, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\service_account.py", line 448, in refresh
+    access_token, expiry, _ = _client.jwt_grant(
+                              ~~~~~~~~~~~~~~~~~^
+        request, self._token_uri, assertion
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 299, in jwt_grant
+    response_data = _token_endpoint_request(
+        request,
+    ...<5 lines>...
+        },
+    )
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 270, in _token_endpoint_request
+    _handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 69, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+2025-04-02 01:46:46,391 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-02 01:46:46,393 - discord.client - INFO - logging in using static token
+2025-04-02 01:46:47,124 - core.database - ERROR - Error during migration: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 170, in _check_and_migrate
+    old_base_stats = db.reference('base_stats').get()
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 221, in get
+    return self._client.body('get', self._add_suffix(), params=params)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 136, in body
+    resp = self.request(method, url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 929, in request
+    return super(_Client, self).request(method, url, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 123, in request
+    resp = self._session.request(method, self.base_url + url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\transport\requests.py", line 533, in request
+    self.credentials.before_request(auth_request, method, url, request_headers)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 239, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 202, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\service_account.py", line 448, in refresh
+    access_token, expiry, _ = _client.jwt_grant(
+                              ~~~~~~~~~~~~~~~~~^
+        request, self._token_uri, assertion
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 299, in jwt_grant
+    response_data = _token_endpoint_request(
+        request,
+    ...<5 lines>...
+        },
+    )
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 270, in _token_endpoint_request
+    _handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 69, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+2025-04-02 01:46:47,128 - core.database - ERROR - Failed to initialize database: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 63, in initialize
+    await self._check_and_migrate()
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 170, in _check_and_migrate
+    old_base_stats = db.reference('base_stats').get()
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 221, in get
+    return self._client.body('get', self._add_suffix(), params=params)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 136, in body
+    resp = self.request(method, url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 929, in request
+    return super(_Client, self).request(method, url, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 123, in request
+    resp = self._session.request(method, self.base_url + url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\transport\requests.py", line 533, in request
+    self.credentials.before_request(auth_request, method, url, request_headers)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 239, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 202, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\service_account.py", line 448, in refresh
+    access_token, expiry, _ = _client.jwt_grant(
+                              ~~~~~~~~~~~~~~~~~^
+        request, self._token_uri, assertion
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 299, in jwt_grant
+    response_data = _token_endpoint_request(
+        request,
+    ...<5 lines>...
+        },
+    )
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 270, in _token_endpoint_request
+    _handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 69, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+2025-04-02 01:47:02,566 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-02 01:47:02,568 - discord.client - INFO - logging in using static token
+2025-04-02 01:47:03,271 - core.database - ERROR - Error during migration: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 170, in _check_and_migrate
+    old_base_stats = db.reference('base_stats').get()
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 221, in get
+    return self._client.body('get', self._add_suffix(), params=params)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 136, in body
+    resp = self.request(method, url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 929, in request
+    return super(_Client, self).request(method, url, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 123, in request
+    resp = self._session.request(method, self.base_url + url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\transport\requests.py", line 533, in request
+    self.credentials.before_request(auth_request, method, url, request_headers)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 239, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 202, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\service_account.py", line 448, in refresh
+    access_token, expiry, _ = _client.jwt_grant(
+                              ~~~~~~~~~~~~~~~~~^
+        request, self._token_uri, assertion
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 299, in jwt_grant
+    response_data = _token_endpoint_request(
+        request,
+    ...<5 lines>...
+        },
+    )
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 270, in _token_endpoint_request
+    _handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 69, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+2025-04-02 01:47:03,274 - core.database - ERROR - Failed to initialize database: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 63, in initialize
+    await self._check_and_migrate()
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 170, in _check_and_migrate
+    old_base_stats = db.reference('base_stats').get()
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 221, in get
+    return self._client.body('get', self._add_suffix(), params=params)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 136, in body
+    resp = self.request(method, url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\db.py", line 929, in request
+    return super(_Client, self).request(method, url, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\_http_client.py", line 123, in request
+    resp = self._session.request(method, self.base_url + url, **kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\transport\requests.py", line 533, in request
+    self.credentials.before_request(auth_request, method, url, request_headers)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 239, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\auth\credentials.py", line 202, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\service_account.py", line 448, in refresh
+    access_token, expiry, _ = _client.jwt_grant(
+                              ~~~~~~~~~~~~~~~~~^
+        request, self._token_uri, assertion
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 299, in jwt_grant
+    response_data = _token_endpoint_request(
+        request,
+    ...<5 lines>...
+        },
+    )
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 270, in _token_endpoint_request
+    _handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\oauth2\_client.py", line 69, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('invalid_grant: Invalid JWT Signature.', {'error': 'invalid_grant', 'error_description': 'Invalid JWT Signature.'})
+2025-04-02 01:53:54,326 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-02 01:53:54,328 - discord.client - INFO - logging in using static token
+2025-04-02 01:53:54,779 - core.database - ERROR - Failed to initialize database: [Errno 2] No such file or directory: 'd:\\Games\\Campaigns\\Ronan Jr\\core\\..\\..\\serviceAccountKey.json'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 57, in initialize
+    cred = credentials.Certificate(cred_path)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\credentials.py", line 97, in __init__
+    with open(cert) as json_file:
+         ~~~~^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'd:\\Games\\Campaigns\\Ronan Jr\\core\\..\\..\\serviceAccountKey.json'
+2025-04-02 01:54:50,510 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-02 01:54:50,512 - discord.client - INFO - logging in using static token
+2025-04-02 01:54:50,979 - core.database - ERROR - Failed to initialize database: [Errno 2] No such file or directory: 'd:\\Games\\Campaigns\\Ronan Jr\\core\\..\\..\\serviceAccountKey.json'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\database.py", line 57, in initialize
+    cred = credentials.Certificate(cred_path)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\firebase_admin\credentials.py", line 97, in __init__
+    with open(cert) as json_file:
+         ~~~~^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'd:\\Games\\Campaigns\\Ronan Jr\\core\\..\\..\\serviceAccountKey.json'
+2025-04-02 01:56:46,264 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-02 01:56:46,266 - discord.client - INFO - logging in using static token
+2025-04-02 01:56:47,864 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b618f45151c4ae65eb52a2aa762f2407).
