@@ -22,50 +22,70 @@ Dependencies:
 - secrets.env for Firebase configuration
 """
 
-from datetime import datetime
-import os
-import logging
-import firebase_admin
-from firebase_admin import credentials, db
+from datetime import datetime  
+import os  
+import logging  
+import firebase_admin  
+from firebase_admin import credentials, db  
 from typing import Optional, Dict, Any, List
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-class Database:
-    """Handles all database operations using Firebase Realtime Database."""
-    
-    def __init__(self):
-        self.initialized = False
-        self._db = None
+class Database:  
+    """Handles all database operations using Firebase Realtime Database."""  
+     
+    def __init__(self):  
+        self.initialized = False  
+        self._db = None  
         self._refs = {}
 
-    async def initialize(self) -> None:
-        """Initialize Firebase connection and run any needed migrations"""
-        if self.initialized:
+    async def initialize(self) -> None:  
+        """Initialize Firebase connection and run any needed migrations"""  
+        if self.initialized:  
             return
 
         try:
-            database_url = "https://ronan-jr-s-brain-default-rtdb.firebaseio.com"
-            cred = credentials.Certificate("D:/Games/Campaigns/Ronan Jr/serviceAccountKey.json")
+            # Make sure environment variables are loaded
+            load_dotenv('secrets.env')
+            
+            # Get Firebase configuration from environment variables
+            database_url = os.getenv('DATABASEURL')
+            
+            # Just put serviceAccountKey.json in the same directory as main.py
+            # and use a simple path
+            cred_path = "serviceAccountKey.json"
+            
+            # Debug - print to verify
+            print(f"Looking for serviceAccountKey.json at: {cred_path}")
+            
+            # Check if file exists
+            if not os.path.exists(cred_path):
+                print("Error: serviceAccountKey.json not found!")
+                print("Please make sure it's in the same directory as main.py")
+                raise FileNotFoundError("serviceAccountKey.json not found")
+            
+            cred = credentials.Certificate(cred_path)
+            
             firebase_admin.initialize_app(cred, {
                 'databaseURL': database_url
             })
 
-            # Initialize database references
-            self._db = db.reference('/')
-            self._refs = {
-                'characters': db.reference('characters'),
-                'shared_movesets': db.reference('shared_movesets'),
-                'shared_moves': db.reference('shared_moves'),
-                'initiative_saves': db.reference('initiative_saves')  # Add this line
+            # Initialize database references  
+            self._db = db.reference('/')  
+            self._refs = {  
+                'characters': db.reference('characters'),  
+                'shared_movesets': db.reference('shared_movesets'),  
+                'shared_moves': db.reference('shared_moves'),  
+                'initiative_saves': db.reference('initiative_saves')
             }
 
-            await self._check_and_migrate()
-            self.initialized = True
-            print("Database initialized successfully")
-            
-        except Exception as e:
-            logger.error(f"Failed to initialize database: {str(e)}", exc_info=True)
+            await self._check_and_migrate()  
+            self.initialized = True  
+            print("Database initialized successfully")  
+             
+        except Exception as e:  
+            logger.error(f"Failed to initialize database: {str(e)}", exc_info=True)  
             raise
 
     # Move Management Methods
