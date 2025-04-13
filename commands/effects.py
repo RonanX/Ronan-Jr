@@ -115,7 +115,7 @@ class EffectsCommands(commands.GroupCog, name="effect"):
             # Skip duration adjustments for permanent effects
             if not permanent:
                 # MANUAL ADJUSTMENT: Set up internal and display duration correctly
-                if is_during_own_turn and not debug_effect.permanent:
+                if is_during_own_turn:
                     # For effects applied during own turn
                     if duration == 1:
                         # Special case for duration 1: Internal = 2, Display = 1
@@ -128,10 +128,12 @@ class EffectsCommands(commands.GroupCog, name="effect"):
                         debug_effect._display_duration = duration
                         print(f"DEBUG: Applied during own turn. Set internal={duration+1}, display={duration}")
                 else:
-                    # For effects NOT applied during own turn: ensure positive internal duration
-                    debug_effect._internal_duration = max(1, duration)
-                    debug_effect._display_duration = duration
-                    print(f"DEBUG: Applied NOT during own turn. Set internal={max(1, duration)}, display={duration}")
+                    # For effects NOT applied during own turn: use same value for internal and display
+                    # Ensure duration is at least 1
+                    safe_duration = max(1, duration)
+                    debug_effect._internal_duration = safe_duration
+                    debug_effect._display_duration = safe_duration
+                    print(f"DEBUG: Applied NOT during own turn. Set internal={safe_duration}, display={safe_duration}")
             else:
                 # Print info for permanent effects
                 print(f"DEBUG: Effect is permanent, no duration adjustment needed")
@@ -190,6 +192,15 @@ class EffectsCommands(commands.GroupCog, name="effect"):
                     value=f"```\nApplied: {applied_during} own turn\nInternal Duration: {int_duration}\nDisplayed Duration: {disp_duration}\nPermanent: {debug_effect.permanent}\nTurns Elapsed: {debug_effect.turns_elapsed}\n```",
                     inline=False
                 )
+            
+            # DEBUG LOG: Print the embed content to the console
+            print("\n=== DEBUG EFFECT EMBED CONTENT ===")
+            print(f"Title: {embed.title}")
+            print(f"Description: {embed.description}")
+            for field in embed.fields:
+                print(f"\nField: {field.name}")
+                print(f"Value: {field.value}")
+            print("=== END EMBED CONTENT ===\n")
             
             await interaction.followup.send(embed=embed)
 
@@ -267,6 +278,194 @@ class EffectsCommands(commands.GroupCog, name="effect"):
             else:
                 embed.description = f"{character} has no active effects."
 
+            await interaction.followup.send(embed=embed)
+
+        except Exception as e:
+            await handle_error(interaction, e)
+
+    @app_commands.command(name="debug_bulk")
+    @app_commands.describe(
+        char1="First character to apply effects to (for DURING effects)",
+        char2="Second character to apply effects to (for NOT DURING effects)",
+        effect_prefix="Prefix to add to effect names for identification (default: '')"
+    )
+    async def debug_bulk_effects(
+        self,
+        interaction: Interaction,
+        char1: str,
+        char2: str,
+        effect_prefix: Optional[str] = ""
+    ):
+        """Applies a set of 4 test effects (1 and 2 turn durations, DURING and NOT DURING) to two characters."""
+        try:
+            await interaction.response.defer()
+
+            # Get the characters
+            char1_obj = self.bot.game_state.get_character(char1)
+            char2_obj = self.bot.game_state.get_character(char2)
+            
+            if not char1_obj:
+                await interaction.followup.send(f"❌ Character '{char1}' not found.", ephemeral=True)
+                return
+                
+            if not char2_obj:
+                await interaction.followup.send(f"❌ Character '{char2}' not found.", ephemeral=True)
+                return
+
+            # Add prefix if provided
+            prefix = f"{effect_prefix} " if effect_prefix else ""
+            
+            # Create effect descriptions
+            effects = [
+                # DURING effects for char1
+                {
+                    "character": char1_obj,
+                    "name": f"{prefix}2 turns during",
+                    "duration": 2,
+                    "message": "Debugging...",
+                    "force_during": True
+                },
+                {
+                    "character": char1_obj,
+                    "name": f"{prefix}1 turn during",
+                    "duration": 1,
+                    "message": "Debugging...",
+                    "force_during": True
+                },
+                # NOT DURING effects for char2
+                {
+                    "character": char2_obj,
+                    "name": f"{prefix}2 turns not during",
+                    "duration": 2,
+                    "message": "Debugging...",
+                    "force_during": False
+                },
+                {
+                    "character": char2_obj,
+                    "name": f"{prefix}1 turn not during",
+                    "duration": 1,
+                    "message": "Debugging...",
+                    "force_during": False
+                }
+            ]
+            
+            # Print log header for this command
+            print("\n=== BULK DEBUG EFFECT PROCESSING ===")
+            
+            # Apply all effects
+            applied_effects = []
+            for effect_info in effects:
+                # Create a DebugEffect with the parameters
+                debug_effect = DebugEffect(
+                    name=effect_info["name"],
+                    duration=effect_info["duration"],
+                    message=effect_info["message"]
+                )
+                
+                # Get current round info
+                initiative_tracker = None
+                current_round = 1
+                is_combat = False
+                
+                # Get initiative info if available
+                if hasattr(self.bot, 'initiative_tracker'):
+                    initiative_tracker = self.bot.initiative_tracker
+                    if initiative_tracker.state.value != 'inactive':
+                        is_combat = True
+                        current_round = initiative_tracker.round_number
+                
+                # Set the force_during flag
+                debug_effect.is_during_own_turn = effect_info["force_during"]
+                
+                # Log the type of effect being created
+                print(f"\nCreating effect: {effect_info['name']} for {effect_info['character'].name}")
+                print(f"During Own Turn: {effect_info['force_during']}")
+                
+                # Directly handle duration adjustments like in debug_effect command
+                if not debug_effect.permanent:
+                    if effect_info["force_during"]:
+                        # For DURING own turn effects
+                        if effect_info["duration"] == 1:
+                            # Duration=1 special case
+                            debug_effect._internal_duration = 2
+                            debug_effect._display_duration = 1
+                            print(f"DEBUG: Duration=1 applied during own turn. Set internal=2, display=1")
+                        else:
+                            # Normal case for DURING
+                            debug_effect._internal_duration = effect_info["duration"] + 1
+                            debug_effect._display_duration = effect_info["duration"]
+                            print(f"DEBUG: Applied during own turn. Set internal={effect_info['duration']+1}, display={effect_info['duration']}")
+                    else:
+                        # For NOT DURING effects - same internal & display
+                        safe_duration = max(1, effect_info["duration"])
+                        debug_effect._internal_duration = safe_duration
+                        debug_effect._display_duration = safe_duration
+                        print(f"DEBUG: Applied NOT during own turn. Set internal={safe_duration}, display={safe_duration}")
+                
+                # Apply the effect using manager function
+                apply_msg = await apply_effect(
+                    character=effect_info["character"],
+                    effect=debug_effect,
+                    round_number=current_round,
+                    combat_logger=self.bot.game_state.logger,
+                    is_combat_active=is_combat,
+                    initiative_tracker=initiative_tracker
+                )
+                
+                # Print effect application message
+                print(f"Applied: {apply_msg}")
+                
+                # Store effect info for the response embed
+                applied_effects.append({
+                    "character": effect_info["character"].name,
+                    "effect": debug_effect.name,
+                    "message": apply_msg,
+                    "internal_duration": debug_effect._internal_duration,
+                    "display_duration": debug_effect._display_duration,
+                    "during_own_turn": effect_info["force_during"]
+                })
+                
+                # Save after each application
+                await self.bot.db.save_character(effect_info["character"])
+            
+            # Create response embed
+            embed = discord.Embed(
+                title="Bulk Debug Effects Applied",
+                description=f"Applied 4 test effects to {char1} and {char2}",
+                color=discord.Color.blue()
+            )
+            
+            # Add fields for each effect
+            for effect_data in applied_effects:
+                # Create detailed info about the effect
+                details = [
+                    f"Applied to: {effect_data['character']}",
+                    f"Type: {'DURING' if effect_data['during_own_turn'] else 'NOT DURING'} own turn",
+                    f"Internal Duration: {effect_data['internal_duration']}",
+                    f"Display Duration: {effect_data['display_duration']}"
+                ]
+                
+                # Fix the message if needed to match the effect type
+                effect_msg = effect_data["message"]
+                if not effect_data["during_own_turn"] and "DURING turn" in effect_msg and "NOT DURING turn" not in effect_msg:
+                    effect_msg = effect_msg.replace("DURING turn", "NOT DURING turn")
+                
+                # Add field for this effect
+                embed.add_field(
+                    name=effect_data['effect'],
+                    value=f"{effect_msg}\n\n```\n{chr(10).join(details)}\n```",
+                    inline=False
+                )
+            
+            # DEBUG LOG: Print the embed content to the console
+            print("\n=== BULK DEBUG EFFECT EMBED CONTENT ===")
+            print(f"Title: {embed.title}")
+            print(f"Description: {embed.description}")
+            for field in embed.fields:
+                print(f"\nField: {field.name}")
+                print(f"Value: {field.value}")
+            print("=== END EMBED CONTENT ===\n")
+            
             await interaction.followup.send(embed=embed)
 
         except Exception as e:

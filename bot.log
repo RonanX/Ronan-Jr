@@ -1991,3 +1991,101 @@ aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gatewa
 2025-04-13 12:33:04,398 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
 2025-04-13 12:33:21,308 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
 2025-04-13 12:52:55,853 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5f682b4f02cec2dabea6511eae8020e8.
+2025-04-13 13:12:56,497 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-13 13:12:56,499 - discord.client - INFO - logging in using static token
+2025-04-13 13:12:56,825 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:12:56,825 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:12:57,263 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-13 13:12:57,264 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:12:57,264 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:12:57,287 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:12:57,287 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:12:57,288 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:12:57,288 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:12:57,288 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-13 13:12:57,541 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 49215b21c0b543a20b1018437436d3d5).
+2025-04-13 13:13:56,699 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=False
+2025-04-13 13:14:13,613 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=False
+2025-04-13 13:16:21,846 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 13:17:03,135 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-13 13:26:35,550 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-13 13:26:35,553 - discord.client - INFO - logging in using static token
+2025-04-13 13:26:35,911 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:26:35,912 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:26:36,332 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-13 13:26:36,333 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:26:36,333 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:26:36,357 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:26:36,357 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:26:36,358 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:26:36,358 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:26:36,358 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-13 13:26:36,667 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: cd141e08b86768dca17cafb7bb7136cb).
+2025-04-13 13:28:14,604 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-13 13:28:27,491 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-13 13:28:44,264 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 13:29:53,704 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 13:49:59,675 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-13 13:49:59,677 - discord.client - INFO - logging in using static token
+2025-04-13 13:50:00,134 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:50:00,134 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:50:00,603 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-13 13:50:00,605 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:50:00,606 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:50:00,641 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:50:00,641 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:50:00,643 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:50:00,643 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:50:00,643 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-13 13:50:01,125 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a58af71833b9ebe4cdc21ad87c0a22ab).
+2025-04-13 13:54:35,858 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-13 13:54:35,861 - discord.client - INFO - logging in using static token
+2025-04-13 13:54:36,245 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:54:36,246 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:54:36,659 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-13 13:54:36,660 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:54:36,661 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 13:54:36,696 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:54:36,696 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:54:36,699 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 13:54:36,699 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 13:54:36,699 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-13 13:54:36,933 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ba205f9aa9edd2e9551f28a53b705e35).
+2025-04-13 14:01:16,112 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 14:01:16,176 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 14:01:16,246 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-13 14:01:16,313 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-13 14:35:37,305 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-13 14:35:37,309 - discord.client - INFO - logging in using static token
+2025-04-13 14:35:37,715 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 14:35:37,715 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 14:35:38,168 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-13 14:35:38,169 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 14:35:38,169 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 14:35:38,197 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 14:35:38,197 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 14:35:38,199 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 14:35:38,199 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 14:35:38,199 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-13 14:35:38,526 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b569d1fdf45a07d04a854988a81654b9).
+2025-04-13 14:36:50,204 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-13 14:36:50,276 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-13 14:36:50,349 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 14:36:50,420 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 19:02:54,499 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-13 19:02:54,501 - discord.client - INFO - logging in using static token
+2025-04-13 19:02:54,922 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 19:02:54,922 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 19:02:55,624 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-13 19:02:55,626 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 19:02:55,627 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-13 19:02:55,651 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 19:02:55,652 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 19:02:55,656 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-13 19:02:55,684 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-13 19:02:55,684 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-13 19:02:56,185 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 5ea490e810999f53d02267f572ef39dd).
+2025-04-13 19:03:30,482 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 19:03:30,577 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-13 19:03:30,659 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-13 19:03:30,763 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False

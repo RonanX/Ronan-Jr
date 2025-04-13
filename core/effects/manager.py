@@ -125,39 +125,69 @@ async def apply_effect(
         is_during_own_turn = False
         current_turn_name = None
 
-        # Simple and direct method using initiative tracker if available
-        if initiative_tracker is not None:
-            # If we have a current_turn property with character_name, use it directly
-            if hasattr(initiative_tracker, 'current_turn') and initiative_tracker.current_turn:
-                if hasattr(initiative_tracker.current_turn, 'character_name'):
-                    current_turn_name = initiative_tracker.current_turn.character_name
-                    is_during_own_turn = (current_turn_name == character.name)
-                    effect.debug(f"Simple check: current_turn_name={current_turn_name}, character={character.name}, during={is_during_own_turn}")
+        # Check if the effect already has a forced during/not during setting
+        if hasattr(effect, 'is_during_own_turn') and effect.is_during_own_turn is not None:
+            # RESPECT the explicitly set value instead of recalculating
+            is_during_own_turn = effect.is_during_own_turn
+            effect.debug(f"Using pre-set during_own_turn flag: {is_during_own_turn}")
             
-            # Fallback: If we don't have current_turn but have turn_order and current_index
-            elif (hasattr(initiative_tracker, 'turn_order') and 
-                 hasattr(initiative_tracker, 'current_index') and 
-                 initiative_tracker.turn_order and
-                 initiative_tracker.current_index < len(initiative_tracker.turn_order)):
-                
-                current_turn = initiative_tracker.turn_order[initiative_tracker.current_index]
-                if hasattr(current_turn, 'character_name'):
-                    current_turn_name = current_turn.character_name
-                    is_during_own_turn = (current_turn_name == character.name)
-                    effect.debug(f"Index-based check: current_turn_name={current_turn_name}, character={character.name}, during={is_during_own_turn}")
-        
-        # Default behavior when tracker isn't available
-        if current_turn_name is None:
-            if is_combat_active:
-                # In combat without known turn: safer to assume NOT during
-                is_during_own_turn = False
-                current_turn_name = "unknown"
-                effect.debug("No turn info available in combat, defaulting to NOT DURING")
+            # Still determine current_turn_name for logging if needed
+            if hasattr(effect, 'current_turn_name') and effect.current_turn_name:
+                current_turn_name = effect.current_turn_name
+            elif initiative_tracker is not None:
+                # Use the existing logic to get current turn name
+                if hasattr(initiative_tracker, 'current_turn') and initiative_tracker.current_turn:
+                    if hasattr(initiative_tracker.current_turn, 'character_name'):
+                        current_turn_name = initiative_tracker.current_turn.character_name
+                elif (hasattr(initiative_tracker, 'turn_order') and 
+                      hasattr(initiative_tracker, 'current_index') and 
+                      initiative_tracker.turn_order and 
+                      initiative_tracker.current_index < len(initiative_tracker.turn_order)):
+                    
+                    current_turn = initiative_tracker.turn_order[initiative_tracker.current_index]
+                    if hasattr(current_turn, 'character_name'):
+                        current_turn_name = current_turn.character_name
+                else:
+                    # Default when not in tracker
+                    current_turn_name = character.name if is_during_own_turn else "unknown"
             else:
-                # Not in combat: assume it's their turn for simpler duration
-                is_during_own_turn = True
-                current_turn_name = character.name
-                effect.debug("Not in combat, defaulting to DURING own turn")
+                # Default when not in tracker
+                current_turn_name = character.name if is_during_own_turn else "unknown"
+        else:
+            # Original logic to determine is_during_own_turn and current_turn_name
+            # Simple and direct method using initiative tracker if available
+            if initiative_tracker is not None:
+                # If we have a current_turn property with character_name, use it directly
+                if hasattr(initiative_tracker, 'current_turn') and initiative_tracker.current_turn:
+                    if hasattr(initiative_tracker.current_turn, 'character_name'):
+                        current_turn_name = initiative_tracker.current_turn.character_name
+                        is_during_own_turn = (current_turn_name == character.name)
+                        effect.debug(f"Simple check: current_turn_name={current_turn_name}, character={character.name}, during={is_during_own_turn}")
+                
+                # Fallback: If we don't have current_turn but have turn_order and current_index
+                elif (hasattr(initiative_tracker, 'turn_order') and 
+                     hasattr(initiative_tracker, 'current_index') and 
+                     initiative_tracker.turn_order and
+                     initiative_tracker.current_index < len(initiative_tracker.turn_order)):
+                    
+                    current_turn = initiative_tracker.turn_order[initiative_tracker.current_index]
+                    if hasattr(current_turn, 'character_name'):
+                        current_turn_name = current_turn.character_name
+                        is_during_own_turn = (current_turn_name == character.name)
+                        effect.debug(f"Index-based check: current_turn_name={current_turn_name}, character={character.name}, during={is_during_own_turn}")
+            
+            # Default behavior when tracker isn't available
+            if current_turn_name is None:
+                if is_combat_active:
+                    # In combat without known turn: safer to assume NOT during
+                    is_during_own_turn = False
+                    current_turn_name = "unknown"
+                    effect.debug("No turn info available in combat, defaulting to NOT DURING")
+                else:
+                    # Not in combat: assume it's their turn for simpler duration
+                    is_during_own_turn = True
+                    current_turn_name = character.name
+                    effect.debug("Not in combat, defaulting to DURING own turn")
         
         # CLEAR LOGGING: Log the final determination
         logger.info(f"EFFECT TIMING: Character={character.name}, CurrentTurn={current_turn_name}, During={is_during_own_turn}")
@@ -170,17 +200,38 @@ async def apply_effect(
         if not hasattr(character, 'in_combat'):
             character.in_combat = is_combat_active
 
-        # FIX: Special handling for "not during" and duration=1 effects
-        if not effect.permanent and not is_during_own_turn and effect.duration == 1:
-            # Ensure the internal duration is at least 1 for "not during" effects
-            # to prevent negative internal duration issues
-            if hasattr(effect, '_internal_duration'):
-                if effect._internal_duration < 1:
+        # FIX: Special handling for duration=1 effects
+        if not effect.permanent and effect.duration == 1:
+            if is_during_own_turn:
+                # For DURING effects with duration=1, internal should be 2
+                if hasattr(effect, '_internal_duration') and effect._internal_duration < 2:
+                    effect._internal_duration = 2
+                    effect._display_duration = 1  # Keep display as 1
+                    effect.debug("FIXED: Duration=1 during own turn effect - set internal=2, display=1")
+            else:
+                # For NOT DURING effects, internal and display should match
+                if hasattr(effect, '_internal_duration'):
                     effect._internal_duration = 1
-                    effect.debug("FIX: Not during own turn with duration=1 - set internal duration to 1")
+                    effect._display_duration = 1
+                    effect.debug("FIXED: Duration=1 not during effect - set both internal and display to 1")
+        # FIX: For NOT DURING effects with any duration, ensure internal and display match
+        elif not effect.permanent and not is_during_own_turn:
+            if hasattr(effect, '_internal_duration') and hasattr(effect, '_display_duration'):
+                # Make sure internal and display match for NOT DURING
+                safe_duration = max(1, effect.duration) if effect.duration is not None else None
+                if safe_duration is not None:
+                    effect._internal_duration = safe_duration
+                    effect._display_duration = safe_duration
+                    effect.debug(f"FIXED: NOT DURING effect - set both durations to {safe_duration}")
 
         # Call the on_apply method
         message = effect.on_apply(character, round_number)
+        
+        # FIX: Ensure the message correctly shows NOT DURING for non-during effects
+        if not is_during_own_turn and "DURING turn" in message and "NOT DURING turn" not in message:
+            # Replace "DURING turn" with "NOT DURING turn" in the message
+            message = message.replace("DURING turn", "NOT DURING turn")
+            effect.debug("Fixed message to correctly show NOT DURING")
 
         # Add effect to character
         character.effects.append(effect)
@@ -217,7 +268,7 @@ async def apply_effect(
     except Exception as e:
         logger.error(f"Error applying effect: {str(e)}", exc_info=True)
         return f"Error applying {effect.name}: {str(e)}"
-        
+            
 async def remove_effect(
     character,
     effect_name: str,
@@ -322,29 +373,24 @@ async def process_effects(
     try:
         # IMPROVED: First, check and fix any effects with duration issues
         for effect in character.effects[:]:
-            if not hasattr(effect, 'timing') or not hasattr(effect, '_internal_duration'):
+            if not hasattr(effect, 'timing') or not hasattr(effect, '_internal_duration') or effect.permanent:
                 continue
                 
-            # Fix for "not during" effects with negative or zero internal duration
-            if (not effect.permanent and 
-                effect.timing and 
-                not effect.timing.applied_during_own_turn and 
-                effect._internal_duration is not None and 
-                effect._internal_duration <= 0):
-                
-                effect._internal_duration = 1
-                effect.debug(f"FIXED: Not during effect had invalid internal duration (≤0).")
+            # Fix for NOT DURING effects to ensure internal and display durations match
+            if not effect.timing.applied_during_own_turn:
+                if hasattr(effect, '_display_duration') and effect._display_duration is not None:
+                    # For NOT DURING, make sure internal and display are the same
+                    safe_duration = max(1, effect._display_duration)
+                    if effect._internal_duration != safe_duration:
+                        effect._internal_duration = safe_duration
+                        effect._display_duration = safe_duration
+                        effect.debug(f"FIXED: NOT DURING effect had mismatched durations. Set both to {safe_duration}")
             
             # Fix for duration=1 "during" effects with insufficient internal duration
-            if (not effect.permanent and 
-                effect._display_duration == 1 and 
-                effect.timing and 
-                effect.timing.applied_during_own_turn and 
-                effect._internal_duration is not None and 
-                effect._internal_duration < 2):
-                
-                effect._internal_duration = 2
-                effect.debug(f"FIXED: Duration=1 during own turn effect had internal duration < 2")
+            elif effect.timing.applied_during_own_turn and effect._display_duration == 1:
+                if effect._internal_duration < 2:
+                    effect._internal_duration = 2
+                    effect.debug(f"FIXED: Duration=1 during own turn effect had internal duration < 2")
 
         # IMPROVED: Process pending feedback at start, but don't display it yet
         pending_feedback_msgs = []

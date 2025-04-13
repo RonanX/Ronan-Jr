@@ -179,12 +179,12 @@ class BaseEffect:
                     # Normal case: Add 1 to internal duration to account for "free" application turn
                     self._internal_duration = self._display_duration + 1
                     self.debug(f"Applied during own turn. Internal duration set to {self._internal_duration}")
-            # FIX: Handle "not during" duration properly - ensure it's at least 1
             else:
-                # Ensure internal duration is at least 1 for "not during" effects
-                if self._internal_duration <= 0:
-                    self._internal_duration = 1
-                    self.debug(f"Fixed: Not during own turn with non-positive duration. Set internal to 1")
+                # FIXED: For NOT during own turn, internal and display durations should be the same
+                # Just ensure duration is at least 1
+                self._internal_duration = max(1, self._display_duration)
+                self._display_duration = self._internal_duration  # Keep them in sync
+                self.debug(f"Applied NOT during own turn. Internal and display durations both set to {self._internal_duration}")
 
         # 4. Transition State
         self.state = EffectState.ACTIVE
@@ -194,7 +194,7 @@ class BaseEffect:
         duration_text = "Permanent" if self.permanent else f"{self._display_duration} turns"
 
         # Include timing info in the apply message for clarity
-        applied_during_text = "DURING" if self.timing.applied_during_own_turn else "NOT DURING"
+        applied_during_text = "DURING" if self.timing and self.timing.applied_during_own_turn else "NOT DURING"
         
         details = [
             f"Duration: {duration_text}",
@@ -396,19 +396,18 @@ class BaseEffect:
             
             # CASE 2: Applied NOT DURING own turn
             else:
-                # Duration ticks start in THIS round
-                # For round_passed = 0 (same round): elapsed = 1 (first tick)
-                # For round_passed = 1 (next round): elapsed = 2 (second tick)
-                elapsed_turns = max(0, rounds_passed) + 1
+                # FIXED: For NOT DURING, just increment by rounds passed.
+                # For round_passed = 0 (same round): elapsed = 0 (no ticks yet)
+                # For round_passed = 1 (next round): elapsed = 1 (first tick)
+                elapsed_turns = max(0, rounds_passed)
                 self.debug(f"Calc Duration: Applied NOT DURING own turn in round {start_round}")
                 self.debug(f"  Current round: {current_round}, Rounds passed: {rounds_passed}")
-                self.debug(f"  Elapsed turns: {elapsed_turns} (Ticks start THIS round)")
+                self.debug(f"  Elapsed turns: {elapsed_turns} (Same ticking as DURING)")
 
             # Update internal tracking
             self.turns_elapsed = elapsed_turns
 
         # --- Calculate Remaining Durations ---
-        # FIX: Ensure internal_remaining is never negative for NOT DURING effects
         internal_remaining = max(0, self._internal_duration - elapsed_turns)
         should_expire_now = internal_remaining <= 0
         is_final_turn = internal_remaining == 1
@@ -430,15 +429,6 @@ class BaseEffect:
                 internal_remaining = 1
                 self.debug("Special case: duration=1 applied during own turn, now in next round (final turn)")
         
-        # FIX: Special handling for "not during" effects to ensure proper duration
-        if not applied_during_own:
-            # Ensure duration=1 effects have at least one turn of display remaining
-            if self._display_duration == 1 and internal_remaining <= 0:
-                internal_remaining = 1
-                should_expire_now = False
-                is_final_turn = True
-                self.debug("Fixed: not during, duration=1 effect - ensuring at least one turn display")
-
         # Calculate display remaining turns (what the user actually sees)
         display_remaining = None
         
@@ -470,10 +460,9 @@ class BaseEffect:
                         # No buffer, display decrements normally
                         display_remaining = max(0, self._display_duration - elapsed_turns)
             else:
-                # FIX: For effects NOT applied during own turn, ensure display shows at least 1 initially
-                display_remaining = max(0, self._display_duration - (elapsed_turns - 1))
-                # Floor to 0
-                display_remaining = max(0, display_remaining)
+                # FIXED: For NOT DURING effects, display and internal are in sync
+                # So display_remaining is simply derived directly from elapsed turns
+                display_remaining = max(0, self._display_duration - elapsed_turns)
                 self.debug(f"Display remaining (not during): {display_remaining}")
 
         # Debug final calculation details
@@ -568,28 +557,31 @@ class BaseEffect:
             timing_data = data.get('timing_info')
             if timing_data:
                  effect.timing = EffectProcessTimingInfo(**timing_data)
-            effect._internal_duration = data.get('_internal_duration', effect._display_duration)
-            if effect.timing and effect.timing.applied_during_own_turn and effect._internal_duration is not None and effect.state != EffectState.CREATED:
-                 expected_internal = (effect._display_duration + 1) if effect._display_duration is not None else None
-                 if effect._internal_duration != expected_internal:
-                      effect.debug(f"Correcting internal duration on load. Saved: {effect._internal_duration}, Expected: {expected_internal}")
-                      effect._internal_duration = expected_internal
-
-            # FIXED: Special handling for duration=1 effects that were applied during own turn
-            if effect._display_duration == 1 and effect.timing and effect.timing.applied_during_own_turn:
-                # For duration=1 applied during own turn, ensure internal duration is at least 2
-                if effect._internal_duration is not None and effect._internal_duration < 2:
+            
+            # Get the timing info to determine how to fix durations
+            applied_during_own = timing_data.get('applied_during_own_turn', True) if timing_data else True
+            
+            # Handle duration restoration based on during/not during
+            if applied_during_own:
+                # For DURING effects, adjust internal duration if needed
+                effect._internal_duration = data.get('_internal_duration', effect._display_duration)
+                if effect._display_duration == 1 and effect._internal_duration < 2:
                     effect._internal_duration = 2
-                    effect.debug("Fixed duration=1 during own turn by setting internal to 2 on load")
-                    
-            # FIX: Ensure "not during" effects have valid internal duration
-            if effect.timing and not effect.timing.applied_during_own_turn:
-                if effect._internal_duration is not None and effect._internal_duration <= 0:
-                    effect._internal_duration = 1
-                    effect.debug("Fixed: Not during own turn effect had non-positive internal duration. Set to 1.")
+                    effect.debug("Fixed: Duration=1 during own turn had invalid internal duration. Set to 2.")
+                elif effect._display_duration and effect._internal_duration < effect._display_duration:
+                    effect._internal_duration = effect._display_duration + 1
+                    effect.debug(f"Fixed: DURING effect had internal duration < display. Set to {effect._internal_duration}")
+            else:
+                # For NOT DURING effects, ensure internal and display are the same
+                display_duration = data.get('duration')
+                if display_duration is not None:
+                    internal_duration = max(1, display_duration)  # Ensure it's at least 1
+                    effect._internal_duration = internal_duration
+                    effect._display_duration = internal_duration
+                    effect.debug(f"Fixed: NOT DURING effect - set both internal and display to {internal_duration}")
 
             effect.turns_elapsed = data.get('turns_elapsed', 0)
-            effect.debug(f"Restored from dict. State={effect.state.value}, InternalDuration={effect._internal_duration}, TurnsElapsed={effect.turns_elapsed}")
+            effect.debug(f"Restored from dict. State={effect.state.value}, InternalDuration={effect._internal_duration}, Display={effect._display_duration}")
             return effect
         except KeyError as e:
             logger.error(f"Missing key in effect data for {cls.__name__}: {e}")
