@@ -5,7 +5,7 @@ Handles various status conditions and their associated tags.
 
 from typing import List, Optional, Dict, Set
 from enum import Enum
-from .base import BaseEffect, EffectCategory, EffectTiming
+from .base import BaseEffect, EffectCategory, EffectProcessTiming
 
 class ConditionType(str, Enum):
     """Available condition types with their associated tags"""
@@ -577,6 +577,6 @@ class ConditionEffect(BaseEffect):
             source=data.get('source')
         )
         if data.get('timing'):
-            effect.timing = EffectTiming(**data['timing'])
+            effect.timing = EffectProcessTiming(**data['timing'])
         effect.tags = set(data.get('tags', []))
         return effect

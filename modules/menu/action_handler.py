@@ -1190,14 +1190,14 @@ class UseMoveView(ui.View):
                 # Check if move is on cooldown first
                 existing_cooldown = False
                 
-                # Import MoveState for the check
-                from core.effects.move import MoveState
+                # Import MovePhase for the check
+                from core.effects.move import MovePhase
                 
                 for effect in self.character.effects:
                     if hasattr(effect, 'name') and effect.name == move.name and hasattr(effect, 'state'):
-                        if effect.state == MoveState.COOLDOWN:
+                        if effect.state == MovePhase.COOLDOWN:
                             # There's already a cooldown effect for this move
-                            phase = effect.phases.get(MoveState.COOLDOWN)
+                            phase = effect.phases.get(MovePhase.COOLDOWN)
                             if phase:
                                 remaining = phase.duration - phase.turns_completed
                                 await interaction.response.send_message(

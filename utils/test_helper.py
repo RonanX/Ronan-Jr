@@ -5,7 +5,7 @@ Also contains debug test methods for various systems.
 """
 
 from core.character import Character, Stats, Resources, DefenseStats, StatType
-from core.effects.move import MoveEffect, MoveState, RollTiming
+from core.effects.move import MoveEffect, MovePhase, RollTiming
 from core.effects.status import SkipEffect, FrostbiteEffect, ACEffect
 from core.effects.manager import process_effects, apply_effect  # Added apply_effect import
 from modules.combat.initiative import CombatState
@@ -561,7 +561,7 @@ async def test_cooldown_move(bot, interaction):
             
         # Fallback to older phases implementation
         elif hasattr(move_effect, 'phases'):
-            cooldown_phase = move_effect.phases.get(MoveState.COOLDOWN)
+            cooldown_phase = move_effect.phases.get(MovePhase.COOLDOWN)
             if cooldown_phase:
                 print(f"Using phases - Cooldown phase: {cooldown_phase.duration} turns, {cooldown_phase.turns_completed} completed")
                 cooldown_duration = cooldown_phase.duration

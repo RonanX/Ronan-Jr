@@ -308,7 +308,7 @@ class CastTimeEffect(CustomEffect):
         }
         
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         return effect
 

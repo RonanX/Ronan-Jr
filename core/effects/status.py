@@ -15,7 +15,7 @@ IMPLEMENTATION MANDATES:
 from datetime import datetime
 from typing import Optional, List
 import logging
-from .base import BaseEffect, EffectCategory, EffectTiming
+from .base import BaseEffect, EffectCategory, EffectProcessTimingInfo
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +207,7 @@ class ACEffect(BaseEffect):
             permanent=data.get('permanent', False)
         )
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
         effect.effect_id = data.get('effect_id', f"ac_mod_{id(effect)}")
         
         # Restore marked for expiry flag
@@ -480,7 +480,7 @@ class FrostbiteEffect(BaseEffect):
             duration=data.get('duration', 2)
         )
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
         effect.effect_id = data.get('effect_id', f"frostbite_ac_{id(effect)}")
         effect.last_stack_reduction = data.get('last_stack_reduction', 0)
         effect.skip_applied = data.get('skip_applied', False)
@@ -609,7 +609,7 @@ class SkipEffect(BaseEffect):
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:

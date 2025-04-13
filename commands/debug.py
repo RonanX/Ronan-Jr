@@ -21,7 +21,7 @@ from typing import Optional, List, Tuple
 from core.effects.status import SkipEffect, FrostbiteEffect, ACEffect
 from core.effects.manager import process_effects, apply_effect
 from modules.combat.initiative import CombatState
-from core.effects.move import MoveEffect, MoveState
+from core.effects.move import MoveEffect, MovePhase
 
 # Move imports
 from modules.moves.data import Moveset, MoveData
@@ -607,10 +607,10 @@ class DebugCommands(commands.GroupCog, name="debug"):
                 move_effect = next((e for e in char.effects if e.name == move.name), None)
                 if move_effect:
                     print(f"  State: {move_effect.state}")
-                    if move_effect.state == MoveState.COOLDOWN:
-                        cooldown_phase = move_effect.phases.get(MoveState.COOLDOWN)
-                        if cooldown_phase:
-                            print(f"  Cooldown: {cooldown_phase.duration} turns, {cooldown_phase.turns_completed} completed")
+                    # Use current_phase attribute instead of state
+                    if move_effect.current_phase == MovePhase.COOLDOWN:
+                        # Access phase_turns_left directly
+                        print(f"  Cooldown: {move_effect.cooldown} turns, {move_effect.cooldown - move_effect.phase_turns_left} completed")
                 else:
                     print("  Move effect not found!")
                     
@@ -1181,7 +1181,7 @@ class DebugCommands(commands.GroupCog, name="debug"):
                 
                 # Verify cooldown phase details
                 if hasattr(effect, 'phases'):
-                    cooldown_phase = effect.phases.get(MoveState.COOLDOWN)
+                    cooldown_phase = effect.phases.get(MovePhase.COOLDOWN)
                     if cooldown_phase:
                         print(f"Cooldown phase: {cooldown_phase.duration} turns, {cooldown_phase.turns_completed} completed")
                         remaining = cooldown_phase.duration - cooldown_phase.turns_completed

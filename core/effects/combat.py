@@ -14,7 +14,7 @@ IMPLEMENTATION MANDATES:
 
 import random
 import logging
-from core.effects.base import BaseEffect, EffectCategory, EffectTiming
+from core.effects.base import BaseEffect, EffectCategory, EffectProcessTiming
 from core.effects.status import ACEffect
 from datetime import datetime
 from typing import List, Dict, Tuple, Optional
@@ -278,7 +278,7 @@ class SourceHeatWaveEffect(BaseEffect):
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag if it exists
         if '_marked_for_expiry' in data:
@@ -485,7 +485,7 @@ class TargetHeatWaveEffect(BaseEffect):
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
         
         # Restore effect_id if it exists
         if 'effect_id' in data:
@@ -837,7 +837,7 @@ class ResistanceEffect(BaseEffect):
         )
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:
@@ -1031,7 +1031,7 @@ class VulnerabilityEffect(BaseEffect):
         )
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:
@@ -1152,7 +1152,7 @@ class WeaknessEffect(BaseEffect):
         )
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:
@@ -1332,7 +1332,7 @@ class TempHPEffect(BaseEffect):
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:
@@ -1568,7 +1568,7 @@ class ShockEffect(BaseEffect):
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:

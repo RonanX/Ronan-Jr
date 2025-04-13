@@ -229,9 +229,10 @@ class RollModifierEffect(BaseEffect):
         
         # Set timing if available
         if timing_data := data.get('timing'):
-            from .base import EffectTiming
-            effect.timing = EffectTiming(**timing_data)
-            
+            # Import the renamed class
+            from .base import EffectProcessTimingInfo
+            effect.timing = EffectProcessTimingInfo(**timing_data)
+
         # Set used state
         effect.used = data.get('used', False)
         

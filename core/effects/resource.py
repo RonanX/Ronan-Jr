@@ -3,7 +3,7 @@ Resource-based effects like drains and regeneration.
 """
 
 from typing import Optional, List, Dict, Union, Tuple
-from .base import BaseEffect, EffectCategory, EffectTiming
+from .base import BaseEffect, EffectCategory, EffectProcessTimingInfo # Updated import
 from utils.dice import DiceRoller
 import logging
 
@@ -306,8 +306,8 @@ class DrainEffect(BaseEffect):
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
-            
+            effect.timing = EffectProcessTimingInfo(**timing_data) # Use updated class name
+
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:
             effect._marked_for_expiry = data['_marked_for_expiry']
@@ -545,7 +545,7 @@ class RegenEffect(BaseEffect):
         
         # Restore timing if it exists
         if timing_data := data.get('timing'):
-            effect.timing = EffectTiming(**timing_data)
+            effect.timing = EffectProcessTiming(**timing_data)
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:

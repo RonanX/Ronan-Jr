@@ -9,7 +9,7 @@ sys.path.append("D:/Games/Campaigns/Ronan Jr")
 from typing import List, Dict, Optional, Set, Tuple
 from dataclasses import dataclass, field
 from core.character import Character, Stats, Resources, DefenseStats, StatType
-from core.effects.move import MoveEffect, MoveState
+from core.effects.move import MoveEffect, MovePhase
 import logging
 
 logger = logging.getLogger(__name__)

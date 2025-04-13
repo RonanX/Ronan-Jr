@@ -31,6 +31,7 @@ from core.character import Character, Stats, Resources, DefenseStats, StatType, 
 from core.state import GameState, CombatLogger, CombatEventType 
 from core.effects.burn_effect import BurnEffect
 from core.effects.manager import apply_effect, process_effects, register_effects
+from core.database import Database
 
 # ANSI color codes for better output styling
 class Colors:
@@ -86,12 +87,25 @@ def print_character_status(character: Character, round_num: int):
         effect_type = effect.__class__.__name__
         print(f"  {Colors.YELLOW}Effect {i+1}: {effect_type} '{effect.name}'{Colors.ENDC}")
         
+        # Add state info
+        if hasattr(effect, 'state'):
+            state_color = {
+                'pending': Colors.CYAN,
+                'active': Colors.GREEN, 
+                'expiring': Colors.YELLOW,
+                'expired': Colors.RED,
+                'feedback': Colors.MAGENTA
+            }.get(effect.state.value, Colors.BLUE)  # Use BLUE as fallback instead of WHITE
+            print(f"    {state_color}State: {effect.state.value}{Colors.ENDC}")
+        
         # Add timing info if available
         if hasattr(effect, 'timing') and effect.timing:
             print(f"    Start Round: {effect.timing.start_round}")
             print(f"    Duration: {effect.duration}")
             print(f"    Application Round: {getattr(effect, '_application_round', 'N/A')}")
             print(f"    Application Turn: {getattr(effect, '_application_turn', 'N/A')}")
+            
+            # Legacy state flags (for backward compatibility)
             print(f"    Will Expire Next: {getattr(effect, '_will_expire_next', False)}")
             print(f"    Marked for Expiry: {getattr(effect, '_marked_for_expiry', False)}")
             print(f"    Expiry Message Sent: {getattr(effect, '_expiry_message_sent', False)}")
@@ -117,13 +131,28 @@ async def run_scenario_1():
     
     This tests what happens when an effect is applied during a character's 
     own turn with duration=1. It should last until the end of their NEXT turn.
+    
+    KEY BEHAVIOR:
+    - Effect is applied in Round 1
+    - Damage is applied at the start of Round 2 
+    - Effect expires at the end of Round 2
+    - No messages in Round 3
     """
     print_header("SCENARIO 1: Effect applied DURING character's turn")
     print("Expected: Effect should apply, deal damage at the start of next turn, and wear off at the end of next turn")
     
+    # Initialize database
+    db = Database()
+    try:
+        await db.initialize()
+        print("Database initialized successfully")
+    except Exception as e:
+        print(f"Database initialization failed: {e}")
+        print("Continuing with local character only")
+    
     # Create test character
     character = Character(
-        name="Test1",
+        name="BurnTest1",
         stats=Stats(
             base={stat: 10 for stat in StatType},
             modified={stat: 10 for stat in StatType}
@@ -140,8 +169,24 @@ async def run_scenario_1():
         )
     )
     
+    # Create game state with database connection
+    game_state = GameState()
+    game_state.db = db
+    character.game_state = game_state  # Attach game state to character
+    
+    # Save character to database
+    if db.initialized:
+        try:
+            await db.save_character(character)
+            print(f"Character {character.name} saved to database")
+        except Exception as e:
+            print(f"Failed to save character to database: {e}")
+    
     # Create combat logger for effect processing
     combat_logger = CombatLogger()
+    
+    # Set up turn tracking - important for correct turn detection
+    character.turn_name = character.name  # Set current turn to this character
     
     # Track rounds
     round_num = 1
@@ -162,19 +207,41 @@ async def run_scenario_1():
     apply_msg = await apply_effect(character, burn_effect, round_num, combat_logger)
     print_effect_message("APPLY", apply_msg)
     
+    # Save character with effect to database
+    if db.initialized:
+        try:
+            await db.save_character(character)
+            print(f"Character with effect saved to database")
+        except Exception as e:
+            print(f"Failed to save character with effect: {e}")
+    
     # Process turn end
     print_phase("TURN END", character.name)
     was_skipped, _, end_msgs = await process_effects(character, round_num, character.name, combat_logger)
     for msg in end_msgs:
         print_effect_message("TURN END", msg)
     
-    # Show character status
+    # Show character status - should show ACTIVE effect
     print_character_status(character, round_num)
     print_effect_feedback(character)
     
     # === ROUND 2 START ===
     round_num = 2
     print_round(round_num, character.name)
+    
+    # Reload character from database to verify persistence
+    if db.initialized:
+        try:
+            char_data = await db.load_character(character.name)
+            if char_data:
+                print(f"Character loaded from database with {len(char_data.get('effects', []))} effects")
+            else:
+                print("Character not found in database")
+        except Exception as e:
+            print(f"Failed to load character from database: {e}")
+    
+    # Set round number on character
+    character.round_number = round_num
     
     # Process turn start - should see damage applied
     print_phase("TURN START", character.name)
@@ -188,15 +255,16 @@ async def run_scenario_1():
     for msg in end_msgs:
         print_effect_message("TURN END", msg)
     
-    # Show character status
+    # Show character status - effect should be gone
     print_character_status(character, round_num)
     print_effect_feedback(character)
     
     # === ROUND 3 START (verification) ===
     round_num = 3
     print_round(round_num, character.name)
+    character.round_number = round_num
     
-    # Process turn start - should be no effects
+    # Process turn start - should be no effects or expiry messages
     print_phase("TURN START", character.name)
     was_skipped, start_msgs, _ = await process_effects(character, round_num, character.name, combat_logger)
     for msg in start_msgs:
@@ -205,6 +273,14 @@ async def run_scenario_1():
     # Show character status - should be no effects
     print_character_status(character, round_num)
     print_effect_feedback(character)
+    
+    # Clean up - delete test character from database
+    if db.initialized:
+        try:
+            await db.delete_character(character.name)
+            print(f"Test character {character.name} deleted from database")
+        except Exception as e:
+            print(f"Failed to delete test character: {e}")
 
 async def run_scenario_2():
     """

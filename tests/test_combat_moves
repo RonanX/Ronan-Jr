@@ -21,7 +21,7 @@ import logging
 from core.character import Character, Stats, Resources, DefenseStats, StatType
 from modules.moves.data import MoveData, Moveset
 from core.effects.condition import ConditionType, ConditionEffect
-from core.effects.move import RollTiming, MoveEffect, MoveState
+from core.effects.move import RollTiming, MoveEffect, MovePhase
 from modules.moves.manager import MoveManager
 from utils.advanced_dice.attack_calculator import AttackCalculator
 from utils.advanced_dice.calculator import DiceCalculator

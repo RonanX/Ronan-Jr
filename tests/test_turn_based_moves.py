@@ -14,7 +14,7 @@ from datetime import datetime
 
 # Import required classes
 from core.character import Character, Stats, Resources, DefenseStats, StatType
-from core.effects.move import MoveEffect, MoveState, RollTiming
+from core.effects.move import MoveEffect, MovePhase, RollTiming
 from modules.combat.initiative import InitiativeTracker, CombatState
 
 class MockBot:

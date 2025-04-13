@@ -19,7 +19,7 @@ import logging
 import asyncio
 from typing import List, Dict, Optional, Tuple, Any
 
-from core.effects.move import MoveEffect, MoveState, RollTiming
+from core.effects.move import MoveEffect, MovePhase, RollTiming
 from modules.moves.data import MoveData, Moveset
 from modules.moves.loader import MoveLoader
 from utils.test_helper import process_turns, recreate_test_characters
@@ -649,7 +649,7 @@ async def test_move_cooldowns(interaction: discord.Interaction, bot):
             
             # Verify cooldown phase details
             if hasattr(effect, 'phases'):
-                cooldown_phase = effect.phases.get(MoveState.COOLDOWN)
+                cooldown_phase = effect.phases.get(MovePhase.COOLDOWN)
                 if cooldown_phase:
                     print(f"Cooldown phase: {cooldown_phase.duration} turns, {cooldown_phase.turns_completed} completed")
                     remaining = cooldown_phase.duration - cooldown_phase.turns_completed

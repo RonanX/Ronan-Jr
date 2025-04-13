@@ -373,19 +373,22 @@ class InitiativeCommands(commands.GroupCog, name="initiative"):
 
     @app_commands.command(name="addcombat")
     @app_commands.describe(
-        character="Character to add to combat"
+        character="Character to add to combat",
+        position="Optional position in the initiative order (1-based index, leave blank to add at the end)"
     )
     async def add_combatant(
         self,
         interaction: discord.Interaction,
-        character: str
+        character: str,
+        position: Optional[int] = None
     ):
-        """Add a character to ongoing combat"""
+        """Add a character to ongoing combat with optional position in initiative order"""
         try:
             await interaction.response.defer()
             
-            self.debug_print(f"\n=== Adding Combatant: {character} ===")
+            self.debug_print(f"\n=== Adding Combatant: {character} at position: {position} ===")
             
+            # Check if character exists
             char = self.bot.game_state.get_character(character)
             if not char:
                 await interaction.followup.send(
@@ -394,7 +397,26 @@ class InitiativeCommands(commands.GroupCog, name="initiative"):
                 )
                 return
             
-            success, message = await self.tracker.add_combatant(char, interaction)
+            # Handle position conversion from 1-based (user input) to 0-based (internal)
+            tracker_position = None
+            if position is not None:
+                # Validate position is positive
+                if position < 1:
+                    await interaction.followup.send(
+                        "❌ `Position must be 1 or higher` ❌",
+                        ephemeral=True
+                    )
+                    return
+                    
+                # Convert to 0-based for tracker
+                tracker_position = position - 1
+            
+            # Add to combat
+            success, message = await self.tracker.add_combatant(
+                char, 
+                interaction,
+                position=tracker_position
+            )
             
             if not success:
                 await interaction.followup.send(

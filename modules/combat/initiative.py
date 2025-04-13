@@ -176,12 +176,12 @@ class InitiativeTracker:
         final_turn_msgs = []
         expiry_msgs = expiry_msgs or []
         
-        # FIXED: Process each message and categorize appropriately
+        # Process each message and categorize appropriately
         for msg in effect_msgs:
             if not msg:
                 continue
             
-            # FIXED: Improved pattern matching for expiry messages
+            # Improved pattern matching for expiry messages
             if any(pattern in msg.lower() for pattern in 
                 ["worn off", "expired", "has ended", "wears off", "has worn off"]):
                 if msg not in expiry_msgs:
@@ -239,6 +239,14 @@ class InitiativeTracker:
                 for field in embed.fields:
                     fields[field.name] = field.value
                 self.logger.log_embed("Effects Update", fields)
+            
+            # FIX: Clear displayed feedback from all characters
+            for turn in self.turn_order:
+                char = self.bot.game_state.get_character(turn.character_name)
+                if char and hasattr(char, 'effect_feedback'):
+                    char.mark_feedback_displayed()
+                    if hasattr(char, 'clear_old_feedback'):
+                        char.clear_old_feedback()
 
     async def process_skipped_turn(self, interaction: discord.Interaction) -> Tuple[bool, str, List[str]]:
         """Process a skipped turn without recursive next_turn call"""
@@ -913,6 +921,209 @@ class InitiativeTracker:
         print("\n=== Combat Ended ===")
         print("Test combat complete")
 
+    async def add_combatant(
+        self, 
+        character: Character, 
+        interaction: discord.Interaction,
+        position: Optional[int] = None
+    ) -> Tuple[bool, str]:
+        """
+        Add a character to an ongoing combat session.
+        
+        Args:
+            character: The character to add
+            interaction: Discord interaction
+            position: Optional position in the initiative order (0-based index)
+                      If None, adds at the end of the initiative order
+        
+        Returns:
+            Tuple of (success, message)
+        """
+        try:
+            # Check if combat is active
+            if self.state == CombatState.INACTIVE:
+                return False, "No active combat session"
+                
+            # Check if character already in combat
+            if any(turn.character_name == character.name for turn in self.turn_order):
+                return False, f"{character.name} is already in combat"
+            
+            # Initialize effects and action stars
+            # Clear temp effects
+            cleanup_messages = await self.clear_combat_effects(character)
+            if cleanup_messages:
+                if isinstance(cleanup_messages, list):
+                    cleanup_text = "\n".join(cleanup_messages)
+                else:
+                    cleanup_text = cleanup_messages
+                    
+                await interaction.followup.send(
+                    f"Cleanup for {character.name}:\n{cleanup_text}",
+                    ephemeral=True
+                )
+                
+            # Reset action stars
+            character.refresh_stars()
+            
+            # Create turn data
+            turn_data = TurnData(
+                character_name=character.name,
+                round_number=self.round_number,
+                initiative_roll=0,  # No initiative roll for mid-combat additions
+                current_ip=100
+            )
+            
+            # Insert at specified position or append to end
+            if position is not None:
+                # Validate position
+                if position < 0 or position > len(self.turn_order):
+                    return False, f"Invalid position: {position}. Must be between 0 and {len(self.turn_order)}"
+                    
+                # Insert at specified position
+                self.turn_order.insert(position, turn_data)
+                
+                # Adjust current_index if inserting before current turn
+                if position <= self.current_index:
+                    self.current_index += 1
+            else:
+                # Add to end of initiative order
+                self.turn_order.append(turn_data)
+            
+            # Create embed to announce addition
+            embed = discord.Embed(
+                title="Combat Update",
+                description=f"✅ **{character.name}** has joined the battle!",
+                color=discord.Color.green()
+            )
+            
+            # Add initiative order field
+            order_text = []
+            for i, turn in enumerate(self.turn_order):
+                if i == self.current_index:
+                    order_text.append(f"▶️ {turn.character_name} (Current)")
+                else:
+                    order_text.append(f"⬜ {turn.character_name}")
+                    
+            embed.add_field(
+                name="Updated Initiative Order",
+                value="\n".join(order_text),
+                inline=False
+            )
+            
+            # Add position info if specified
+            if position is not None:
+                pos_text = f"Inserted at position {position+1}" if position < len(self.turn_order)-1 else "Added to the end"
+                embed.set_footer(text=pos_text)
+            
+            await interaction.followup.send(embed=embed)
+            
+            # Log to combat logger
+            if self.logger:
+                self.logger.add_event(
+                    CombatEventType.SYSTEM_MESSAGE,
+                    message=f"{character.name} has joined the battle",
+                    character=character.name,
+                    details={"position": position if position is not None else "end"}
+                )
+                
+            return True, f"{character.name} added to combat"
+            
+        except Exception as e:
+            logger.error(f"Error adding combatant: {e}", exc_info=True)
+            return False, f"Error adding combatant: {str(e)}"
+            
+    async def remove_combatant(
+        self, 
+        character_name: str, 
+        interaction: discord.Interaction
+    ) -> Tuple[bool, str]:
+        """
+        Remove a character from combat.
+        
+        Args:
+            character_name: Name of character to remove
+            interaction: Discord interaction
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        try:
+            # Check if combat is active
+            if self.state == CombatState.INACTIVE:
+                return False, "No active combat session"
+                
+            # Find character in turn order
+            char_index = None
+            for i, turn in enumerate(self.turn_order):
+                if turn.character_name == character_name:
+                    char_index = i
+                    break
+                    
+            if char_index is None:
+                return False, f"{character_name} is not in combat"
+                
+            # Get original position for reporting
+            original_position = char_index
+                
+            # Handle current index adjustment
+            if char_index == self.current_index:
+                # If removing current character, just advance to next turn
+                # Don't actually increment current_index, as removing the character shifts everything
+                pass
+            elif char_index < self.current_index:
+                # If removing character before current turn, adjust index down
+                self.current_index -= 1
+                
+            # Remove from turn order
+            removed_turn = self.turn_order.pop(char_index)
+            
+            # Create embed to announce removal
+            embed = discord.Embed(
+                title="Combat Update",
+                description=f"❌ **{character_name}** has left the battle!",
+                color=discord.Color.red()
+            )
+            
+            # Add new initiative order if any characters remain
+            if self.turn_order:
+                order_text = []
+                for i, turn in enumerate(self.turn_order):
+                    if i == self.current_index:
+                        order_text.append(f"▶️ {turn.character_name} (Current)")
+                    else:
+                        order_text.append(f"⬜ {turn.character_name}")
+                        
+                embed.add_field(
+                    name="Updated Initiative Order",
+                    value="\n".join(order_text),
+                    inline=False
+                )
+            else:
+                # If no characters remain, end combat
+                await self.end_combat(interaction)
+                embed.add_field(
+                    name="Combat Ended",
+                    value="All combatants have left the battle!",
+                    inline=False
+                )
+                
+            await interaction.followup.send(embed=embed)
+            
+            # Log to combat logger
+            if self.logger:
+                self.logger.add_event(
+                    CombatEventType.SYSTEM_MESSAGE,
+                    message=f"{character_name} has left the battle",
+                    character=character_name,
+                    details={"original_position": original_position}
+                )
+                
+            return True, f"{character_name} removed from combat"
+            
+        except Exception as e:
+            logger.error(f"Error removing combatant: {e}", exc_info=True)
+            return False, f"Error removing combatant: {str(e)}"
+            
     def _get_current_state(self) -> Dict:
         """Get the current combat state for undo functionality"""
         return {
