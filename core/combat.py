@@ -362,7 +362,7 @@ class CompoundMove:
         try:
             if not self.params.attack_roll:
                 return True, "", []
-
+    
             damage_components = []
             if self.params.damage and self.params.damage_type:
                 damage_components.append(DamageComponent(
@@ -413,6 +413,17 @@ class CompoundMove:
         except Exception as e:
             logger.error(f"Error processing attack: {str(e)}", exc_info=True)
             return False, str(e), []
+    
+    def format_effect_message(self, message, details=None):
+        """Format an effect message with optional details"""
+        if not details:
+            return f"> {message}"
+        
+        formatted = [f"> **{message}**"]
+        for detail in details:
+            formatted.append(f"> • {detail}")
+        
+        return "\n".join(formatted)
 
     def create_cast_effect(self, duration: Optional[int] = None) -> BaseEffect:
         """Create effect for the move"""

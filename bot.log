@@ -2089,3 +2089,2306 @@ aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gatewa
 2025-04-13 19:03:30,577 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
 2025-04-13 19:03:30,659 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
 2025-04-13 19:03:30,763 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-14 18:07:10,446 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-14 18:07:10,448 - discord.client - INFO - logging in using static token
+2025-04-14 18:07:11,123 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:07:11,123 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:07:11,896 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-14 18:07:11,897 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:07:11,898 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:07:11,922 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:07:11,922 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:07:11,924 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:07:11,924 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:07:11,924 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-14 18:07:12,458 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 78503f2fc9e6b167c4b63e61b331a749).
+2025-04-14 18:08:18,290 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-14 18:08:18,292 - discord.client - INFO - logging in using static token
+2025-04-14 18:08:18,731 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:08:18,731 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:08:19,328 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-14 18:08:19,329 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:08:19,329 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:08:19,338 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:08:19,338 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:08:19,340 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:08:19,340 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:08:19,340 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-14 18:08:19,764 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6b1aa43649d4233c6b61bd5a1c96aedb).
+2025-04-14 18:10:18,734 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-14 18:10:40,252 - core.effects.manager - ERROR - Error processing on_turn_start for Burn: Invalid dice component: d4
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 414, in process_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\burn_effect.py", line 210, in on_turn_start
+    total_damage, explanation = DiceRoller.roll_dice(self.damage_formula)
+                                ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\utils\dice.py", line 107, in roll_dice
+    raise ValueError(f"Invalid dice component: {comp}")
+ValueError: Invalid dice component: d4
+2025-04-14 18:33:46,289 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-14 18:33:46,292 - discord.client - INFO - logging in using static token
+2025-04-14 18:33:47,103 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:33:47,103 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:33:47,781 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-14 18:33:47,784 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:33:47,785 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:33:47,831 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:33:47,831 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:33:47,834 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:33:47,834 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:33:47,834 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-14 18:33:48,202 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 081b2445c6f471a4585d94fccf32e8f8).
+2025-04-14 18:36:52,341 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-14 18:48:51,113 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-14 18:48:51,116 - discord.client - INFO - logging in using static token
+2025-04-14 18:48:51,681 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:48:51,682 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:48:52,413 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-14 18:48:52,414 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:48:52,415 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 18:48:52,445 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:48:52,446 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:48:52,447 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 18:48:52,447 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 18:48:52,448 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-14 18:48:52,750 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0ae916964e1247599dbca6b89046ec45).
+2025-04-14 18:53:14,404 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-14 19:18:06,003 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-14 19:18:06,006 - discord.client - INFO - logging in using static token
+2025-04-14 19:18:06,500 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 19:18:06,501 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 19:18:07,253 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-14 19:18:07,254 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 19:18:07,255 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 19:18:07,266 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 19:18:07,266 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 19:18:07,268 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 19:18:07,268 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 19:18:07,268 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-14 19:18:07,806 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 42951e9a438f82f11441e5af86fe1a78).
+2025-04-14 19:32:18,892 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-14 19:54:00,968 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-14 19:54:00,970 - discord.client - INFO - logging in using static token
+2025-04-14 19:54:01,524 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 19:54:01,525 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 19:54:02,280 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-14 19:54:02,281 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 19:54:02,281 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-14 19:54:02,316 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 19:54:02,316 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 19:54:02,318 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-14 19:54:02,318 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-14 19:54:02,319 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-14 19:54:02,705 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3024dc4bba3b895631c16f7eabbb0281).
+2025-04-14 19:54:27,109 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-14 22:26:07,201 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-14 22:26:07,204 - discord.client - ERROR - Attempting a reconnect in 1.44s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-14 22:26:08,807 - discord.client - ERROR - Attempting a reconnect in 3.59s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-14 22:26:12,720 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-14 22:26:18,059 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 05e7fafa3436f5e124efb696b3a70e48).
+2025-04-15 00:10:20,841 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 05e7fafa3436f5e124efb696b3a70e48.
+2025-04-15 01:42:48,312 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 05e7fafa3436f5e124efb696b3a70e48.
+2025-04-15 01:56:11,152 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 05e7fafa3436f5e124efb696b3a70e48.
+2025-04-15 12:38:35,541 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-15 12:38:35,761 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-15 12:38:41,156 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: acf4d31ff0d89f0ed24299a00779515f).
+2025-04-15 12:49:09,098 - discord.gateway - INFO - Shard ID None has successfully RESUMED session acf4d31ff0d89f0ed24299a00779515f.
+2025-04-15 20:40:42,760 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-15 20:40:43,028 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-15 20:40:48,456 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 68b3426ddae39ce5f353026db55c2570).
+2025-04-15 21:02:21,360 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 68b3426ddae39ce5f353026db55c2570.
+2025-04-15 21:26:44,333 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 68b3426ddae39ce5f353026db55c2570.
+2025-04-15 21:27:00,958 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 68b3426ddae39ce5f353026db55c2570.
+2025-04-15 21:34:39,445 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 68b3426ddae39ce5f353026db55c2570.
+2025-04-15 22:57:15,384 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 68b3426ddae39ce5f353026db55c2570.
+2025-04-16 02:08:54,640 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 68b3426ddae39ce5f353026db55c2570.
+2025-04-16 10:49:49,329 - discord.client - ERROR - Attempting a reconnect in 1.87s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-16 10:49:51,251 - discord.client - ERROR - Attempting a reconnect in 3.07s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-16 10:49:55,134 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-16 10:50:00,713 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 299c48be1cfc0b5309fa6601a35fbf8b).
+2025-04-16 12:35:19,246 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 299c48be1cfc0b5309fa6601a35fbf8b.
+2025-04-16 13:10:41,460 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 299c48be1cfc0b5309fa6601a35fbf8b.
+2025-04-16 13:28:29,476 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 299c48be1cfc0b5309fa6601a35fbf8b.
+2025-04-16 15:24:44,080 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 299c48be1cfc0b5309fa6601a35fbf8b.
+2025-04-16 15:57:52,744 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 299c48be1cfc0b5309fa6601a35fbf8b.
+2025-04-16 21:23:11,135 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-16 21:23:11,382 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-16 21:23:16,723 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 74b720c7786656a52e317556663554ff).
+2025-04-16 21:29:00,664 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 74b720c7786656a52e317556663554ff.
+2025-04-17 13:22:51,332 - discord.client - ERROR - Attempting a reconnect in 1.96s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 13:22:53,460 - discord.client - ERROR - Attempting a reconnect in 0.61s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 13:22:54,322 - discord.client - ERROR - Attempting a reconnect in 3.68s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 13:22:58,126 - discord.client - ERROR - Attempting a reconnect in 3.53s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 13:23:01,716 - discord.client - ERROR - Attempting a reconnect in 24.28s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 13:23:26,008 - discord.client - ERROR - Attempting a reconnect in 48.82s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 13:24:16,228 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-17 13:24:21,925 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f1d3958aae71ed1ac8b39620d1f9be29).
+2025-04-17 13:37:42,541 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f1d3958aae71ed1ac8b39620d1f9be29.
+2025-04-17 13:38:37,541 - discord.client - ERROR - Attempting a reconnect in 1.23s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 704, in connect
+    await self.ws.poll_event()
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 627, in poll_event
+    await self.received_message(msg.data)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 532, in received_message
+    await self.send_as_json(beat)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 663, in send_as_json
+    await self.send(utils._to_json(data))
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 659, in send
+    await self.socket.send_str(data)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client_ws.py", line 245, in send_str
+    await self._writer.send_frame(
+        data.encode("utf-8"), WSMsgType.TEXT, compress=compress
+    )
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\_websocket\writer.py", line 125, in send_frame
+    raise ClientConnectionResetError("Cannot write to closing transport")
+aiohttp.client_exceptions.ClientConnectionResetError: Cannot write to closing transport
+2025-04-17 13:38:38,914 - discord.gateway - INFO - Shard ID None has successfully RESUMED session f1d3958aae71ed1ac8b39620d1f9be29.
+2025-04-17 17:30:16,657 - discord.client - ERROR - Attempting a reconnect in 1.84s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 17:30:18,553 - discord.client - ERROR - Attempting a reconnect in 3.93s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-17 17:30:22,750 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-17 17:30:28,244 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 083451e86c8063525f90512026c600d7).
+2025-04-17 19:20:00,354 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 083451e86c8063525f90512026c600d7.
+2025-04-17 19:54:30,752 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 083451e86c8063525f90512026c600d7.
+2025-04-17 20:01:42,294 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 083451e86c8063525f90512026c600d7.
+2025-04-17 20:46:35,115 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 083451e86c8063525f90512026c600d7.
+2025-04-17 20:47:16,345 - asyncio - ERROR - Unclosed connection
+client_connection: Connection<ConnectionKey(host='gateway-us-east1-b.discord.gg', port=443, is_ssl=True, ssl=True, proxy=None, proxy_auth=None, proxy_headers_hash=None)>
+2025-04-18 00:19:17,790 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 083451e86c8063525f90512026c600d7.
+2025-04-18 12:59:53,043 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 12:59:53,046 - discord.client - INFO - logging in using static token
+2025-04-18 12:59:53,800 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 12:59:53,801 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 12:59:54,550 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 12:59:54,551 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 12:59:54,551 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 12:59:54,560 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 12:59:54,560 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 12:59:54,562 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 12:59:54,562 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 12:59:54,562 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 12:59:54,910 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a5da49f4b9043b0236cd8cf42be19152).
+2025-04-18 13:21:55,910 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-18 13:21:56,145 - discord.gateway - INFO - Shard ID None has successfully RESUMED session a5da49f4b9043b0236cd8cf42be19152.
+2025-04-18 13:23:56,687 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-18 13:25:05,311 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=True
+2025-04-18 13:41:19,275 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 13:41:19,278 - discord.client - INFO - logging in using static token
+2025-04-18 13:41:19,844 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:41:19,844 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:41:20,639 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 13:41:20,641 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 13:41:20,641 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 13:41:20,644 - core.effects.base - ERROR - Error calling from_dict for BurnEffect: BaseEffect.__init__() got an unexpected keyword argument 'stacks'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 947, in from_dict
+    instance = effect_class.from_dict(data)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\burn_effect.py", line 89, in from_dict
+    effect = cls(
+        name=data["name"],
+        permanent=data.get("permanent", False),
+        stacks=data.get("stacks", [])
+    )
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\burn_effect.py", line 7, in __init__
+    super().__init__(name, duration, permanent=permanent, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: BaseEffect.__init__() got an unexpected keyword argument 'stacks'
+2025-04-18 13:41:20,655 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:41:20,656 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:41:20,658 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:41:20,658 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:41:20,659 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 13:41:21,041 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 25e970b08fc3aa29399a6359e480e237).
+2025-04-18 13:46:15,045 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 13:46:15,048 - discord.client - INFO - logging in using static token
+2025-04-18 13:46:15,763 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:46:15,764 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:46:16,393 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 13:46:16,394 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 13:46:16,395 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 13:46:16,436 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:46:16,436 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:46:16,438 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:46:16,439 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:46:16,439 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 13:46:16,803 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: fef5f452897642db15a9ce58c2e63be8).
+2025-04-18 13:48:42,312 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 13:48:42,314 - discord.client - INFO - logging in using static token
+2025-04-18 13:48:42,786 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:48:42,786 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:48:43,539 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 13:48:43,541 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 13:48:43,541 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 13:48:43,551 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:48:43,551 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:48:43,552 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 13:48:43,553 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 13:48:43,553 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 13:48:43,855 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e7aeb524da058d37eaa5874282aefa60).
+2025-04-18 13:48:58,714 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-18 13:49:11,256 - core.effects.manager - ERROR - General error processing effects for test: 'NoneType' object has no attribute 'applied_during_own_turn'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 380, in process_effects
+    if not effect.timing.applied_during_own_turn:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'applied_during_own_turn'
+2025-04-18 13:49:11,768 - core.effects.manager - ERROR - General error processing effects for test: 'NoneType' object has no attribute 'applied_during_own_turn'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 380, in process_effects
+    if not effect.timing.applied_during_own_turn:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'applied_during_own_turn'
+2025-04-18 14:01:33,133 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 14:01:33,136 - discord.client - INFO - logging in using static token
+2025-04-18 14:01:33,519 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 14:01:33,520 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 14:01:34,737 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 14:01:34,738 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 14:01:34,738 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 14:01:34,740 - core.effects.base - ERROR - Effect data missing 'type' field.
+2025-04-18 14:01:34,749 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 14:01:34,749 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 14:01:34,751 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 14:01:34,751 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 14:01:34,752 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 14:01:35,061 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f053d4e41e71fdbe2cb61e7f0c21a6ad).
+2025-04-18 14:02:15,632 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-18 14:02:15,632 - core.effects.manager - ERROR - Error applying effect: 'BurnEffect' object has no attribute 'initialize_timing'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 228, in apply_effect
+    message = effect.on_apply(character, round_number)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\burn_effect.py", line 44, in on_apply
+    self.initialize_timing(round_number, character.name)
+    ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'BurnEffect' object has no attribute 'initialize_timing'. Did you mean: '_initialize_timing'?
+2025-04-18 14:02:51,356 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 14:02:51,360 - discord.client - INFO - logging in using static token
+2025-04-18 14:02:51,785 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 14:02:51,785 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 14:02:52,419 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 14:02:52,420 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 14:02:52,421 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 14:02:52,429 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 14:02:52,430 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 14:02:52,431 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 14:02:52,431 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 14:02:52,431 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 14:02:52,976 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: deb9b864c31af10de637fe6994bd21f3).
+2025-04-18 14:03:08,361 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-18 14:03:08,361 - core.effects.manager - ERROR - Error applying effect: 'int' object has no attribute 'name'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 228, in apply_effect
+    message = effect.on_apply(character, round_number)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\burn_effect.py", line 44, in on_apply
+    self._initialize_timing(round_number, character.name)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 349, in _initialize_timing
+    start_turn_name=character.name,
+                    ^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'name'
+2025-04-18 15:00:42,914 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 15:00:42,916 - discord.client - INFO - logging in using static token
+2025-04-18 15:00:43,427 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:00:43,428 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:00:44,155 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 15:00:44,156 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 15:00:44,156 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 15:00:44,171 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:00:44,172 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:00:44,174 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:00:44,174 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:00:44,174 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 15:00:44,596 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 50840c6e27586ec5b8708f3be0fb550c).
+2025-04-18 15:03:05,703 - core.effects.manager - ERROR - Error applying effect 'Burn' to 'test': 'int' object has no attribute 'name'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 131, in apply_effect
+    effect._initialize_timing(round_number, character.name)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 349, in _initialize_timing
+    start_turn_name=character.name,
+                    ^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'name'
+2025-04-18 15:10:30,320 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 15:10:30,322 - discord.client - INFO - logging in using static token
+2025-04-18 15:10:30,705 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:10:30,705 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:10:31,457 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 15:10:31,459 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 15:10:31,459 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 15:10:31,473 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:10:31,473 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:10:31,476 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:10:31,476 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:10:31,476 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 15:10:31,896 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a3ecd05952d6dd1e2af5c0ba484d41e7).
+2025-04-18 15:10:51,255 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-18 15:20:46,003 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 15:20:46,005 - discord.client - INFO - logging in using static token
+2025-04-18 15:20:46,390 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:20:46,390 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:20:47,150 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 15:20:47,152 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 15:20:47,152 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 15:20:47,165 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:20:47,166 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:20:47,167 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 15:20:47,167 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 15:20:47,168 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 15:20:47,585 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 71594f82aef60a69057c1de59949ec8a).
+2025-04-18 15:21:26,677 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-18 17:25:32,278 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 17:25:32,280 - discord.client - INFO - logging in using static token
+2025-04-18 17:25:32,739 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 17:25:32,739 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 17:25:33,346 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 17:25:33,347 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 17:25:33,348 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 17:25:33,357 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 17:25:33,357 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 17:25:33,358 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 17:25:33,359 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 17:25:33,359 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 17:25:33,686 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: af4059918894447b9480213292671cf6).
+2025-04-18 17:26:21,418 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-18 17:26:21,421 - discord.client - INFO - logging in using static token
+2025-04-18 17:26:21,880 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 17:26:21,880 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 17:26:22,550 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-18 17:26:22,551 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 17:26:22,552 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-18 17:26:22,562 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 17:26:22,562 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 17:26:22,564 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-18 17:26:22,564 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-18 17:26:22,564 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-18 17:26:22,920 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 5942fc07a43242ade650b4edb268ec4c).
+2025-04-18 17:26:33,253 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-18 17:46:38,332 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5942fc07a43242ade650b4edb268ec4c.
+2025-04-18 18:08:20,278 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5942fc07a43242ade650b4edb268ec4c.
+2025-04-18 20:16:20,144 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5942fc07a43242ade650b4edb268ec4c.
+2025-04-18 21:30:26,523 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5942fc07a43242ade650b4edb268ec4c.
+2025-04-18 23:00:38,017 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5942fc07a43242ade650b4edb268ec4c.
+2025-04-19 00:00:18,144 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5942fc07a43242ade650b4edb268ec4c.
+2025-04-19 00:14:37,758 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 5942fc07a43242ade650b4edb268ec4c.
+2025-04-19 11:14:25,186 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-19 11:14:25,193 - discord.client - ERROR - Attempting a reconnect in 1.21s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-19 11:14:26,839 - discord.client - ERROR - Attempting a reconnect in 2.49s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-19 11:14:29,356 - discord.client - ERROR - Attempting a reconnect in 1.68s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-19 11:14:31,060 - discord.client - ERROR - Attempting a reconnect in 13.23s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-19 11:14:44,309 - discord.client - ERROR - Attempting a reconnect in 30.18s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-19 11:15:14,763 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-19 11:15:20,017 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c3b7df2a7df31a3a4fc4adebbfa08847).
+2025-04-19 11:48:24,307 - discord.gateway - INFO - Shard ID None has successfully RESUMED session c3b7df2a7df31a3a4fc4adebbfa08847.
+2025-04-19 12:04:44,777 - discord.gateway - INFO - Shard ID None has successfully RESUMED session c3b7df2a7df31a3a4fc4adebbfa08847.
+2025-04-19 13:08:05,495 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 13:08:05,498 - discord.client - INFO - logging in using static token
+2025-04-19 13:08:05,929 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:08:05,929 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:08:06,425 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 13:08:06,426 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:08:06,427 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:08:06,460 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:08:06,461 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:08:06,463 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:08:06,463 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:08:06,464 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 13:08:06,708 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ea461a541a7935763b90800fe0dd51c7).
+2025-04-19 13:19:00,842 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 13:19:00,842 - core.effects.manager - ERROR - Error applying effect: 'int' object has no attribute 'name'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 228, in apply_effect
+    message = effect.on_apply(character, round_number)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\burn_effect.py", line 25, in on_apply
+    self._initialize_timing(round_number, character.name)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\base.py", line 349, in _initialize_timing
+    start_turn_name=character.name,
+                    ^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'name'
+2025-04-19 13:22:21,466 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 13:22:21,468 - discord.client - INFO - logging in using static token
+2025-04-19 13:22:21,868 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:22:21,869 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:22:22,258 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 13:22:22,259 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:22:22,259 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:22:22,269 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:22:22,269 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:22:22,271 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:22:22,271 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:22:22,271 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 13:22:22,505 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 47813ce179be71991fbbee06f35cf52a).
+2025-04-19 13:23:07,291 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 13:24:37,949 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 13:24:51,286 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 13:29:55,297 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 13:29:55,299 - discord.client - INFO - logging in using static token
+2025-04-19 13:29:55,671 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:29:55,672 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:29:56,139 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 13:29:56,140 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:29:56,140 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:29:56,151 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:29:56,151 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:29:56,153 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:29:56,153 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:29:56,154 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 13:29:56,362 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 473d58e820c4de234cf254c80ed741ea).
+2025-04-19 13:34:44,681 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 13:34:51,457 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 13:36:37,213 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-19 13:37:01,480 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-19 13:42:24,006 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 13:42:24,009 - discord.client - INFO - logging in using static token
+2025-04-19 13:42:24,391 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:42:24,391 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:42:24,859 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 13:42:24,860 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:42:24,860 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:42:24,872 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:42:24,872 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:42:24,874 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:42:24,874 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:42:24,874 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 13:42:25,113 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1d2c2c62795bd5484533bdaee74b0515).
+2025-04-19 13:43:14,727 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-19 13:43:20,072 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-19 13:53:35,121 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 13:53:35,124 - discord.client - INFO - logging in using static token
+2025-04-19 13:53:35,422 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:53:35,422 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:53:35,853 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 13:53:35,854 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:53:35,854 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:53:35,863 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:53:35,863 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:53:35,864 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:53:35,864 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:53:35,865 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 13:53:36,072 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c03588973e295db7154bdc0ccdadc988).
+2025-04-19 13:55:43,956 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-19 13:55:51,264 - core.effects.manager - ERROR - Error processing on_turn_end for Burn (1) #1_1745085343_3547: 'BurnEffect' object has no attribute 'process_duration'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 457, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\burn_effect.py", line 182, in on_turn_end
+    turns_remaining, should_expire = self.process_duration(round_number, turn_name)
+                                     ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'BurnEffect' object has no attribute 'process_duration'
+2025-04-19 13:58:48,505 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 13:58:48,508 - discord.client - INFO - logging in using static token
+2025-04-19 13:58:49,039 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:58:49,040 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:58:49,450 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 13:58:49,451 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:58:49,451 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 13:58:49,461 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:58:49,461 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:58:49,463 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 13:58:49,463 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 13:58:49,463 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 13:58:49,711 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: cd26eb4c2aff8a1b5e0f1dae7cdb5505).
+2025-04-19 14:01:19,603 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-19 14:09:33,408 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 14:09:33,411 - discord.client - INFO - logging in using static token
+2025-04-19 14:09:33,739 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:09:33,740 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:09:34,205 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 14:09:34,206 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:09:34,206 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:09:34,214 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:09:34,214 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:09:34,216 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:09:34,216 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:09:34,216 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 14:09:34,447 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c612c3a9e73d7a59593665a2e083a13e).
+2025-04-19 14:10:43,928 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-19 14:11:27,050 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-19 14:15:55,677 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 14:15:55,680 - discord.client - INFO - logging in using static token
+2025-04-19 14:15:55,987 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:15:55,987 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:15:56,431 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 14:15:56,432 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:15:56,432 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:15:56,442 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:15:56,443 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:15:56,444 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:15:56,444 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:15:56,444 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 14:15:56,927 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2d80424b5e46add4c5063ecb0343554e).
+2025-04-19 14:16:38,995 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-19 14:17:55,246 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 14:23:23,494 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 14:23:23,496 - discord.client - INFO - logging in using static token
+2025-04-19 14:23:23,899 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:23:23,899 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:23:24,300 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 14:23:24,301 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:23:24,302 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:23:24,310 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:23:24,310 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:23:24,312 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:23:24,312 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:23:24,312 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 14:23:24,531 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f1518a841937998ccb5dccfe3627fb7a).
+2025-04-19 14:37:43,195 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 14:37:43,197 - discord.client - INFO - logging in using static token
+2025-04-19 14:37:43,553 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:37:43,554 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:37:43,971 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 14:37:43,972 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:37:43,972 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 14:37:44,008 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:37:44,008 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:37:44,010 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 14:37:44,010 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 14:37:44,010 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 14:37:44,259 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 665d2368be5646e0eee03250cb58b3ad).
+2025-04-19 14:38:49,165 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-19 14:38:49,166 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-19 14:38:49,250 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-19 14:38:49,251 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-19 18:31:58,794 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-19 18:31:58,797 - discord.client - INFO - logging in using static token
+2025-04-19 18:31:59,349 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 18:31:59,349 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 18:32:00,139 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-19 18:32:00,140 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 18:32:00,141 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-19 18:32:00,186 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 18:32:00,186 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 18:32:00,188 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-19 18:32:00,188 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-19 18:32:00,188 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-19 18:32:00,834 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1107dce2d08c4aedd357c61a38b92d65).
+2025-04-19 18:33:07,962 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-19 18:33:07,963 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-19 18:33:08,084 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-19 18:33:08,086 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:04:18,339 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 10:04:18,342 - discord.client - INFO - logging in using static token
+2025-04-20 10:04:18,750 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:04:18,750 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:04:19,208 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 10:04:19,210 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:04:19,210 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:04:19,247 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:04:19,247 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:04:19,248 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:04:19,249 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:04:19,249 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 10:04:19,763 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1d8ce4261488579273c0d94ce8c09fc6).
+2025-04-20 10:09:38,989 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 10:09:38,990 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 10:09:39,065 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 10:09:39,066 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 10:16:03,550 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:16:03,551 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:16:03,626 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:16:03,627 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:28:20,705 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 10:28:20,708 - discord.client - INFO - logging in using static token
+2025-04-20 10:28:21,195 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:28:21,195 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:28:21,705 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 10:28:21,706 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:28:21,706 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:28:21,716 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:28:21,717 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:28:21,718 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:28:21,718 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:28:21,718 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 10:28:21,973 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b9d9325f82010e14820c009abd3a32e4).
+2025-04-20 10:28:35,960 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:28:35,961 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:28:36,035 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:28:36,035 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:35:13,487 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 10:35:13,489 - discord.client - INFO - logging in using static token
+2025-04-20 10:35:13,899 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:35:13,899 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:35:14,320 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 10:35:14,321 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:35:14,321 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:35:14,330 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:35:14,331 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:35:14,332 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:35:14,332 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:35:14,332 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 10:35:14,551 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 660a3df2f7667d20e4519cc4bb71e121).
+2025-04-20 10:40:11,119 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:40:11,120 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:40:11,194 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:40:11,196 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:46:53,739 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 10:46:53,742 - discord.client - INFO - logging in using static token
+2025-04-20 10:46:54,136 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:46:54,137 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:46:54,579 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 10:46:54,580 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:46:54,580 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:46:54,619 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:46:54,619 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:46:54,620 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:46:54,621 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:46:54,621 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 10:46:55,029 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: d4d2071cdda23f02e1b3027c4479501e).
+2025-04-20 10:47:14,383 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:47:14,384 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 10:47:14,459 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:47:14,460 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 10:56:30,751 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 10:56:30,753 - discord.client - INFO - logging in using static token
+2025-04-20 10:56:31,131 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:56:31,132 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:56:31,554 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 10:56:31,555 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:56:31,555 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 10:56:31,565 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:56:31,565 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:56:31,566 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 10:56:31,567 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 10:56:31,567 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 10:56:31,867 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0b767e18cb318b18e7934e9a11548306).
+2025-04-20 10:57:06,746 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 10:57:06,746 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 10:57:06,810 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 10:57:06,811 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 11:14:05,376 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:14:05,379 - discord.client - INFO - logging in using static token
+2025-04-20 11:14:06,034 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:14:06,035 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:14:06,480 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:14:06,481 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:14:06,482 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:14:06,494 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:14:06,494 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:14:06,497 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:14:06,497 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:14:06,497 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:14:06,749 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b9b2da7042b9d54f09ebfe73d05519f7).
+2025-04-20 11:15:11,801 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:15:11,802 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:15:11,870 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:15:11,871 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:20:22,964 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:20:22,967 - discord.client - INFO - logging in using static token
+2025-04-20 11:20:23,373 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:20:23,373 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:20:23,806 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:20:23,807 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:20:23,808 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:20:23,818 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:20:23,818 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:20:23,819 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:20:23,819 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:20:23,820 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:20:24,082 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 38ef49f93b1570446a385d476b4e13a5).
+2025-04-20 11:20:46,576 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:20:46,577 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:20:46,653 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:20:46,654 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:22:45,661 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:22:45,663 - discord.client - INFO - logging in using static token
+2025-04-20 11:22:46,147 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:22:46,147 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:22:46,538 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:22:46,539 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:22:46,540 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:22:46,552 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:22:46,552 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:22:46,554 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:22:46,554 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:22:46,555 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:22:46,940 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 09d38ae22de846399797c73a5940bc0c).
+2025-04-20 11:22:59,485 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:22:59,486 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:22:59,558 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:22:59,559 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:29:53,606 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:29:53,609 - discord.client - INFO - logging in using static token
+2025-04-20 11:29:54,132 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:29:54,132 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:29:54,576 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:29:54,578 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:29:54,578 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:29:54,587 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:29:54,622 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:29:54,623 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:29:54,624 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:29:54,624 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:29:54,858 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 105b170653cb04c2d6f21adf1fb70604).
+2025-04-20 11:30:12,968 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:30:12,969 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:30:13,044 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:30:13,045 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:31:54,581 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:31:54,583 - discord.client - INFO - logging in using static token
+2025-04-20 11:31:54,896 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:31:54,896 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:31:55,288 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:31:55,289 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:31:55,289 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:31:55,299 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:31:55,299 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:31:55,300 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:31:55,300 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:31:55,301 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:31:55,565 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1272d30bdd1f8544e8655ed94d7cad02).
+2025-04-20 11:32:10,692 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 11:32:10,693 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 11:32:10,763 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 11:32:10,764 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 11:39:02,270 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:39:02,272 - discord.client - INFO - logging in using static token
+2025-04-20 11:39:02,591 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:39:02,591 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:39:03,030 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:39:03,031 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:39:03,032 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:39:03,044 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:39:03,044 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:39:03,046 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:39:03,046 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:39:03,046 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:39:03,267 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3dd6e03329bbf4e63e9136e72df47121).
+2025-04-20 11:39:48,096 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:39:48,097 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:39:48,169 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:39:48,169 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:47:56,550 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:47:56,552 - discord.client - INFO - logging in using static token
+2025-04-20 11:47:56,841 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:47:56,842 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:47:57,266 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:47:57,267 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:47:57,267 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:47:57,277 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:47:57,277 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:47:57,278 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:47:57,279 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:47:57,279 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:47:57,617 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 39c683a299de3e4b2a54003000b17c08).
+2025-04-20 11:48:18,444 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:48:18,444 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 11:48:18,515 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:48:18,515 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 11:51:29,490 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 11:51:29,493 - discord.client - INFO - logging in using static token
+2025-04-20 11:51:29,815 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:51:29,815 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:51:30,208 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 11:51:30,209 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:51:30,209 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 11:51:30,218 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:51:30,218 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:51:30,220 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 11:51:30,220 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 11:51:30,220 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 11:51:30,493 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 5acdd3d08be415494b30a6c0615fae74).
+2025-04-20 11:52:00,025 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 11:52:00,026 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 11:52:00,101 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 11:52:00,102 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:06:54,837 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:06:54,838 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:06:54,958 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:06:54,959 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:11:03,701 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 12:11:03,704 - discord.client - INFO - logging in using static token
+2025-04-20 12:11:04,021 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:11:04,021 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:11:04,423 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 12:11:04,424 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:11:04,424 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:11:04,435 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:11:04,436 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:11:04,438 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:11:04,438 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:11:04,438 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 12:11:04,757 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3446cd52b027b04ca9db0fac7e0947cb).
+2025-04-20 12:12:00,422 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:12:00,423 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:12:00,489 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:12:00,490 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:16:38,977 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 12:16:38,979 - discord.client - INFO - logging in using static token
+2025-04-20 12:16:39,301 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:16:39,302 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:16:39,700 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 12:16:39,702 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:16:39,702 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:16:39,716 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:16:39,716 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:16:39,718 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:16:39,718 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:16:39,718 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 12:16:40,112 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 03c230af7b7dfdafa2599b6432a0e818).
+2025-04-20 12:16:55,425 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 12:16:55,426 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 12:16:55,495 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 12:16:55,495 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 12:27:27,829 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 12:27:27,831 - discord.client - INFO - logging in using static token
+2025-04-20 12:27:28,288 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:27:28,289 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:27:28,738 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 12:27:28,739 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:27:28,739 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:27:28,752 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:27:28,752 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:27:28,754 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:27:28,755 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:27:28,755 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 12:27:29,089 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6edec2e02234ec66cf2a761255ff62dd).
+2025-04-20 12:27:44,520 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 12:27:44,521 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 12:27:44,586 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 12:27:44,586 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 12:27:46,457 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:27:46,702 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:28:01,110 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:32:27,161 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 12:32:27,164 - discord.client - INFO - logging in using static token
+2025-04-20 12:32:27,539 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:32:27,540 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:32:27,963 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 12:32:27,964 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:32:27,965 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:32:27,974 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:32:27,974 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:32:27,975 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:32:27,975 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:32:27,976 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 12:32:28,178 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ce560ac2166ea400679d1cc2ef17fa28).
+2025-04-20 12:33:37,228 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:33:37,229 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:33:37,299 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:33:37,300 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:33:39,999 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:33:40,255 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:33:46,796 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:34:39,988 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:34:39,989 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:34:40,056 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:34:40,057 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:35:13,342 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 12:35:13,346 - discord.client - INFO - logging in using static token
+2025-04-20 12:35:14,581 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:35:14,582 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:35:15,536 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 12:35:15,538 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:35:15,538 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:35:15,547 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:35:15,547 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:35:15,549 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:35:15,549 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:35:15,549 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 12:35:15,853 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 690510f0acdcb7b732c411546032b4be).
+2025-04-20 12:35:41,568 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 12:35:41,569 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 12:35:41,637 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 12:35:41,638 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 12:56:10,093 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 12:56:10,095 - discord.client - INFO - logging in using static token
+2025-04-20 12:56:10,461 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:56:10,462 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:56:10,917 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 12:56:10,918 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:56:10,919 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 12:56:10,928 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:56:10,928 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:56:10,930 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 12:56:10,930 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 12:56:10,930 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 12:56:11,190 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e27006a0894eef210cb9d9514c339b4f).
+2025-04-20 12:56:41,963 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:56:41,963 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 12:56:42,029 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:56:42,029 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 12:56:43,827 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:56:44,096 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 12:56:48,129 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:19:09,095 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 13:19:09,097 - discord.client - INFO - logging in using static token
+2025-04-20 13:19:09,476 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:19:09,477 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:19:09,919 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 13:19:09,921 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 13:19:09,921 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 13:19:09,930 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:19:09,930 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:19:09,932 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:19:09,932 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:19:09,932 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 13:19:10,165 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 251dbd030b9a2d6d6d0417747d37882e).
+2025-04-20 13:27:25,888 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 13:27:25,889 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 13:27:26,071 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 13:27:26,072 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 13:27:28,468 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:27:28,816 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:27:36,611 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:48:29,501 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 13:48:29,503 - discord.client - INFO - logging in using static token
+2025-04-20 13:48:29,913 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:48:29,913 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:48:30,385 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 13:48:30,386 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 13:48:30,386 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 13:48:30,397 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:48:30,397 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:48:30,399 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:48:30,399 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:48:30,399 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 13:48:30,642 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 30dc6bd4e5648551d0776f22c0fa85bb).
+2025-04-20 13:49:46,064 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 13:49:46,065 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 13:49:47,482 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 13:49:47,483 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 13:49:50,082 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:49:50,321 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:49:53,872 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:52:06,690 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 13:52:06,693 - discord.client - INFO - logging in using static token
+2025-04-20 13:52:07,044 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:52:07,044 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:52:07,437 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 13:52:07,439 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 13:52:07,439 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 13:52:07,447 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:52:07,447 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:52:07,449 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 13:52:07,449 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 13:52:07,449 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 13:52:07,666 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 67185eebbdfc8a9962b95f35494968e8).
+2025-04-20 13:52:32,545 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 13:52:32,546 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 13:52:32,623 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 13:52:32,624 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 13:53:25,588 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 13:53:25,588 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 13:53:25,658 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 13:53:25,659 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 13:53:28,555 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:53:28,792 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:53:52,934 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 13:56:04,272 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 13:56:04,273 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 13:56:04,349 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 13:56:04,350 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 14:17:46,576 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 67185eebbdfc8a9962b95f35494968e8.
+2025-04-20 14:51:11,257 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 67185eebbdfc8a9962b95f35494968e8.
+2025-04-20 15:09:27,932 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 15:09:27,935 - discord.client - INFO - logging in using static token
+2025-04-20 15:09:28,325 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 15:09:28,325 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 15:09:28,734 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 15:09:28,735 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 15:09:28,735 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 15:09:28,744 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 15:09:28,744 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 15:09:28,746 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 15:09:28,746 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 15:09:28,746 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 15:09:29,099 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7ac739e0af73ab74f468fa5b6518de02).
+2025-04-20 15:09:56,750 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 15:09:56,751 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 15:09:56,815 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 15:09:56,817 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 16:49:07,177 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 16:49:07,180 - discord.client - INFO - logging in using static token
+2025-04-20 16:49:07,631 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 16:49:07,632 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 16:49:08,352 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 16:49:08,354 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 16:49:08,354 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 16:49:08,365 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 16:49:08,366 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 16:49:08,368 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 16:49:08,368 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 16:49:08,368 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 16:49:08,724 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b71d7b4ddebdc9f92fc755831f25f332).
+2025-04-20 16:53:36,957 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 16:53:36,958 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 16:53:37,073 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 16:53:37,074 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 17:11:52,141 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 17:11:52,142 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 17:11:52,468 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 17:11:52,469 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 17:11:55,283 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:11:55,574 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:12:40,211 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 17:12:40,212 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 17:12:40,335 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 17:12:40,336 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 17:12:43,264 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:12:43,728 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:13:05,772 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 17:13:05,773 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 17:13:05,870 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 17:13:05,871 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 17:13:07,616 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:13:07,962 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:13:29,957 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:17:27,209 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 17:17:27,211 - discord.client - INFO - logging in using static token
+2025-04-20 17:17:27,733 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 17:17:27,733 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 17:17:28,475 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 17:17:28,476 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 17:17:28,477 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 17:17:28,486 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 17:17:28,486 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 17:17:28,488 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 17:17:28,488 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 17:17:28,489 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 17:17:28,831 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: eb0b019105d22e812ec51c95b6ebf859).
+2025-04-20 17:23:53,381 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 17:23:53,382 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 17:23:53,501 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 17:23:53,502 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 17:23:56,126 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:23:57,356 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:24:01,176 - utils.advanced_dice.calculator - ERROR - Error in calculate: Invalid dice expression: 2×1
+2025-04-20 17:57:14,461 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 17:57:14,465 - discord.client - INFO - logging in using static token
+2025-04-20 17:57:15,018 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 17:57:15,018 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 17:57:15,784 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 17:57:15,786 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 17:57:15,786 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 17:57:15,839 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 17:57:15,840 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 17:57:15,842 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 17:57:15,842 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 17:57:15,843 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 17:57:16,320 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2e8213c5396921c8f96478d106a6d8b1).
+2025-04-20 17:57:36,556 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 17:57:36,557 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 17:57:36,663 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 17:57:36,665 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 18:04:06,401 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 18:04:06,404 - discord.client - INFO - logging in using static token
+2025-04-20 18:04:06,871 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:04:06,871 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:04:07,678 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 18:04:07,680 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:04:07,681 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:04:07,694 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:04:07,695 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:04:07,697 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:04:07,697 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:04:07,697 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 18:04:08,240 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 03ed47a4b03fb03e0edd1747b45f6e4e).
+2025-04-20 18:05:15,616 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 18:05:15,617 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-20 18:05:15,744 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 18:05:15,745 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-20 18:23:51,907 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 18:23:51,911 - discord.client - INFO - logging in using static token
+2025-04-20 18:23:52,522 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:23:52,523 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:23:53,321 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 18:23:53,323 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:23:53,323 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:23:53,336 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:23:53,336 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:23:53,339 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:23:53,339 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:23:53,340 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 18:23:53,710 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2bd7e3d135e9ab6dc3d7bf0e6e7472fb).
+2025-04-20 18:26:29,905 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 18:26:29,906 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-20 18:26:33,399 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 18:26:33,399 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=unknown, During=False
+2025-04-20 18:31:01,753 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 18:31:01,756 - discord.client - INFO - logging in using static token
+2025-04-20 18:31:02,243 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:31:02,244 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:31:03,029 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 18:31:03,031 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:31:03,031 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:31:03,045 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:31:03,046 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:31:03,048 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:31:03,048 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:31:03,049 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 18:31:03,374 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: d89f5b6a173d1e141a85f57ed1e0e6b9).
+2025-04-20 18:31:50,211 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-20 18:31:51,501 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-20 18:31:52,647 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-20 18:32:17,842 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-20 18:32:35,104 - commands.moves - ERROR - Error in temp_move: MoveEffect.__init__() got an unexpected keyword argument 'duration'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 395, in temp_move
+    move_effect = MoveEffect(
+        name=name,
+    ...<16 lines>...
+        roll_modifier=roll_modifier
+    )
+TypeError: MoveEffect.__init__() got an unexpected keyword argument 'duration'
+2025-04-20 18:35:07,792 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 18:35:07,796 - discord.client - INFO - logging in using static token
+2025-04-20 18:35:08,203 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:35:08,203 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:35:08,929 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 18:35:08,930 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:35:08,930 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 18:35:08,945 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:35:08,946 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:35:08,948 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 18:35:08,948 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 18:35:08,949 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 19:09:12,688 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 19:09:12,691 - discord.client - INFO - logging in using static token
+2025-04-20 19:09:13,130 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 19:09:13,130 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 19:09:13,859 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 19:09:13,861 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 19:09:13,861 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 19:09:13,873 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 19:09:13,873 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 19:09:13,875 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 19:09:13,876 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 19:09:13,876 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-20 19:14:18,916 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-20 19:14:18,919 - discord.client - INFO - logging in using static token
+2025-04-20 19:14:19,410 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 19:14:19,411 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 19:14:20,132 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-20 19:14:20,133 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 19:14:20,133 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-20 19:14:20,144 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 19:14:20,144 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 19:14:20,146 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-20 19:14:20,146 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-20 19:14:20,146 - commands.effects - INFO - EffectsCommands Cog loaded.

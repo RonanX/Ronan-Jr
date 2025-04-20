@@ -1,544 +1,440 @@
 """
-BurnEffect implementation for fire damage over time.
-
-This is a simplified, template-based implementation that:
-1. Applies damage at the start of each turn
-2. Correctly tracks duration
-3. Reliably shows expiry messages
-4. Supports both fixed damage and dice notation
-5. Uses the feedback system for reliable message display
-
-This implementation follows the new template approach while maintaining
-backward compatibility with existing code.
+Burn Effect (DoT) implementation with clean user output and accurate duration tracking.
 """
 
-from core.effects.base import BaseEffect, EffectCategory, EffectState
-from typing import List, Optional, Dict, Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import logging
+import time
+import random
+
+from .base import BaseEffect, EffectState, EffectCategory, EffectProcessTimingInfo
 
 logger = logging.getLogger(__name__)
 
+# Counter for unique effect IDs
+_burn_effect_counter = 0
+
 class BurnEffect(BaseEffect):
     """
-    Applies fire damage at the start of each turn.
-    
-    This effect can be created in two ways:
-    1. Directly: BurnEffect("1d6", duration=3)
-    2. Via template: BaseEffect.create_dot("Burn", "1d6", "fire", duration=3, emoji="🔥")
+    Fire damage over time effect with accurate duration tracking.
     
     Features:
-    - Simple, reliable implementation
-    - Consistent duration tracking
-    - Clear damage messaging
-    - Proper expiry handling with feedback
+    - Correctly handles "during" vs "not during" application
+    - Proper expiry message handling
+    - Clean user-facing messages
     """
-    def __init__(self, damage: str, duration: Optional[int] = None):
+    
+    def __init__(
+        self,
+        name: str = "Burn",
+        duration: Optional[int] = 3,
+        damage_formula: str = "1d4",
+        permanent: bool = False,
+        unique_id: Optional[str] = None,
+        **kwargs
+    ):
         """
-        Initialize a burn effect.
+        Initialize burn effect with damage formula and duration.
+        """
+        global _burn_effect_counter
+        
+        # Create a unique effect ID if not provided
+        if unique_id is None:
+            # Combine counter and timestamp for uniqueness
+            _burn_effect_counter += 1
+            unique_id = f"{_burn_effect_counter}_{int(time.time())}_{random.randint(1000, 9999)}"
+        
+        # Store basic name for display purposes
+        self.base_name = name
+        self.damage_formula = damage_formula
+        
+        # Create clean display name (without unique ID)
+        self.display_name = f"{name} ({damage_formula})"
+        
+        # Create a unique internal name that includes the unique ID
+        internal_name = f"{name} ({damage_formula}) #{unique_id}"
+        
+        # Initialize base effect
+        super().__init__(
+            name=internal_name,
+            duration=None if permanent else duration,
+            permanent=permanent,
+            category=EffectCategory.COMBAT,
+            description=f"Deals {damage_formula} fire damage each turn",
+            process_timing="both",  # Process at start AND end of turn
+            emoji="🔥",
+            debug_mode=True  # Enable debug logging
+        )
+        
+        # Store burn-specific data
+        self.unique_id = unique_id
+        self.is_dice = self._is_dice_formula(damage_formula)
+        
+        # Track last damage roll
+        self.last_damage_roll = None
+        
+        # Flag to track if we've added expiry feedback to prevent duplicates
+        self._expiry_feedback_added = False
+    
+    def _is_dice_formula(self, formula: str) -> bool:
+        """Check if a string is a dice formula (e.g., "d6", "2d8", "1d20+2")"""
+        if not isinstance(formula, str):
+            return False
+        
+        # Normalize "d4" to "1d4"
+        formula = formula.lower()
+        if formula.startswith('d') and len(formula) > 1 and formula[1:].isdigit():
+            formula = '1' + formula
+            
+        # Simple regex-free check for dice pattern
+        parts = formula.replace('+', ' ').replace('-', ' ').split()
+        for part in parts:
+            if 'd' in part:
+                dice_parts = part.split('d')
+                if len(dice_parts) == 2:
+                    if (dice_parts[0].isdigit() or not dice_parts[0]) and dice_parts[1].isdigit():
+                        return True
+        return False
+    
+    def get_display_name(self, context="default"):
+        """
+        Get appropriate display name based on context.
         
         Args:
-            damage: Amount of damage per turn (can be dice notation)
-            duration: How many turns the effect lasts
+            context (str): The context where the name will be displayed
+                - "damage": For damage messages (simplest form)
+                - "expiry": For expiry messages (clean format)
+                - "status": For status updates (with formula)
+                - "default": Default display name
         """
-        super().__init__(
-            name="Burn",
-            duration=duration,
-            permanent=False,
-            category=EffectCategory.COMBAT,
-            emoji="🔥"
-        )
-        
-        # Store the template data to leverage template processing
-        self._template_type = "dot"
-        self._template_data = {
-            "damage": damage,
-            "damage_type": "fire",
-            "last_damage": 0
-        }
-        
-        # Enhanced duration tracking
-        self._internal_duration = duration  # For internal tracking (may be adjusted)
-        self._displayed_duration = duration  # For user-facing display
-        
-        # Turn-based duration adjustment tracking
-        self._applied_during_own_turn = False  # Whether effect was applied during character's own turn
-        self._duration_adjusted = False  # Whether duration has been adjusted for turn timing
-        self._debug_mode = False  # Enable for detailed debugging output
-    
-    @property
-    def damage(self) -> str:
-        """Get damage value from template data"""
-        return self._template_data.get("damage", "1d4")
-    
-    @damage.setter
-    def damage(self, value: str):
-        """Set damage value in template data"""
-        self._template_data["damage"] = value
-    
-    @property
-    def last_damage(self) -> int:
-        """Get last damage value from template data"""
-        return self._template_data.get("last_damage", 0)
-    
-    @last_damage.setter
-    def last_damage(self, value: int):
-        """Set last damage value in template data"""
-        self._template_data["last_damage"] = value
-    
-    def debug_print(self, message: str) -> None:
-        """Print debug message if debug mode is enabled"""
-        if self._debug_mode:
-            print(f"[BurnEffect] {message}")
-    
-    def initialize_timing(self, round_number: int, character_name: str) -> None:
-        """
-        Set up timing tracking with turn-based duration adjustment.
-        
-        Also checks if this effect is being applied during the character's own turn,
-        which affects duration tracking.
-        """
-        # Initialize base timing with standard duration
-        super().initialize_timing(round_number, character_name)
-        
-        # Check if we're in combat and this is the character's own turn
-        self._check_if_during_own_turn(character_name)
-    
-    def _check_if_during_own_turn(self, character_name: str) -> None:
-        """
-        Check if this effect is being applied during the character's own turn.
-        This affects how duration is tracked.
-        """
-        # Default to not during own turn
-        self._applied_during_own_turn = False
-        
-        # Find character by name in available objects
-        import inspect
-        frame = inspect.currentframe()
-        current_character = None
-        
-        while frame:
-            if 'character' in frame.f_locals:
-                current_character = frame.f_locals['character']
-                break
-            frame = frame.f_back
-        
-        if not current_character:
-            return
-            
-        # Try to get the initiative tracker from character's game_state
-        if hasattr(current_character, 'game_state') and hasattr(current_character.game_state, 'initiative_tracker'):
-            tracker = current_character.game_state.initiative_tracker
-            if tracker.state != "inactive":  # Check if combat is active
-                # Check if it's this character's turn
-                if (hasattr(tracker, 'current_turn') and tracker.current_turn and 
-                    tracker.current_turn.character_name == character_name):
-                    self.debug_print(f"Effect applied during character's own turn")
-                    self._applied_during_own_turn = True
-                    
-                    # If effect has duration, perform the adjustment
-                    if self._internal_duration and not self.permanent:
-                        # Increment internal duration by 1 but keep displayed duration unchanged
-                        self._internal_duration += 1
-                        self._duration_adjusted = True
-                        self.debug_print(f"Adjusted internal duration to {self._internal_duration}, display remains {self._displayed_duration}")
-    
+        if context == "damage":
+            return "Burn"  # Simplest form for damage messages
+        elif context == "expiry":
+            return f"{self.base_name} ({self.damage_formula})"  # Clean format for expiry
+        elif context == "status":
+            return self.display_name  # Full display name
+        else:
+            return self.display_name  # Full display name for most contexts
+
     def on_apply(self, character, round_number: int) -> str:
-        """
-        Apply burn effect with formatted message.
+        """Called when effect is first applied to a character."""
+        # First let the base class handle state transition and timing initialization
+        apply_msg = super().on_apply(character, round_number)
         
-        Sets up timing tracking and transitions to ACTIVE state.
-        Ensures damage is not applied in the same turn it was applied.
-        Returns application message.
-        """
-        # Initialize timing and transition to ACTIVE state
-        self.initialize_timing(round_number, character.name)
-        self.activate()  # Transition from PENDING to ACTIVE
+        # Log detailed timing information for debugging only
+        applied_during = "DURING" if self.timing and self.timing.applied_during_own_turn else "NOT DURING"
+        internal_dur = self._internal_duration
+        display_dur = self._display_duration
         
-        # Set start round and turn
-        self._application_round = round_number
-        self._application_turn = character.name
+        self.debug(f"Applied on round {round_number}, {character.name}'s turn: {applied_during}")
+        self.debug(f"Duration: Display={display_dur}, Internal={internal_dur}, Permanent={self.permanent}")
+
+        # Create a clean message for user display
+        details = []
         
-        # For effect applied DURING character's turn
-        # Increment internal duration by 1 (but display the original duration)
-        # This ensures it lasts through the proper number of turns
-        if character.name == getattr(character, 'turn_name', character.name):
-            self._applied_during_own_turn = True
-            if self._internal_duration and not self.permanent:
-                self._internal_duration += 1
-                self._duration_adjusted = True
-                self.debug_print(f"Applied during own turn: Adjusted duration to {self._internal_duration}, display remains {self._displayed_duration}")
+        # Duration info
+        if self.permanent:
+            details.append("Permanent effect")
+        else:
+            details.append(f"Duration: {self._display_duration} turns")
         
-        # Format duration text
-        duration_text = ""
-        if self.duration:
-            turns = "turn" if self.duration == 1 else "turns"
-            duration_text = f"for {self.duration} {turns}"
-        elif self.permanent:
-            duration_text = "permanently"
+        # Add damage info
+        details.append(f"Damage: {self.damage_formula} fire each turn")
         
-        # Return formatted message
+        # Add application timing but in a simplified way for users
+        if self.timing and self.timing.applied_during_own_turn:
+            details.append(f"Applied: DURING turn")
+        else:
+            details.append(f"Applied: NOT DURING turn")
+
+        # Add internal duration only in debug logs, not user message
+        if self.debug_mode and not self.permanent:
+            self.debug(f"Internal duration: {self._internal_duration}")
+
+        # Use the base class formatter to create a consistent message
         return self.format_effect_message(
-            f"{character.name} is burning",
-            [
-                f"Taking {self.damage} fire damage per turn",
-                duration_text
-            ],
-            emoji="🔥"
+            f"{character.name} is burning!",
+            details=details,
+            emoji=self.emoji
         )
-    
-    def process_duration(self, round_number: int, turn_name: str) -> Tuple[int, bool, bool]:
-        """
-        Enhanced duration calculation with turn-based adjustment support.
-        
-        Returns:
-        - turns_remaining: How many turns remain (displayable value)
-        - will_expire_next: Whether effect will expire next turn
-        - should_expire_now: Whether effect should expire now
-        """
-        if self.permanent or not self.timing:
-            return (None, False, False)
-            
-        # Skip processing if not on the character's turn
-        if turn_name != self.timing.start_turn:
-            return (None, False, False)
-            
-        # Calculate elapsed turns
-        turns_elapsed = round_number - self.timing.start_round
-        
-        # Special case for effects applied BEFORE character's turn in same round
-        # These should expire at the end of the CURRENT turn
-        if (self._application_round == self.timing.start_round and 
-            self._application_turn != self.timing.start_turn):
-            # Should expire at the end of the current turn
-            return (0, False, True)  # Should expire now
-        
-        # For effects applied DURING character's turn,
-        # the first round doesn't count toward duration
-        first_turn_processing = (round_number == self._application_round and 
-                                turn_name == self._application_turn)
-        
-        # Calculate true remaining turns based on when effect was applied
-        if first_turn_processing:
-            # During first processing, full duration remains
-            internal_remaining = self._internal_duration
-        else:
-            # For subsequent turns, account for elapsed turns correctly
-            internal_remaining = max(0, self._internal_duration - turns_elapsed)
-        
-        # Calculate displayed remaining turns
-        # If duration was adjusted due to application during own turn,
-        # displayed remaining is one less than internal
-        if self._duration_adjusted and internal_remaining > 0:
-            display_remaining = internal_remaining - 1
-        else:
-            display_remaining = internal_remaining
-        
-        # Calculate expiry states
-        will_expire_next = (internal_remaining == 1)
-        
-        # Effect should expire now if duration is complete and not first turn
-        should_expire_now = (internal_remaining == 0 and not first_turn_processing)
-        
-        self.debug_print(f"Duration calculation: internal={internal_remaining}, display={display_remaining}, " +
-                        f"will_expire={will_expire_next}, should_expire={should_expire_now}")
-        
-        return (display_remaining, will_expire_next, should_expire_now)
-    
+
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
-        """
-        Process burn damage at start of affected character's turn.
-        
-        Only applies damage if effect is in ACTIVE state and not in the
-        same turn it was applied. Uses state-based checks to prevent duplicate damage.
-        
-        CRITICAL: Never expires effects in turn start phase - only marks for expiry.
-        """
-        # Only process for the affected character's turn
+        """Apply burn damage at the start of the character's turn."""
+        # Only process if it's the character's turn and effect is active
+        if character.name != turn_name or self.state != EffectState.ACTIVE:
+            return []
+
+        self.debug(f"Turn Start processing on round {round_number}. State: {self.state.value}")
+        messages = []
+
+        # Apply damage
+        try:
+            # Use dice calculator if available
+            from utils.advanced_dice.calculator import DiceCalculator
+            calc = DiceCalculator()
+            result = calc.calculate(self.damage_formula)
+            damage = result.final_result
+            self.last_damage_roll = damage
+            
+            # Apply damage to character
+            old_hp = character.resources.current_hp
+            character.resources.current_hp = max(0, old_hp - damage)
+            
+            self.debug(f"Dealt {damage} damage to {character.name}. HP: {old_hp} → {character.resources.current_hp}")
+            
+            # Create damage message
+            message = self.format_effect_message(
+                f"{character.name} takes {damage} fire damage from {self.get_display_name('damage')}! HP: {character.resources.current_hp}/{character.resources.max_hp}",
+                emoji=self.emoji
+            )
+            
+            messages.append(message)
+            
+        except Exception as e:
+            self.debug(f"Error applying damage: {e}")
+            # Fallback to minimal damage
+            damage = 1
+            character.resources.current_hp = max(0, character.resources.current_hp - damage)
+            messages.append(self.format_effect_message(
+                f"{character.name} takes {damage} fire damage from {self.get_display_name('damage')}!",
+                emoji=self.emoji
+            ))
+            
+        return messages
+
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+        """Called at the end of the character's turn to update duration and status."""
+        # Skip processing if not this character's turn
         if character.name != turn_name:
             return []
         
-        # Skip if not in ACTIVE state - only ACTIVE effects deal damage
-        if self.state != EffectState.ACTIVE:
-            return []
-        
-        # Skip damage if this was just applied during the character's own turn
-        # and it's still the same round
-        if (round_number == self._application_round and 
-            turn_name == self._application_turn):
-            self.debug_print(f"Skipping damage on application turn")
-            return []
-        
-        # Check if this effect should expire on this turn
-        # (for effects applied before the character's turn)
-        _, _, should_expire_now = self.process_duration(round_number, turn_name)
-        if should_expire_now:
-            # Don't apply damage if we're going to expire this turn
-            # Instead, queue the effect for expiry at end of turn ONLY
-            self.mark_expiring()  # Transition to EXPIRING state
-            return []
-        
-        # Get damage info from template data
-        damage_value = self._template_data["damage"]
-        
-        # Roll damage
-        from utils.dice import DiceRoller
-        if isinstance(damage_value, str) and ('d' in damage_value.lower()):
-            damage_amount, _ = DiceRoller.roll_dice(damage_value, character)
-        else:
-            damage_amount = int(damage_value)
-        
-        # Store for reference
-        self._template_data["last_damage"] = damage_amount
-        
-        # Create message details
-        details = []
-        
-        # Handle temp HP
-        absorbed = 0
-        if character.resources.current_temp_hp > 0:
-            absorbed = min(character.resources.current_temp_hp, damage_amount)
-            character.resources.current_temp_hp -= absorbed
-            damage_amount -= absorbed
-        
-        # Apply remaining damage to regular HP
-        character.resources.current_hp = max(0, character.resources.current_hp - damage_amount)
-        
-        # Add damage details to message
-        if absorbed > 0:
-            details.append(f"{absorbed} absorbed by temp HP")
-        details.append(f"HP: {character.resources.current_hp}/{character.resources.max_hp}")
-        
-        # Add duration info based on state and remaining turns
-        if not self.permanent and self.duration:
-            # Calculate remaining turns
-            turns_remaining, will_expire_next, _ = self.process_duration(round_number, turn_name)
-            
-            # Set state to EXPIRING if this is the final turn
-            if will_expire_next and self.state == EffectState.ACTIVE:
-                self.mark_expiring()  # Transition to EXPIRING state
-                details.append("Final turn - will expire after this turn")
-            # Only show remaining duration for non-expiring effects
-            elif turns_remaining is not None and turns_remaining > 0:
-                s = "s" if turns_remaining != 1 else ""
-                details.append(f"{turns_remaining} turn{s} remaining")
-        
-        # Return formatted message
-        return [self.format_effect_message(
-            f"{character.name} takes {damage_amount} fire damage from burn",
-            details,
-            emoji="🔥"
-        )]
+        self.debug(f"Turn End processing on round {round_number}. State: {self.state.value}")
+        messages = []
 
-    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
-        """
-        Process burn effect at end of affected character's turn.
+        # Skip permanent effects
+        if self.permanent:
+            messages.append(self.format_effect_message(
+                f"{self.get_display_name('status')} continues",
+                details=["Permanent effect"],
+                emoji=self.emoji
+            ))
+            return messages
         
-        Uses state-based transitions to handle expiry and duration tracking.
-        """
-        # Only process on character's own turn, skip for permanent effects
-        if character.name != turn_name or self.permanent:
-            return []
+        # Calculate duration status manually instead of using base class
+        should_expire = False
+        is_final = False
+        display_remaining = None
         
-        # Use standardized duration tracking
-        turns_remaining, will_expire_next, should_expire_now = self.process_duration(round_number, turn_name)
+        if self.timing:
+            if self.timing.applied_during_own_turn:
+                # For DURING effects, calculate based on rounds passed
+                rounds_passed = round_number - self.timing.start_round
+                self.turns_elapsed = rounds_passed
+                
+                # Check if should expire
+                if self._internal_duration is not None and rounds_passed >= self._internal_duration:
+                    should_expire = True
+                elif self._internal_duration is not None and rounds_passed == self._internal_duration - 1:
+                    is_final = True
+                    
+                # Calculate display remaining
+                if self._display_duration is not None:
+                    display_remaining = max(0, self._display_duration - rounds_passed)
+                    # Adjust for display
+                    if self._display_duration > 1 and display_remaining > 1 and self.state == EffectState.ACTIVE:
+                        display_remaining = max(1, display_remaining - 1)
+            else:
+                # For NOT DURING effects
+                self.turns_elapsed += 1
+                
+                # Check if should expire
+                if self._internal_duration is not None and self.turns_elapsed >= self._internal_duration:
+                    should_expire = True
+                elif self._internal_duration is not None and self.turns_elapsed == self._internal_duration - 1:
+                    is_final = True
+                    
+                # Calculate display remaining
+                if self._display_duration is not None:
+                    display_remaining = max(0, self._display_duration - self.turns_elapsed)
+                    # Adjust for display
+                    if self._display_duration > 1 and display_remaining > 1 and self.state == EffectState.ACTIVE:
+                        display_remaining = max(1, display_remaining - 1)
         
-        # State transition: ACTIVE -> EXPIRING -> EXPIRED
-        if should_expire_now:
-            # First transition to EXPIRING if not already
-            if self.state == EffectState.ACTIVE:
-                self.mark_expiring()  # Sets _marked_for_expiry = True
+        # Handle expiry
+        if should_expire:
+            # Change state to EXPIRED
+            self.state = EffectState.EXPIRED
             
-            # Then transition to EXPIRED
-            self.expire()  # Sets state to EXPIRED
-            
-            # Create expiry message
+            # Add clean expiry message to feedback
             expiry_msg = self.format_effect_message(
-                f"Burn effect has worn off from {character.name}",
-                emoji="🔥"
+                f"{self.get_display_name('expiry')} has worn off",
+                emoji=self.emoji
             )
             
-            # Add to feedback system for reliable display on next turn
-            self._add_expiry_feedback(character, expiry_msg, round_number)
-            
-            # Transition to FEEDBACK state to mark as processed
-            self.mark_feedback_sent()  # Sets _expiry_message_sent = True
-            
-            # Return message for immediate display in end-of-turn embed
-            return [expiry_msg]
+            if hasattr(character, 'add_effect_feedback'):
+                character.add_effect_feedback(
+                    effect_name=self.base_name,
+                    expiry_message=expiry_msg,
+                    round_expired=round_number,
+                    turn_expired=character.name
+                )
+                self._expiry_feedback_added = True
+        else:
+            # Add status message for continuing effect
+            if is_final:
+                messages.append(self.format_effect_message(
+                    f"{self.get_display_name('status')} continues",
+                    details=["Final turn"],
+                    emoji=self.emoji
+                ))
+            elif display_remaining is not None and display_remaining > 0:
+                # Format plural correctly
+                s = "s" if display_remaining != 1 else ""
+                messages.append(self.format_effect_message(
+                    f"{self.get_display_name('status')} continues",
+                    details=[f"{display_remaining} turn{s} remaining"],
+                    emoji=self.emoji
+                ))
         
-        # Handle final turn warning (will expire next turn)
-        if will_expire_next and self.state == EffectState.ACTIVE:
-            # Transition to EXPIRING state
-            self.mark_expiring()  # Sets _will_expire_next = True
-            
-            return [self.format_effect_message(
-                f"Burn effect continues",
-                ["Final turn - will expire after this turn"],
-                emoji="🔥"
-            )]
-        
-        # Regular duration update (only for ACTIVE state)
-        if self.state == EffectState.ACTIVE and turns_remaining is not None and turns_remaining > 0:
-            s = "s" if turns_remaining != 1 else ""
-            return [self.format_effect_message(
-                f"Burn effect continues",
-                [f"{turns_remaining} turn{s} remaining"],
-                emoji="🔥"
-            )]
-        
-        return []
+        return messages
 
     def on_expire(self, character) -> str:
-        """
-        Clean up when effect expires or is removed.
+        """Called when the effect is removed."""
+        # Just set state to REMOVED and return empty string
+        self.state = EffectState.REMOVED
         
-        Uses state-based approach to ensure proper cleanup and prevent duplicate messages.
-        This can be called either through natural expiry or forced removal.
-        """
-        # Get current round for feedback (fallback to 1 if not available)
-        round_number = getattr(character, 'round_number', 1)
-        
-        # Only generate a message if not in FEEDBACK state
-        if self.state != EffectState.FEEDBACK:
-            # Create expiry message
+        # Only add clean expiry message if not already added and not from duration expiry
+        if not self._expiry_feedback_added:
             expiry_msg = self.format_effect_message(
-                f"Burn effect has worn off from {character.name}",
-                emoji="🔥"
+                f"{self.get_display_name('expiry')} has worn off",
+                emoji=self.emoji
             )
             
-            # Ensure proper state transition sequence
-            if self.state == EffectState.ACTIVE:
-                # For direct removal without going through normal expiry
-                self.mark_expiring()  # ACTIVE -> EXPIRING
-                self.expire()         # EXPIRING -> EXPIRED
-            elif self.state == EffectState.EXPIRING:
-                # For effects that were already marked as expiring
-                self.expire()         # EXPIRING -> EXPIRED
-            
-            # Add to feedback system for reliable display
-            self._add_expiry_feedback(character, expiry_msg, round_number)
-            
-            # Transition to FEEDBACK state
-            self.mark_feedback_sent()
-            
-            return expiry_msg
+            if hasattr(character, 'add_effect_feedback'):
+                character.add_effect_feedback(
+                    effect_name=self.base_name,
+                    expiry_message=expiry_msg,
+                    round_expired=getattr(character, 'round_number', 0),
+                    turn_expired=character.name
+                )
         
+        # Return empty string to prevent any messages from being displayed
         return ""
-    
-    def get_status_text(self, character) -> str:
-        """Format status text for character sheet display"""
-        lines = [f"🔥 **{self.name}**"]
-        
-        # Add damage info
-        lines.append(f"• `Damage: {self.damage} fire per turn`")
-        if self.last_damage:
-            lines.append(f"• `Last damage: {self.last_damage}`")
-        
-        # Add duration info if available
-        if self.timing and self.duration:
-            if hasattr(character, 'round_number'):
-                rounds_passed = character.round_number - self.timing.start_round
-                remaining = max(0, self.duration - rounds_passed)
-                
-                # Calculate progress bar
-                percentage = int((remaining / self.duration) * 100)
-                blocks = min(10, max(0, int(percentage / 10)))
-                bar = '█' * blocks + '░' * (10 - blocks)
-                
-                lines.append(f"• `Duration: {bar} ({remaining}/{self.duration} turns)`")
-        elif self.permanent:
-            lines.append("• `Permanent`")
-        
-        return "\n".join(lines)
-    
-    def to_dict(self) -> dict:
-        """
-        Convert to dictionary for storage.
-        
-        Includes state tracking for proper database serialization.
-        """
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for storage."""
         data = super().to_dict()
         
-        # Ensure template data exists for backward compatibility
-        if not data.get('_template_data'):
-            data["_template_data"] = {
-                "damage": self.damage,
-                "damage_type": "fire",
-                "last_damage": getattr(self, 'last_damage', 0)
-            }
-        
-        # Store enhanced duration tracking fields
+        # Add BurnEffect-specific fields
         data.update({
-            "_internal_duration": self._internal_duration,
-            "_displayed_duration": self._displayed_duration,
-            "_applied_during_own_turn": self._applied_during_own_turn,
-            "_duration_adjusted": self._duration_adjusted,
-            "_state": self.state.value  # Store the enum value as a string
+            "damage_formula": self.damage_formula,
+            "last_damage_roll": self.last_damage_roll,
+            "unique_id": self.unique_id,
+            "base_name": self.base_name,
+            "display_name": self.display_name,
+            "is_dice": self.is_dice,
+            "_expiry_feedback_added": self._expiry_feedback_added,
         })
         
         return data
-    
+
     @classmethod
-    def from_dict(cls, data: dict) -> 'BurnEffect':
-        """
-        Create from dictionary data.
-        
-        Restores state tracking for proper effect lifecycle management.
-        """
-        # Get damage and duration
-        if '_template_data' in data and 'damage' in data['_template_data']:
-            damage = data['_template_data']['damage']
-        else:
-            damage = data.get('damage', "1d4")
-        
-        # Create new effect (starts in PENDING state)
-        effect = cls(
-            damage=damage,
-            duration=data.get('duration')
-        )
-        
-        # Restore template data if available
-        if '_template_data' in data:
-            effect._template_data = data['_template_data']
+    def from_dict(cls, data: Dict[str, Any]) -> Optional['BurnEffect']:
+        """Reconstruct from dictionary data."""
+        try:
+            # Extract damage formula and unique ID
+            damage_formula = data.get('damage_formula', '1d4')
+            unique_id = data.get('unique_id')
             
-            # Ensure damage type is set
-            if 'damage_type' not in effect._template_data:
-                effect._template_data['damage_type'] = 'fire'
-        
-        # Restore timing information
-        if timing_data := data.get('timing'):
-            effect.timing = EffectProcessTiming(**timing_data)
-        
-        # Restore legacy state flags for backward compatibility
-        effect._marked_for_expiry = data.get('_marked_for_expiry', False)
-        effect._will_expire_next = data.get('_will_expire_next', False)
-        effect._application_round = data.get('_application_round')
-        effect._application_turn = data.get('_application_turn')
-        effect._expiry_message_sent = data.get('_expiry_message_sent', False)
-        
-        # Restore the state enum value if available
-        # For backward compatibility, determine state from flags if not stored
-        if '_state' in data:
-            # Import here to avoid circular imports
-            from core.effects.base import EffectState
-            state_value = data['_state']
+            # Extract base name - try stored value first
+            base_name = data.get('base_name', 'Burn')
             
-            # Get the enum value by string
-            for state in EffectState:
-                if state.value == state_value:
-                    effect._state = state
-                    break
-        else:
-            # For backward compatibility, infer state from legacy flags
-            from core.effects.base import EffectState
-            if effect._expiry_message_sent:
-                effect._state = EffectState.FEEDBACK
-            elif effect._marked_for_expiry:
-                effect._state = EffectState.EXPIRED
-            elif effect._will_expire_next:
-                effect._state = EffectState.EXPIRING
-            else:
-                # Default to ACTIVE if effect has timing info (was applied)
-                effect._state = EffectState.ACTIVE if effect.timing else EffectState.PENDING
+            # If base_name not found, try to extract from full name
+            if not base_name and 'name' in data:
+                full_name = data.get('name', 'Burn')
+                if ' (' in full_name and ')' in full_name:
+                    base_name = full_name.split(' (')[0]
+                else:
+                    base_name = 'Burn'
+            
+            # Create new effect with preserved unique_id
+            effect = cls(
+                name=base_name,
+                duration=data.get('duration'),
+                damage_formula=damage_formula,
+                permanent=data.get('permanent', False),
+                unique_id=unique_id
+            )
+            
+            # Restore display name if available
+            if 'display_name' in data:
+                effect.display_name = data.get('display_name')
+            
+            # Restore state
+            if 'state' in data:
+                effect.state = EffectState(data['state'])
+            
+            # Restore timing info
+            timing_data = data.get('timing_info')
+            if timing_data:
+                effect.timing = EffectProcessTimingInfo(**timing_data)
+            
+            # Restore tracking fields
+            if '_internal_duration' in data:
+                effect._internal_duration = data.get('_internal_duration')
+            
+            if '_display_duration' in data:
+                effect._display_duration = data.get('_display_duration')
+                
+            # Explicitly restore timing application info for proper duration handling
+            if timing_data and 'applied_during_own_turn' in timing_data:
+                applied_during = timing_data.get('applied_during_own_turn')
+                effect.debug(f"Restored application timing: during_own={applied_during}")
+            
+            effect.turns_elapsed = data.get('turns_elapsed', 0)
+            effect.last_damage_roll = data.get('last_damage_roll')
+            
+            # Restore burn-specific properties
+            effect.is_dice = data.get('is_dice', effect._is_dice_formula(damage_formula))
+            
+            # Restore feedback tracking
+            effect._expiry_feedback_added = data.get('_expiry_feedback_added', False)
+            
+            # Debug restoration
+            effect.debug(f"Restored from dict. State={effect.state.value}, Internal={effect._internal_duration}, Display={effect._display_duration}")
+            if effect.timing:
+                during = "DURING" if effect.timing.applied_during_own_turn else "NOT DURING"
+                effect.debug(f"Timing restored: {during} own turn, Turns elapsed: {effect.turns_elapsed}")
+            
+            return effect
+        except Exception as e:
+            logger.error(f"Error reconstructing BurnEffect from dict: {e}", exc_info=True)
+            return None
+
+    def dump_state(self, indent="") -> str:
+        """Generate a detailed state dump for debugging."""
+        lines = [
+            f"{indent}BurnEffect State Dump:",
+            f"{indent}  Name: {self.name}",
+            f"{indent}  Display Name: {self.display_name}",
+            f"{indent}  State: {self.state.value}",
+            f"{indent}  Damage Formula: {self.damage_formula}",
+            f"{indent}  Is Dice: {self.is_dice}",
+            f"{indent}  Permanent: {self.permanent}",
+        ]
         
-        return effect
+        # Add duration info
+        if self.permanent:
+            lines.append(f"{indent}  Duration: Permanent")
+        else:
+            lines.append(f"{indent}  Display Duration: {self._display_duration}")
+            lines.append(f"{indent}  Internal Duration: {self._internal_duration}")
+            lines.append(f"{indent}  Turns Elapsed: {self.turns_elapsed}")
+        
+        # Add timing info
+        if self.timing:
+            lines.append(f"{indent}  Applied During Own Turn: {self.timing.applied_during_own_turn}")
+            lines.append(f"{indent}  Start Round: {self.timing.start_round}")
+            lines.append(f"{indent}  Start Turn: {self.timing.start_turn_name}")
+        
+        return "\n".join(lines)

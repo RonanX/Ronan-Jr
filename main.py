@@ -1,71 +1,9 @@
 """
 Ronan Jr Discord Bot - Complete Rewrite (v2.0)
 
-
 This is a complete rewrite of the Ronan Jr Discord bot, focusing on better code organization,
 enhanced features, and a more robust foundation for future additions.
-
-
-Features to Implement:
-1. Character System
-   - Enhanced stat generation with multiple methods
-   - Status effect system with various effect types
-   - Temporary stat modifications
-   - Character progression and leveling
-   - Inventory system with item management
-
-
-2. Combat System
-   - Initiative tracking with multiple options
-   - Action economy with Initiative Points (IP)
-   - Turn management and combat states
-   - AoE and multi-target support
-   - Combat log and history
-
-
-3. Spell/Move System
-   - Spell slots and cooldowns
-   - Multiple damage types and resistances
-   - Effect application and duration tracking
-   - Spell categories and organization
-   - Moveset saving and loading
-
-
-4. UI Improvements
-   - Form-based input for complex commands
-   - Rich embeds for information display
-   - Interactive menus and buttons
-   - Better feedback and error messages
-   - Help system with examples
-
-
-5. Quality of Life Features
-   - Dice rolling with various methods
-   - State saving and loading
-   - Combat automation options
-   - Batch commands for efficiency
-   - Custom command aliases
-
-
-6. Additional Systems
-   - Random name generation
-   - Grid-based movement
-   - Effect combinations
-   - Custom effect creation
-   - Sound effects and multimedia
-
-
-Code Organization:
-- core/: Core systems and data structures
-- modules/: Feature-specific implementations
-- utils/: Helper functions and constants
-- menu/: UI components and views
-
-
-This rewrite aims to provide a more maintainable, extensible, and user-friendly bot
-while preserving and enhancing the functionality of the original version.
 """
-
 
 import os
 import sys
@@ -96,15 +34,65 @@ from modules.menu.defense_handler import DefenseHandler
 from utils.error_handler import setup as error_handler_setup
 
 
-# Load environment variables  
-load_dotenv('secrets.env')
-# Verify variables are loaded
-print("Environment Variables Loaded:")
-print(f"DMTOKEN exists: {os.getenv('DMTOKEN') is not None}")
-print(f"DATABASEURL: {os.getenv('DATABASEURL')}")
+# Enhanced environment variable loading with better error handling
+def load_environment_variables():
+    """Load environment variables with robust error checking and helpful messages"""
+    # First, check if the secrets.env file exists
+    env_path = 'secrets.env'
+    if not os.path.exists(env_path):
+        print(f"ERROR: {env_path} file not found in {os.getcwd()}")
+        print("Please ensure your secrets.env file is in the correct directory.")
+        return False
+    
+    # Try to load the environment variables
+    load_dotenv(env_path)
+    
+    # Check required variables
+    required_vars = [
+        'TOKEN',         # Bot token (primary)
+        'DMTOKEN',       # Alternative token name
+        'DATABASEURL',   # Firebase URL
+        'APIKEY',        # Firebase API key
+    ]
+    
+    missing_vars = []
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+    
+    # Look for either TOKEN or DMTOKEN (allowing for different naming conventions)
+    has_token = os.getenv('TOKEN') or os.getenv('DMTOKEN')
+    if not has_token:
+        print("ERROR: No bot token found in secrets.env")
+        print("Please make sure either TOKEN or DMTOKEN is set in your secrets.env file")
+        return False
+    
+    # Report any other missing variables
+    if missing_vars and 'TOKEN' in missing_vars and 'DMTOKEN' not in missing_vars:
+        # If TOKEN is missing but DMTOKEN exists, we can continue
+        missing_vars.remove('TOKEN')
+    
+    if missing_vars:
+        print(f"WARNING: The following variables are missing from secrets.env: {', '.join(missing_vars)}")
+        print("Some features may not work correctly without these variables.")
+        
+    # Print successful variables for debugging
+    print("Environment Variables Loaded Successfully:")
+    token_var = 'DMTOKEN' if os.getenv('DMTOKEN') else 'TOKEN'
+    print(f"✓ Bot token ({token_var})")
+    print(f"✓ Database URL: {os.getenv('DATABASEURL')[:20]}..." if os.getenv('DATABASEURL') else "✗ Database URL missing")
+    
+    return True
 
-# Get the token and Firebase config from environment variables  
-TOKEN = os.getenv('DMTOKEN')  # Use the environment variable
+# Load environment variables
+if not load_environment_variables():
+    print("Failed to load required environment variables. Please fix secrets.env file.")
+    sys.exit(1)  # Exit if critical environment variables are missing
+
+# Get the token, prioritizing DMTOKEN if available (for backward compatibility)
+TOKEN = os.getenv('DMTOKEN') if os.getenv('DMTOKEN') else os.getenv('TOKEN')
+
+# Get Firebase config from environment variables
 DATABASEURL = os.getenv('DATABASEURL')
 APIKEY = os.getenv('APIKEY')
 AUTHDOMAIN = os.getenv('AUTHDOMAIN')
@@ -157,9 +145,15 @@ class GameBot(commands.Bot):
         # Register all effect types  
         register_effects()  
          
-        # Load data from database  
-        await self.db.initialize()  
-        await self.game_state.load(self.db)  
+        # Load data from database with better error handling
+        try:
+            await self.db.initialize()  
+            await self.game_state.load(self.db)
+            print("Database initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}", exc_info=True)
+            print(f"WARNING: Database initialization failed. Error: {e}")
+            print("Bot will continue without database functionality.")
          
         # Search for and load files with commands  
         await self.load_extension("commands.effects")  # Load effect commands  
@@ -331,14 +325,6 @@ async def check(interaction: discord.Interaction, name: str, ephemeral: bool = T
         )
 
 
-    except Exception as e:
-        logger.error(f"Error in check command: {str(e)}", exc_info=True)
-        await interaction.response.send_message(
-            "An error occurred while displaying character information.",
-            ephemeral=True
-        )
-
-
 @bot.tree.command(name="list", description="List all characters")
 async def list_characters(interaction: discord.Interaction):
     """Lists all characters in the game"""
@@ -390,6 +376,18 @@ async def list_characters(interaction: discord.Interaction):
         )
 
 
+@bot.command(name='stop')
+@commands.is_owner()
+async def stop(ctx):
+    """Stops the bot and closes the process."""
+    await ctx.send("Shutting down...")
+    await bot.close()
+
+
+if __name__ == "__main__":
+    bot.run(TOKEN)
+
+
 """
 Available Conditions:
 Movement Conditions:
@@ -439,15 +437,3 @@ Example: /effect condition Gandalf prone,blinded 3
 Note: Duration is optional. Without duration, conditions are toggles.
 Effects show in turn order and character sheets with mechanical effects.
 """
-
-
-@bot.command(name='stop')
-@commands.is_owner()
-async def stop(ctx):
-    """Stops the bot and closes the process."""
-    await ctx.send("Shutting down...")
-    await bot.close()
-
-
-if __name__ == "__main__":
-    bot.run(TOKEN)

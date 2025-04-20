@@ -1,5 +1,5 @@
 """
-Core Effects System (base.py) - Reworked
+Core Effects System (base.py) - Reworked with utilities for DOT effects
 
 This module provides the foundational classes and logic for the game's effect system.
 It defines the BaseEffect class, state management, duration tracking, and message formatting.
@@ -10,6 +10,7 @@ Key Design Principles:
 - Simplified Duration Logic: Handles 'during' vs 'not during' application consistently.
 - Centralized Message Handling: Standard formatting and feedback integration.
 - Debuggability: Built-in debug logging.
+- Utility Functions: Common patterns for damage-over-time effects and dice handling.
 """
 
 from dataclasses import dataclass, field
@@ -64,6 +65,7 @@ class BaseEffect:
     - Consistent message formatting
     - Debug logging support
     - Database serialization hooks (to_dict, from_dict - though subclasses implement details)
+    - Utility methods for dice rolls and DOT effects
     """
     def __init__(
         self,
@@ -263,9 +265,35 @@ class BaseEffect:
                     self.state = EffectState.EXPIRING
                     return [self.format_effect_message(f"{self.name} continues", details=["Final turn"], emoji=self.emoji)]
                 else:
-                    if turns_remaining_display is not None:
-                         s = "s" if turns_remaining_display != 1 else ""
-                         return [self.format_effect_message(f"{self.name} continues", details=[f"{turns_remaining_display} turn{s} remaining"], emoji=self.emoji)]
+                    # Fixed: For "during own turn" effects, improve the display of remaining turns
+                    if self.timing.applied_during_own_turn:
+                        # Calculate remaining turns based on rounds passed instead of turns_elapsed
+                        rounds_passed = round_number - self.timing.start_round
+                        display_remaining = max(0, self._display_duration - rounds_passed)
+                        
+                        # FIX: Subtract 1 from display_remaining for effects with initial duration > 1
+                        # This better aligns the displayed duration with the actual expiration schedule
+                        if self._display_duration > 1 and display_remaining > 1 and self.state == EffectState.ACTIVE:
+                            display_remaining = max(1, display_remaining - 1)
+                            self.debug(f"Adjusted display duration: {display_remaining} turns remaining")
+                        
+                        if display_remaining > 0:
+                            s = "s" if display_remaining != 1 else ""
+                            return [self.format_effect_message(f"{self.name} continues", 
+                                                            details=[f"{display_remaining} turn{s} remaining"], 
+                                                            emoji=self.emoji)]
+                    elif turns_remaining_display is not None:
+                        # For "not during own turn" effects, use the calculated display
+                        
+                        # FIX: Subtract 1 from turns_remaining_display for effects with initial duration > 1
+                        if self._display_duration > 1 and turns_remaining_display > 1 and self.state == EffectState.ACTIVE:
+                            turns_remaining_display = max(1, turns_remaining_display - 1)
+                            self.debug(f"Adjusted 'not during' display duration: {turns_remaining_display} turns remaining")
+                        
+                        s = "s" if turns_remaining_display != 1 else ""
+                        return [self.format_effect_message(f"{self.name} continues", 
+                                                        details=[f"{turns_remaining_display} turn{s} remaining"], 
+                                                        emoji=self.emoji)]
 
             elif self.state == EffectState.EXPIRING:
                 # If it was already expiring, it should now be expired after this turn end processing
@@ -396,7 +424,7 @@ class BaseEffect:
             
             # CASE 2: Applied NOT DURING own turn
             else:
-                # FIXED: For NOT DURING, just increment by rounds passed.
+                # For NOT DURING, just increment by rounds passed.
                 # For round_passed = 0 (same round): elapsed = 0 (no ticks yet)
                 # For round_passed = 1 (next round): elapsed = 1 (first tick)
                 elapsed_turns = max(0, rounds_passed)
@@ -434,33 +462,19 @@ class BaseEffect:
         
         if self._display_duration is not None:
             if applied_during_own:
-                # IMPROVED: For "during own turn" effects, display remaining should:
-                # 1. Equal display_duration in application round
-                # 2. Start decrementing once internal duration reaches display duration
-                if elapsed_turns == 0:
+                # FIX: Simplified logic for "during own turn" effects
+                if current_round == start_round:
                     # In application round, show full display duration
                     display_remaining = self._display_duration
                     self.debug(f"Display remaining (during application round): {display_remaining}")
                 else:
-                    # Only start decrementing display once internal and display sync up
-                    # (this handles "3 internal, 2 display" situation)
-                    if self._internal_duration > self._display_duration:
-                        # Check if we're still in the "buffer" period where internal > display
-                        remaining_buffer = self._internal_duration - self._display_duration
-                        if elapsed_turns <= remaining_buffer:
-                            # Still in buffer period, display remains unchanged
-                            display_remaining = self._display_duration
-                            self.debug(f"Display remaining (in buffer period): {display_remaining}")
-                        else:
-                            # Past buffer period, display decrements normally
-                            display_elapsed = elapsed_turns - remaining_buffer
-                            display_remaining = max(0, self._display_duration - display_elapsed)
-                            self.debug(f"Display remaining (past buffer): {display_remaining}")
-                    else:
-                        # No buffer, display decrements normally
-                        display_remaining = max(0, self._display_duration - elapsed_turns)
+                    # For subsequent rounds, display duration should count down correctly
+                    # Since internal_duration = display_duration + 1, we offset by 1
+                    display_elapsed = max(0, elapsed_turns - 1)
+                    display_remaining = max(0, self._display_duration - display_elapsed)
+                    self.debug(f"Display remaining (subsequent round): {display_remaining} (elapsed={elapsed_turns}, display_elapsed={display_elapsed})")
             else:
-                # FIXED: For NOT DURING effects, display and internal are in sync
+                # For NOT DURING effects, display and internal are in sync
                 # So display_remaining is simply derived directly from elapsed turns
                 display_remaining = max(0, self._display_duration - elapsed_turns)
                 self.debug(f"Display remaining (not during): {display_remaining}")
@@ -506,6 +520,307 @@ class BaseEffect:
             if detail_lines:
                 formatted += "\n" + "\n".join(detail_lines)
         return formatted
+
+    # --- Stack Helper Methods ---
+
+    def combine_damage_formulas(self, damage_formulas: List[str]) -> str:
+        from collections import Counter
+        formula_counter = Counter(damage_formulas)
+        combined_parts = []
+
+        for formula, count in formula_counter.items():
+            if count > 1:
+                combined_parts.append(f"{count}×{formula}")
+            else:
+                combined_parts.append(formula)
+
+        return ' + '.join(combined_parts)
+
+    def get_highest_duration(self, durations: List[int]) -> int:
+        return max(durations) if durations else 0
+
+
+    # --- DOT Effect Utilities ---
+    
+    def apply_dot_damage(
+        self, 
+        character, 
+        damage_amount: int, 
+        damage_type: str = "fire", 
+        stacks: int = 1,
+        emoji: Optional[str] = None
+    ) -> Tuple[int, str]:
+        """
+        Apply damage-over-time to a character with resistance handling.
+        
+        Args:
+            character: The character to damage
+            damage_amount: Base damage amount
+            damage_type: Type of damage (fire, cold, poison, etc.)
+            stacks: Number of stacks to multiply damage by
+            emoji: Override emoji for the message
+            
+        Returns:
+            Tuple[int, str]: (final_damage_dealt, formatted_message)
+        """
+        # Calculate total damage before resistance
+        total_damage = damage_amount * stacks
+        
+        # Initialize resistance tracking
+        damage_reduction = 0
+        resistance_percent = 0
+        
+        # Check for resistance/vulnerability (if implemented in character defense)
+        if (hasattr(character, 'defense') and 
+            hasattr(character.defense, 'get_total_resistance')):
+            # Get resistance percentage
+            resistance_percent = character.defense.get_total_resistance(damage_type)
+            if resistance_percent > 0:
+                damage_reduction = int(total_damage * (resistance_percent / 100))
+                self.debug(f"{damage_type.capitalize()} resistance {resistance_percent}% reduces damage by {damage_reduction}")
+        
+        # Check for vulnerability
+        vulnerability_percent = 0
+        vulnerability_bonus = 0
+        if (hasattr(character, 'defense') and 
+            hasattr(character.defense, 'get_total_vulnerability')):
+            # Get vulnerability percentage
+            vulnerability_percent = character.defense.get_total_vulnerability(damage_type)
+            if vulnerability_percent > 0:
+                vulnerability_bonus = int(total_damage * (vulnerability_percent / 100))
+                self.debug(f"{damage_type.capitalize()} vulnerability {vulnerability_percent}% increases damage by {vulnerability_bonus}")
+        
+        # Calculate final damage
+        final_damage = max(0, total_damage - damage_reduction + vulnerability_bonus)
+        
+        # Initialize temp HP variables
+        temp_hp_absorbed = 0
+        
+        # Apply damage to character if they have HP
+        if hasattr(character, 'resources') and hasattr(character.resources, 'current_hp'):
+            # Apply to temp HP first if available
+            if hasattr(character.resources, 'remove_temp_hp'):
+                old_temp_hp = character.resources.current_temp_hp
+                if old_temp_hp > 0:
+                    # remove_temp_hp returns (absorbed, remaining_damage)
+                    temp_hp_absorbed, remaining_damage = character.resources.remove_temp_hp(final_damage)
+                    self.debug(f"Temp HP absorbed {temp_hp_absorbed} damage, {remaining_damage} remains")
+                    final_damage = remaining_damage
+            
+            # Apply remaining damage to regular HP
+            old_hp = character.resources.current_hp
+            character.resources.current_hp = max(0, old_hp - final_damage)
+            actual_hp_damage = old_hp - character.resources.current_hp
+            self.debug(f"HP changed from {old_hp} → {character.resources.current_hp}")
+            
+            # Check if character is knocked out
+            knocked_out = character.resources.current_hp <= 0 and old_hp > 0
+        else:
+            # No HP system available
+            knocked_out = False
+        
+        # Get damage emoji
+        if emoji is None:
+            # Try to get from constants
+            if hasattr(character, 'constants') and hasattr(character.constants, 'EMOJI_MAP'):
+                emoji = character.constants.EMOJI_MAP.get(damage_type, "💥")
+            else:
+                # Default damage type emojis
+                emoji_map = {
+                    "fire": "🔥", 
+                    "cold": "❄️",
+                    "lightning": "⚡",
+                    "poison": "☠️",
+                    "acid": "🧪",
+                    "necrotic": "💀",
+                    "radiant": "✨"
+                }
+                emoji = emoji_map.get(damage_type, "💥")
+        
+        # Create damage message
+        message_parts = [f"{character.name} takes {final_damage + temp_hp_absorbed} {damage_type} damage"]
+        
+        # Add source information if needed
+        if self.name != damage_type.capitalize():
+            message_parts.append(f"from {self.name}")
+        
+        # Add stack count for clarity if multiple stacks
+        if stacks > 1:
+            message_parts.append(f"[{stacks} stacks]")
+        
+        # Create the message
+        message = " ".join(message_parts) + "!"
+        
+        # Add resistance/vulnerability info if applicable
+        details = []
+        if resistance_percent > 0:
+            details.append(f"Resisted {damage_reduction} damage")
+        if vulnerability_percent > 0:
+            details.append(f"Vulnerable: +{vulnerability_bonus} damage")
+        if temp_hp_absorbed > 0:
+            details.append(f"{temp_hp_absorbed} absorbed by shield")
+            
+        # Format the message
+        formatted_message = self.format_effect_message(message, details=details, emoji=emoji)
+        
+        # Add knockdown message if needed
+        if knocked_out:
+            knockdown_message = self.format_effect_message(
+                f"{character.name} falls unconscious from {damage_type} damage!",
+                emoji="💥"
+            )
+            formatted_message += f"\n{knockdown_message}"
+        
+        return final_damage, formatted_message
+    
+    def is_dice_expression(self, text: str) -> bool:
+        """
+        Check if text is a valid dice expression like "1d4", "2d6+3", etc.
+        Also handles "d4" (without leading number) format.
+        
+        Args:
+            text (str): Text to check
+            
+        Returns:
+            bool: True if valid dice expression
+        """
+        if not isinstance(text, str):
+            return False
+            
+        # Normalize "d4" to "1d4" for checking
+        normalized = text
+        if text.startswith('d') and text[1:].isdigit():
+            normalized = '1' + text
+            
+        # Check for basic dice pattern (XdY or dY)
+        dice_pattern = r'^(\d+)?d\d+([+-]\d+)?$'
+        return bool(re.match(dice_pattern, normalized.lower()))
+    
+    def normalize_dice(self, dice_str: str) -> str:
+        """
+        Normalize dice notation, converting "d4" to "1d4".
+        
+        Args:
+            dice_str (str): Dice notation to normalize
+            
+        Returns:
+            str: Normalized dice notation
+        """
+        if not isinstance(dice_str, str):
+            return str(dice_str)
+            
+        # Convert "d4" to "1d4"
+        if dice_str.startswith('d') and dice_str[1:].isdigit():
+            return '1' + dice_str
+            
+        return dice_str
+    
+    def roll_damage(self, damage_formula: str, character=None, stacks: int = 1) -> Tuple[int, str]:
+        """
+        Roll damage from a formula, handling both dice expressions and flat values.
+        Supports multiple stacks and has error recovery.
+        
+        Args:
+            damage_formula (str): Dice expression or flat number
+            character: Optional character for stat-based rolls
+            stacks: Number of stacks (for multiple rolls)
+            
+        Returns:
+            Tuple[int, str]: (total_damage, roll_description)
+        """
+        # Track total damage and roll details
+        total_damage = 0
+        roll_details = ""
+        all_rolls = []
+        all_results = []
+        
+        # Normalize dice format first
+        formula = self.normalize_dice(damage_formula)
+        
+        try:
+            # Handle dice expressions
+            if self.is_dice_expression(formula):
+                # Check for DiceRoller availability
+                dice_roller_available = False
+                try:
+                    # Try to import DiceRoller if available
+                    from utils.dice import DiceRoller
+                    dice_roller_available = True
+                except ImportError:
+                    self.debug("DiceRoller not available, using simplified dice rolling")
+                
+                # Roll dice for each stack
+                for i in range(stacks):
+                    try:
+                        if dice_roller_available:
+                            # Use proper DiceRoller if available
+                            result, explanation = DiceRoller.roll_dice(formula, character)
+                        else:
+                            # Simple dice rolling fallback
+                            import random
+                            dice_match = re.match(r'^(\d+)d(\d+)([+-]\d+)?$', formula.lower())
+                            if dice_match:
+                                count = int(dice_match.group(1) or 1)
+                                sides = int(dice_match.group(2))
+                                bonus = int(dice_match.group(3) or 0) if dice_match.group(3) else 0
+                                
+                                rolls = [random.randint(1, sides) for _ in range(count)]
+                                result = sum(rolls) + bonus
+                                explanation = f"{count}d{sides}{'+'+str(bonus) if bonus else ''}: {rolls}"
+                            else:
+                                # Just use d6 if parsing fails
+                                result = random.randint(1, 6)
+                                explanation = f"d6: [{result}]"
+                        
+                        total_damage += result
+                        all_rolls.append(explanation)
+                        all_results.append(result)
+                    except Exception as e:
+                        # Fallback on any error
+                        self.debug(f"Error rolling dice: {e}, using simplified approach")
+                        # Get sides from formula or default to d6
+                        sides = 6
+                        try:
+                            if 'd' in formula:
+                                sides = int(formula.split('d')[1].split('+')[0].split('-')[0])
+                        except:
+                            pass
+                            
+                        # Generate a random result
+                        import random
+                        result = random.randint(1, sides)
+                        total_damage += result
+                        all_rolls.append(f"d{sides}[{result}]")
+                        all_results.append(result)
+                
+                # Format roll details
+                if len(all_rolls) > 1:
+                    roll_details = f"{stacks}×{formula}: {all_results} → {total_damage}"
+                else:
+                    roll_details = all_rolls[0] if all_rolls else f"{formula}: {total_damage}"
+            else:
+                # Handle flat values
+                try:
+                    flat_damage = int(formula)
+                    total_damage = flat_damage * stacks
+                    
+                    if stacks > 1:
+                        roll_details = f"{stacks}×{flat_damage} = {total_damage}"
+                    else:
+                        roll_details = str(flat_damage)
+                except ValueError:
+                    # If conversion to int fails, default to 1 damage per stack
+                    total_damage = stacks
+                    roll_details = f"Error parsing '{formula}', defaulting to {total_damage}"
+        
+        except Exception as e:
+            # Global fallback for any errors
+            self.debug(f"Error in roll_damage: {e}, using default value")
+            total_damage = stacks  # 1 damage per stack is a safe default
+            roll_details = f"Error - defaulting to {total_damage}"
+        
+        self.debug(f"Damage roll result: {total_damage} ({roll_details})")
+        return total_damage, roll_details
 
     # --- Serialization ---
 

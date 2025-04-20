@@ -589,11 +589,53 @@ def get_effect_summary(character) -> List[str]:
                       elif effect.permanent:
                           duration_str = "Permanent"
                       elif effect.duration is not None:
-                          # Calculate remaining turns for display if possible
+                          # Fixed: Calculate remaining turns consistently with on_turn_end
                           if hasattr(effect, 'timing') and effect.timing:
-                              remaining = max(0, effect.duration - effect.turns_elapsed)
-                              duration_str = f"{remaining} turns remaining"
+                              # Check if this effect is applied during own turn
+                              applied_during_own = effect.timing.applied_during_own_turn
+                              
+                              if applied_during_own:
+                                  # For DURING effects, we need to properly handle the offset
+                                  if hasattr(effect, 'turns_elapsed'):
+                                      # Calculate rounds passed and use that for display countdown
+                                      if character.name == effect.timing.start_turn_name:
+                                          rounds_passed = 0
+                                          if hasattr(character, 'round_number') and effect.timing.start_round:
+                                              rounds_passed = character.round_number - effect.timing.start_round
+                                              
+                                          # For display, we use rounds_passed directly
+                                          remaining = max(0, effect.duration - rounds_passed)
+                                          
+                                          # FIX: Subtract 1 from remaining for effects with initial duration > 1
+                                          # This aligns display with the actual expiration schedule
+                                          if effect.duration > 1 and remaining > 1 and effect.state == EffectState.ACTIVE:
+                                              remaining = max(1, remaining - 1)
+                                              effect.debug(f"Adjusted display duration: {remaining} turns remaining")
+                                          
+                                          duration_str = f"{remaining} turn{'' if remaining == 1 else 's'} remaining"
+                                      else:
+                                          # Use turns_elapsed but with during-own-turn offset
+                                          display_elapsed = max(0, effect.turns_elapsed - 1)
+                                          remaining = max(0, effect.duration - display_elapsed)
+                                          
+                                          # FIX: Subtract 1 from remaining for effects with initial duration > 1
+                                          if effect.duration > 1 and remaining > 1 and effect.state == EffectState.ACTIVE:
+                                              remaining = max(1, remaining - 1)
+                                              effect.debug(f"Adjusted display duration: {remaining} turns remaining")
+                                          
+                                          duration_str = f"{remaining} turn{'' if remaining == 1 else 's'} remaining"
+                              else:
+                                  # For NOT DURING effects, no offset is needed
+                                  remaining = max(0, effect.duration - effect.turns_elapsed)
+                                  
+                                  # FIX: Subtract 1 from remaining for effects with initial duration > 1
+                                  if effect.duration > 1 and remaining > 1 and effect.state == EffectState.ACTIVE:
+                                      remaining = max(1, remaining - 1)
+                                      effect.debug(f"Adjusted display duration: {remaining} turns remaining")
+                                  
+                                  duration_str = f"{remaining} turn{'' if remaining == 1 else 's'} remaining"
                           else:
+                              # Fallback for effects without timing info
                               duration_str = f"{effect.duration} turns"
                       
                       summary.append(f"• {emoji} `{effect.name}` {duration_str} {status}")

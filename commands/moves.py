@@ -19,7 +19,7 @@ import asyncio
 from typing import Optional, List, Dict, Any, Tuple
 
 from core.character import Character, StatType
-from core.effects.move import MoveEffect, MovePhase, RollTiming
+from core.effects.move import MoveEffect, MoveState, RollTiming
 from core.effects.rollmod import RollModifierType, RollModifierEffect
 from core.effects.manager import apply_effect  # Import apply_effect directly
 from modules.moves.data import MoveData, Moveset
@@ -149,7 +149,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         name="Name of the move to use",
         target="Target character(s) (comma-separated)",
         roll_timing="When to process attack roll: instant, active, or per_turn",
-        aoe_mode="How to handle multiple targets: single (one roll) or multi (roll per target)"
+        aoe_mode="How to handle multiple targets: single (one roll) or multi (roll per target)",
+        force_during="Force the effect to be treated as during/not during own turn"
     )
     @app_commands.autocomplete(character=character_autocomplete, name=move_name_autocomplete)
     async def use_move(
@@ -159,7 +160,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         name: str,
         target: Optional[str] = None,
         roll_timing: Optional[str] = None,
-        aoe_mode: Optional[str] = "single"
+        aoe_mode: Optional[str] = "single",
+        force_during: Optional[bool] = None
     ):
         """
         Use a stored move from a character's moveset.
@@ -256,7 +258,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 targets=targets,
                 bonus_on_hit=move.bonus_on_hit if hasattr(move, 'bonus_on_hit') else None,
                 aoe_mode=aoe_mode or getattr(move, 'aoe_mode', 'single'),
-                roll_modifier=move.roll_modifier if hasattr(move, 'roll_modifier') else None
+                roll_modifier=move.roll_modifier if hasattr(move, 'roll_modifier') else None,
+                force_during=force_during  # Add force_during parameter
             )
             
             # Apply effect and get feedback message
@@ -299,7 +302,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         damage="Damage formula (e.g., 2d6+str fire)",
         crit_range="Natural roll for critical hit",
         roll_timing="When to process attack roll: instant, active, or per_turn",
-        advanced_json="Advanced parameters in JSON format"
+        advanced_json="Advanced parameters in JSON format",
+        force_during="Force the effect to be treated as during/not during own turn"
     )
     @app_commands.autocomplete(character=character_autocomplete)
     async def temp_move(
@@ -319,7 +323,8 @@ class MoveCommands(commands.GroupCog, name="move"):
         damage: Optional[str] = None,
         crit_range: int = 20,
         roll_timing: str = "active",
-        advanced_json: Optional[str] = None
+        advanced_json: Optional[str] = None,
+        force_during: Optional[bool] = None
     ):
         """
         Use a temporary move without saving it to character's moveset.
@@ -410,14 +415,16 @@ class MoveCommands(commands.GroupCog, name="move"):
                 targets=targets,
                 bonus_on_hit=bonus_on_hit,
                 aoe_mode=aoe_mode,
-                roll_modifier=roll_modifier
+                roll_modifier=roll_modifier,
+                force_during=force_during  # Add force_during parameter
             )
             
-            # Apply effect and get feedback message - use apply_effect directly
+            # Apply effect - use apply_effect directly
             result = await apply_effect(
                 char,
                 move_effect,
-                current_round
+                current_round,
+                combat_logger=self.bot.game_state.logger
             )
             
             # Use action stars if required
