@@ -154,6 +154,38 @@ class GameBot(commands.Bot):
             logger.error(f"Failed to initialize database: {e}", exc_info=True)
             print(f"WARNING: Database initialization failed. Error: {e}")
             print("Bot will continue without database functionality.")
+        
+        # Register the move effect bridge
+        try:
+            from core.effects.move.bridge import register_with_bot
+            register_with_bot(self)
+            print("Move effect bridge registered successfully")
+            
+            # Add diagnostics for additional error checking
+            try:
+                from core.effects.move.effect import MoveEffect, MovePhase
+                from core.effects.move.combat import CombatProcessor
+                print(f"Move effect subsystem verified: MoveEffect OK, MovePhase OK")
+                
+                # Test for required methods
+                test_effect = MoveEffect(name="test", description="test")
+                if hasattr(test_effect, 'get_phase_name') and callable(test_effect.get_phase_name):
+                    print("Required method check: get_phase_name() OK")
+                else:
+                    print("WARNING: Required method missing: get_phase_name()")
+                
+                # Test for combat processor
+                test_processor = CombatProcessor()
+                if hasattr(test_processor, 'perform_sync_attack') and callable(test_processor.perform_sync_attack):
+                    print("Required method check: perform_sync_attack() OK")
+                else:
+                    print("WARNING: Required method missing: perform_sync_attack()")
+                    
+            except Exception as verification_error:
+                print(f"Move effect verification failed: {verification_error}")
+        except Exception as e:
+            logger.error(f"Failed to register move effect bridge: {e}", exc_info=True)
+            print(f"WARNING: Move effects may not function correctly. Error: {e}")
          
         # Search for and load files with commands  
         await self.load_extension("commands.effects")  # Load effect commands  
@@ -164,6 +196,7 @@ class GameBot(commands.Bot):
         await self.load_extension("commands.healing")  # Load healing commands  
         await self.load_extension("commands.advanced_roll") # Load dice roll commands  
         await self.load_extension("commands.skillcheck")  # Load skill check commands
+        await self.load_extension("commands.move_cancel")  # Load move cancellation command
         await self.load_extension("modules.menu.skill_check_handler")  # Load skill check context menus  
         await self.load_extension("commands.initiative")  # Load initiative commands  
         await self.load_extension("commands.qol")  # Load QOL commands

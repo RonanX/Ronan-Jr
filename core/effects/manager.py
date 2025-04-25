@@ -201,19 +201,23 @@ async def apply_effect(
             character.in_combat = is_combat_active
 
         # FIX: Special handling for duration=1 effects
-        if not effect.permanent and effect.duration == 1:
-            if is_during_own_turn:
-                # For DURING effects with duration=1, internal should be 2
-                if hasattr(effect, '_internal_duration') and effect._internal_duration < 2:
-                    effect._internal_duration = 2
-                    effect._display_duration = 1  # Keep display as 1
-                    effect.debug("FIXED: Duration=1 during own turn effect - set internal=2, display=1")
-            else:
-                # For NOT DURING effects, internal and display should match
-                if hasattr(effect, '_internal_duration'):
-                    effect._internal_duration = 1
-                    effect._display_duration = 1
-                    effect.debug("FIXED: Duration=1 not during effect - set both internal and display to 1")
+        if (hasattr(effect, '_internal_duration') and 
+            effect._internal_duration is not None and 
+            effect._internal_duration < 2):
+            # Safer comparison that handles None values
+            if not effect.permanent and effect.duration == 1:
+                if is_during_own_turn:
+                    # For DURING effects with duration=1, internal should be 2
+                    if hasattr(effect, '_internal_duration') and effect._internal_duration < 2:
+                        effect._internal_duration = 2
+                        effect._display_duration = 1  # Keep display as 1
+                        effect.debug("FIXED: Duration=1 during own turn effect - set internal=2, display=1")
+                else:
+                    # For NOT DURING effects, internal and display should match
+                    if hasattr(effect, '_internal_duration'):
+                        effect._internal_duration = 1
+                        effect._display_duration = 1
+                        effect.debug("FIXED: Duration=1 not during effect - set both internal and display to 1")
         # FIX: For NOT DURING effects with any duration, ensure internal and display match
         elif not effect.permanent and not is_during_own_turn:
             if hasattr(effect, '_internal_duration') and hasattr(effect, '_display_duration'):
@@ -224,17 +228,27 @@ async def apply_effect(
                     effect._display_duration = safe_duration
                     effect.debug(f"FIXED: NOT DURING effect - set both durations to {safe_duration}")
 
-        # Call the on_apply method
-        message = effect.on_apply(character, round_number)
+        # Add effect to character
+        character.effects.append(effect)
         
+        # Call on_apply and get the message
+        # Check if on_apply is an async method and await it properly
+        if hasattr(effect, 'on_apply'):
+            if asyncio.iscoroutinefunction(effect.on_apply):
+                # Async version
+                message = await effect.on_apply(character, round_number)
+            else:
+                # Non-async version
+                message = effect.on_apply(character, round_number)
+        else:
+            message = f"{effect.name} applied to {character.name}."
+
         # FIX: Ensure the message correctly shows NOT DURING for non-during effects
         if not is_during_own_turn and "DURING turn" in message and "NOT DURING turn" not in message:
             # Replace "DURING turn" with "NOT DURING turn" in the message
             message = message.replace("DURING turn", "NOT DURING turn")
             effect.debug("Fixed message to correctly show NOT DURING")
 
-        # Add effect to character
-        character.effects.append(effect)
         effect.debug(f"Added to character {character.name}. Current effects: {len(character.effects)}")
 
         # Log application

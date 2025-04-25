@@ -263,7 +263,19 @@ class MoveCommands(commands.GroupCog, name="move"):
             )
             
             # Apply effect and get feedback message
-            result = await char.add_effect(move_effect, current_round)
+            result = await apply_effect(char, move_effect, current_round)
+            
+            # IMPORTANT: Now process any pending async operations
+            if hasattr(move_effect, 'execute_pending_operations'):
+                additional_messages = await move_effect.execute_pending_operations()
+                if additional_messages:
+                    # Add any additional messages to the result
+                    if isinstance(additional_messages, list):
+                        for msg in additional_messages:
+                            if msg not in result:
+                                result += f"\n{msg}"
+                    else:
+                        result += f"\n{additional_messages}"
             
             # Mark move as used
             move.use(current_round)
@@ -286,165 +298,152 @@ class MoveCommands(commands.GroupCog, name="move"):
             error_msg = await handle_error(interaction, e)
             logger.error(f"Error using move: {str(e)}", exc_info=True)
     
-    @app_commands.command(name="temp", description="Use a temporary move (not saved)")
+    @app_commands.command(name="temp", description="Create a temporary move for testing")
     @app_commands.describe(
-        character="Character using the move",
-        name="Name of the move",
-        description="Move description",
-        mp_cost="MP cost (negative for regen)",
-        hp_cost="HP cost (negative for healing)",
-        star_cost="Action star cost",
-        cast_time="Cast time (in turns)",
-        duration="Active duration (in turns)",
-        cooldown="Cooldown after use (in turns)",
-        target="Target character(s) (comma-separated)",
-        attack_roll="Attack roll formula (e.g., 1d20+str)",
-        damage="Damage formula (e.g., 2d6+str fire)",
-        crit_range="Natural roll for critical hit",
-        roll_timing="When to process attack roll: instant, active, or per_turn",
-        advanced_json="Advanced parameters in JSON format",
-        force_during="Force the effect to be treated as during/not during own turn"
+        character="The character using the move",
+        name="The name of the move",
+        description="Description of the move",
+        cast_time="Cast time in turns",
+        duration="Duration in turns",
+        cooldown="Cooldown in turns",
+        mp_cost="Mana cost",
+        star_cost="Star cost",
+        target="Target of the move (optional)",
+        attack_roll="Attack roll formula (e.g. 'd20+str')",
+        damage="Damage formula (e.g. '2d6+str fire')",
+        crit_range="Critical hit range (default: 20)",
+        roll_timing="When to roll attacks (instant, active, per_turn)",
+        force_during="Force effect to be treated as during own turn",
+        save_type="Saving throw type (str, dex, etc.)",
+        save_dc="Save DC formula (e.g. '8+prof+int')",
+        half_on_save="Whether to apply half damage on successful save",
+        aoe_mode="AOE mode (single, multi)"
     )
-    @app_commands.autocomplete(character=character_autocomplete)
     async def temp_move(
         self,
         interaction: discord.Interaction,
         character: str,
         name: str,
         description: str,
-        mp_cost: int = 0,
-        hp_cost: int = 0,
-        star_cost: int = 0,
         cast_time: Optional[int] = None,
         duration: Optional[int] = None,
         cooldown: Optional[int] = None,
+        mp_cost: Optional[int] = 0,
+        star_cost: Optional[int] = 0,
         target: Optional[str] = None,
         attack_roll: Optional[str] = None,
         damage: Optional[str] = None,
-        crit_range: int = 20,
-        roll_timing: str = "active",
-        advanced_json: Optional[str] = None,
-        force_during: Optional[bool] = None
+        crit_range: Optional[int] = 20,
+        roll_timing: Optional[str] = "active",
+        force_during: Optional[bool] = None,
+        save_type: Optional[str] = None,
+        save_dc: Optional[str] = None,
+        half_on_save: Optional[bool] = False,
+        aoe_mode: Optional[str] = "single"
     ):
-        """
-        Use a temporary move without saving it to character's moveset.
-        
-        This command:
-        - Creates a one-time-use move effect with the specified parameters
-        - Does NOT save the move to the character's moveset in Firebase
-        - Applies the effect to handle combat interactions
-        - Processes any advanced parameters like roll modifiers
-        
-        Temporary moves are ideal for situational actions or testing new moves.
-        For attack rolls with no cast time/duration, the "instant" roll timing
-        will automatically generate attack results in the initial response.
-        """
+        """Create a temporary move for testing"""
         try:
+            # Log command parameters
+            cmd_params = f"/move temp character: {character} name: {name} description: {description}"
+            if cast_time is not None: cmd_params += f" cast_time: {cast_time}"
+            if duration is not None: cmd_params += f" duration: {duration}"
+            if cooldown is not None: cmd_params += f" cooldown: {cooldown}"
+            if mp_cost != 0: cmd_params += f" mp_cost: {mp_cost}"
+            if star_cost != 0: cmd_params += f" star_cost: {star_cost}"
+            if target: cmd_params += f" target: {target}"
+            if attack_roll: cmd_params += f" attack_roll: {attack_roll}"
+            if damage: cmd_params += f" damage: {damage}"
+            if crit_range != 20: cmd_params += f" crit_range: {crit_range}"
+            if roll_timing != "active": cmd_params += f" roll_timing: {roll_timing}"
+            if force_during is not None: cmd_params += f" force_during: {force_during}"
+            if save_type: cmd_params += f" save_type: {save_type}"
+            if save_dc: cmd_params += f" save_dc: {save_dc}"
+            if half_on_save: cmd_params += f" half_on_save: {half_on_save}"
+            if aoe_mode != "single": cmd_params += f" aoe_mode: {aoe_mode}"
+            
+            print(f"COMMAND EXECUTED: {cmd_params}")
+            logger.info(f"COMMAND EXECUTED: {cmd_params}")
+            
             await interaction.response.defer()
             
-            # Get character
-            char = self.bot.game_state.get_character(character)
-            if not char:
+            # Get source character
+            source = interaction.client.game_state.get_character(character)
+            if not source:
                 await interaction.followup.send(f"Character '{character}' not found.")
                 return
                 
-            # Find target characters
+            # Get target character if specified
+            target_char = None
             targets = []
             if target:
-                target_names = [t.strip() for t in target.split(',')]
-                for target_name in target_names:
-                    target_char = self.bot.game_state.get_character(target_name)
-                    if target_char:
-                        targets.append(target_char)
-                    else:
-                        await interaction.followup.send(
-                            f"Target '{target_name}' not found. Continuing with available targets."
-                        )
-            
-            # Check if we're in combat
-            in_combat = (hasattr(self.bot, 'initiative_tracker') and 
-                        self.bot.initiative_tracker.state.value == 'active')
-            current_round = self.bot.initiative_tracker.round_number if in_combat else 0
-                
-            # Check action star cost
-            if hasattr(char, 'can_use_move') and star_cost > 0:
-                can_use, reason = char.can_use_move(star_cost, name)
-                if not can_use:
-                    await interaction.followup.send(f"Cannot use {name}: {reason}")
+                target_char = interaction.client.game_state.get_character(target)
+                if not target_char:
+                    await interaction.followup.send(f"Target '{target}' not found.")
                     return
+                targets = [target_char]
                 
-            # Parse advanced JSON parameter
-            extra_params = {}
-            if advanced_json:
-                try:
-                    extra_params = json.loads(advanced_json)
-                except json.JSONDecodeError:
-                    await interaction.followup.send(
-                        f"Invalid JSON in advanced_json parameter: {advanced_json}",
-                        ephemeral=True
-                    )
-                    return
+            # Create the move effect
+            from core.effects.move import MoveEffect
             
-            # Extract parameters from advanced_json
-            bonus_on_hit = extra_params.get('bonus_on_hit')
-            aoe_mode = extra_params.get('aoe_mode', 'single')
-            conditions = extra_params.get('conditions', [])
-            roll_modifier = extra_params.get('roll_modifier')
+            # Debug print for the roll_timing parameter
+            print(f"Creating move with roll_timing: {roll_timing} (type: {type(roll_timing)})")
             
-            # Adjust all timing parameters
-            adjusted_cast_time, adjusted_duration, adjusted_cooldown = self._adjust_timing_parameters(
-                character, cast_time, duration, cooldown
-            )
-                
-            # Create move effect
-            move_effect = MoveEffect(
+            move = MoveEffect(
                 name=name,
                 description=description,
                 star_cost=star_cost,
-                mp_cost=mp_cost,  # Can be negative for mana regen
-                hp_cost=hp_cost,  # Can be negative for healing
-                cast_time=adjusted_cast_time,  # Use adjusted cast time
-                duration=adjusted_duration,    # Use adjusted duration
-                cooldown=adjusted_cooldown,    # Use adjusted cooldown
-                cast_description=extra_params.get('cast_description'),
+                mp_cost=mp_cost,
+                cast_time=cast_time,
+                duration=duration,
+                cooldown=cooldown,
                 attack_roll=attack_roll,
                 damage=damage,
                 crit_range=crit_range,
-                conditions=conditions,
-                roll_timing=roll_timing,
                 targets=targets,
-                bonus_on_hit=bonus_on_hit,
-                aoe_mode=aoe_mode,
-                roll_modifier=roll_modifier,
-                force_during=force_during  # Add force_during parameter
+                roll_timing=roll_timing,
+                force_during=force_during,
+                save_type=save_type,
+                save_dc=save_dc,
+                half_on_save=half_on_save,
+                aoe_mode=aoe_mode
             )
             
-            # Apply effect - use apply_effect directly
-            result = await apply_effect(
-                char,
-                move_effect,
-                current_round,
-                combat_logger=self.bot.game_state.logger
-            )
+            # Apply the effect
+            from core.effects.manager import apply_effect
             
-            # Use action stars if required
-            if hasattr(char, 'use_move_stars') and star_cost > 0:
-                char.use_move_stars(star_cost, name)
-            
-            # Save character state
-            await self.bot.db.save_character(char)
-            
-            # Save any targets that were modified
-            for target_char in targets:
-                await self.bot.db.save_character(target_char)
-                
-            # Display result
+            current_round = 1
+            if hasattr(interaction.client, 'initiative_tracker'):
+                tracker = interaction.client.initiative_tracker
+                if hasattr(tracker, 'round_number'):
+                    current_round = tracker.round_number
+                    
+            # Make sure we're properly awaiting apply_effect
+            result = await apply_effect(source, move, current_round)
             await interaction.followup.send(result)
             
+            # Execute pending operations like attack rolls
+            if hasattr(move, 'execute_pending_operations'):
+                try:
+                    messages = await move.execute_pending_operations()
+                    if messages:
+                        if isinstance(messages, list):
+                            # Send as a single message for cleaner output
+                            await interaction.followup.send('\n'.join(messages))
+                        else:
+                            await interaction.followup.send(messages)
+                except Exception as e:
+                    logger.error(f"Error executing pending operations: {e}")
+                    
+            # Save the character
+            await interaction.client.db.save_character(source)
+            
         except Exception as e:
-            # Proper error handling
-            logger.error(f"Error in temp_move: {str(e)}", exc_info=True)
+            from utils.error_handler import handle_error
             await handle_error(interaction, e)
+            
+            # Also log the exception for debugging
+            print(f"ERROR executing move command: {str(e)}")
+            logger.error(f"Error executing move command: {str(e)}", exc_info=True)
 
     @app_commands.command(name="create", description="Create a new move for a character")
     @app_commands.describe(

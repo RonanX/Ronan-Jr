@@ -293,6 +293,49 @@ class SavingThrowProcessor:
         if self.debug_mode:
             print(f"[SavingThrowProcessor] {message}")
             
+    def schedule_save(self,
+                     source, 
+                     targets,
+                     save_type: str,
+                     save_dc: str,
+                     effect_name: str,
+                     half_on_save: bool = False,
+                     damage: Optional[str] = None) -> None:
+        """
+        Schedule a saving throw for later processing.
+        This avoids the need for awaiting process_save directly.
+        
+        Args:
+            source: Character causing the save
+            targets: List of characters making saves
+            save_type: Type of save (str, dex, con, etc.)
+            save_dc: DC expression (e.g. "8+prof+int")
+            effect_name: Name of the effect
+            half_on_save: Whether successful save halves damage
+            damage: Optional damage to apply on failure
+        """
+        # Validate parameters
+        if not targets or not save_type:
+            return
+            
+        # Store parameters for later processing
+        save_params = {
+            'source': source,
+            'targets': targets,
+            'save_type': save_type,
+            'save_dc': save_dc,
+            'effect_name': effect_name,
+            'half_on_save': half_on_save,
+            'damage': damage
+        }
+        
+        # Store in source object for retrieval
+        if not hasattr(source, '_pending_saves'):
+            source._pending_saves = []
+        source._pending_saves.append(save_params)
+        
+        self.debug_print(f"Scheduled save for {len(targets)} targets, type: {save_type}")
+            
     async def process_save(self,
                          source, 
                          targets,
@@ -997,11 +1040,11 @@ class MoveEffect(BaseEffect):
             target_names = ", ".join(t.name for t in self.targets)
             details.append(f"Target{'s' if len(self.targets) > 1 else ''}: {target_names}")
             
-        # Process instant attack rolls immediately
+        # Process instant attack rolls - FIXED to avoid direct await
         if self.attack_roll and self.roll_timing == RollTiming.INSTANT:
-            self.debug(f"Processing instant attack roll")
-            # Process attack immediately
-            attack_results = await self.combat.process_attack(
+            self.debug(f"Scheduling instant attack roll")
+            # Instead of awaiting, store the coroutine for later execution
+            self._internal_cache['attack_coroutine'] = self.combat.process_attack(
                 source=character,
                 targets=self.targets,
                 attack_roll=self.attack_roll,
@@ -1010,14 +1053,7 @@ class MoveEffect(BaseEffect):
                 reason=self.name,
                 bonus_on_hit=self.bonus_on_hit
             )
-            if attack_results:
-                # Separate attack messages and bonus messages
-                for message in attack_results:
-                    if "Hits! Bonuses:" in message:
-                        bonus_messages.append(message)
-                    else:
-                        attack_messages.append(message)
-                    
+        
         # Build the primary message
         if self.cast_description:
             main_message = f"{character.name} {self.cast_description} {self.name}"
@@ -1086,14 +1122,6 @@ class MoveEffect(BaseEffect):
                     msg += f" {duration_str}"
                     
                 formatted_message += f"\n• `{msg}`"
-            
-        # Add attack messages directly to the response for instant attacks
-        if attack_messages:
-            formatted_message += "\n" + "\n".join(attack_messages)
-            
-        # Add bonus messages after attack messages
-        if bonus_messages:
-            formatted_message += "\n" + "\n".join(bonus_messages)
         
         # For instant moves with no follow-up needed, mark for removal
         if self.state_machine.state == MoveState.INSTANT and self.state_machine.cooldown is None:
@@ -1102,7 +1130,7 @@ class MoveEffect(BaseEffect):
         self.debug(f"on_apply complete, returning formatted message")
         return formatted_message
     
-    async def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
+    def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
         """
         Process start of turn effects with proper attack roll handling.
         
@@ -1136,14 +1164,14 @@ class MoveEffect(BaseEffect):
             
             # Process attack if needed (PER_TURN or newly ACTIVE)
             if self.attack_roll and (is_per_turn or just_activated):
-                self.debug(f"Processing turn start attack roll")
+                self.debug(f"Scheduling turn start attack roll")
                 self.last_roll_round = round_number
                 
                 # Reset bonus tracker for new rolls
                 self.bonus_on_hit.reset()
                 
-                # Process attack directly
-                attack_results = await self.combat.process_attack(
+                # Store coroutine for later execution
+                self._internal_cache['attack_coroutine'] = self.combat.process_attack(
                     source=character,
                     targets=self.targets,
                     attack_roll=self.attack_roll,
@@ -1152,8 +1180,6 @@ class MoveEffect(BaseEffect):
                     reason=self.name,
                     bonus_on_hit=self.bonus_on_hit
                 )
-                if attack_results:
-                    messages.extend(attack_results)
             else:
                 self.debug(f"Skipping attack roll - timing: {self.roll_timing.value}, last_roll_round: {self.last_roll_round}")
             
@@ -1193,7 +1219,7 @@ class MoveEffect(BaseEffect):
         
         return messages
 
-    async def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
+    def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """
         Handle phase transitions and duration tracking with enhanced feedback.
         
@@ -1649,8 +1675,43 @@ class MoveEffect(BaseEffect):
         except Exception as e:
             logger.error(f"Error reconstructing MoveEffect: {str(e)}", exc_info=True)
             return None
+
+    # --- Async execution methods ---
             
-    # Special method to retrieve async results 
+    async def execute_pending_operations(self) -> List[str]:
+        """
+        Execute all pending async operations stored in the internal cache.
+        This should be called from an async context after on_apply or on_turn_start.
+        
+        Returns:
+            List[str]: Messages generated from async operations
+        """
+        messages = []
+        
+        # Process attack coroutines
+        if 'attack_coroutine' in self._internal_cache:
+            try:
+                self.debug("Executing pending attack operation")
+                attack_messages = await self._internal_cache['attack_coroutine']
+                messages.extend(attack_messages)
+                del self._internal_cache['attack_coroutine']
+            except Exception as e:
+                self.debug(f"Error executing attack coroutine: {str(e)}")
+        
+        # Process save coroutines
+        if 'save_coroutine' in self._internal_cache:
+            try:
+                self.debug("Executing pending save operation")
+                save_messages = await self._internal_cache['save_coroutine']
+                messages.extend(save_messages)
+                del self._internal_cache['save_coroutine']
+            except Exception as e:
+                self.debug(f"Error executing save coroutine: {str(e)}")
+        
+        return messages
+    
+    # Add a method to process all pending async operations
+    # This replaces the original process_async_results
     async def process_async_results(self) -> List[str]:
         """
         Process any stored async coroutines from the cache.
@@ -1660,26 +1721,5 @@ class MoveEffect(BaseEffect):
         
         Returns messages generated from async operations.
         """
-        messages = []
-        
-        # Process any attack coroutines
-        if 'attack_coroutine' in self._internal_cache:
-            try:
-                self.debug(f"Processing async attack coroutine")
-                attack_messages = await self._internal_cache['attack_coroutine']
-                messages.extend(attack_messages)
-                del self._internal_cache['attack_coroutine']
-            except Exception as e:
-                self.debug(f"Error processing attack coroutine: {str(e)}")
-                
-        # Process any save coroutines
-        if 'save_coroutine' in self._internal_cache:
-            try:
-                self.debug(f"Processing async save coroutine")
-                save_messages = await self._internal_cache['save_coroutine']
-                messages.extend(save_messages)
-                del self._internal_cache['save_coroutine']
-            except Exception as e:
-                self.debug(f"Error processing save coroutine: {str(e)}")
-                
-        return messages
+        # Just forward to the renamed method for backward compatibility
+        return await self.execute_pending_operations()
