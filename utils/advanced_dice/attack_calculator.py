@@ -3,13 +3,15 @@ Attack roll processing system.
 Handles attack rolls against targets, including multi-target and AoE variants.
 """
 
-import logging
-import re
 from typing import List, Optional, Dict, Any, Tuple, Set
 from dataclasses import dataclass
+import logging
+import re
 from discord import Embed, Color
 from .calculator import DiceCalculator
 from .target_handler import TargetHandler, AttackResult, DamageComponent
+from core.character import StatType
+from core.effects.move.combat import BonusOnHit
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +43,7 @@ class AttackParameters:
     crit_range: int = 20
     aoe_mode: str = 'single'
     reason: Optional[str] = None
+    bonus_on_hit: Optional[BonusOnHit] = None  # Added BonusOnHit parameter
 
 class AttackCalculator:
     """Handles attack rolls with targeting"""
@@ -51,7 +54,8 @@ class AttackCalculator:
         attack_results: List[AttackResult],
         is_multi: bool = False,
         reason: Optional[str] = None,
-        aoe_mode: str = 'single'
+        aoe_mode: str = 'single',
+        bonus_message: Optional[str] = None
     ) -> str:
         """Format attack output with consistent styling"""
         logger.debug(f"\nFormatting attack output:")
@@ -59,14 +63,20 @@ class AttackCalculator:
         logger.debug(f"Is Multi: {is_multi}")
         logger.debug(f"Results: {len(attack_results)} targets")
 
-        # Start with the roll result (preserve stat mods)
-        parts = [roll_formatted.rstrip('`')]
+        # Properly extract the roll expression from formatted output
+        # This fixes the double dice emoji issue by extracting only what we need
+        if roll_formatted.startswith('`🎲'):
+            # Extract the content between the backticks, removing the emoji
+            roll_content = roll_formatted.strip('`').lstrip('🎲 ')
+        else:
+            roll_content = roll_formatted
         
         # Handle no targets case (untargeted roll)
         if not attack_results or (len(attack_results) == 1 and not attack_results[0].target_name):
+            parts = [f"`🎲 {roll_content}"]
             if reason:
-                parts.append(f" | 📝 {reason}")
-            parts.append("`")
+                parts[0] += f" | 📝 {reason}"
+            parts[0] += "`"
             return "".join(parts)
 
         # Handle multihit attack (multiple rolls against single target)
@@ -74,6 +84,9 @@ class AttackCalculator:
             # Multi-target mode with individual results
             hits = sum(1 for r in attack_results if r.hit)
             crits = sum(1 for r in attack_results if r.is_crit)
+            
+            # Start the output with the roll result - include original roll expression with result
+            parts = [f"`🎲 {roll_content}"]
             
             # Add hit summary
             hit_parts = [f"Hits: {hits}/{len(attack_results)}"]
@@ -84,7 +97,7 @@ class AttackCalculator:
             if all(r.target_name == attack_results[0].target_name for r in attack_results):
                 hit_parts.append(f"→ {attack_results[0].target_name}")
                 
-            parts.append(f" | {' '.join(hit_parts)}")
+            parts[0] += f" | {' '.join(hit_parts)}"
             
             # Calculate total damage by type
             if hits > 0:
@@ -100,7 +113,14 @@ class AttackCalculator:
                     for type_, total in damage_by_type.items():
                         emoji = DAMAGE_TYPE_EMOJIS.get(type_.lower(), '⚔️')
                         damage_parts.append(f"{emoji} {total} {type_}")
-                    parts.append(f" | {' + '.join(damage_parts)}")
+                    parts[0] += f" | {' + '.join(damage_parts)}"
+            
+            # Add reason if provided
+            if reason:
+                parts[0] += f" | 📝 {reason}"
+                
+            # Close the formatting
+            parts[0] += "`"
         
         # Handle AoE Single Mode (one roll applied to multiple targets)
         elif aoe_mode == 'single':
@@ -110,8 +130,8 @@ class AttackCalculator:
                 icon = "💥" if result.is_crit else "✅" if result.hit else "❌"
                 target_results.append(f"{result.target_name} {icon}")
             
-            # Add target summary
-            parts.append(f" | 🎯 {', '.join(target_results)}")
+            # Format the output - include original roll expression with result
+            parts = [f"`🎲 {roll_content} | 🎯 {', '.join(target_results)}"]
             
             # Add damage only if at least one hit
             if any(r.hit for r in attack_results) and attack_results[0].damage_rolls:
@@ -127,23 +147,30 @@ class AttackCalculator:
                     damage_str = ' + '.join(damage_parts)
                     if len(result.damage_rolls) > 1:
                         damage_str += f" = {result.total_damage} total"
-                    parts.append(f" | {damage_str} each")
+                    parts[0] += f" | {damage_str} each"
+            
+            # Add reason if provided
+            if reason:
+                parts[0] += f" | 📝 {reason}"
+                
+            # Close the formatting
+            parts[0] += "`"
         
-        # Handle AoE Multi Mode (separate roll for each target)
+        # Handle AoE Multi Mode (separate roll for each target) 
         else:  # aoe_mode == 'multi'
-            # Just show hit summary in main line
+            # Header with hit summary - include original roll expression with result
             hits = sum(1 for r in attack_results if r.hit)
             crits = sum(1 for r in attack_results if r.is_crit)
             
-            summary = [f"Hits: {hits}/{len(attack_results)}"]
+            parts = [f"`🎲 {roll_content} | Hits: {hits}/{len(attack_results)}"]
             if crits > 0:
-                summary.append(f"💥 {crits} CRIT{'S' if crits > 1 else ''}")
-            parts.append(f" | {' '.join(summary)}")
+                parts[0] += f" | 💥 {crits} CRIT{'S' if crits > 1 else ''}"
+            parts[0] += "`"
             
-            # Add individual target results as bullets
+            # Add individual target results as bullets with their own formatting
             for result in attack_results:
                 icon = "💥" if result.is_crit else "✅" if result.hit else "❌"
-                target_line = [f"\n• 🎯 {result.target_name} {icon} AC {result.ac}"]
+                target_line = [f"\n• `🎯 {result.target_name} | [{result.natural_roll}]+{result.attack_roll - result.natural_roll} = {result.attack_roll} {icon} AC {result.ac}"]
                 
                 if result.hit and result.damage_rolls:
                     damage_parts = []
@@ -154,25 +181,26 @@ class AttackCalculator:
                     damage_str = ' + '.join(damage_parts)
                     if len(result.damage_rolls) > 1:
                         damage_str += f" = {result.total_damage} total"
-                    target_line.append(f" | {damage_str}")
+                    target_line[0] += f" | {damage_str}"
                 elif not result.hit:
-                    target_line.append(" | MISS")
+                    target_line[0] += " | MISS"
                     
+                target_line[0] += "`"
                 parts.append("".join(target_line))
             
             # Add total damage if any hits
             if hits > 0:
                 total_damage = sum(r.total_damage for r in attack_results if r.hit)
                 if total_damage > 0:
-                    parts.append(f"\nTotal Damage: {total_damage}")
+                    parts.append(f"\n`Total Damage: {total_damage}" + (f" | 📝 {reason}`" if reason else "`"))
+            # Add reason if not already added with total damage
+            elif reason and not any(f"📝 {reason}" in p for p in parts):
+                parts.append(f"\n`📝 {reason}`")
         
-        # Add reason if provided
-        if reason:
-            parts.append(f" | 📝 {reason}")
+        # Add bonus message if provided - directly add without bullet point
+        if bonus_message:
+            parts.append(f"\n{bonus_message}")
             
-        # Close the formatting
-        parts.append("`")
-        
         return "".join(parts)
 
     @staticmethod
@@ -186,6 +214,9 @@ class AttackCalculator:
           - hit_results_dict is a dictionary of target names to hit data
         """
         try:
+            # Initialize bonus tracker if provided
+            bonus_on_hit = params.bonus_on_hit or BonusOnHit()
+            
             # Validate parameters
             if 'multihit' in params.roll_expression.lower() and params.aoe_mode == 'multi':
                 # Instead of raising an exception, return a formatted error message
@@ -248,6 +279,9 @@ class AttackCalculator:
 
             # Handle multihit attack
             if 'multihit' in params.roll_expression.lower():
+                # Reset hit bonus tracker for new attack
+                bonus_on_hit.reset()
+                
                 attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
                     params.roll_expression,
                     params.character,
@@ -294,6 +328,10 @@ class AttackCalculator:
                     hit = mod_roll >= params.targets[0].defense.current_ac
                     is_crit = roll >= params.crit_range
                     
+                    # Register hit for bonus tracking
+                    if hit:
+                        bonus_on_hit.register_hit()
+                    
                     # Calculate damage if hit
                     damage_rolls = None
                     total_damage = 0
@@ -322,18 +360,27 @@ class AttackCalculator:
                         if params.targets[0].name not in hit_data:
                             hit_data[params.targets[0].name] = {'hit': True, 'damage': total_damage, 'is_crit': is_crit}
                 
+                # Apply bonus based on hits
+                bonus_message = None
+                if params.character and bonus_on_hit.has_any_bonuses():
+                    bonus_message = bonus_on_hit.apply_bonuses(params.character)
+                
                 # Create summary message
                 message = AttackCalculator.format_attack_output(
                     attack_formatted,
                     results,
                     True,
-                    params.reason
+                    params.reason,
+                    bonus_message=bonus_message
                 )
                 
                 return message, hit_data
 
             # AoE single mode (one roll against multiple targets)
             if params.aoe_mode == 'single':
+                # Reset hit bonus tracker for new attack
+                bonus_on_hit.reset()
+                
                 # Make a single attack roll for all targets
                 attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
                     params.roll_expression,
@@ -351,6 +398,10 @@ class AttackCalculator:
                 for target in params.targets:
                     hit = attack_total >= target.defense.current_ac
                     
+                    # Register hit for bonus tracking
+                    if hit:
+                        bonus_on_hit.register_hit()
+                    
                     # Calculate damage if hit
                     damage_rolls = None
                     total_damage = 0
@@ -378,28 +429,32 @@ class AttackCalculator:
                     if hit:
                         hit_data[target.name] = {'hit': True, 'damage': total_damage, 'is_crit': is_crit}
                 
+                # Apply bonus based on hits
+                bonus_message = None
+                if params.character and bonus_on_hit.has_any_bonuses():
+                    bonus_message = bonus_on_hit.apply_bonuses(params.character)
+                
                 message = AttackCalculator.format_attack_output(
                     attack_formatted,
                     results,
                     False,
                     params.reason,
-                    'single'
+                    'single',
+                    bonus_message=bonus_message
                 )
                 
                 return message, hit_data
                 
             # AoE multi mode (separate roll for each target)
             else:  # params.aoe_mode == 'multi'
+                # Reset hit bonus tracker for new attack
+                bonus_on_hit.reset()
+                
                 results = []
                 hit_data = {}
+                all_attack_formatted = []
                 
-                # Store first roll's formatted output for display
-                _, first_formatted, _ = DiceCalculator.calculate_complex(
-                    params.roll_expression,
-                    params.character,
-                    concise=True
-                )
-                
+                # Make separate roll for each target and store the formatted results
                 for target in params.targets:
                     # Make separate attack roll for each target
                     attack_total, attack_formatted, _ = DiceCalculator.calculate_complex(
@@ -407,12 +462,17 @@ class AttackCalculator:
                         params.character,
                         concise=True
                     )
+                    all_attack_formatted.append(attack_formatted)
                     
                     # Get natural roll
                     natural_roll = TargetHandler.extract_natural_roll(attack_formatted)
                     is_crit = natural_roll >= params.crit_range
                     
                     hit = attack_total >= target.defense.current_ac
+                    
+                    # Register hit for bonus tracking
+                    if hit:
+                        bonus_on_hit.register_hit()
                     
                     # Calculate damage if hit
                     damage_rolls = None
@@ -441,12 +501,19 @@ class AttackCalculator:
                     if hit:
                         hit_data[target.name] = {'hit': True, 'damage': total_damage, 'is_crit': is_crit}
                 
+                # Apply bonus based on hits
+                bonus_message = None
+                if params.character and bonus_on_hit.has_any_bonuses():
+                    bonus_message = bonus_on_hit.apply_bonuses(params.character)
+                
+                # Use first roll for the header, but each target will show their specific roll
                 message = AttackCalculator.format_attack_output(
-                    first_formatted,
+                    all_attack_formatted[0] if all_attack_formatted else params.roll_expression,
                     results,
                     False,
                     params.reason,
-                    'multi'
+                    'multi',
+                    bonus_message=bonus_message
                 )
                 
                 return message, hit_data

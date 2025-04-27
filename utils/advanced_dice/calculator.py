@@ -155,8 +155,8 @@ class DiceCalculator:
                         has_disadvantage = True
                         disadv_count = modifier.value - adv_count
                         if disadv_count > 0:
-                            expression += f" disadvantage {disadv_count}"
-                        applied_messages.append(f"Advantage canceled and converted to Disadvantage {disadv_count} by {modifier.name}")
+                            expression += f" disadvantage {disadvantage_count}"
+                        applied_messages.append(f"Advantage canceled and converted to Disadvantage {disadvantage_count} by {modifier.name}")
                     else:
                         # Advantage is reduced but not canceled
                         remaining = adv_count - modifier.value
@@ -391,7 +391,8 @@ class DiceCalculator:
     def format_roll(cls, breakdown: RollBreakdown, concise: bool = False) -> str:
         """Format roll results with improved clarity"""
         try:
-            parts = [f"🎲 `{breakdown.original_expression}: "]
+            # Move the dice emoji inside the formatting
+            parts = [f"`🎲 {breakdown.original_expression}: "]
             
             # Handle flat numbers
             if breakdown.is_standalone:
@@ -408,7 +409,7 @@ class DiceCalculator:
                 for stat, mod in breakdown.stat_mods.items():
                     parts.append(f"{'+' if mod >= 0 else ''}{mod}")
             
-            # Handle multihit with advantage/disadvantage
+            # Handle multihit with advantage/disadvantage - IMPROVED DISPLAY
             if breakdown.advantage_state and breakdown.multihit_results:
                 if hasattr(breakdown, 'pre_advantage_rolls') and breakdown.pre_advantage_rolls:
                     # Show the selected rolls (post-advantage, pre-modifier)

@@ -241,35 +241,46 @@ async def handle_error(interaction: discord.Interaction, error: Exception) -> No
     else:
         await interaction.response.send_message(embed=error_embed, ephemeral=True)
 
-# Example error handler for the bot
+async def handle_interaction_error(interaction, error, command_name=None):
+    """Universal handler for interaction command errors"""
+    # Create error embed
+    error_embed = create_error_embed(error, command_name)
+    
+    # Send response based on interaction state
+    try:
+        if interaction.response.is_done():
+            await interaction.followup.send(embed=error_embed, ephemeral=True)
+        else:
+            await interaction.response.send_message(embed=error_embed, ephemeral=True)
+    except Exception as e:
+        logger.error(f"Failed to send error response: {e}", exc_info=True)
+        # Last resort fallback
+        try:
+            await interaction.channel.send(
+                f"An error occurred but I couldn't display it properly. Check logs for details.",
+                delete_after=10
+            )
+        except:
+            pass
+
 async def handle_command_error(ctx, error, command_name=None):
-    """General error handler for traditional bot commands"""
-    context = f"Command: {command_name}" if command_name else "Unknown command"
+    """Universal handler for command errors"""
+    # Create error embed
+    error_embed = create_error_embed(error, command_name)
     
-    # Log the user-friendly error message to console
-    print(ErrorTranslator.format_for_console(error, context))
-    
-    # If it's an async error, also show the async helper
-    async_help = ErrorTranslator.format_async_error(error)
-    if async_help:
-        print(async_help)
-    
-    # Send a friendly message to the user
-    friendly_message = ErrorTranslator.translate_error(error)
-    error_embed = discord.Embed(
-        title="🔧 Oops! Something went wrong",
-        description=friendly_message,
-        color=discord.Color.red()
-    )
-    
-    if command_name:
-        error_embed.add_field(
-            name="Command",
-            value=f"`/{command_name}`",
-            inline=False
-        )
-    
-    await ctx.send(embed=error_embed)
+    # Handle different context types
+    try:
+        if isinstance(ctx, discord.Interaction):
+            # For application commands (Interactions)
+            if ctx.response.is_done():
+                await ctx.followup.send(embed=error_embed, ephemeral=True)
+            else:
+                await ctx.response.send_message(embed=error_embed, ephemeral=True)
+        else:
+            # For regular prefix commands
+            await ctx.send(embed=error_embed)
+    except Exception as e:
+        logger.error(f"Failed to send error response: {e}", exc_info=True)
 
 def setup(bot):
     @bot.event 
@@ -278,4 +289,8 @@ def setup(bot):
         
     @bot.tree.error
     async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
-        await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+        await handle_interaction_error(
+            interaction, 
+            error, 
+            interaction.command.name if interaction.command else None
+        )

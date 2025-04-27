@@ -337,20 +337,17 @@ class MoveEffect(BaseEffect):
         
         # Manage instant effects
         attack_preview = None
+        attack_messages = []
         if self.attack_roll and (is_truly_instant or has_only_cooldown or self.roll_timing == RollTiming.INSTANT):
             print(f"[Move-{self.name}] Processing INSTANT attack roll")
             self.last_roll_round = round_number
             
-            # Create attack preview for instant display
-            attack_preview = self.combat.preview_attack(
-                source=character,
-                targets=self.targets, 
-                attack_roll=self.attack_roll,
-                reason=self.name
-            )
+            # Reset bonus tracker for new rolls
+            if hasattr(self, 'bonus_on_hit'):
+                self.bonus_on_hit.reset()
             
-            # Store coroutine for executing the actual roll
-            self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+            # Execute attack roll synchronously and add to details
+            attack_results = self.combat.perform_sync_attack(
                 source=character,
                 targets=self.targets,
                 attack_roll=self.attack_roll,
@@ -359,6 +356,12 @@ class MoveEffect(BaseEffect):
                 reason=self.name,
                 bonus_on_hit=self.bonus_on_hit
             )
+            
+            # Add attack results to message details
+            if attack_results:
+                # Don't add to info_parts (which would put them inline)
+                # Store for adding as bullets later
+                attack_messages = attack_results
             
             # If truly instant (no phases), mark for removal after execution
             if is_truly_instant:
@@ -370,40 +373,39 @@ class MoveEffect(BaseEffect):
                 self.timing_handler.current_phase = MovePhase.COOLDOWN
                 self.timing_handler.turns_remaining = self.cooldown
         
-        # Format application message
+        # Build the primary message - this was missing!
         if self.cast_description:
             main_message = f"{character.name} {self.cast_description} {self.name}"
         else:
-            # Format based on phase
-            current_phase = self.timing_handler.current_phase
-            if current_phase == MovePhase.INSTANT or is_truly_instant:
+            if is_truly_instant:
                 main_message = f"{character.name} uses {self.name}"
-            elif current_phase == MovePhase.CASTING:
+            elif self.timing_handler.current_phase == MovePhase.CASTING:
                 main_message = f"{character.name} begins casting {self.name}"
-            elif current_phase == MovePhase.COOLDOWN:
-                main_message = f"{character.name} uses {self.name}"
             else:
                 main_message = f"{character.name} uses {self.name}"
         
-        # Format the complete message - don't repeat info parts
-        formatted_message = self.format_effect_message(f"{main_message} | {' | '.join(info_parts)}", [])
+        # Format the message differently to include info parts within the backticks
+        if info_parts:
+            main_message = f"{main_message} | {' | '.join(info_parts)}"
+            
+        # Now use the complete message with format_effect_message
+        formatted_message = self.format_effect_message(main_message, [])
         
-        # Add attack preview or target info - prefer attack preview if available
+        # Add attack results as bulleted items with proper formatting
+        if attack_messages:
+            for result in attack_messages:
+                formatted_message += f"\n• `{result}`"
+        
+        # Add attack preview or target info with proper formatting
         if attack_preview:
-            formatted_message += f"\n• Attack: {attack_preview}"
+            formatted_message += f"\n• `Attack: {attack_preview}`"
         elif self.attack_roll and (self.roll_timing == RollTiming.ACTIVE or self.roll_timing == RollTiming.PER_TURN):
             # Don't show target info if we'll be showing attack rolls later
             pass
-        elif self.targets:
-            if len(self.targets) == 1:
-                formatted_message += f"\n• Target: {self.targets[0].name}"
-            else:
-                target_names = [t.name for t in self.targets]
-                formatted_message += f"\n• Targets: {', '.join(target_names)}"
         
         print(f"[Move-{self.name}] Apply complete, returning formatted message")
         return formatted_message
-    
+
     def get_phase_name(self) -> str:
         """Get the current phase name for display purposes"""
         if not hasattr(self, 'timing_handler'):
@@ -487,16 +489,15 @@ class MoveEffect(BaseEffect):
                 if hasattr(self, 'bonus_on_hit'):
                     self.bonus_on_hit.reset()
                 
-                # Create attack preview
-                preview_msg = self.combat.preview_attack(
-                    source=character,
-                    targets=self.targets, 
-                    attack_roll=self.attack_roll,
-                    reason=self.name
+                # First add the status message before attack results
+                active_msg = self.format_effect_message(
+                    f"{self.name} {phase_name}",
+                    [turn_display]
                 )
+                messages.append(active_msg)
                 
-                # Store coroutine for actual execution
-                self._internal_cache['attack_coroutine'] = self.combat.process_attack(
+                # Execute attack roll synchronously
+                attack_results = self.combat.perform_sync_attack(
                     source=character,
                     targets=self.targets,
                     attack_roll=self.attack_roll,
@@ -506,20 +507,17 @@ class MoveEffect(BaseEffect):
                     bonus_on_hit=self.bonus_on_hit
                 )
                 
-                # Add preview to message
-                active_msg = self.format_effect_message(
-                    f"{self.name} {phase_name}",
-                    [turn_display, f"*Attack: {preview_msg}*"]
-                )
+                # Add attack results with proper bullet formatting (outside of backticks)
+                if attack_results:
+                    for result in attack_results:
+                        messages.append(f"• `{result}`")
             else:
                 # Show active status message without attack preview
                 active_msg = self.format_effect_message(
                     f"{self.name} {phase_name}",
                     [turn_display]
                 )
-            
-            # Add status message
-            messages.append(active_msg)
+                messages.append(active_msg)
             
         elif current_phase == MovePhase.COOLDOWN:
             # Show cooldown status
@@ -676,49 +674,6 @@ class MoveEffect(BaseEffect):
         return False
 
     async def execute_pending_operations(self) -> List[str]:
-        """
-        Execute all pending async operations stored in the internal cache.
-        This should be called from an async context AFTER on_apply or on_turn_start.
-        
-        Returns:
-            List[str]: Messages generated from async operations
-        """
-        messages = []
-        
-        # Process attack coroutines
-        if 'attack_coroutine' in self._internal_cache:
-            try:
-                print(f"[Move-{self.name}] Executing pending attack operation")
-                attack_messages = await self._internal_cache['attack_coroutine']
-                
-                if isinstance(attack_messages, list):
-                    messages.extend(attack_messages)
-                else:
-                    messages.append(attack_messages)
-                    
-                # Clear the coroutine after execution
-                del self._internal_cache['attack_coroutine']
-            except Exception as e:
-                print(f"[Move-{self.name}] Error executing attack coroutine: {str(e)}")
-        
-        # Process save coroutines
-        if 'save_coroutine' in self._internal_cache:
-            try:
-                print(f"[Move-{self.name}] Executing pending save operation")
-                save_messages = await self._internal_cache['save_coroutine']
-                if save_messages:
-                    if isinstance(save_messages, list):
-                        messages.extend(save_messages)
-                    else:
-                        messages.append(save_messages)
-                del self._internal_cache['save_coroutine']
-            except Exception as e:
-                print(f"[Move-{self.name}] Error executing save coroutine: {str(e)}")
-        
-        # For truly instant effects (no phases), mark for removal after execution
-        is_truly_instant = not self.cast_time and not self.duration and not self.cooldown
-        if is_truly_instant:
-            print(f"[Move-{self.name}] Marking truly instant effect for removal after execution")
-            self.marked_for_removal = True
-        
-        return messages
+        """Execute any pending async operations"""
+        # This is now handled synchronously in the on_apply and on_turn_start methods
+        return []

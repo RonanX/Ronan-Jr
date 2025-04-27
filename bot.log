@@ -7029,3 +7029,1041 @@ aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gatewa
 2025-04-25 16:05:09,726 - discord.gateway - INFO - Shard ID None session has been invalidated.
 2025-04-25 16:05:15,076 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3e1267235b6c361f7aa2caaa1362b4c9).
 2025-04-25 16:06:05,742 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 3e1267235b6c361f7aa2caaa1362b4c9.
+2025-04-25 16:15:15,646 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-25 16:15:15,648 - discord.client - INFO - logging in using static token
+2025-04-25 16:15:16,102 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 16:15:16,102 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 16:15:16,781 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-25 16:15:16,782 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 16:15:16,782 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 16:15:16,783 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 16:15:16,830 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-25 16:15:16,830 - core.effects.move.base - INFO - [MoveTiming-7760] Created timing with phase=instant, remaining=0/0
+2025-04-25 16:15:16,836 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 16:15:16,836 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 16:15:16,838 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 16:15:16,838 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 16:15:16,838 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-25 16:15:18,455 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 24f7bec16fd5c11820059e84128e1338).
+2025-04-25 18:25:39,610 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-25 18:25:39,613 - discord.client - INFO - logging in using static token
+2025-04-25 18:25:40,081 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:25:40,081 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:25:40,851 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-25 18:25:40,852 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:25:40,852 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:25:40,853 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:25:40,891 - __main__ - ERROR - Failed to register move effect bridge: unterminated string literal (detected at line 597) (effect.py, line 597)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 165, in setup_hook
+    from core.effects.move.bridge import register_with_bot
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\__init__.py", line 9, in <module>
+    from .effect import MoveEffect
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 597
+    detailsor {turns} turn{'s' if turns != 1 else ''}")
+                                                     ^
+SyntaxError: unterminated string literal (detected at line 597)
+2025-04-25 18:25:40,903 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:25:40,904 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:25:40,907 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:25:40,908 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:25:40,908 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-25 18:31:56,216 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-25 18:31:56,219 - discord.client - INFO - logging in using static token
+2025-04-25 18:31:56,619 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:31:56,620 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:31:57,388 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-25 18:31:57,389 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:31:57,390 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:31:57,391 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:31:57,438 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-25 18:31:57,439 - core.effects.move.base - INFO - [MoveTiming-9824] Created timing with phase=instant, remaining=0/0
+2025-04-25 18:31:57,447 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:31:57,447 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:31:57,449 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:31:57,449 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:31:57,449 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-25 18:31:57,919 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: fa3463a28d195e4ddd6f2f8821705193).
+2025-04-25 18:32:53,477 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: d20+int damage: d4 bludgeoning
+2025-04-25 18:32:53,707 - core.effects.move.base - INFO - [MoveTiming-5424] Created timing with phase=instant, remaining=0/0
+2025-04-25 18:32:53,707 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-25 18:32:53,707 - core.effects.move.base - INFO - [MoveTiming-5424] Timing adjustment called: during_own_turn=True
+2025-04-25 18:32:53,708 - core.effects.manager - ERROR - Error applying effect: 'CombatProcessor' object has no attribute 'perform_sync_attack'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 242, in apply_effect
+    message = effect.on_apply(character, round_number)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 349, in on_apply
+    attack_result = self.combat.perform_sync_attack(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CombatProcessor' object has no attribute 'perform_sync_attack'
+2025-04-25 18:54:44,286 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-25 18:54:44,288 - discord.client - INFO - logging in using static token
+2025-04-25 18:54:44,767 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:54:44,767 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:54:45,542 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-25 18:54:45,543 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:54:45,543 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:54:45,545 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-25 18:54:45,605 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-25 18:54:45,606 - core.effects.move.base - INFO - [MoveTiming-5360] Created timing with phase=instant, remaining=0/0
+2025-04-25 18:54:45,614 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:54:45,614 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:54:45,616 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-25 18:54:45,616 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-25 18:54:45,617 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-25 18:54:46,107 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4810832020736153016d8c52f5cfd415).
+2025-04-25 18:55:16,127 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: d20+int damage: d4 bludgeoning
+2025-04-25 18:55:16,275 - core.effects.move.base - INFO - [MoveTiming-6512] Created timing with phase=instant, remaining=0/0
+2025-04-25 18:55:16,276 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-25 18:55:16,276 - core.effects.move.base - INFO - [MoveTiming-6512] Timing adjustment called: during_own_turn=True
+2025-04-25 19:08:26,845 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: fireball description: . cast_time: 1 duration: 1 target: test2 attack_roll: d20+int damage: d6 fire force_during: True
+2025-04-25 19:08:27,142 - core.effects.move.base - INFO - [MoveTiming-9072] Created timing with phase=casting, remaining=1/1
+2025-04-25 19:08:27,142 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-25 19:08:27,143 - core.effects.move.base - INFO - [MoveTiming-9072] Timing adjustment called: during_own_turn=True
+2025-04-25 19:08:27,143 - core.effects.move.base - INFO - [MoveTiming-9072] Pre-adjustment: turns_remaining=1
+2025-04-25 19:08:27,143 - core.effects.move.base - INFO - [MoveTiming-9072] Duration 1 special case: buffered to 2 turns internally
+2025-04-25 19:08:27,143 - core.effects.move.base - INFO - [MoveTiming-9072] Timing adjusted for during-own-turn: internal=2, display=1
+2025-04-25 19:08:31,900 - core.effects.move.base - INFO - [MoveTiming-9072] BEFORE decrement: phase=casting, turns_remaining=2/1
+2025-04-25 19:08:31,900 - core.effects.move.base - INFO - [MoveTiming-9072] AFTER decrement: 2 -> 1
+2025-04-25 19:08:31,901 - core.effects.move.base - INFO - [MoveTiming-9072] No transition needed. Remaining turns: 1
+2025-04-25 19:08:39,018 - core.effects.move.base - INFO - [MoveTiming-9072] BEFORE decrement: phase=casting, turns_remaining=1/1
+2025-04-25 19:08:39,018 - core.effects.move.base - INFO - [MoveTiming-9072] AFTER decrement: 1 -> 0
+2025-04-25 19:08:39,018 - core.effects.move.base - INFO - [MoveTiming-9072] Cast time completed. Duration=1, Cooldown=None
+2025-04-25 19:08:39,019 - core.effects.move.base - INFO - [MoveTiming-9072] Transitioned to ACTIVE with 1 turns remaining
+2025-04-25 19:08:39,019 - core.effects.move.base - INFO - [MoveTiming-9072] Transition: casting -> active with message: activates!
+2025-04-25 19:08:42,987 - core.effects.move.base - INFO - [MoveTiming-9072] Already processed round 2, turn test
+2025-04-25 19:09:02,499 - core.effects.move.base - INFO - [MoveTiming-9072] BEFORE decrement: phase=active, turns_remaining=1/1
+2025-04-25 19:09:02,499 - core.effects.move.base - INFO - [MoveTiming-9072] AFTER decrement: 1 -> 0
+2025-04-25 19:09:02,500 - core.effects.move.base - INFO - [MoveTiming-9072] Active duration completed. Cooldown=None
+2025-04-25 19:09:02,500 - core.effects.move.base - INFO - [MoveTiming-9072] No cooldown, marked for removal
+2025-04-25 19:09:02,500 - core.effects.move.base - INFO - [MoveTiming-9072] Transition: active -> active with message: wears off
+2025-04-25 19:16:24,812 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 4810832020736153016d8c52f5cfd415.
+2025-04-26 11:25:07,989 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 11:25:07,992 - discord.client - INFO - logging in using static token
+2025-04-26 11:25:09,290 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 11:25:09,290 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 11:25:11,655 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 11:25:11,656 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 11:25:11,656 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 11:25:11,657 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 11:25:11,710 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 11:25:11,711 - core.effects.move.base - INFO - [MoveTiming-4880] Created timing with phase=instant, remaining=0/0
+2025-04-26 11:25:11,717 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 11:25:11,717 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 11:25:11,719 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 11:25:11,719 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 11:25:11,719 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 11:25:13,073 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e2798fb62146f0e5327578deaee61c8a).
+2025-04-26 11:31:25,819 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: instant attack description: . target: test attack_roll: d20+int damage: d4 bludgeoning
+2025-04-26 11:31:31,136 - core.effects.move.base - INFO - [MoveTiming-5072] Created timing with phase=instant, remaining=0/0
+2025-04-26 11:31:31,137 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 11:31:31,138 - core.effects.move.base - INFO - [MoveTiming-5072] Timing adjustment called: during_own_turn=True
+2025-04-26 11:31:31,138 - core.effects.manager - ERROR - Error applying effect: 'MoveEffect' object has no attribute 'state_machine'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 242, in apply_effect
+    message = effect.on_apply(character, round_number)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 308, in on_apply
+    if self.state_machine.state == MoveState.INSTANT:
+       ^^^^^^^^^^^^^^^^^^
+AttributeError: 'MoveEffect' object has no attribute 'state_machine'
+2025-04-26 13:05:31,747 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 13:05:31,750 - discord.client - INFO - logging in using static token
+2025-04-26 13:05:32,078 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:05:32,079 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:05:32,525 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 13:05:32,527 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:05:32,527 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:05:32,529 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:05:32,579 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 13:05:32,580 - core.effects.move.base - INFO - [MoveTiming-6704] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:05:32,587 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:05:32,587 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:05:32,589 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:05:32,589 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:05:32,589 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 13:05:32,872 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 63cdef25378fe972cf70c383bf3c1807).
+2025-04-26 13:06:36,715 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py:1149> exception=AttributeError("'Interaction' object has no attribute 'send'")>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1283, in _call
+    command, options = self._get_app_command_options(data)
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1202, in _get_app_command_options
+    raise CommandNotFound(name, parents)
+discord.app_commands.errors.CommandNotFound: Application command 'temp' not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1153, in wrapper
+    await self._dispatch_error(interaction, e)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1146, in _dispatch_error
+    await self.on_error(interaction, error)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 281, in on_app_command_error
+    await handle_command_error(interaction, error, interaction.command.name if interaction.command else None)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 272, in handle_command_error
+    await ctx.send(embed=error_embed)
+          ^^^^^^^^
+AttributeError: 'Interaction' object has no attribute 'send'
+2025-04-26 13:09:12,738 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 13:09:12,740 - discord.client - INFO - logging in using static token
+2025-04-26 13:09:13,115 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:09:13,116 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:09:13,540 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 13:09:13,541 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:09:13,541 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:09:13,551 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 13:09:13,552 - core.effects.move.base - INFO - [MoveTiming-3920] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:09:13,558 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:09:13,558 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:09:13,559 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:09:13,559 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:09:13,559 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 13:11:29,573 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 13:11:29,575 - discord.client - INFO - logging in using static token
+2025-04-26 13:11:29,954 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:11:29,954 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:11:30,384 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 13:11:30,385 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:11:30,385 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:11:30,397 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 13:11:30,398 - core.effects.move.base - INFO - [MoveTiming-1056] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:11:30,404 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:11:30,404 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:11:30,406 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:11:30,406 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:11:30,406 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 13:11:30,745 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 483a6248f51fe7ff6ee37f02db00e781).
+2025-04-26 13:14:04,722 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 13:14:04,725 - discord.client - INFO - logging in using static token
+2025-04-26 13:14:05,237 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:14:05,237 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:14:05,747 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 13:14:05,748 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:14:05,749 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:14:05,764 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 13:14:05,765 - core.effects.move.base - INFO - [MoveTiming-1504] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:14:05,773 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:14:05,774 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:14:05,776 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:14:05,777 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:14:05,777 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 13:14:06,173 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e171f622bf26b7b8385cd6bf6e014f3c).
+2025-04-26 13:22:32,423 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 13:22:32,427 - discord.client - INFO - logging in using static token
+2025-04-26 13:22:32,851 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:22:32,851 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:22:33,310 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 13:22:33,312 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:22:33,312 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:22:33,334 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 13:22:33,335 - core.effects.move.base - INFO - [MoveTiming-1536] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:22:33,346 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:22:33,346 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:22:33,349 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:22:33,349 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:22:33,349 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 13:22:33,787 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 90f4d5e405e91ceca591663248f9db8c).
+2025-04-26 13:24:02,278 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: test description: /
+2025-04-26 13:24:02,428 - core.effects.move.base - INFO - [MoveTiming-3200] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:24:02,429 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 13:24:02,430 - core.effects.move.base - INFO - [MoveTiming-3200] Timing adjustment called: during_own_turn=True
+2025-04-26 13:24:10,865 - core.effects.move.base - INFO - [MoveTiming-3200] Instant effect marked for removal
+2025-04-26 13:24:36,449 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: d20+int damage: d4 bludgeoning
+2025-04-26 13:24:36,708 - core.effects.move.base - INFO - [MoveTiming-2560] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:24:36,708 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 13:24:36,709 - core.effects.move.base - INFO - [MoveTiming-2560] Timing adjustment called: during_own_turn=True
+2025-04-26 13:25:08,752 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: fireball description: . cast_time: 2 duration: 1 target: test2 attack_roll: d20+int damage: d6 fire force_during: True
+2025-04-26 13:25:08,969 - core.effects.move.base - INFO - [MoveTiming-7456] Created timing with phase=casting, remaining=2/2
+2025-04-26 13:25:08,969 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 13:25:08,970 - core.effects.move.base - INFO - [MoveTiming-7456] Timing adjustment called: during_own_turn=True
+2025-04-26 13:25:08,970 - core.effects.move.base - INFO - [MoveTiming-7456] Pre-adjustment: turns_remaining=2
+2025-04-26 13:25:08,970 - core.effects.move.base - INFO - [MoveTiming-7456] Added turn buffer: now 3 turns
+2025-04-26 13:25:08,971 - core.effects.move.base - INFO - [MoveTiming-7456] Timing adjusted for during-own-turn: internal=3, display=1
+2025-04-26 13:26:57,413 - core.effects.move.base - INFO - [MoveTiming-7456] BEFORE decrement: phase=casting, turns_remaining=3/2
+2025-04-26 13:26:57,413 - core.effects.move.base - INFO - [MoveTiming-7456] AFTER decrement: 3 -> 2
+2025-04-26 13:26:57,414 - core.effects.move.base - INFO - [MoveTiming-7456] No transition needed. Remaining turns: 2
+2025-04-26 13:27:01,972 - core.effects.move.base - INFO - [MoveTiming-7456] BEFORE decrement: phase=casting, turns_remaining=2/2
+2025-04-26 13:27:01,972 - core.effects.move.base - INFO - [MoveTiming-7456] AFTER decrement: 2 -> 1
+2025-04-26 13:27:01,972 - core.effects.move.base - INFO - [MoveTiming-7456] No transition needed. Remaining turns: 1
+2025-04-26 13:27:05,085 - core.effects.move.base - INFO - [MoveTiming-7456] Already processed round 2, turn test
+2025-04-26 13:27:09,176 - core.effects.move.base - INFO - [MoveTiming-7456] BEFORE decrement: phase=casting, turns_remaining=1/2
+2025-04-26 13:27:09,177 - core.effects.move.base - INFO - [MoveTiming-7456] AFTER decrement: 1 -> 0
+2025-04-26 13:27:09,177 - core.effects.move.base - INFO - [MoveTiming-7456] Cast time completed. Duration=1, Cooldown=None
+2025-04-26 13:27:09,177 - core.effects.move.base - INFO - [MoveTiming-7456] Transitioned to ACTIVE with 1 turns remaining
+2025-04-26 13:27:09,177 - core.effects.move.base - INFO - [MoveTiming-7456] Transition: casting -> active with message: activates!
+2025-04-26 13:27:12,944 - core.effects.move.base - INFO - [MoveTiming-7456] Already processed round 3, turn test
+2025-04-26 13:27:17,501 - core.effects.move.base - INFO - [MoveTiming-7456] BEFORE decrement: phase=active, turns_remaining=1/1
+2025-04-26 13:27:17,502 - core.effects.move.base - INFO - [MoveTiming-7456] AFTER decrement: 1 -> 0
+2025-04-26 13:27:17,502 - core.effects.move.base - INFO - [MoveTiming-7456] Active duration completed. Cooldown=None
+2025-04-26 13:27:17,502 - core.effects.move.base - INFO - [MoveTiming-7456] No cooldown, marked for removal
+2025-04-26 13:27:17,502 - core.effects.move.base - INFO - [MoveTiming-7456] Transition: active -> active with message: wears off
+2025-04-26 13:29:11,489 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 13:29:11,492 - discord.client - INFO - logging in using static token
+2025-04-26 13:29:11,916 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:29:11,916 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:29:12,354 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 13:29:12,355 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:29:12,355 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:29:12,356 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 13:29:12,386 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 13:29:12,387 - core.effects.move.base - INFO - [MoveTiming-5328] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:29:12,392 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:29:12,393 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:29:12,394 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 13:29:12,394 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 13:29:12,395 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 13:29:12,614 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e265fb53d5da26f4cbf406673646992f).
+2025-04-26 13:30:46,136 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: d20+int damage: d4 bludgeoning
+2025-04-26 13:30:46,365 - core.effects.move.base - INFO - [MoveTiming-6560] Created timing with phase=instant, remaining=0/0
+2025-04-26 13:30:46,366 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 13:30:46,366 - core.effects.move.base - INFO - [MoveTiming-6560] Timing adjustment called: during_own_turn=True
+2025-04-26 14:19:25,208 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 14:19:25,211 - discord.client - INFO - logging in using static token
+2025-04-26 14:19:25,549 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:19:25,550 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:19:25,983 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 14:19:25,984 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:19:25,984 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:19:25,985 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:19:26,027 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 14:19:26,027 - core.effects.move.base - INFO - [MoveTiming-9440] Created timing with phase=instant, remaining=0/0
+2025-04-26 14:19:26,033 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:19:26,033 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:19:26,036 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:19:26,036 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:19:26,036 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 14:19:26,272 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b8ced0d0e34e0d5f9e0ab5e22796207c).
+2025-04-26 14:20:56,825 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 14:20:56,828 - discord.client - INFO - logging in using static token
+2025-04-26 14:20:57,412 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:20:57,412 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:20:57,828 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 14:20:57,830 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:20:57,830 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:20:57,831 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:20:57,839 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 14:20:57,839 - core.effects.move.base - INFO - [MoveTiming-3344] Created timing with phase=instant, remaining=0/0
+2025-04-26 14:20:57,843 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:20:57,843 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:20:57,845 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:20:57,845 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:20:57,845 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 14:20:58,127 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 49d02bef663beb35dac938d67e81b6e5).
+2025-04-26 14:25:20,759 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: instant attack description: . target: test attack_roll: d20+int damage: d4 bludgeoning
+2025-04-26 14:25:20,898 - core.effects.move.base - INFO - [MoveTiming-224] Created timing with phase=instant, remaining=0/0
+2025-04-26 14:25:20,899 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 14:25:20,899 - core.effects.move.base - INFO - [MoveTiming-224] Timing adjustment called: during_own_turn=True
+2025-04-26 14:25:20,901 - core.effects.manager - ERROR - Error applying effect: name 'main_message' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 242, in apply_effect
+    message = effect.on_apply(character, round_number)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 378, in on_apply
+    formatted_message = self.format_effect_message(main_message, [])
+                                                   ^^^^^^^^^^^^
+NameError: name 'main_message' is not defined
+2025-04-26 14:28:50,804 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 14:28:50,806 - discord.client - INFO - logging in using static token
+2025-04-26 14:28:51,290 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:28:51,291 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:28:51,749 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 14:28:51,750 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:28:51,750 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:28:51,752 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:28:51,781 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 14:28:51,781 - core.effects.move.base - INFO - [MoveTiming-944] Created timing with phase=instant, remaining=0/0
+2025-04-26 14:28:51,787 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:28:51,787 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:28:51,789 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:28:51,789 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:28:51,790 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 14:28:52,078 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f52b1491c12ce5533267c7f63a77e54b).
+2025-04-26 14:29:07,459 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: instant attack description: . target: test attack_roll: d20+int damage: d4 bludgeoning
+2025-04-26 14:29:07,637 - core.effects.move.base - INFO - [MoveTiming-2496] Created timing with phase=instant, remaining=0/0
+2025-04-26 14:29:07,638 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 14:29:07,638 - core.effects.move.base - INFO - [MoveTiming-2496] Timing adjustment called: during_own_turn=True
+2025-04-26 14:30:13,427 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: fireball description: . cast_time: 2 duration: 1 target: test attack_roll: d20+int damage: d6 fire force_during: True
+2025-04-26 14:30:13,617 - core.effects.move.base - INFO - [MoveTiming-4736] Created timing with phase=casting, remaining=2/2
+2025-04-26 14:30:13,617 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 14:30:13,618 - core.effects.move.base - INFO - [MoveTiming-4736] Timing adjustment called: during_own_turn=True
+2025-04-26 14:30:13,618 - core.effects.move.base - INFO - [MoveTiming-4736] Pre-adjustment: turns_remaining=2
+2025-04-26 14:30:13,618 - core.effects.move.base - INFO - [MoveTiming-4736] Added turn buffer: now 3 turns
+2025-04-26 14:30:13,618 - core.effects.move.base - INFO - [MoveTiming-4736] Timing adjusted for during-own-turn: internal=3, display=1
+2025-04-26 14:30:18,195 - core.effects.move.base - INFO - [MoveTiming-4736] BEFORE decrement: phase=casting, turns_remaining=3/2
+2025-04-26 14:30:18,195 - core.effects.move.base - INFO - [MoveTiming-4736] AFTER decrement: 3 -> 2
+2025-04-26 14:30:18,195 - core.effects.move.base - INFO - [MoveTiming-4736] No transition needed. Remaining turns: 2
+2025-04-26 14:30:21,944 - core.effects.move.base - INFO - [MoveTiming-4736] BEFORE decrement: phase=casting, turns_remaining=2/2
+2025-04-26 14:30:21,944 - core.effects.move.base - INFO - [MoveTiming-4736] AFTER decrement: 2 -> 1
+2025-04-26 14:30:21,944 - core.effects.move.base - INFO - [MoveTiming-4736] No transition needed. Remaining turns: 1
+2025-04-26 14:30:24,015 - core.effects.move.base - INFO - [MoveTiming-4736] Already processed round 2, turn test2
+2025-04-26 14:30:27,372 - core.effects.move.base - INFO - [MoveTiming-4736] BEFORE decrement: phase=casting, turns_remaining=1/2
+2025-04-26 14:30:27,372 - core.effects.move.base - INFO - [MoveTiming-4736] AFTER decrement: 1 -> 0
+2025-04-26 14:30:27,373 - core.effects.move.base - INFO - [MoveTiming-4736] Cast time completed. Duration=1, Cooldown=None
+2025-04-26 14:30:27,373 - core.effects.move.base - INFO - [MoveTiming-4736] Transitioned to ACTIVE with 1 turns remaining
+2025-04-26 14:30:27,373 - core.effects.move.base - INFO - [MoveTiming-4736] Transition: casting -> active with message: activates!
+2025-04-26 14:30:30,099 - core.effects.move.base - INFO - [MoveTiming-4736] Already processed round 3, turn test2
+2025-04-26 14:30:33,024 - core.effects.move.base - INFO - [MoveTiming-4736] BEFORE decrement: phase=active, turns_remaining=1/1
+2025-04-26 14:30:33,024 - core.effects.move.base - INFO - [MoveTiming-4736] AFTER decrement: 1 -> 0
+2025-04-26 14:30:33,024 - core.effects.move.base - INFO - [MoveTiming-4736] Active duration completed. Cooldown=None
+2025-04-26 14:30:33,024 - core.effects.move.base - INFO - [MoveTiming-4736] No cooldown, marked for removal
+2025-04-26 14:30:33,024 - core.effects.move.base - INFO - [MoveTiming-4736] Transition: active -> active with message: wears off
+2025-04-26 14:43:57,407 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 14:43:57,409 - discord.client - INFO - logging in using static token
+2025-04-26 14:43:57,803 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:43:57,803 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:43:59,279 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 14:43:59,280 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:43:59,280 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:43:59,282 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 14:43:59,312 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 14:43:59,312 - core.effects.move.base - INFO - [MoveTiming-2992] Created timing with phase=instant, remaining=0/0
+2025-04-26 14:43:59,317 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:43:59,318 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:43:59,319 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 14:43:59,319 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 14:43:59,319 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 14:43:59,562 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c49fa4d4c0872d9b266b671ab08cfafe).
+2025-04-26 14:48:37,627 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: instant attack description: . target: test attack_roll: d20+int damage: d4 bludgeoning
+2025-04-26 14:48:37,828 - core.effects.move.base - INFO - [MoveTiming-3584] Created timing with phase=instant, remaining=0/0
+2025-04-26 14:48:37,828 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 14:48:37,828 - core.effects.move.base - INFO - [MoveTiming-3584] Timing adjustment called: during_own_turn=True
+2025-04-26 14:51:33,291 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: fireball description: . duration: 2 target: test attack_roll: 1d20+wis damage: 2d4+int fire force_during: True
+2025-04-26 14:51:33,554 - core.effects.move.base - INFO - [MoveTiming-6784] Created timing with phase=active, remaining=2/2
+2025-04-26 14:51:33,554 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 14:51:33,555 - core.effects.move.base - INFO - [MoveTiming-6784] Timing adjustment called: during_own_turn=True
+2025-04-26 14:51:33,555 - core.effects.move.base - INFO - [MoveTiming-6784] Pre-adjustment: turns_remaining=2
+2025-04-26 14:51:33,555 - core.effects.move.base - INFO - [MoveTiming-6784] Added turn buffer: now 3 turns
+2025-04-26 14:51:33,555 - core.effects.move.base - INFO - [MoveTiming-6784] Timing adjusted for during-own-turn: internal=3, display=2
+2025-04-26 14:51:41,229 - core.effects.move.base - INFO - [MoveTiming-6784] BEFORE decrement: phase=active, turns_remaining=3/2
+2025-04-26 14:51:41,229 - core.effects.move.base - INFO - [MoveTiming-6784] AFTER decrement: 3 -> 2
+2025-04-26 14:51:41,229 - core.effects.move.base - INFO - [MoveTiming-6784] No transition needed. Remaining turns: 2
+2025-04-26 14:51:50,985 - core.effects.move.base - INFO - [MoveTiming-6784] BEFORE decrement: phase=active, turns_remaining=2/2
+2025-04-26 14:51:50,985 - core.effects.move.base - INFO - [MoveTiming-6784] AFTER decrement: 2 -> 1
+2025-04-26 14:51:50,985 - core.effects.move.base - INFO - [MoveTiming-6784] No transition needed. Remaining turns: 1
+2025-04-26 14:51:56,879 - core.effects.move.base - INFO - [MoveTiming-6784] Already processed round 2, turn test2
+2025-04-26 14:52:00,289 - core.effects.move.base - INFO - [MoveTiming-6784] BEFORE decrement: phase=active, turns_remaining=1/2
+2025-04-26 14:52:00,289 - core.effects.move.base - INFO - [MoveTiming-6784] AFTER decrement: 1 -> 0
+2025-04-26 14:52:00,289 - core.effects.move.base - INFO - [MoveTiming-6784] Active duration completed. Cooldown=None
+2025-04-26 14:52:00,290 - core.effects.move.base - INFO - [MoveTiming-6784] No cooldown, marked for removal
+2025-04-26 14:52:00,290 - core.effects.move.base - INFO - [MoveTiming-6784] Transition: active -> active with message: wears off
+2025-04-26 14:52:16,190 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: fireball description: . cast_time: 2 duration: 1 target: test attack_roll: d20+int damage: d6 fire force_during: True
+2025-04-26 14:52:16,494 - core.effects.move.base - INFO - [MoveTiming-6960] Created timing with phase=casting, remaining=2/2
+2025-04-26 14:52:16,494 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 14:52:16,495 - core.effects.move.base - INFO - [MoveTiming-6960] Timing adjustment called: during_own_turn=True
+2025-04-26 14:52:16,495 - core.effects.move.base - INFO - [MoveTiming-6960] Pre-adjustment: turns_remaining=2
+2025-04-26 14:52:16,495 - core.effects.move.base - INFO - [MoveTiming-6960] Added turn buffer: now 3 turns
+2025-04-26 14:52:16,495 - core.effects.move.base - INFO - [MoveTiming-6960] Timing adjusted for during-own-turn: internal=3, display=1
+2025-04-26 14:52:20,311 - core.effects.move.base - INFO - [MoveTiming-6960] BEFORE decrement: phase=casting, turns_remaining=3/2
+2025-04-26 14:52:20,311 - core.effects.move.base - INFO - [MoveTiming-6960] AFTER decrement: 3 -> 2
+2025-04-26 14:52:20,312 - core.effects.move.base - INFO - [MoveTiming-6960] No transition needed. Remaining turns: 2
+2025-04-26 14:52:23,441 - core.effects.move.base - INFO - [MoveTiming-6960] Already processed round 4, turn test2
+2025-04-26 14:52:26,807 - core.effects.move.base - INFO - [MoveTiming-6960] BEFORE decrement: phase=casting, turns_remaining=2/2
+2025-04-26 14:52:26,807 - core.effects.move.base - INFO - [MoveTiming-6960] AFTER decrement: 2 -> 1
+2025-04-26 14:52:26,807 - core.effects.move.base - INFO - [MoveTiming-6960] No transition needed. Remaining turns: 1
+2025-04-26 14:52:29,352 - core.effects.move.base - INFO - [MoveTiming-6960] Already processed round 5, turn test2
+2025-04-26 14:52:35,343 - core.effects.move.base - INFO - [MoveTiming-6960] BEFORE decrement: phase=casting, turns_remaining=1/2
+2025-04-26 14:52:35,343 - core.effects.move.base - INFO - [MoveTiming-6960] AFTER decrement: 1 -> 0
+2025-04-26 14:52:35,343 - core.effects.move.base - INFO - [MoveTiming-6960] Cast time completed. Duration=1, Cooldown=None
+2025-04-26 14:52:35,343 - core.effects.move.base - INFO - [MoveTiming-6960] Transitioned to ACTIVE with 1 turns remaining
+2025-04-26 14:52:35,343 - core.effects.move.base - INFO - [MoveTiming-6960] Transition: casting -> active with message: activates!
+2025-04-26 14:52:38,752 - core.effects.move.base - INFO - [MoveTiming-6960] Already processed round 6, turn test2
+2025-04-26 14:52:41,164 - core.effects.move.base - INFO - [MoveTiming-6960] BEFORE decrement: phase=active, turns_remaining=1/1
+2025-04-26 14:52:41,165 - core.effects.move.base - INFO - [MoveTiming-6960] AFTER decrement: 1 -> 0
+2025-04-26 14:52:41,165 - core.effects.move.base - INFO - [MoveTiming-6960] Active duration completed. Cooldown=None
+2025-04-26 14:52:41,165 - core.effects.move.base - INFO - [MoveTiming-6960] No cooldown, marked for removal
+2025-04-26 14:52:41,166 - core.effects.move.base - INFO - [MoveTiming-6960] Transition: active -> active with message: wears off
+2025-04-26 14:53:27,611 - discord.gateway - INFO - Shard ID None has successfully RESUMED session c49fa4d4c0872d9b266b671ab08cfafe.
+2025-04-26 14:59:02,098 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-26 14:59:03,366 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-26 14:59:04,332 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-26 15:02:40,060 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: persistent lightning description: hits once per turn duration: 3 target: test2 attack_roll: d20+int damage: d6 lightning roll_timing: per_turn force_during: False
+2025-04-26 15:02:40,238 - core.effects.move.base - INFO - [MoveTiming-2704] Created timing with phase=active, remaining=3/3
+2025-04-26 15:02:40,238 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=unknown, During=False
+2025-04-26 15:02:40,239 - core.effects.move.base - INFO - [MoveTiming-2704] Timing adjustment called: during_own_turn=False
+2025-04-26 15:02:47,558 - core.effects.move.base - INFO - [MoveTiming-2704] BEFORE decrement: phase=active, turns_remaining=3/3
+2025-04-26 15:02:47,558 - core.effects.move.base - INFO - [MoveTiming-2704] AFTER decrement: 3 -> 2
+2025-04-26 15:02:47,559 - core.effects.move.base - INFO - [MoveTiming-2704] No transition needed. Remaining turns: 2
+2025-04-26 15:04:22,027 - core.effects.move.base - INFO - [MoveTiming-2704] Already processed round 7, turn test
+2025-04-26 15:04:26,417 - core.effects.move.base - INFO - [MoveTiming-2704] BEFORE decrement: phase=active, turns_remaining=2/3
+2025-04-26 15:04:26,418 - core.effects.move.base - INFO - [MoveTiming-2704] AFTER decrement: 2 -> 1
+2025-04-26 15:04:26,418 - core.effects.move.base - INFO - [MoveTiming-2704] No transition needed. Remaining turns: 1
+2025-04-26 15:04:35,401 - core.effects.move.base - INFO - [MoveTiming-2704] Already processed round 8, turn test
+2025-04-26 15:04:39,316 - core.effects.move.base - INFO - [MoveTiming-2704] BEFORE decrement: phase=active, turns_remaining=1/3
+2025-04-26 15:04:39,316 - core.effects.move.base - INFO - [MoveTiming-2704] AFTER decrement: 1 -> 0
+2025-04-26 15:04:39,316 - core.effects.move.base - INFO - [MoveTiming-2704] Active duration completed. Cooldown=None
+2025-04-26 15:04:39,316 - core.effects.move.base - INFO - [MoveTiming-2704] No cooldown, marked for removal
+2025-04-26 15:04:39,316 - core.effects.move.base - INFO - [MoveTiming-2704] Transition: active -> active with message: wears off
+2025-04-26 17:58:18,845 - discord.client - ERROR - Attempting a reconnect in 1.06s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-26 17:58:20,548 - discord.client - ERROR - Attempting a reconnect in 0.46s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-26 17:58:21,070 - discord.client - ERROR - Attempting a reconnect in 6.87s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-b.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-04-26 17:58:28,346 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-26 17:58:33,725 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: cffc8e5b6307f919f7f0fbcb9d789665).
+2025-04-26 18:38:47,245 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 18:38:47,247 - discord.client - INFO - logging in using static token
+2025-04-26 18:38:47,745 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 18:38:47,745 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 18:38:48,520 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 18:38:48,521 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 18:38:48,521 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 18:38:48,523 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 18:38:48,555 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 18:38:48,555 - core.effects.move.base - INFO - [MoveTiming-3712] Created timing with phase=instant, remaining=0/0
+2025-04-26 18:38:48,561 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 18:38:48,561 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 18:38:48,563 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 18:38:48,563 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 18:38:48,563 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 18:38:48,959 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ad98751a82efeba20bc2ccb034388470).
+2025-04-26 18:46:04,530 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: instant attack description: . target: test attack_roll: d20+int damage: d4 bludgeoning
+2025-04-26 18:46:04,900 - core.effects.move.base - INFO - [MoveTiming-7600] Created timing with phase=instant, remaining=0/0
+2025-04-26 18:46:04,901 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 18:46:04,901 - core.effects.move.base - INFO - [MoveTiming-7600] Timing adjustment called: during_own_turn=True
+2025-04-26 18:46:16,343 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: instant attack description: . target: test attack_roll: d20+dex damage: d4 bludgeoning
+2025-04-26 18:46:16,533 - core.effects.move.base - INFO - [MoveTiming-1440] Created timing with phase=instant, remaining=0/0
+2025-04-26 18:46:16,534 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 18:46:16,534 - core.effects.move.base - INFO - [MoveTiming-1440] Timing adjustment called: during_own_turn=True
+2025-04-26 18:53:01,302 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: fireball description: . cast_time: 1 duration: 2 target: test attack_roll: d20+int damage: d6 fire force_during: True
+2025-04-26 18:53:01,569 - core.effects.move.base - INFO - [MoveTiming-4304] Created timing with phase=casting, remaining=1/1
+2025-04-26 18:53:01,569 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-04-26 18:53:01,570 - core.effects.move.base - INFO - [MoveTiming-4304] Timing adjustment called: during_own_turn=True
+2025-04-26 18:53:01,570 - core.effects.move.base - INFO - [MoveTiming-4304] Pre-adjustment: turns_remaining=1
+2025-04-26 18:53:01,571 - core.effects.move.base - INFO - [MoveTiming-4304] Duration 1 special case: buffered to 2 turns internally
+2025-04-26 18:53:01,571 - core.effects.move.base - INFO - [MoveTiming-4304] Timing adjusted for during-own-turn: internal=2, display=2
+2025-04-26 18:53:07,471 - core.effects.move.base - INFO - [MoveTiming-4304] BEFORE decrement: phase=casting, turns_remaining=2/1
+2025-04-26 18:53:07,471 - core.effects.move.base - INFO - [MoveTiming-4304] AFTER decrement: 2 -> 1
+2025-04-26 18:53:07,471 - core.effects.move.base - INFO - [MoveTiming-4304] No transition needed. Remaining turns: 1
+2025-04-26 18:53:11,915 - core.effects.move.base - INFO - [MoveTiming-4304] BEFORE decrement: phase=casting, turns_remaining=1/1
+2025-04-26 18:53:11,915 - core.effects.move.base - INFO - [MoveTiming-4304] AFTER decrement: 1 -> 0
+2025-04-26 18:53:11,915 - core.effects.move.base - INFO - [MoveTiming-4304] Cast time completed. Duration=2, Cooldown=None
+2025-04-26 18:53:11,915 - core.effects.move.base - INFO - [MoveTiming-4304] Transitioned to ACTIVE with 2 turns remaining
+2025-04-26 18:53:11,915 - core.effects.move.base - INFO - [MoveTiming-4304] Transition: casting -> active with message: activates!
+2025-04-26 18:53:15,696 - core.effects.move.base - INFO - [MoveTiming-4304] Already processed round 2, turn test2
+2025-04-26 18:53:23,670 - core.effects.move.base - INFO - [MoveTiming-4304] BEFORE decrement: phase=active, turns_remaining=2/2
+2025-04-26 18:53:23,670 - core.effects.move.base - INFO - [MoveTiming-4304] AFTER decrement: 2 -> 1
+2025-04-26 18:53:23,670 - core.effects.move.base - INFO - [MoveTiming-4304] No transition needed. Remaining turns: 1
+2025-04-26 18:53:42,437 - core.effects.move.base - INFO - [MoveTiming-4304] Already processed round 3, turn test2
+2025-04-26 18:53:50,212 - core.effects.move.base - INFO - [MoveTiming-4304] BEFORE decrement: phase=active, turns_remaining=1/2
+2025-04-26 18:53:50,213 - core.effects.move.base - INFO - [MoveTiming-4304] AFTER decrement: 1 -> 0
+2025-04-26 18:53:50,213 - core.effects.move.base - INFO - [MoveTiming-4304] Active duration completed. Cooldown=None
+2025-04-26 18:53:50,213 - core.effects.move.base - INFO - [MoveTiming-4304] No cooldown, marked for removal
+2025-04-26 18:53:50,213 - core.effects.move.base - INFO - [MoveTiming-4304] Transition: active -> active with message: wears off
+2025-04-26 18:55:44,228 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2, test3 attack_roll: d20+int damage: d4 fire
+2025-04-26 18:58:00,680 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: 3d20mint damage: d4 fire
+2025-04-26 18:58:01,027 - core.effects.move.base - INFO - [MoveTiming-4912] Created timing with phase=instant, remaining=0/0
+2025-04-26 18:58:01,027 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 18:58:01,028 - core.effects.move.base - INFO - [MoveTiming-4912] Timing adjustment called: during_own_turn=True
+2025-04-26 18:58:23,898 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: d20 multihit int damage: d4 fire
+2025-04-26 18:58:24,161 - core.effects.move.base - INFO - [MoveTiming-7344] Created timing with phase=instant, remaining=0/0
+2025-04-26 18:58:24,161 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 18:58:24,162 - core.effects.move.base - INFO - [MoveTiming-7344] Timing adjustment called: during_own_turn=True
+2025-04-26 18:59:12,346 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: 3d20 multihit int damage: d4 fire
+2025-04-26 18:59:12,613 - core.effects.move.base - INFO - [MoveTiming-160] Created timing with phase=instant, remaining=0/0
+2025-04-26 18:59:12,614 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 18:59:12,614 - core.effects.move.base - INFO - [MoveTiming-160] Timing adjustment called: during_own_turn=True
+2025-04-26 19:06:26,103 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ad98751a82efeba20bc2ccb034388470.
+2025-04-26 19:12:11,534 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 19:12:11,537 - discord.client - INFO - logging in using static token
+2025-04-26 19:12:12,097 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 19:12:12,097 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 19:12:12,899 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,900 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,900 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,901 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,901 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,901 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,902 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,902 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:12:12,929 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 19:12:12,929 - core.effects.move.base - INFO - [MoveTiming-4528] Created timing with phase=instant, remaining=0/0
+2025-04-26 19:12:12,934 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 19:12:12,935 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 19:12:12,936 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 19:12:12,936 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 19:12:12,937 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 19:12:13,285 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ac9e66c833a32506726432b51b231128).
+2025-04-26 19:12:28,033 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: instant attack description: . target: test2 attack_roll: 3d20 multihit int damage: d4 fire
+2025-04-26 19:12:28,333 - core.effects.move.base - INFO - [MoveTiming-96] Created timing with phase=instant, remaining=0/0
+2025-04-26 19:12:28,333 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-26 19:12:28,333 - core.effects.move.base - INFO - [MoveTiming-96] Timing adjustment called: during_own_turn=True
+2025-04-26 19:14:32,228 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: name 'StatType' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 272, in process_attack
+    stat_type = next((s for s in StatType if s.value.startswith(stat_name)), None)
+                                 ^^^^^^^^
+NameError: name 'StatType' is not defined
+2025-04-26 19:20:07,097 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 19:20:07,099 - discord.client - INFO - logging in using static token
+2025-04-26 19:20:07,996 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 19:20:07,997 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 19:20:08,709 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 19:20:08,710 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:20:08,710 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:20:08,711 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:20:08,712 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:20:08,712 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 19:20:08,736 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 19:20:08,736 - core.effects.move.base - INFO - [MoveTiming-3392] Created timing with phase=instant, remaining=0/0
+2025-04-26 19:20:08,741 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 19:20:08,741 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 19:20:08,743 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 19:20:08,743 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 19:20:08,743 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 19:20:09,033 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 38b19f19a20a185e9f8319126bb8f315).
+2025-04-26 20:44:45,518 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-04-26 20:44:45,705 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-04-26 20:44:51,034 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ecd9bfe54f9dc73fada8e6828c9cef56).
+2025-04-26 21:12:32,505 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-26 21:12:32,508 - discord.client - INFO - logging in using static token
+2025-04-26 21:12:32,944 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 21:12:32,944 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 21:12:33,687 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-26 21:12:33,689 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 21:12:33,689 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 21:12:33,690 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 21:12:33,691 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 21:12:33,691 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-26 21:12:33,700 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-26 21:12:33,700 - core.effects.move.base - INFO - [MoveTiming-9456] Created timing with phase=instant, remaining=0/0
+2025-04-26 21:12:33,706 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 21:12:33,706 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 21:12:33,708 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-26 21:12:33,708 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-26 21:12:33,708 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-26 21:12:34,086 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0480f9f65ade7c14e187c7ee7af5a11f).
+2025-04-26 21:46:36,181 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 0480f9f65ade7c14e187c7ee7af5a11f.
+2025-04-27 09:59:17,217 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 09:59:17,219 - discord.client - INFO - logging in using static token
+2025-04-27 09:59:17,604 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 09:59:17,604 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 09:59:18,041 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 09:59:18,042 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 09:59:18,042 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 09:59:18,043 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 09:59:18,044 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 09:59:18,044 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 09:59:18,054 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 09:59:18,054 - core.effects.move.base - INFO - [MoveTiming-0] Created timing with phase=instant, remaining=0/0
+2025-04-27 09:59:18,059 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 09:59:18,060 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 09:59:18,061 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 09:59:18,061 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 09:59:18,061 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 09:59:18,297 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 61ea44047f9748554b1a1286f4d58b8c).
+2025-04-27 10:59:08,662 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 10:59:08,665 - discord.client - INFO - logging in using static token
+2025-04-27 10:59:09,022 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 10:59:09,022 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 10:59:09,503 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 10:59:09,505 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 10:59:09,505 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 10:59:09,506 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 10:59:09,507 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 10:59:09,507 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 10:59:09,539 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 10:59:09,539 - core.effects.move.base - INFO - [MoveTiming-4096] Created timing with phase=instant, remaining=0/0
+2025-04-27 10:59:09,546 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 10:59:09,546 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 10:59:09,548 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 10:59:09,548 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 10:59:09,548 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 10:59:09,897 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4bb681f41630e0f38a311801b052ce70).
+2025-04-27 11:15:48,100 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 4bb681f41630e0f38a311801b052ce70.
+2025-04-27 11:16:30,137 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 11:16:30,141 - discord.client - INFO - logging in using static token
+2025-04-27 11:16:30,616 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:16:30,619 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:16:31,202 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 11:16:31,207 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:16:31,207 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:16:31,214 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:16:31,215 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:16:31,290 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 11:16:31,291 - core.effects.move.base - INFO - [MoveTiming-880] Created timing with phase=instant, remaining=0/0
+2025-04-27 11:16:31,303 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:16:31,303 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:16:31,307 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:16:31,308 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:16:31,308 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 11:16:31,689 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9bc359e3b8cdbbe2410de7239a4c960a).
+2025-04-27 11:16:43,757 - utils.advanced_dice.attack_calculator - ERROR - Error in process_attack: name 'is_rit' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\utils\advanced_dice\attack_calculator.py", line 356, in process_attack
+    hit_data[params.targets[0].name] = {'hit': True, 'damage': total_damage, 'is_crit': is_rit}
+                                                                                        ^^^^^^
+NameError: name 'is_rit' is not defined. Did you mean: 'is_crit'?
+2025-04-27 11:19:02,655 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 11:19:02,658 - discord.client - INFO - logging in using static token
+2025-04-27 11:19:03,021 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:19:03,021 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:19:03,401 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 11:19:03,403 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:19:03,403 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:19:03,405 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:19:03,405 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:19:03,439 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 11:19:03,439 - core.effects.move.base - INFO - [MoveTiming-5456] Created timing with phase=instant, remaining=0/0
+2025-04-27 11:19:03,447 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:19:03,447 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:19:03,449 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:19:03,449 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:19:03,449 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 11:19:03,787 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4a3fc813e36cc7b08378b485edd5c645).
+2025-04-27 11:24:49,834 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 11:24:49,837 - discord.client - INFO - logging in using static token
+2025-04-27 11:24:50,280 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:24:50,280 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:24:50,817 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 11:24:50,819 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:24:50,819 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:24:50,822 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:24:50,822 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:24:50,836 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 11:24:50,837 - core.effects.move.base - INFO - [MoveTiming-1760] Created timing with phase=instant, remaining=0/0
+2025-04-27 11:24:50,846 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:24:50,846 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:24:50,848 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:24:50,849 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:24:50,849 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 11:24:51,225 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f346cf4013191871b54636cd1ee9ec1c).
+2025-04-27 11:29:51,323 - core.effects.move.base - INFO - [MoveTiming-656] Created timing with phase=instant, remaining=0/0
+2025-04-27 11:29:51,324 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-27 11:29:51,325 - core.effects.move.base - INFO - [MoveTiming-656] Timing adjustment called: during_own_turn=True
+2025-04-27 11:31:56,850 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: heavy attack description: . target: test2 attack_roll: d20+str damage: 3d6+str bludgeoning
+2025-04-27 11:31:57,059 - core.effects.move.base - INFO - [MoveTiming-3984] Created timing with phase=instant, remaining=0/0
+2025-04-27 11:31:57,059 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-27 11:31:57,060 - core.effects.move.base - INFO - [MoveTiming-3984] Timing adjustment called: during_own_turn=True
+2025-04-27 11:32:40,894 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test name: heavy attack description: . star_cost: 4 target: test2 attack_roll: d20+str damage: 3d6+str bludgeoning
+2025-04-27 11:32:41,080 - core.effects.move.base - INFO - [MoveTiming-208] Created timing with phase=instant, remaining=0/0
+2025-04-27 11:32:41,080 - core.effects.manager - INFO - EFFECT TIMING: Character=test, CurrentTurn=test, During=True
+2025-04-27 11:32:41,081 - core.effects.move.base - INFO - [MoveTiming-208] Timing adjustment called: during_own_turn=True
+2025-04-27 11:56:18,930 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 11:56:18,932 - discord.client - INFO - logging in using static token
+2025-04-27 11:56:19,439 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:56:19,440 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:56:19,894 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 11:56:19,895 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:56:19,895 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:56:19,896 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:56:19,897 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:56:19,897 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 11:56:19,922 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 11:56:19,923 - core.effects.move.base - INFO - [MoveTiming-8400] Created timing with phase=instant, remaining=0/0
+2025-04-27 11:56:19,931 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:56:19,931 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:56:19,934 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 11:56:19,934 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 11:56:19,935 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 11:56:20,219 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3713b3ec608b736ae9226c5c1ccf47cc).
+2025-04-27 12:03:07,720 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 12:03:07,723 - discord.client - INFO - logging in using static token
+2025-04-27 12:03:08,218 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:03:08,218 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:03:08,686 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 12:03:08,687 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 12:03:08,687 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 12:03:08,700 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 12:03:08,701 - core.effects.move.base - INFO - [MoveTiming-6784] Created timing with phase=instant, remaining=0/0
+2025-04-27 12:03:08,706 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:03:08,707 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:03:08,708 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:03:08,709 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:03:08,709 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 12:03:08,785 - __main__ - ERROR - Failed to load extension commands.moves: Extension 'commands.moves' raised an error: ImportError: cannot import name 'process_move_attack' from 'core.effects.move.bridge' (d:\Games\Campaigns\Ronan Jr\core\effects\move\bridge.py)
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\ext\commands\bot.py", line 951, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 13, in <module>
+    from core.effects.move.bridge import process_move_attack
+ImportError: cannot import name 'process_move_attack' from 'core.effects.move.bridge' (d:\Games\Campaigns\Ronan Jr\core\effects\move\bridge.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 253, in setup_hook
+    await self.load_extension(extension)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\ext\commands\bot.py", line 1029, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\ext\commands\bot.py", line 954, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'commands.moves' raised an error: ImportError: cannot import name 'process_move_attack' from 'core.effects.move.bridge' (d:\Games\Campaigns\Ronan Jr\core\effects\move\bridge.py)
+2025-04-27 12:03:09,134 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e869eb693bfc79adb4921ec8a2219747).
+2025-04-27 12:04:48,909 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='CommandTree-invoker' coro=<CommandTree._from_interaction.<locals>.wrapper() done, defined at c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py:1149> exception=NameError("name 'create_error_embed' is not defined")>
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1151, in wrapper
+    await self._call(interaction)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1283, in _call
+    command, options = self._get_app_command_options(data)
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1187, in _get_app_command_options
+    raise CommandNotFound(name, parents)
+discord.app_commands.errors.CommandNotFound: Application command 'move' not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1153, in wrapper
+    await self._dispatch_error(interaction, e)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1146, in _dispatch_error
+    await self.on_error(interaction, error)
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 292, in on_app_command_error
+    await handle_interaction_error(
+    ...<3 lines>...
+    )
+  File "d:\Games\Campaigns\Ronan Jr\utils\error_handler.py", line 247, in handle_interaction_error
+    error_embed = create_error_embed(error, command_name)
+                  ^^^^^^^^^^^^^^^^^^
+NameError: name 'create_error_embed' is not defined
+2025-04-27 12:09:56,366 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 12:09:56,368 - discord.client - INFO - logging in using static token
+2025-04-27 12:09:56,728 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:09:56,728 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:09:57,170 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 12:09:57,171 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 12:09:57,171 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 12:09:57,181 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 12:09:57,182 - core.effects.move.base - INFO - [MoveTiming-1840] Created timing with phase=instant, remaining=0/0
+2025-04-27 12:09:57,187 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:09:57,187 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:09:57,189 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:09:57,189 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:09:57,189 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 12:09:57,597 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 66737d51bba9a73f29a1aa240b9a508d).
+2025-04-27 12:19:59,089 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 66737d51bba9a73f29a1aa240b9a508d.
+2025-04-27 12:21:14,742 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-04-27 12:21:14,744 - discord.client - INFO - logging in using static token
+2025-04-27 12:21:15,096 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:21:15,096 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:21:15,560 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-04-27 12:21:15,561 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 12:21:15,562 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-04-27 12:21:15,602 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-04-27 12:21:15,603 - core.effects.move.base - INFO - [MoveTiming-5680] Created timing with phase=instant, remaining=0/0
+2025-04-27 12:21:15,610 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:21:15,611 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:21:15,613 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-04-27 12:21:15,613 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-04-27 12:21:15,613 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-04-27 12:21:15,920 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9a3f88e01788d60b0cd8dc74d0b788a9).
+2025-04-27 12:25:12,647 - commands.moves - ERROR - Error in character autocomplete: object dict can't be used in 'await' expression
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 92, in character_autocomplete
+    chars = await self.bot.db._refs['characters'].get()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object dict can't be used in 'await' expression
+2025-04-27 13:46:08,318 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 9a3f88e01788d60b0cd8dc74d0b788a9.

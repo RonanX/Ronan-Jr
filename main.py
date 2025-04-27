@@ -3,6 +3,11 @@ Ronan Jr Discord Bot - Complete Rewrite (v2.0)
 
 This is a complete rewrite of the Ronan Jr Discord bot, focusing on better code organization,
 enhanced features, and a more robust foundation for future additions.
+
+Note: When editing the move effect system, please ensure to update the bridge and effect files accordingly. 
+Do not modify the core effect manager directly, as it may lead to inconsistencies and bugs.
+Instead, use the provided bridge system to handle move effects and their interactions as well as the
+move-exclusive base and manager files in the moves directory.
 """
 
 import os
@@ -132,16 +137,50 @@ class GameBot(commands.Bot):
                 everyone=False  
             )  
         )  
-         
+        
         # Initialize core systems  
         self.db = Database()  
         self.game_state = GameState()  
          
         # Sync status  
         self.synced = False
-
-    async def setup_hook(self):  
-        """Called when the bot is starting up"""  
+        
+        # Store important commands for verification
+        self.verified_commands = {}
+        self.required_commands = {
+            'move': ['use', 'temp', 'create', 'update', 'list', 'import']
+        }
+        
+    async def verify_commands(self):
+        """Verify that all required commands are registered"""
+        for group, commands_list in self.required_commands.items():
+            group_cog = self.get_cog(f"{group.capitalize()}Commands")
+            if not group_cog:
+                print(f"WARNING: {group.capitalize()}Commands cog not found!")
+                continue
+                
+            print(f"Checking {group} commands...")
+            
+            # Get all registered commands in this group
+            try:
+                registered = [cmd.name for cmd in group_cog.walk_app_commands()]
+                print(f"Found commands: {', '.join(registered)}")
+                
+                # Check for missing commands
+                missing = [cmd for cmd in commands_list if cmd not in registered]
+                if missing:
+                    print(f"WARNING: Missing required {group} commands: {', '.join(missing)}")
+                    print("Try running the /sync command to update Discord's command registry.")
+                else:
+                    print(f"✓ All required {group} commands are registered")
+                    
+                # Store for reference
+                self.verified_commands[group] = registered
+            except Exception as e:
+                print(f"Error checking {group} commands: {e}")
+        
+    async def setup_hook(self):
+        """Called when the bot is starting up"""
         # Register all effect types  
         register_effects()  
          
@@ -187,31 +226,67 @@ class GameBot(commands.Bot):
             logger.error(f"Failed to register move effect bridge: {e}", exc_info=True)
             print(f"WARNING: Move effects may not function correctly. Error: {e}")
          
-        # Search for and load files with commands  
-        await self.load_extension("commands.effects")  # Load effect commands  
-        await self.load_extension("commands.debug") # Load debug commands
-        await self.load_extension("commands.movesets")  # Load moveset commands  
-        await self.load_extension("commands.mana") #Load mana commands
-        await self.load_extension("commands.combat")   # Load combat commands  
-        await self.load_extension("commands.healing")  # Load healing commands  
-        await self.load_extension("commands.advanced_roll") # Load dice roll commands  
-        await self.load_extension("commands.skillcheck")  # Load skill check commands
-        await self.load_extension("commands.move_cancel")  # Load move cancellation command
-        await self.load_extension("modules.menu.skill_check_handler")  # Load skill check context menus  
-        await self.load_extension("commands.initiative")  # Load initiative commands  
-        await self.load_extension("commands.qol")  # Load QOL commands
-        await self.load_extension("commands.moves") # Load move commands
-        await self.load_extension("commands.actions") # Load action commands
+        # Load command extensions
+        print("Loading command extensions...")
+        extensions = [
+            "commands.effects",
+            "commands.debug",
+            "commands.movesets",
+            "commands.mana",
+            "commands.combat",
+            "commands.healing",
+            "commands.advanced_roll",
+            "commands.skillcheck",
+            "commands.move_cancel",
+            "modules.menu.skill_check_handler",
+            "commands.initiative",
+            "commands.qol",
+            "commands.moves",
+            "commands.actions"
+        ]
+        
+        # Track loaded extensions
+        loaded_extensions = []
+        
+        for extension in extensions:
+            try:
+                await self.load_extension(extension)
+                loaded_extensions.append(extension)
+                print(f"✓ Loaded {extension}")
+            except Exception as e:
+                logger.error(f"Failed to load extension {extension}: {e}", exc_info=True)
+                print(f"✗ Error loading {extension}: {e}")
+        
+        print(f"Loaded {len(loaded_extensions)}/{len(extensions)} extensions")
 
         # Get initiative tracker from the cog after loading  
         initiative_cog = self.get_cog('InitiativeCommands')  
         if initiative_cog:  
             self.initiative_tracker = initiative_cog.tracker
-
-    async def on_ready(self):  
-        """Called when the bot is ready"""  
-        print(f'Logged in as {self.user} (ID: {self.user.id})')  
+        
+        # Verify all required commands
+        await self.verify_commands()
+        
+    async def on_ready(self):
+        """Called when the bot is ready"""
+        print(f'Logged in as {self.user} (ID: {self.user.id})')
         print(f'{self.user}: ok i pull up')
+        
+        # Auto-sync commands if needed and possible
+        if not self.synced:
+            print("Commands not yet synced. Attempting auto-sync...")
+            try:
+                # Try syncing to primary guild first for faster testing
+                guild = discord.Object(id=GUILD_IDS[0])
+                synced = await self.tree.sync(guild=guild)
+                print(f"Auto-synced {len(synced)} commands to guild {GUILD_IDS[0]}")
+                self.synced = True
+                
+                # Verify commands again after sync
+                await self.verify_commands()
+            except Exception as e:
+                print(f"Auto-sync failed: {e}")
+                print("Manual sync required using /sync command")
 
 bot = GameBot()
 
