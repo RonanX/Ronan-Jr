@@ -1,4 +1,7 @@
 """
+### NOTICE: THIS FILE IS OUTDATED AND NO LONGER USED FOR MOVE EFFECTS ###
+### REFER TO THE CORE/EFFECTS/MOVE FOLDER FOR THE LATEST IMPLEMENTATION ###
+
 ## src/core/effects/move.py
 
 Move Effect System Implementation with Simplified State Machine

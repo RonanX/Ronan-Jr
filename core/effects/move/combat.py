@@ -4,7 +4,7 @@ Combat processing system for handling attacks, damage, and bonuses.
 
 import random
 import re
-from typing import Dict, List, Set, Any, Optional
+from typing import Dict, List, Set, Any, Optional, Tuple
 from core.character import StatType
 
 class BonusOnHit:
@@ -318,9 +318,30 @@ class CombatProcessor:
                     bonus_on_hit.register_hit()
                     self.debug(f"Target hit: {target.name}")
         
-        # Format the message based on roll type and AOE mode
+        # Format the message based on roll type and AOE mode - IMPROVED FORMATTING
+        # This is the key change - match advanced_roll formatting
+        
+        DAMAGE_TYPE_EMOJIS = {
+            'slashing': '🗡️',
+            'piercing': '🏹',
+            'bludgeoning': '🔨',
+            'fire': '🔥',
+            'cold': '❄️',
+            'lightning': '⚡',
+            'thunder': '💥',
+            'acid': '💧',
+            'poison': '☠️',
+            'psychic': '🧠',
+            'radiant': '✨',
+            'necrotic': '💀',
+            'force': '🌟',
+            'divine': '🙏',
+            'unspecified': '⚔️'
+        }
+        
+        # Format based on attack type
         if is_multihit:
-            # Format multihit message - format changes based on advantage/disadvantage
+            # Format multihit message with improved formatting
             roll_strings = []
             for i, (roll1, roll2, final_roll, is_adv, is_disadv) in enumerate(attack_rolls):
                 if is_adv:
@@ -330,112 +351,179 @@ class CombatProcessor:
                 else:
                     roll_strings.append(f"[{roll1}]+{stat_mod}+{multihit_count} → {final_roll}")
             
-            roll_string = f"{attack_roll}: {', '.join(roll_strings)}"
+            roll_string = f"🎲 {attack_roll}: {', '.join(roll_strings)}"
             
             # Process damage for hit targets
             total_damage = 0
             if hit_targets and damage:
                 damage_values = []
+                damage_types = set()
+                
                 for _ in range(len(hit_targets)):
-                    # Parse the damage formula
-                    damage_dice = self._parse_damage_formula(damage)
-                    damage_val = self._roll_damage(damage_dice, stat_mod)
+                    # Parse the damage formula - handle multiple damage types
+                    damage_parts = self._parse_damage_components(damage)
+                    damage_val = 0
+                    
+                    for dmg_formula, dmg_type in damage_parts:
+                        val = self._roll_damage_component(dmg_formula, stat_mod, source, is_crit=False)
+                        damage_val += val
+                        damage_types.add(dmg_type)
+                    
                     damage_values.append(damage_val)
                     total_damage += damage_val
                 
-                damage_type = self._extract_damage_type(damage)
-                damage_text = f" | 🏹 {' + '.join(map(str, damage_values))} {damage_type}"
+                # Format damage type string
+                if len(damage_types) == 1:
+                    damage_type = next(iter(damage_types))
+                    emoji = DAMAGE_TYPE_EMOJIS.get(damage_type.lower(), '⚔️')
+                    damage_text = f" | {emoji} {' + '.join(map(str, damage_values))} {damage_type}"
+                else:
+                    # Multiple damage types
+                    damage_text = " | "
+                    for dmg_type in damage_types:
+                        emoji = DAMAGE_TYPE_EMOJIS.get(dmg_type.lower(), '⚔️')
+                        damage_text += f"{emoji} {total_damage} {dmg_type}, "
+                    damage_text = damage_text.rstrip(", ")
                 
                 hits_count = len(hit_targets)
                 hits_total = min(3, len(targets))
                 
-                messages.append(f"🎲 {roll_string} | Hits: {hits_count}/{hits_total} → {', '.join(t.name for t in hit_targets)}{damage_text} | 📝 {reason}")
+                messages.append(f"{roll_string} | Hits: {hits_count}/{hits_total} → {', '.join(t.name for t in hit_targets)}{damage_text} | 📝 {reason}")
             else:
                 hits_count = len(hit_targets)
                 hits_total = min(3, len(targets))
                 
                 if hits_count > 0:
-                    messages.append(f"🎲 {roll_string} | Hits: {hits_count}/{hits_total} → {', '.join(t.name for t in hit_targets)} | 📝 {reason}")
+                    messages.append(f"{roll_string} | Hits: {hits_count}/{hits_total} → {', '.join(t.name for t in hit_targets)} | 📝 {reason}")
                 else:
-                    messages.append(f"🎲 {roll_string} | Hits: 0/{hits_total} | MISS | 📝 {reason}")
-        
+                    messages.append(f"{roll_string} | Hits: 0/{hits_total} | MISS | 📝 {reason}")
+                    
         elif self.aoe_mode == 'single':
             # Single AOE mode - one roll applies to all targets
             roll1, roll2, final_roll, is_adv, is_disadv = attack_rolls[0]
             
             if is_adv:
-                roll_string = f"{attack_roll}: [{roll1},{roll2}]+{stat_mod} → {final_roll} (advantage)"
+                roll_string = f"🎲 {attack_roll}: [{roll1},{roll2}]+{stat_mod} → {final_roll} (advantage)"
             elif is_disadv:
-                roll_string = f"{attack_roll}: [{roll1},{roll2}]+{stat_mod} → {final_roll} (disadvantage)"
+                roll_string = f"🎲 {attack_roll}: [{roll1},{roll2}]+{stat_mod} → {final_roll} (disadvantage)"
             else:
-                roll_string = f"{attack_roll}: [{roll1}]+{stat_mod} → {final_roll}"
+                roll_string = f"🎲 {attack_roll}: [{roll1}]+{stat_mod} → {final_roll}"
             
             # Format target results
             target_results = []
             total_damage = 0
+            damage_components = []
             
             for target in targets:
                 hit = target in hit_targets
                 hit_icon = "✅" if hit else "❌"
                 
                 if hit and damage:
-                    # Parse damage formula and roll damage
-                    damage_dice = self._parse_damage_formula(damage)
-                    damage_val = self._roll_damage(damage_dice, stat_mod)
-                    total_damage += damage_val
-                    damage_type = self._extract_damage_type(damage)
+                    # Parse damage formula and roll damage - handle multiple damage types
+                    damage_parts = self._parse_damage_components(damage)
+                    damage_val = 0
                     
-                    target_results.append(f"{target.name} {hit_icon} ({damage_val} {damage_type})")
+                    # Only calculate damage types once for single mode
+                    if not damage_components:
+                        for dmg_formula, dmg_type in damage_parts:
+                            val = self._roll_damage_component(dmg_formula, stat_mod, source, is_crit=False)
+                            damage_val += val
+                            damage_components.append((val, dmg_type))
+                    else:
+                        damage_val = sum(val for val, _ in damage_components)
+                    
+                    total_damage += damage_val
+                    
+                    target_results.append(f"{target.name} {hit_icon} AC {target.defense.current_ac}")
                 else:
-                    target_results.append(f"{target.name} {hit_icon}")
+                    target_results.append(f"{target.name} {hit_icon} AC {target.defense.current_ac}")
             
-            messages.append(f"🎲 {roll_string} | 🎯 {', '.join(target_results)} | 📝 {reason}")
+            # Format damage string with multiple damage types if needed
+            damage_str = ""
+            if hit_targets and damage_components:
+                if len(damage_components) == 1:
+                    # Single damage type
+                    val, dmg_type = damage_components[0]
+                    emoji = DAMAGE_TYPE_EMOJIS.get(dmg_type.lower(), '⚔️')
+                    damage_str = f" | {emoji} {val} {dmg_type} each"
+                else:
+                    # Multiple damage types
+                    type_strings = []
+                    for val, dmg_type in damage_components:
+                        emoji = DAMAGE_TYPE_EMOJIS.get(dmg_type.lower(), '⚔️')
+                        type_strings.append(f"{emoji} {val} {dmg_type}")
+                    
+                    damage_str = f" | {' + '.join(type_strings)} = {total_damage} total each"
             
-            if total_damage > 0:
-                messages.append(f"Total Damage: {total_damage}")
-        
+            messages.append(f"{roll_string} | 🎯 {', '.join(target_results)}{damage_str} | 📝 {reason}")
+            
         else:  # aoe_mode == 'multi'
             # Multi AOE mode - separate roll for each target
-            result_lines = []
-            total_damage = 0
+            # Header with hit summary
             hits_count = len(hit_targets)
+            first_roll = attack_rolls[0] if attack_rolls else (1, None, 1, False, False)
+            roll1, roll2, final_roll, is_adv, is_disadv = first_roll
             
-            # Add header with hit summary
-            result_lines.append(f"🎲 {attack_roll} | Hits: {hits_count}/{len(targets)}")
+            # Format the initial roll display
+            if is_adv:
+                roll_string = f"🎲 {attack_roll}: [{roll1},{roll2}]+{stat_mod} → {final_roll} (advantage)"
+            elif is_disadv:
+                roll_string = f"🎲 {attack_roll}: [{roll1},{roll2}]+{stat_mod} → {final_roll} (disadvantage)"
+            else:
+                roll_string = f"🎲 {attack_roll}: [{roll1}]+{stat_mod} → {final_roll}"
+                
+            messages.append(f"{roll_string} | Hits: {hits_count}/{len(targets)}")
             
-            # Add individual target results
+            # Add individual target results as bullets
+            total_damage = 0
             for i, target in enumerate(targets):
+                hit = target in hit_targets
+                
+                # Get the correct roll for this target
                 if i < len(attack_rolls):
                     roll1, roll2, final_roll, is_adv, is_disadv = attack_rolls[i]
-                    
-                    if is_adv:
-                        roll_text = f"[{roll1},{roll2}]+{stat_mod} → {final_roll}"
-                    elif is_disadv:
-                        roll_text = f"[{roll1},{roll2}]+{stat_mod} → {final_roll}"
-                    else:
-                        roll_text = f"[{roll1}]+{stat_mod} → {final_roll}"
-                    
-                    hit = target in hit_targets
-                    hit_icon = "✅" if hit else "❌"
-                    ac_text = f"AC {target.defense.current_ac}"
-                    
-                    if hit and damage:
-                        # Parse damage formula and roll damage
-                        damage_dice = self._parse_damage_formula(damage)
-                        damage_val = self._roll_damage(damage_dice, stat_mod)
-                        total_damage += damage_val
-                        damage_type = self._extract_damage_type(damage)
-                        
-                        result_lines.append(f"• 🎯 {target.name} {hit_icon} {ac_text} | {roll_text} | ⚡ {damage_val} {damage_type}")
-                    else:
-                        result_lines.append(f"• 🎯 {target.name} {hit_icon} {ac_text} | {roll_text}" + (" | MISS" if not hit else ""))
-            
-            result_lines.append(f"📝 {reason}")
-            
-            if total_damage > 0:
-                result_lines.append(f"Total Damage: {total_damage}")
+                else:
+                    roll1, roll2, final_roll = 1, None, 1  # Default if something went wrong
                 
-            messages.append("\n".join(result_lines))
+                # Format roll display
+                if roll2:
+                    roll_text = f"[{roll1},{roll2}]+{stat_mod}"
+                else:
+                    roll_text = f"[{roll1}]+{stat_mod}"
+                
+                hit_icon = "💥" if (hit and roll1 >= crit_range) else "✅" if hit else "❌"
+                is_crit = hit and roll1 >= crit_range
+                
+                target_line = f"• 🎯 {target.name} | {roll_text} → {final_roll} {hit_icon} AC {target.defense.current_ac}"
+                
+                if hit and damage:
+                    # Parse damage formula and roll damage
+                    damage_parts = self._parse_damage_components(damage)
+                    damage_val = 0
+                    damage_strs = []
+                    
+                    for dmg_formula, dmg_type in damage_parts:
+                        val = self._roll_damage_component(dmg_formula, stat_mod, source, is_crit)
+                        damage_val += val
+                        emoji = DAMAGE_TYPE_EMOJIS.get(dmg_type.lower(), '⚔️')
+                        damage_strs.append(f"{emoji} {val} {dmg_type}")
+                    
+                    total_damage += damage_val
+                    
+                    if len(damage_strs) > 1:
+                        damage_text = f" | {' + '.join(damage_strs)} = {damage_val} total"
+                    else:
+                        damage_text = f" | {damage_strs[0]}"
+                        
+                    messages.append(f"{target_line}{damage_text}")
+                else:
+                    messages.append(f"{target_line} | MISS")
+            
+            # Add total damage if any hits
+            if hits_count > 0 and total_damage > 0:
+                messages.append(f"Total Damage: {total_damage} | 📝 {reason}")
+            else:
+                messages.append(f"📝 {reason}")
         
         # Apply bonuses and add bonus message
         if hit_targets and bonus_on_hit.has_any_bonuses():
@@ -450,7 +538,7 @@ class CombatProcessor:
                     messages.append(f"{bonus_on_hit.custom_note}")
         
         return messages
-    
+
     async def process_attack(self,
                            source,
                            targets,
@@ -538,32 +626,151 @@ class CombatProcessor:
         
         return stat_mod
     
-    def _parse_damage_formula(self, damage_str: str) -> List[int]:
-        """Parse damage formula into dice components"""
-        # Extract dice formula from the damage string (e.g., "2d6+str fire" -> "2d6")
-        dice_match = re.search(r'(\d+)d(\d+)', damage_str)
+    def _parse_damage_components(self, damage_str: str) -> List[Tuple[str, str]]:
+        """Parse damage string into component formulas and types"""
+        if not damage_str:
+            return []
+            
+        components = []
+        self.debug(f"Parsing damage string: '{damage_str}'")
+        
+        # Define known stat modifiers for clear identification
+        stat_modifiers = ["str", "dex", "con", "int", "wis", "cha", "strength", "dexterity", 
+                          "constitution", "intelligence", "wisdom", "charisma"]
+        
+        # Split by commas for multiple damage types
+        parts = [p.strip() for p in damage_str.split(',')]
+        
+        for part in parts:
+            self.debug(f"  Processing damage part: '{part}'")
+            # First split formula and damage type more cleanly using the last word as type
+            # This regex captures everything up to the last word as formula, and the last word as type
+            formula_parts = part.split()
+            
+            if not formula_parts:
+                continue
+                
+            # Default values
+            damage_formula = part
+            damage_type = "damage"
+            
+            # If we have at least one word
+            if len(formula_parts) > 1:
+                last_word = formula_parts[-1].lower()
+                
+                # Check if the last word is a stat modifier or contains digits
+                if last_word not in stat_modifiers and not any(c.isdigit() for c in last_word):
+                    # Last word seems to be a damage type
+                    damage_type = last_word
+                    damage_formula = ' '.join(formula_parts[:-1])
+                    self.debug(f"  Identified damage type: '{damage_type}', formula: '{damage_formula}'")
+                    
+            # Ensure we actually have a formula component
+            if not damage_formula:
+                damage_formula = "d4"  # Default to d4 if somehow we ended up with empty formula
+                self.debug(f"  Empty formula, using default: 'd4'")
+                
+            # Now we have properly separated the formula from the type
+            components.append((damage_formula, damage_type))
+                
+        # Return a default if parsing failed
+        if not components:
+            self.debug(f"  Parsing failed, using default: ('{damage_str}', 'damage')")
+            return [(damage_str, "damage")]
+            
+        self.debug(f"  Final parsed components: {components}")
+        return components
+    
+    def _roll_damage_component(self, formula: str, attack_mod: int, character=None, is_crit: bool = False) -> int:
+        """Roll a single damage component with stat mod"""
+        self.debug(f"Rolling damage for: '{formula}', attack_mod: {attack_mod}, is_crit: {is_crit}")
+        
+        # Check for dice in formula - handles formats like "d8" (meaning 1d8)
+        dice_match = re.search(r'(?:(\d+))?[dD](\d+)', formula)
+        
+        # Parse stat modifiers in the formula
+        stat_names = {
+            "str": StatType.STRENGTH, 
+            "dex": StatType.DEXTERITY,
+            "con": StatType.CONSTITUTION, 
+            "int": StatType.INTELLIGENCE,
+            "wis": StatType.WISDOM, 
+            "cha": StatType.CHARISMA,
+            "strength": StatType.STRENGTH, 
+            "dexterity": StatType.DEXTERITY,
+            "constitution": StatType.CONSTITUTION, 
+            "intelligence": StatType.INTELLIGENCE,
+            "wisdom": StatType.WISDOM, 
+            "charisma": StatType.CHARISMA
+        }
+        
+        # Extract stat modifier from formula
+        stat_mod = 0
+        formula_lower = formula.lower()
+        
+        # Look for stat names in the formula - only use explicitly specified stats
+        for stat_name, stat_type in stat_names.items():
+            if stat_name in formula_lower and character and hasattr(character, 'stats') and hasattr(character.stats, 'modified'):
+                value = character.stats.modified.get(stat_type, 10)
+                stat_mod = (value - 10) // 2
+                self.debug(f"  Found {stat_name} in formula, value: {value}, modifier: {stat_mod}")
+                break
+        
+        # If no specific stat found, do not use attack_mod as fallback
+        
         if dice_match:
-            num_dice = int(dice_match.group(1))
+            # Handle dice formula with fixed regex
+            num_dice = dice_match.group(1)
+            num_dice = int(num_dice) if num_dice else 1  # Default to 1 if not specified
             die_size = int(dice_match.group(2))
-            return [die_size] * num_dice
+            
+            self.debug(f"  Dice match found: {num_dice}d{die_size}")
+            
+            # Double dice on crit
+            if is_crit:
+                original_num_dice = num_dice
+                num_dice *= 2
+                self.debug(f"  Critical hit: Doubling dice from {original_num_dice}d{die_size} to {num_dice}d{die_size}")
+            
+            # Roll the dice
+            dice_rolls = [random.randint(1, die_size) for _ in range(num_dice)]
+            dice_total = sum(dice_rolls)
+            self.debug(f"  Rolled {num_dice}d{die_size}: {dice_rolls} = {dice_total}")
+            
+            # Start with dice total
+            result = dice_total
+            
+            # Add stat modifier if applicable
+            if stat_mod != 0:
+                self.debug(f"  Adding stat modifier: {stat_mod}")
+                result += stat_mod
+            
+            # Handle additional fixed modifiers
+            mod_match = re.search(r'(?<!d)[\+\-]\d+', formula)
+            if mod_match:
+                mod = int(mod_match.group(0))
+                self.debug(f"  Adding fixed modifier: {mod}")
+                result += mod
+                
+            self.debug(f"  Final damage result: {result}")
+            return max(1, result)  # Minimum 1 damage
         else:
-            # Default to 1d8 if no valid dice formula
-            return [8]
-    
-    def _roll_damage(self, dice: List[int], stat_mod: int) -> int:
-        """Roll damage dice and add modifier"""
-        # Roll each die and sum the results
-        damage = sum(random.randint(1, die) for die in dice) + stat_mod
-        return max(1, damage)  # Minimum damage of 1
-    
-    def _extract_damage_type(self, damage_str: str) -> str:
-        """Extract damage type from damage string"""
-        # Remove dice formula and stat modifier
-        without_dice = re.sub(r'\d+d\d+(\+\w+)?', '', damage_str).strip()
-        
-        # Default to "damage" if no type specified
-        if not without_dice:
-            return "damage"
-        
-        # Return the first word as damage type if multiple words
-        return without_dice.split()[0]
+            # Try to parse as a flat number
+            try:
+                # Check if it's a simple integer value
+                flat_value = int(re.search(r'^\d+', formula.strip()).group(0))
+                self.debug(f"  Flat damage value found: {flat_value}")
+                return flat_value
+            except (ValueError, AttributeError):
+                # It might contain just a stat modifier
+                if stat_mod != 0:
+                    self.debug(f"  Using only stat modifier: {stat_mod}")
+                    return max(1, stat_mod)  # Return at least 1 damage
+                
+                # If no valid formula, log this as a potential error and default to 1d4
+                self.debug(f"  WARNING: Could not parse damage formula '{formula}', defaulting to 1d4")
+                roll = random.randint(1, 4)
+                if is_crit:
+                    roll *= 2
+                    self.debug(f"  Critical hit on default 1d4: {roll}")
+                return roll

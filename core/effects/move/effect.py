@@ -3,7 +3,7 @@ Core implementation of the MoveEffect class with independent phase management.
 """
 
 import logging
-from typing import Optional, List, Dict, Any, Set, Union
+from typing import Optional, List, Dict, Any, Set, Union, Tuple
 
 from core.effects.base import BaseEffect, EffectCategory, EffectState
 from core.effects.rollmod import RollModifierType, RollModifierEffect
@@ -264,6 +264,40 @@ class MoveEffect(BaseEffect):
                     messages.append(f"{character.name} doesn't have enough stars!")
         
         return messages
+
+    def can_use(self, character) -> Tuple[bool, str]:
+        """
+        Check if character has enough resources to use this move
+        
+        Args:
+            character: Character to check resources for
+            
+        Returns:
+            Tuple[bool, str]: (can_use, reason if cannot use)
+        """
+        # Check MP cost
+        if self.mp_cost > 0 and hasattr(character, 'resources'):
+            if hasattr(character.resources, 'current_mp'):
+                if character.resources.current_mp < self.mp_cost:
+                    return False, f"Not enough MP ({character.resources.current_mp}/{self.mp_cost})"
+                    
+        # Check HP cost (only if it would reduce to 0)
+        if self.hp_cost > 0 and hasattr(character, 'resources'):
+            if hasattr(character.resources, 'current_hp'):
+                if character.resources.current_hp <= self.hp_cost:
+                    return False, f"Not enough HP ({character.resources.current_hp}/{self.hp_cost})"
+        
+        # Check star cost
+        if self.star_cost > 0 and hasattr(character, 'action_stars'):
+            if hasattr(character.action_stars, 'can_use_stars'):
+                can_use, reason = character.action_stars.can_use_stars(self.star_cost)
+                if not can_use:
+                    return False, reason
+            elif hasattr(character.action_stars, 'current_stars'):
+                if character.action_stars.current_stars < self.star_cost:
+                    return False, f"Not enough stars ({character.action_stars.current_stars}/{self.star_cost})"
+        
+        return True, "Ability ready to use"
 
     def on_apply(self, character, round_number: int) -> str:
         """

@@ -6,10 +6,11 @@ Provides a simpler, more compatible interface for viewing and using moves.
 """
 
 import discord
-from discord import Embed, Color, ui, ButtonStyle, SelectOption
-from typing import List, Optional, Dict, Any, Tuple, Callable
-import asyncio
+from discord import ui, app_commands, Embed, Color, ButtonStyle
 import logging
+from typing import List, Optional, Any, Dict, Callable, Union, Tuple
+
+import asyncio
 import json
 import re
 
@@ -31,37 +32,37 @@ class ActionSelectMenu(ui.Select):
     def __init__(self, placeholder: str = "Select an action..."):
         # Create options for standard actions
         options = [
-            SelectOption(
+            discord.SelectOption(
                 label="Basic Attack",
                 description="Make a basic attack (⭐1)",
                 value="basic_attack",
                 emoji="⚔️"
             ),
-            SelectOption(
+            discord.SelectOption(
                 label="Dodge",
                 description="Attacks against you have disadvantage (⭐2)",
                 value="dodge",
                 emoji="🛡️"
             ),
-            SelectOption(
+            discord.SelectOption(
                 label="Dash",
                 description="Double your movement speed (⭐1)",
                 value="dash",
                 emoji="🏃"
             ),
-            SelectOption(
+            discord.SelectOption(
                 label="Disengage",
                 description="Avoid opportunity attacks (⭐1)",
                 value="disengage",
                 emoji="↪️"
             ),
-            SelectOption(
+            discord.SelectOption(
                 label="Help",
                 description="Give advantage to an ally (⭐1)",
                 value="help",
                 emoji="🤝"
             ),
-            SelectOption(
+            discord.SelectOption(
                 label="Hide",
                 description="Attempt to hide (⭐1)",
                 value="hide",
@@ -766,13 +767,15 @@ class ActionHandler:
             if move.mp_cost > 0:
                 costs.append(f"💙 MP: {move.mp_cost}")
             elif move.mp_cost < 0:
+                # Show MP gain with a + sign
                 costs.append(f"💙 +{abs(move.mp_cost)} MP")
             if move.hp_cost > 0:
                 costs.append(f"❤️ HP: {move.hp_cost}")
             elif move.hp_cost < 0:
+                # Show healing with a + sign
                 costs.append(f"❤️ +{abs(move.hp_cost)} HP")
                 
-            cost_text = " | ".join(costs)
+            cost_text = " | ".join(costs) if costs else ""
             
             # Create timing info text
             timing_info = []
@@ -986,7 +989,7 @@ class ActionHandler:
                 
             if move.last_used_round >= current_round - move.cooldown:
                 rounds_left = move.cooldown - (current_round - move.last_used_round)
-                usage.append(f"On Cooldown: {rounds_left} round(s) remaining")
+                usage.append(f"On Cooldown: {rounds_left} turn(s) remaining")
                 
         if usage:
             embed.add_field(
@@ -1128,7 +1131,7 @@ class MoveSelectMenu(ui.Select):
             
             # Create select option
             options.append(
-                SelectOption(
+                discord.SelectOption(
                     label=move.name[:25],  # Max 25 chars for label
                     description=description,  # Include all info
                     value=str(i)  # Use index as value
@@ -1143,181 +1146,324 @@ class MoveSelectMenu(ui.Select):
             max_values=1
         )
 
-class UseMoveView(ui.View):
-    """View for selecting a move to use"""
-    
-    def __init__(self, character: Character, moves: List[MoveData], bot):
-        super().__init__(timeout=60)
-        self.character = character
-        self.moves = moves
+class TargetSelectMenu(discord.ui.Select):
+    """Select menu for choosing multiple targets"""
+    def __init__(self, bot, available_targets, min_values=1, max_values=10):
         self.bot = bot
         
-        # Add move select menu
+        # Create options from available targets
+        options = [
+            discord.SelectOption(label=target.name, value=target.name)
+            for target in available_targets[:25]  # Discord limit
+        ]
+        
+        # If no targets available, add a placeholder option
+        if not options:
+            options = [discord.SelectOption(label="No targets available", value="none")]
+        
+        super().__init__(
+            placeholder="Select target(s)...",
+            min_values=min_values if options and options[0].value != "none" else 0,
+            max_values=min(max_values, len(options)) if options and options[0].value != "none" else 0,
+            options=options
+        )
+    
+    async def callback(self, interaction: discord.Interaction):
+        """Handle selection of targets"""
+        # Store the selected targets in the VIEW (not in self)
+        view = self.view
+        view.selected_targets = self.values
+        
+        # Update the message to show selected targets
+        targets_text = ", ".join(self.values) if self.values else "None"
+        
+        embed = interaction.message.embeds[0]
+        
+        # Update the embed with selected targets
+        for i, field in enumerate(embed.fields):
+            if field.name == "Selected Targets":
+                embed.set_field_at(i, name="Selected Targets", value=targets_text, inline=False)
+                break
+        else:
+            # Field not found, add it
+            embed.clear_fields()
+            embed.add_field(name="Selected Targets", value=targets_text, inline=False)
+        
+        # Use the parent view, not self
+        await interaction.response.edit_message(embed=embed, view=view)
+
+class UseMoveView(discord.ui.View):
+    """View for selecting a move to use"""
+    def __init__(self, character, moves_list, bot, timeout=60):
+        super().__init__(timeout=timeout)
+        self.bot = bot
+        self.character = character
+        self.moves_list = moves_list
+        self.selected_move = None
+        self.selected_targets = []
+        self.force_during = False
+        
+        # Add initial move selection components
         self.move_select = MoveSelectMenu(
-            moves, 
-            placeholder="Select a move to use..."
+            self.moves_list,
+            placeholder="Select a move..."
+        )
+        self.add_item(self.move_select)
+        
+        # Explicitly set the callback for move selection
+        self.move_select.callback = self.move_selected_callback
+
+    async def move_selected_callback(self, interaction: discord.Interaction):
+        """Callback for when a move is selected"""
+        try:
+            # Get the selected move index
+            move_idx = int(self.move_select.values[0])
+            self.selected_move = self.moves_list[move_idx]
+            
+            # Format description with bullet points if it contains semicolons
+            description = getattr(self.selected_move, 'description', 'No description available')
+            if description and ';' in description:
+                formatted_description = "• " + description.replace(';', '\n• ')
+            else:
+                formatted_description = description
+            
+            # Create embed with move info
+            embed = Embed(
+                title=f"Using {self.selected_move.name}",
+                description=formatted_description,
+                color=Color.blue()
+            )
+            
+            # Add options field
+            embed.add_field(
+                name="Options",
+                value=f"During Own Turn: {'Yes' if self.force_during else 'No'}",
+                inline=False
+            )
+            
+            # Add instructions field
+            embed.add_field(
+                name="Instructions",
+                value="1. Use 'Select Targets' if this move affects other characters\n"
+                      "2. Toggle 'During Turn' if needed\n"
+                      "3. Click 'Execute' when ready to use the move",
+                inline=False
+            )
+            
+            await interaction.response.edit_message(embed=embed, view=self)
+            
+        except (ValueError, IndexError) as e:
+            logger.error(f"Error selecting move: {e}", exc_info=True)
+            await interaction.response.send_message(
+                f"Error selecting move: {str(e)}",
+                ephemeral=True
+            )
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Ensure that the interaction comes from any valid user"""
+        # Allow all interactions since we can't check owner_id
+        return True
+
+    async def on_timeout(self):
+        """Disable the view on timeout"""
+        for item in self.children:
+            item.disabled = True
+            
+        # Only attempt to edit message if we've stored it
+        if hasattr(self, 'message') and self.message:
+            try:
+                await self.message.edit(view=self)
+            except discord.errors.NotFound:
+                pass  # Message might have been deleted
+        
+    @discord.ui.button(label="Select Targets", style=discord.ButtonStyle.primary, row=1)
+    async def select_targets_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Open target selection dialog"""
+        if not self.selected_move:
+            await interaction.response.send_message(
+                "Please select a move first!",
+                ephemeral=True
+            )
+            return
+            
+        # Get all characters as potential targets
+        available_targets = list(self.bot.game_state.characters.values())
+        
+        # Create a temporary view for target selection
+        target_view = discord.ui.View(timeout=60)
+        target_select = TargetSelectMenu(self.bot, available_targets, min_values=1, max_values=10)
+        target_view.add_item(target_select)
+        
+        # Add done button with callback
+        done_button = discord.ui.Button(
+            label="Done", 
+            style=discord.ButtonStyle.success
         )
         
-        # Define a callback for the move selection
-        async def move_selected(interaction: discord.Interaction):
-            # Get selected move
-            try:
-                move_idx = int(self.move_select.values[0])
-                move = self.moves[move_idx]
+        # Create a reference to self (the original view)
+        original_view = self
+        
+        async def done_callback(done_interaction: discord.Interaction):
+            # Store the selected targets from the target selection menu
+            if hasattr(target_select, 'values') and target_select.values:
+                # Update the original view's selected targets
+                original_view.selected_targets = target_select.values
                 
-                # Check resource costs first
-                if self.character.resources.current_mp < move.mp_cost:
-                    await interaction.response.send_message(
-                        f"{self.character.name} doesn't have enough MP! (Needs {move.mp_cost}, has {self.character.resources.current_mp})",
-                        ephemeral=True
-                    )
-                    return
+                targets_text = ", ".join(original_view.selected_targets)
                 
-                # Check action stars
-                can_use_stars, stars_reason = self.character.can_use_move(move.star_cost)
-                if not can_use_stars:
-                    await interaction.response.send_message(
-                        f"{self.character.name} can't use this move: {stars_reason}",
-                        ephemeral=True
-                    )
-                    return
+                # Visual feedback
+                await done_interaction.response.send_message(
+                    f"✅ **Targets selected:** {targets_text}\n\n"
+                    f"Return to the move selection and click **Execute** when ready.",
+                    ephemeral=True
+                )
                 
-                # Get current round if in combat
-                current_round = 1
-                if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                    current_round = self.bot.initiative_tracker.round_number
-                
-                # Check if move is on cooldown first
-                existing_cooldown = False
-                
-                # Import MovePhase for the check
-                from core.effects.move import MovePhase
-                
-                for effect in self.character.effects:
-                    if hasattr(effect, 'name') and effect.name == move.name and hasattr(effect, 'state'):
-                        if effect.state == MovePhase.COOLDOWN:
-                            # There's already a cooldown effect for this move
-                            phase = effect.phases.get(MovePhase.COOLDOWN)
-                            if phase:
-                                remaining = phase.duration - phase.turns_completed
-                                await interaction.response.send_message(
-                                    f"{self.character.name} can't use {move.name}: On cooldown ({remaining} turns remaining)",
-                                    ephemeral=True
-                                )
-                                return
-                            existing_cooldown = True
-                            break
-                
-                # Only check moveset cooldown if no active cooldown effect
-                if not existing_cooldown:
-                    # Check cooldowns in the move data
-                    can_use, reason = move.can_use(current_round)
-                    if not can_use:
-                        await interaction.response.send_message(
-                            f"{self.character.name} can't use {move.name}: {reason}",
-                            ephemeral=True
-                        )
-                        return
-                
-                # Check if move needs a target
-                if move.attack_roll or (move.damage and not getattr(move, 'save_type', None)):
-                    # Show target selector - get all possible targets
-                    targets = []
-                    
-                    # Try to get characters from initiative tracker
-                    if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
-                        turn_order = getattr(self.bot.initiative_tracker, 'turn_order', [])
-                        for turn in turn_order:
-                            if hasattr(turn, 'character_name'):
-                                target_char = self.bot.game_state.get_character(turn.character_name)
-                                if target_char and target_char.name != character.name:
-                                    targets.append(target_char)
-                    
-                    # If no targets from initiative, try all characters
-                    if not targets and hasattr(self.bot.game_state, 'get_all_characters'):
-                        targets = [c for c in self.bot.game_state.get_all_characters() 
-                                if c.name != character.name]
-                    elif not targets and hasattr(self.bot.game_state, 'characters'):
-                        # Alternative access through characters dictionary
-                        targets = [c for name, c in self.bot.game_state.characters.items() 
-                                if name != character.name]
-                    
-                    if targets:
-                        # Create target options for dropdown
-                        target_options = [
-                            SelectOption(
-                                label=target.name,
-                                description=f"AC: {target.defense.current_ac}" if hasattr(target, 'defense') else ""
+                # Also update the original message if possible
+                try:
+                    # Get original embed
+                    if interaction.message and interaction.message.embeds:
+                        embed = interaction.message.embeds[0]
+                        
+                        # Update or add targets field
+                        targets_field_index = -1
+                        for i, field in enumerate(embed.fields):
+                            if field.name == "Selected Targets":
+                                targets_field_index = i
+                                break
+                                
+                        if targets_field_index >= 0:
+                            embed.set_field_at(
+                                targets_field_index,
+                                name="Selected Targets",
+                                value=targets_text,
+                                inline=False
                             )
-                            for target in targets[:25]  # Discord limits to 25 options
-                        ]
-                        
-                        # Create target select menu
-                        target_select = ui.Select(
-                            placeholder="Select a target...",
-                            options=target_options,
-                            min_values=1,
-                            max_values=1
-                        )
-                        
-                        # Create view
-                        target_view = ui.View(timeout=60)
-                        
-                        async def target_callback(target_interaction):
-                            target_name = target_select.values[0]
+                        else:
+                            embed.add_field(
+                                name="Selected Targets",
+                                value=targets_text,
+                                inline=False
+                            )
                             
-                            # Now execute the move with the target
-                            await self.execute_move(target_interaction, move, target_name)
-                            
-                        target_select.callback = target_callback
-                        target_view.add_item(target_select)
-                        
-                        # Show target selector
-                        await interaction.response.send_message(
-                            f"Select a target for {move.name}:",
-                            view=target_view,
-                            ephemeral=True
-                        )
-                    else:
-                        await interaction.response.send_message(
-                            "No targets available. Add characters or start combat first.",
-                            ephemeral=True
-                        )
-                else:
-                    # Use move directly without a target
-                    await self.execute_move(interaction, move)
-            except (ValueError, IndexError) as e:
-                logger.error(f"Error selecting move: {e}", exc_info=True)
-                await interaction.response.send_message(
-                    "Invalid move selection.",
+                        # Try to update original message (may fail due to Discord limitations)
+                        try:
+                            await interaction.edit_original_response(embed=embed, view=original_view)
+                        except:
+                            # If we can't update original, at least we showed confirmation
+                            pass
+                except Exception as e:
+                    # Don't fail if we can't update the original message
+                    logger.error(f"Error updating original message with targets: {e}")
+            else:
+                await done_interaction.response.send_message(
+                    "No targets selected. Please select at least one target.",
                     ephemeral=True
                 )
         
-        # Set the callback and add the selection menu to the view
-        self.move_select.callback = move_selected
-        self.add_item(self.move_select)
+        # Attach the callback to the done button
+        done_button.callback = done_callback
+        target_view.add_item(done_button)
         
-    async def execute_move(self, interaction, move, target=None):
+        # Create embed for target selection
+        embed = discord.Embed(
+            title="Target Selection",
+            description=f"Select targets for {self.selected_move.name}",
+            color=discord.Color.blue()
+        )
+        
+        # Add a field for currently selected targets if any
+        if self.selected_targets:
+            embed.add_field(
+                name="Currently Selected",
+                value=", ".join(self.selected_targets),
+                inline=False
+            )
+        
+        await interaction.response.send_message(embed=embed, view=target_view, ephemeral=True)
+
+    @discord.ui.button(label="Toggle During Turn", style=discord.ButtonStyle.secondary, row=1)
+    async def toggle_during_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Toggle the force_during option"""
+        self.force_during = not self.force_during
+        button.label = f"During Turn: {'Yes' if self.force_during else 'No'}"
+        
+        # Create a new embed or update existing one
+        try:
+            embeds = interaction.message.embeds
+            embed = embeds[0] if embeds and len(embeds) > 0 else None
+        except (IndexError, AttributeError):
+            embed = None
+            
+        if not embed:
+            # Format description with bullet points if it contains semicolons
+            description = getattr(self.selected_move, 'description', 'No description available') if self.selected_move else "Select a move to use"
+            if self.selected_move and description and ';' in description:
+                formatted_description = "• " + description.replace(';', '\n• ')
+            else:
+                formatted_description = description
+            
+            # Create a new basic embed
+            embed = Embed(
+                title="Move Selection" if not self.selected_move else f"Using {self.selected_move.name}",
+                description=formatted_description,
+                color=Color.blue()
+            )
+        
+        # Find or update options field
+        options_field_index = -1
+        for i, field in enumerate(embed.fields):
+            if field.name == "Options":
+                options_field_index = i
+                break
+                
+        options_text = f"During Own Turn: {'Yes' if self.force_during else 'No'}"
+        
+        if options_field_index >= 0:
+            embed.set_field_at(options_field_index, name="Options", value=options_text, inline=False)
+        else:
+            embed.add_field(name="Options", value=options_text, inline=False)
+        
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    @discord.ui.button(label="Execute", style=discord.ButtonStyle.success, row=2)
+    async def execute_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Execute the selected move with the specified targets and options"""
+        if not self.selected_move:
+            await interaction.response.send_message(
+                "Please select a move first!",
+                ephemeral=True
+            )
+            return
+            
+        # Defer response to allow for longer processing time
+        await interaction.response.defer(ephemeral=True)
+        
+        # Execute the move
+        await self.execute_move(interaction, self.selected_move, self.selected_targets, self.force_during)
+
+    async def execute_move(self, interaction, move, targets=None, force_during=False):
         """Execute a move with or without a target"""
         try:
-            # Always defer first to avoid timeout
-            try:
-                await interaction.response.defer()
-            except:
-                # If already deferred, this will fail but we can continue
-                pass
+            # The interaction has already been responded to by the execute_button method
+            # No need to defer again - just use followup messages
             
-            # Get character and target from game state
+            # Get character from game state
             character = self.bot.game_state.get_character(self.character.name)
             if not character:
                 await interaction.followup.send("Character not found", ephemeral=True)
                 return
                 
-            # Get target character
-            target_char = None
-            if target:
-                target_char = self.bot.game_state.get_character(target)
-                
+            # Get target characters
+            target_chars = []
+            if targets:
+                for target_name in targets:
+                    target_char = self.bot.game_state.get_character(target_name)
+                    if target_char:
+                        target_chars.append(target_char)
+            
+            # Format target string for the command
+            target_str = ", ".join(t.name for t in target_chars) if target_chars else None
+            
             # Get current round
             current_round = 1
             if hasattr(self.bot, 'initiative_tracker') and self.bot.initiative_tracker.state != 'inactive':
@@ -1325,7 +1471,7 @@ class UseMoveView(ui.View):
                 
             # Import needed modules
             from core.effects.move import MoveEffect
-            from core.effects.manager import apply_effect  # Import apply_effect directly
+            from core.effects.manager import apply_effect
             
             # Create the effect
             move_effect = MoveEffect(
@@ -1341,13 +1487,17 @@ class UseMoveView(ui.View):
                 damage=getattr(move, 'damage', None),
                 crit_range=getattr(move, 'crit_range', 20),
                 roll_timing=getattr(move, 'roll_timing', 'active'),
-                targets=[target_char] if target_char else [],
+                targets=target_chars,
                 bonus_on_hit=getattr(move, 'bonus_on_hit', None),
-                aoe_mode=getattr(move, 'aoe_mode', 'single')
+                aoe_mode=getattr(move, 'aoe_mode', 'single'),
+                force_during=force_during
             )
             
-            # Apply the effect directly using apply_effect
-            character.use_move_stars(move.star_cost, move.name)
+            # IMPORTANT: Do NOT deduct stars here - let apply_effect handle ALL resource costs
+            # Remove this line to avoid double-charging stars:
+            # character.use_move_stars(move.star_cost, move.name)
+            
+            # Apply the effect - this will handle all resource costs internally
             result = await apply_effect(character, move_effect, current_round)
             
             # Mark as used
@@ -1357,19 +1507,31 @@ class UseMoveView(ui.View):
             # Save character
             await self.bot.db.save_character(character)
             
-            # Save target if needed
-            if target_char:
+            # Save targets if needed
+            for target_char in target_chars:
                 await self.bot.db.save_character(target_char)
                 
-            # Send result
-            await interaction.followup.send(result)
+            # Process any pending async operations
+            if hasattr(move_effect, 'execute_pending_operations'):
+                additional_messages = await move_effect.execute_pending_operations()
+                if additional_messages:
+                    if isinstance(additional_messages, list):
+                        result += "\n" + "\n".join(additional_messages)
+                    else:
+                        result += "\n" + additional_messages
+            
+            # Send a confirmation to the user (ephemeral)
+            await interaction.followup.send(f"Executing {move.name}...", ephemeral=True)
+            
+            # Send the actual result to the channel directly (public)
+            await interaction.channel.send(result)
             
         except Exception as e:
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Error executing move: {e}", exc_info=True)
             
-            # Handle error
+            # Handle error (keep ephemeral)
             await interaction.followup.send(
                 f"Error executing move: {str(e)}",
                 ephemeral=True
@@ -1414,3 +1576,18 @@ class MoveInfoView(ui.View):
         # Set the callback and add the selection menu to the view
         self.move_select.callback = move_selected
         self.add_item(self.move_select)
+
+    async def character_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        """Autocomplete for character names"""
+        try:
+            # Use proper async method instead of direct dict access
+            char_names = await self.bot.db.list_characters()
+            
+            return [
+                app_commands.Choice(name=name, value=name)
+                for name in char_names
+                if current.lower() in name.lower()
+            ][:25]  # Discord limits to 25 choices
+        except Exception as e:
+            logger.warning(f"Character autocomplete error: {e}")
+            return []  # Return empty list as fallback

@@ -85,25 +85,6 @@ class MoveCommands(commands.GroupCog, name="move"):
                 
         return cast_time, duration, cooldown
 
-    async def character_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
-        """Autocomplete for character names"""
-        try:
-            # Get all characters from the database
-            chars = await self.bot.db._refs['characters'].get()
-            if not chars:
-                return []
-            
-            # Filter based on current input
-            matches = [
-                app_commands.Choice(name=name, value=name)
-                for name in chars.keys()
-                if name != "combat_state" and current.lower() in name.lower()
-            ]
-            return matches[:25]  # Discord limits to 25 choices
-        except Exception as e:
-            logger.error(f"Error in character autocomplete: {e}", exc_info=True)
-            return []
-    
     async def move_name_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         """Autocomplete for move names based on selected character"""
         try:
@@ -116,18 +97,22 @@ class MoveCommands(commands.GroupCog, name="move"):
             char = self.bot.game_state.get_character(char_name)
             if not char:
                 # If not in memory, try to load from database
-                char_data = await self.bot.db._refs['characters'].child(char_name).get()
-                if not char_data or 'moveset' not in char_data or 'moves' not in char_data['moveset']:
+                try:
+                    char_data = await self.bot.db.load_character(char_name)
+                    if not char_data or 'moveset' not in char_data or 'moves' not in char_data['moveset']:
+                        return []
+                    
+                    # Get moves from database
+                    moves = char_data['moveset']['moves']
+                    choices = []
+                    for key, move_data in moves.items():
+                        name = move_data.get('name', key)
+                        if current.lower() in name.lower():
+                            choices.append(app_commands.Choice(name=name, value=name))
+                    return choices[:25]
+                except Exception as e:
+                    logger.error(f"Error loading character for move autocomplete: {e}", exc_info=True)
                     return []
-                
-                # Get moves from database
-                moves = char_data['moveset']['moves']
-                choices = []
-                for key, move_data in moves.items():
-                    name = move_data.get('name', key)
-                    if current.lower() in name.lower():
-                        choices.append(app_commands.Choice(name=name, value=name))
-                return choices[:25]
             
             # Get moves from character in memory
             if hasattr(char, 'moveset') and hasattr(char.moveset, 'list_moves'):
@@ -143,6 +128,21 @@ class MoveCommands(commands.GroupCog, name="move"):
             logger.error(f"Error in move name autocomplete: {e}", exc_info=True)
             return []
     
+    async def character_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        """Autocomplete for character names"""
+        try:
+            # Use proper async method instead of direct dict access
+            char_names = await self.bot.db.list_characters()
+            
+            return [
+                app_commands.Choice(name=name, value=name)
+                for name in char_names
+                if current.lower() in name.lower()
+            ][:25]  # Discord limits to 25 choices
+        except Exception as e:
+            logger.warning(f"Character autocomplete error: {e}")
+            return []  # Return empty list as fallback
+
     @app_commands.command(name="use", description="Use a stored move")
     @app_commands.describe(
         character="Character using the move",
@@ -314,10 +314,11 @@ class MoveCommands(commands.GroupCog, name="move"):
         crit_range="Critical hit range (default: 20)",
         roll_timing="When to roll attacks (instant, active, per_turn)",
         force_during="Force effect to be treated as during own turn",
-        save_type="Saving throw type (str, dex, etc.)",
-        save_dc="Save DC formula (e.g. '8+prof+int')",
-        half_on_save="Whether to apply half damage on successful save",
-        aoe_mode="AOE mode (single, multi)"
+        aoe_mode="AOE mode (single, multi)",
+        hp_bonus="Health points to gain per hit",
+        mp_bonus="Mana points to gain per hit",
+        star_bonus="Action stars to gain per hit",
+        bonus_note="Custom note to display with hit bonuses"
     )
     async def temp_move(
         self,
@@ -335,11 +336,12 @@ class MoveCommands(commands.GroupCog, name="move"):
         damage: Optional[str] = None,
         crit_range: Optional[int] = 20,
         roll_timing: Optional[str] = "active",
-        force_during: Optional[bool] = None,
-        save_type: Optional[str] = None,
-        save_dc: Optional[str] = None,
-        half_on_save: Optional[bool] = False,
-        aoe_mode: Optional[str] = "single"
+        force_during: Optional[bool] = False,
+        aoe_mode: Optional[str] = "single",
+        hp_bonus: Optional[int] = 0,
+        mp_bonus: Optional[int] = 0,
+        star_bonus: Optional[int] = 0,
+        bonus_note: Optional[str] = None
     ):
         """Create a temporary move for testing"""
         try:
@@ -356,10 +358,11 @@ class MoveCommands(commands.GroupCog, name="move"):
             if crit_range != 20: cmd_params += f" crit_range: {crit_range}"
             if roll_timing != "active": cmd_params += f" roll_timing: {roll_timing}"
             if force_during is not None: cmd_params += f" force_during: {force_during}"
-            if save_type: cmd_params += f" save_type: {save_type}"
-            if save_dc: cmd_params += f" save_dc: {save_dc}"
-            if half_on_save: cmd_params += f" half_on_save: {half_on_save}"
             if aoe_mode != "single": cmd_params += f" aoe_mode: {aoe_mode}"
+            if hp_bonus: cmd_params += f" hp_bonus: {hp_bonus}"
+            if mp_bonus: cmd_params += f" mp_bonus: {mp_bonus}"
+            if star_bonus: cmd_params += f" star_bonus: {star_bonus}"
+            if bonus_note: cmd_params += f" bonus_note: {bonus_note}"
             
             print(f"COMMAND EXECUTED: {cmd_params}")
             logger.info(f"COMMAND EXECUTED: {cmd_params}")
@@ -371,16 +374,59 @@ class MoveCommands(commands.GroupCog, name="move"):
             if not source:
                 await interaction.followup.send(f"Character '{character}' not found.")
                 return
+            
+            # Resource validation - CHECK BEFORE CREATING MOVE
+            # Check MP cost
+            if mp_cost > 0 and hasattr(source, 'resources') and hasattr(source.resources, 'current_mp'):
+                if source.resources.current_mp < mp_cost:
+                    await interaction.followup.send(
+                        f"Not enough MP to use {name}. Required: {mp_cost}, Available: {source.resources.current_mp}",
+                        ephemeral=True
+                    )
+                    return
+            
+            # Check star cost
+            if star_cost > 0 and hasattr(source, 'action_stars'):
+                can_use, reason = source.can_use_move(star_cost, name)
+                if not can_use:
+                    await interaction.followup.send(
+                        f"Cannot use {name}: {reason}",
+                        ephemeral=True
+                    )
+                    return
                 
             # Get target character if specified
             target_char = None
             targets = []
             if target:
-                target_char = interaction.client.game_state.get_character(target)
-                if not target_char:
-                    await interaction.followup.send(f"Target '{target}' not found.")
-                    return
-                targets = [target_char]
+                # Support multiple targets separated by commas
+                target_names = [t.strip() for t in target.split(',')]
+                for target_name in target_names:
+                    t_char = interaction.client.game_state.get_character(target_name)
+                    if t_char:
+                        targets.append(t_char)
+                    else:
+                        await interaction.followup.send(f"Target '{target_name}' not found.", ephemeral=True)
+                
+                # Check target compatibility with aoe_mode
+                if 'multihit' in (attack_roll or '') and aoe_mode == 'multi' and len(targets) > 1:
+                    await interaction.followup.send(
+                        "⚠️ Multihit attacks are not compatible with multiple targets in 'multi' mode. "
+                        "Using 'single' mode instead.",
+                        ephemeral=True
+                    )
+                    aoe_mode = 'single'
+                
+            # Create bonus_on_hit parameter if any bonuses specified
+            bonus_on_hit = None
+            if hp_bonus or mp_bonus or star_bonus or bonus_note:
+                from core.effects.move.combat import BonusOnHit
+                bonus_on_hit = BonusOnHit(
+                    stars=star_bonus,
+                    mp=mp_bonus,
+                    hp=hp_bonus,
+                    custom_note=bonus_note
+                )
                 
             # Create the move effect
             from core.effects.move import MoveEffect
@@ -402,10 +448,8 @@ class MoveCommands(commands.GroupCog, name="move"):
                 targets=targets,
                 roll_timing=roll_timing,
                 force_during=force_during,
-                save_type=save_type,
-                save_dc=save_dc,
-                half_on_save=half_on_save,
-                aoe_mode=aoe_mode
+                aoe_mode=aoe_mode,
+                bonus_on_hit=bonus_on_hit
             )
             
             # Apply the effect
@@ -436,6 +480,10 @@ class MoveCommands(commands.GroupCog, name="move"):
                     
             # Save the character
             await interaction.client.db.save_character(source)
+            
+            # Also save target characters if modified
+            for target_char in targets:
+                await interaction.client.db.save_character(target_char)
             
         except Exception as e:
             from utils.error_handler import handle_error
