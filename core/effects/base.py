@@ -904,6 +904,296 @@ class BaseEffect:
         except Exception as e:
             logger.error(f"Error reconstructing {cls.__name__} from dict: {e}", exc_info=True)
             return None
+        
+    # --- Standardized Message Creation ---
+
+    def create_standard_active_message(self, character, remaining_turns: Optional[int] = None, details: List[str] = None) -> str:
+        """
+        Create a standardized "effect active" message with proper formatting.
+        
+        Args:
+            character: Character affected by the effect
+            remaining_turns: Number of turns remaining (None for permanent effects)
+            details: Optional list of additional details to include
+            
+        Returns:
+            Formatted message string with proper emoji and backticks
+        """
+        # Start with base message
+        message = f"{self.name} active"
+        all_details = []
+        
+        # Add description if available
+        if self.description:
+            all_details.append(self.description)
+        
+        # Add provided details
+        if details:
+            all_details.extend(details)
+        
+        # Add turns remaining
+        if self.permanent:
+            all_details.append("Permanent effect")
+        elif remaining_turns is not None:
+            s = "" if remaining_turns == 1 else "s"
+            all_details.append(f"{remaining_turns} turn{s} remaining")
+        
+        # Format with standard formatting
+        return self.format_effect_message(message, details=all_details, emoji=self.emoji)
+
+    def create_standard_expiry_message(self, character) -> str:
+        """
+        Create a standardized "effect expired" message with proper formatting.
+        
+        Args:
+            character: Character from which the effect expired
+            
+        Returns:
+            Formatted expiry message with proper emoji and backticks
+        """
+        message = f"{self.name} has worn off"
+        return self.format_effect_message(message, emoji=self.emoji)
+
+    def create_standard_final_message(self, character, details: List[str] = None) -> str:
+        """
+        Create a standardized "final turn" message with proper formatting.
+        
+        Args:
+            character: Character affected by the effect
+            details: Optional list of additional details
+            
+        Returns:
+            Formatted message indicating this is the effect's final turn
+        """
+        message = f"{self.name} continues"
+        all_details = ["Final turn"]
+        
+        if details:
+            all_details.extend(details)
+        
+        return self.format_effect_message(message, details=all_details, emoji=self.emoji)
+
+    def create_standard_continues_message(self, character, remaining_turns: int, details: List[str] = None) -> str:
+        """
+        Create a standardized "effect continues" message with proper formatting.
+        
+        Args:
+            character: Character affected by the effect
+            remaining_turns: Number of turns remaining
+            details: Optional list of additional details
+            
+        Returns:
+            Formatted message indicating the effect continues with turns remaining
+        """
+        message = f"{self.name} continues"
+        
+        # Format turn count
+        s = "" if remaining_turns == 1 else "s"
+        all_details = [f"{remaining_turns} turn{s} remaining"]
+        
+        # Add any additional details
+        if details:
+            all_details.extend(details)
+        
+        return self.format_effect_message(message, details=all_details, emoji=self.emoji)
+
+    def add_stack(self, amount: int = 1, character = None) -> str:
+        """
+        Add stacks to a stackable effect. Override in subclasses that support stacking.
+        
+        Args:
+            amount: Number of stacks to add (default: 1)
+            character: Character affected by the effect
+            
+        Returns:
+            Formatted message about stacks added
+        """
+        # Default implementation for effects that don't support stacking
+        self.debug(f"add_stack called but effect doesn't support stacking")
+        return f"Effect {self.name} doesn't support stacking"
+
+    def remove_stack(self, character, amount: int = 1) -> Tuple[bool, str]:
+        """
+        Remove stacks from a stackable effect. Override in subclasses that support stacking.
+        
+        Args:
+            character: Character affected by the effect
+            amount: Number of stacks to remove (default: 1)
+            
+        Returns:
+            Tuple of (should_remove_effect, message)
+            - should_remove_effect: True if all stacks are removed and effect should be cleaned up
+            - message: Formatted message about stack removal
+        """
+        # Default implementation for effects that don't support stacking
+        self.debug(f"remove_stack called but effect doesn't support stacking")
+        # Default to removing the whole effect
+        return True, f"Effect {self.name} doesn't support stacking, removing completely"
+
+    # === Standard Turn Start ===
+    def standard_turn_start(self, character, round_number: int, turn_name: str, custom_logic=None) -> List[str]:
+        """
+        Standard implementation for on_turn_start that handles most common cases.
+        
+        Args:
+            character: Character whose turn is starting
+            round_number: Current combat round
+            turn_name: Name of the character whose turn it is
+            custom_logic: Optional callback method for custom effect logic
+                        Method should take (character, round_number, turn_name) args
+            
+        Returns:
+            List of formatted messages
+        """
+        # Only process if it's the character's turn and effect is active
+        if character.name != turn_name or self.state != EffectState.ACTIVE:
+            return []
+        
+        self.debug(f"Turn Start processing on round {round_number}")
+        messages = []
+        
+        # Calculate remaining turns for display
+        should_expire, is_final, remaining = self.calculate_duration(round_number, turn_name)
+        
+        # Handle permanent effects
+        if self.permanent:
+            # Create standard "active" message for permanent effects
+            messages.append(self.create_standard_active_message(character))
+            
+            # Run custom logic if provided
+            if custom_logic:
+                # FIXED: When self.custom_logic is passed, don't pass self explicitly
+                # as it's already included as the implicit first argument
+                custom_messages = custom_logic(character, round_number, turn_name)
+                if custom_messages:
+                    messages.extend(custom_messages)
+            
+            return messages
+        
+        # For non-permanent effects with duration
+        # Create standard "active" message based on remaining turns
+        if should_expire:
+            # Shouldn't happen during turn start, but handle it anyway
+            self.debug(f"Effect would expire on turn start (unusual). Duration: {self._internal_duration}, Elapsed: {self.turns_elapsed}")
+            messages.append(self.create_standard_active_message(character, 0))
+        elif is_final:
+            messages.append(self.create_standard_active_message(character, 1))
+        else:
+            messages.append(self.create_standard_active_message(character, remaining))
+        
+        # Run custom logic if provided
+        if custom_logic:
+            # FIXED: When self.custom_logic is passed, don't pass self explicitly
+            custom_messages = custom_logic(character, round_number, turn_name)
+            if custom_messages:
+                messages.extend(custom_messages)
+        
+        return messages
+
+    # === Standard Turn End ===
+    def standard_turn_end(self, character, round_number: int, turn_name: str, custom_logic=None) -> List[str]:
+        """
+        Standard implementation for on_turn_end that handles most common cases.
+        
+        Args:
+            character: Character whose turn is ending
+            round_number: Current combat round
+            turn_name: Name of the character whose turn it is
+            custom_logic: Optional callback method for custom effect logic
+                        Method should take (character, round_number, turn_name) args
+            
+        Returns:
+            List of formatted messages
+        """
+        # Skip processing if not this character's turn
+        if character.name != turn_name:
+            return []
+        
+        self.debug(f"Turn End processing on round {round_number}")
+        messages = []
+        
+        # Run custom logic first, before state transitions
+        if custom_logic:
+            # FIXED: When self.custom_logic is passed, don't pass self explicitly
+            custom_messages = custom_logic(character, round_number, turn_name)
+            if custom_messages:
+                messages.extend(custom_messages)
+        
+        # Skip duration logic for permanent effects
+        if self.permanent:
+            if self.process_timing in ["end", "both"] and self.state == EffectState.ACTIVE:
+                details = []
+                if hasattr(self, "custom_message") and self.custom_message:
+                    details.append(self.custom_message)
+                messages.append(self.create_standard_continues_message(character, 0, details))
+            return messages
+        
+        # Duration and state logic - let base class handle transitions
+        # but provide standard messaging
+        # Calculate if effect should expire
+        should_expire, is_final, remaining_display = self.calculate_duration(round_number, turn_name)
+        
+        if self.state == EffectState.ACTIVE:
+            if should_expire:
+                self.debug("Duration expired. Transitioning to EXPIRED.")
+                self.state = EffectState.EXPIRED
+                expiry_msg = self.create_standard_expiry_message(character)
+                
+                # Add to feedback instead of returning directly
+                self.add_feedback(character, expiry_msg, round_number, is_expiry=True)
+            elif is_final:
+                self.debug("Final turn reached. Transitioning to EXPIRING.")
+                self.state = EffectState.EXPIRING
+                messages.append(self.create_standard_final_message(character))
+            else:
+                # Normal case - effect continues
+                if remaining_display is not None and remaining_display > 0:
+                    details = []
+                    if hasattr(self, "custom_message") and self.custom_message:
+                        details.append(self.custom_message)
+                    messages.append(self.create_standard_continues_message(character, remaining_display, details))
+        
+        elif self.state == EffectState.EXPIRING:
+            # If already expiring, transition to expired
+            self.debug("Was EXPIRING. Transitioning to EXPIRED.")
+            self.state = EffectState.EXPIRED
+            expiry_msg = self.create_standard_expiry_message(character)
+            
+            # Add to feedback instead of returning directly
+            self.add_feedback(character, expiry_msg, round_number, is_expiry=True)
+        
+        return messages
+
+    def apply_status_effect(self, character, status_name: str, status_value: Any, 
+                        emoji: str = "✨", apply_message: Optional[str] = None) -> str:
+        """
+        Apply a generic status effect to a character (like a stat modifier).
+        
+        Args:
+            character: Character to affect
+            status_name: Name of the status (e.g., "strength", "movement")
+            status_value: Value to apply to the status
+            emoji: Emoji to use in messages
+            apply_message: Optional custom message (if None, generates standard message)
+            
+        Returns:
+            Formatted message about status application
+        """
+        # Generate a clean status name for display (e.g., "max_hp" -> "Max HP")
+        display_name = status_name.replace('_', ' ').title()
+        
+        # Create the message
+        if apply_message:
+            message = apply_message
+        else:
+            # Format the value with sign if it's a number
+            if isinstance(status_value, (int, float)):
+                sign = "+" if status_value > 0 else ""
+                message = f"{character.name}'s {display_name} {sign}{status_value}"
+            else:
+                message = f"{character.name}'s {display_name}: {status_value}"
+        
+        return self.format_effect_message(message, emoji=emoji)
 
 # --- Effect Registry ---
 
@@ -975,3 +1265,4 @@ class EffectRegistry:
     def get_registered_effects(cls) -> Dict[str, Type[BaseEffect]]:
         """Return a copy of the registered effects."""
         return cls._effects.copy()
+    

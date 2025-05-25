@@ -1,0 +1,23 @@
+{
+  "reference": "creator test",
+  "moves": {
+    "r": {
+      "name": "Supersonic Elbow",
+      "description": "Dashes and attacks at high speed",
+      "mp_cost": 0,
+      "hp_cost": 0,
+      "star_cost": 0,
+      "category": "Offense",
+      "version": 9,
+      "attack_roll": "1d20+dex",
+      "damage": "2d4+dex bludgeoning, 1d4 sonic",
+      "crit_range": 15,
+      "cast_time": 1,
+      "duration": 1,
+      "bonus_on_hit": {
+        "hp": 10,
+        "note": "Kinetic Charge"
+      }
+    }
+  }
+}

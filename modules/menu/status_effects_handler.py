@@ -1,3 +1,9 @@
+"""
+Update to status_effects_handler.py to support displaying stat effects.
+
+This extends the existing handler to properly format stat effects in the UI.
+"""
+
 from typing import Any, List, Optional
 from discord import Embed, Color
 from core.effects.condition import ConditionType, CONDITION_PROPERTIES
@@ -78,6 +84,20 @@ class StatusEffectHandler:
             'confusion': "Mental interference that may cause erratic behavior.",
             'vulnerability': "A weakness to specific types of damage.",
             'resistance': "Enhanced protection against specific types of damage.",
+            
+            # Stat effects
+            'strength boost': "Enhanced physical power, improving attack damage and athletics.",
+            'strength reduction': "Diminished physical power, reducing attack damage and athletics ability.",
+            'dexterity boost': "Improved agility and reflexes, enhancing accuracy and evasion.",
+            'dexterity reduction': "Reduced agility and reflexes, impairing accuracy and evasion.",
+            'constitution boost': "Increased stamina and resilience, improving health and endurance.",
+            'constitution reduction': "Decreased stamina and resilience, weakening health and endurance.",
+            'intelligence boost': "Enhanced mental acuity, improving arcane aptitude and knowledge.",
+            'intelligence reduction': "Diminished mental acuity, reducing arcane aptitude and knowledge.",
+            'wisdom boost': "Improved awareness and intuition, enhancing perception and mysticism.",
+            'wisdom reduction': "Impaired awareness and intuition, reducing perception and mysticism.",
+            'charisma boost': "Magnified presence and charm, improving social interactions and influence.",
+            'charisma reduction': "Weakened presence and charm, reducing social interactions and influence.",
 
             # Movement Conditions
             'prone': "Target is lying on the ground. Ranged attacks are harder, but melee attacks are easier.",
@@ -301,6 +321,72 @@ class StatusEffectHandler:
         return lines
 
     @staticmethod
+    def format_stat_effect(effect: Any, character: Any) -> List[str]:
+        """Format stat effect for status display"""
+        lines = []
+        
+        # Get base information
+        emoji = getattr(effect, '_get_emoji', lambda: "💪")()
+        stat_type = getattr(effect, 'stat_type', None)
+        amount = getattr(effect, 'amount', 0)
+        duration = getattr(effect, 'duration', None)
+        permanent = getattr(effect, 'permanent', False)
+        
+        if not stat_type:
+            return []
+        
+        # Get stat name
+        stat_name = stat_type.name.title() if hasattr(stat_type, 'name') else str(stat_type)
+        
+        # Add header
+        if amount >= 0:
+            lines.append(f"{emoji} **{stat_name} Boost**")
+        else:
+            lines.append(f"{emoji} **{stat_name} Reduction**")
+        
+        # Add description
+        description = StatusEffectHandler.get_effect_description(effect.name.lower())
+        if description:
+            lines.append(f"• {description}")
+        
+        # Get stat information
+        try:
+            if hasattr(character, 'stats'):
+                # Get base and modified values for the stat
+                base_value = character.stats.base.get(stat_type, 10)
+                modified_value = character.stats.modified.get(stat_type, base_value)
+                
+                # Calculate modifiers
+                base_mod = (base_value - 10) // 2
+                current_mod = (modified_value - 10) // 2
+                mod_change = current_mod - base_mod
+                
+                # Format sign
+                sign = "+" if amount > 0 else ""
+                
+                # Add stat info
+                lines.append(f"• **Modification:** `{sign}{amount}`")
+                lines.append(f"• **Base Value:** `{base_value} ({base_mod:+})`")
+                lines.append(f"• **Current Value:** `{modified_value} ({current_mod:+})`")
+                
+                # Add modifier impact if changed
+                if mod_change != 0:
+                    lines.append(f"• **Modifier Change:** `{mod_change:+}`")
+        except Exception as e:
+            # Fallback if we can't get stat info
+            sign = "+" if amount > 0 else ""
+            lines.append(f"• **Modification:** `{sign}{amount}`")
+        
+        # Add duration info
+        if permanent:
+            lines.append("• **Duration:** `Permanent`")
+        elif duration is not None:
+            s = "s" if duration != 1 else ""
+            lines.append(f"• **Duration:** `{duration} turn{s}`")
+        
+        return lines
+
+    @staticmethod
     def format_effects(effects: List[Any], character: Any = None) -> List[str]:
         """Format effect descriptions with better organization and visuals"""
         effect_texts = []
@@ -319,180 +405,165 @@ class StatusEffectHandler:
         # Merge stacking effects first
         effects = StatusEffectHandler.merge_stacking_effects(effects)
         
+        # Group effects by type for better organization
+        stat_effects = []
+        ac_effects = []
+        condition_effects = []
+        move_effects = []
+        other_effects = []
+        
         for effect in effects:
             # Skip placeholder effects
             if getattr(effect, 'type', '') == 'placeholder':
                 continue
+            
+            # Categorize by effect type
+            effect_name = getattr(effect, 'name', 'Unknown Effect').lower()
+            
+            # Check if this is a stat effect
+            if hasattr(effect, 'stat_type'):
+                stat_effects.append(effect)
+                continue
                 
-            # Get basic effect information
-            effect_name = getattr(effect, 'name', 'Unknown Effect')
-            
-            # Check if this is a move effect - improved detection
-            is_move_effect = False
-            
-            # Check for move effect by common attributes
+            # Check if this is an AC effect
+            if 'ac ' in effect_name or effect_name.startswith('ac '):
+                ac_effects.append(effect)
+                continue
+                
+            # Check if this is a condition effect
+            if hasattr(effect, 'conditions'):
+                condition_effects.append(effect)
+                continue
+                
+            # Check if this is a move effect
             if (hasattr(effect, 'state') or 
                 hasattr(effect, 'phases') or 
                 hasattr(effect, 'get_phase_name') or 
                 hasattr(effect, 'phase') or
                 hasattr(effect, 'cast_time') or
                 hasattr(effect, 'star_cost')):
-                is_move_effect = True
-            
-            # Handle move effects specially with better formatting
-            if is_move_effect:
-                try:
-                    # Get effect state
-                    state_name = ""
-                    if hasattr(effect, 'get_phase_name') and callable(getattr(effect, 'get_phase_name')):
-                        state_name = effect.get_phase_name()
-                    elif hasattr(effect, 'state'):
-                        state = effect.state
-                        state_name = state.value.title() if hasattr(state, 'value') else str(state)
-                    elif hasattr(effect, 'phase'):
-                        state_name = str(effect.phase).title()
-                        
-                    # Add header with name and state
-                    if state_name:
-                        effect_texts.append(f"✨ **{effect_name}** ({state_name}) ✨")
-                    else:
-                        effect_texts.append(f"✨ **{effect_name}** ✨")
-                    
-                    # Format description with bullet points
-                    description = getattr(effect, 'description', '')
-                    if description:
-                        if ';' in description:
-                            for part in description.split(';'):
-                                if part := part.strip():
-                                    effect_texts.append(f"• {part}")
-                        else:
-                            effect_texts.append(f"• {description}")
-                    
-                    # Add duration info based on state
-                    duration = getattr(effect, 'duration', None)
-                    cast_time = getattr(effect, 'cast_time', None)
-                    cooldown = getattr(effect, 'cooldown', None)
-                    
-                    state_lower = state_name.lower() if state_name else ""
-                    
-                    if "cast" in state_lower and cast_time:
-                        effect_texts.append(f"• Casting completes in {cast_time} turn(s)")
-                    elif "active" in state_lower and duration:
-                        effect_texts.append(f"• Duration: {duration} turn(s)")
-                    elif "cooldown" in state_lower and cooldown:
-                        effect_texts.append(f"• Cooldown: {cooldown} turn(s)")
-                    
-                    # Add target information if available
-                    if hasattr(effect, 'targets') and effect.targets:
-                        if isinstance(effect.targets, list) and effect.targets:
-                            target_names = []
-                            for target in effect.targets:
-                                target_names.append(getattr(target, 'name', str(target)))
-                            if target_names:
-                                effect_texts.append(f"• Targets: {', '.join(target_names)}")
-                        else:
-                            target_name = getattr(effect.targets, 'name', str(effect.targets))
-                            effect_texts.append(f"• Target: {target_name}")
-                            
-                    # Add separator
-                    effect_texts.append("─" * 40)
-                except Exception as e:
-                    # Add basic info if formatting fails
-                    effect_texts.append(f"**{effect_name}**")
-                    effect_texts.append(f"• Status: Active")
-                    effect_texts.append("─" * 40)
-                
+                move_effects.append(effect)
                 continue
-            
-            # Handle conditions and other effect types with existing code
-            if hasattr(effect, 'conditions'):
+                
+            # Otherwise, add to other effects
+            other_effects.append(effect)
+        
+        # Format each category of effects
+        
+        # 1. Format stat effects
+        for effect in stat_effects:
+            try:
+                # Use specialized formatter for stat effects
+                formatted_text = StatusEffectHandler.format_stat_effect(effect, character)
+                if formatted_text:
+                    effect_texts.extend(formatted_text)
+                    effect_texts.append("─" * 40)  # Separator line
+            except Exception as e:
+                # Fallback if formatter fails
+                effect_texts.append(f"**{effect.name}**")
+                effect_texts.append("─" * 40)  # Separator line
+                
+        # 2. Format AC effects
+        for effect in ac_effects:
+            try:
+                # Basic formatting for AC effects
+                emoji = getattr(effect, '_get_emoji', lambda: "🛡️")()
+                amount = getattr(effect, 'amount', 0)
+                sign = "+" if amount > 0 else ""
+                
+                effect_texts.append(f"{emoji} **{effect.name}**")
+                description = StatusEffectHandler.get_effect_description(effect_name)
+                if description:
+                    effect_texts.append(f"• {description}")
+                
+                effect_texts.append(f"• **AC Modified:** `{sign}{amount}`")
+                
+                if getattr(effect, 'permanent', False):
+                    effect_texts.append("• **Duration:** `Permanent`")
+                elif hasattr(effect, 'duration') and effect.duration:
+                    s = "s" if effect.duration != 1 else ""
+                    effect_texts.append(f"• **Duration:** `{effect.duration} turn{s}`")
+                
+                effect_texts.append("─" * 40)  # Separator line
+            except Exception as e:
+                # Fallback
+                effect_texts.append(f"**{effect.name}**")
+                effect_texts.append("─" * 40)  # Separator line
+                
+        # 3. Format condition effects
+        for effect in condition_effects:
+            try:
                 condition_details = StatusEffectHandler.format_condition_details(effect)
                 if condition_details:
                     effect_texts.extend(condition_details)
-                    effect_texts.append("─" * 40)
-                continue
+                    effect_texts.append("─" * 40)  # Separator line
+            except Exception as e:
+                # Fallback
+                effect_texts.append(f"**{effect.name}**")
+                effect_texts.append("─" * 40)  # Separator line
                 
-            # Handle other effects
-            description = StatusEffectHandler.get_effect_description(effect_name)
-            
-            # Header with name and basic description
-            header = [f"**{effect_name}**"]
-            if description:
-                header.append(f"• {description}")
-            
-            # Details section
-            details = []
-            
-            # Duration info (except for stacking effects)
-            if not any(x in effect_name.lower() for x in ['frostbite', 'heat']):
+        # 4. Format move effects
+        for effect in move_effects:
+            try:
+                move_lines = StatusEffectHandler.format_move_effect(effect, character)
+                if move_lines:
+                    effect_texts.extend(move_lines)
+                    effect_texts.append("─" * 40)  # Separator line
+            except Exception as e:
+                # Fallback
+                effect_texts.append(f"**{effect.name}**")
+                effect_texts.append("─" * 40)  # Separator line
+                
+        # 5. Format other effects
+        for effect in other_effects:
+            try:
+                effect_name = getattr(effect, 'name', 'Unknown Effect')
+                description = StatusEffectHandler.get_effect_description(effect_name)
+                
+                # Header with name
+                header = [f"**{effect_name}**"]
+                if description:
+                    header.append(f"• {description}")
+                
+                # Details section
+                details = []
+                
+                # Duration info
                 if getattr(effect, 'permanent', False):
                     details.append("**Duration:** `Permanent`")
                 elif hasattr(effect, 'duration') and effect.duration:
-                    details.append(f"**Duration:** `{effect.duration} turn(s)`")
-            
-            # Effect-specific details
-            if effect_name.lower() == 'frostbite':
-                stacks = getattr(effect, 'stacks', 0)
-                details.extend([
-                    f"**Stacks:** `{stacks}/5`",
-                    f"**Movement Speed:** `-{stacks * 5} ft`",
-                    f"**Attack Roll:** `-{stacks}`"
-                ])
-                if stacks >= 5:
-                    details.extend([
-                        "**Status:** `Frozen Solid`",
-                        "**Effects:**",
-                        "• `Cannot take actions`",
-                        "• `AC reduced to 5`"
-                    ])
-                    
-            elif effect_name.lower() == 'heat':
-                stacks = getattr(effect, 'stacks', 0)
-                source = getattr(effect, 'source', 'Unknown')
-                details.extend([
-                    f"**Source:** `{source}`",
-                    f"**Heat Stacks:** `{stacks}/3`",
-                    f"**AC Reduction:** `-{stacks}`"
-                ])
-                if stacks >= 3:
-                    details.append("**Status:** `Vulnerable to fire damage`")
-                if hasattr(effect, 'duration') and effect.duration:
-                    details.append(f"**Duration:** `{effect.duration} turn(s)`")
-                    
-            elif effect_name.lower() == 'phoenix pursuit':
-                details.extend([
-                    "**Effects:**",
-                    "• `Movement Speed: +5 ft`",
-                    "• `Quick Attack Cost: -2 MP`",
-                    "• `Attack Roll: +2`",
-                    "• `Ember Shift available as free action`",
-                    "• `Duration refreshes on critical hit`"
-                ])
-                if hasattr(effect, 'duration') and effect.duration:
-                    details.append(f"**Duration:** `{effect.duration} turn(s)`")
-                    
-            elif 'burn' in effect_name.lower():
-                damage = getattr(effect, 'damage_dice', 'N/A')
-                details.append(f"**Damage per Turn:** `{damage}`")
-                    
-            elif 'ac' in effect_name.lower():
-                amount = getattr(effect, 'amount', 0)
-                sign = '+' if amount > 0 else ''
-                details.append(f"**AC Modified:** `{sign}{amount}`")
+                    s = "s" if effect.duration != 1 else ""
+                    details.append(f"**Duration:** `{effect.duration} turn{s}`")
                 
-            # Custom effect handling
-            elif hasattr(effect, 'description'):
-                desc = getattr(effect, 'description', '')
-                if desc:
-                    if ';' in desc:
-                        bullets = [b.strip() for b in desc.split(';') if b.strip()]
-                        details.append("**Effects:**")
-                        details.extend(f"• `{bullet}`" for bullet in bullets)
-                    else:
-                        details.append(f"**Effect:** `{desc}`")
-            
-            # Combine everything with proper spacing and separator
-            effect_texts.append("\n".join(header + details))
-            effect_texts.append("─" * 40)  # Separator line
+                # Effect-specific details based on type
+                if hasattr(effect, 'description'):
+                    desc = getattr(effect, 'description', '')
+                    if desc:
+                        if ';' in desc:
+                            bullets = [b.strip() for b in desc.split(';') if b.strip()]
+                            details.append("**Effects:**")
+                            details.extend(f"• `{bullet}`" for bullet in bullets)
+                        else:
+                            details.append(f"**Effect:** `{desc}`")
                 
-        return effect_texts[:-1] if effect_texts else []  # Remove last separator
+                # Combine everything
+                effect_texts.append("\n".join(header + details))
+                effect_texts.append("─" * 40)  # Separator line
+            except Exception as e:
+                # Fallback
+                effect_texts.append(f"**{effect.name}**")
+                effect_texts.append("─" * 40)  # Separator line
+        
+        # Add pending effect feedback if any exists
+        if hasattr(character, 'effect_feedback'):
+            pending_feedback = [f for f in character.effect_feedback if not f.displayed]
+            if pending_feedback:
+                if effect_texts:
+                    effect_texts.append("")
+                effect_texts.append("**Recent Effect Updates:**")
+                for feedback in pending_feedback:
+                    # Simply append the expiry message, which is already formatted
+                    effect_texts.append(f"• `{feedback.effect_name} has worn off`")
+        
+        # Remove last separator if any
+        return effect_texts[:-1] if effect_texts else []

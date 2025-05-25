@@ -15,7 +15,9 @@ Features:
 import discord
 from core.effects.move import MoveEffect, RollTiming
 from core.effects.condition import ConditionType
+from core.effects.ac import ACEffect  # Add import for ACEffect
 from typing import Optional, List, Dict, Any, Tuple
+from .data import MoveData
 import logging
 
 logger = logging.getLogger(__name__)
@@ -202,6 +204,15 @@ class MoveManager:
             
         return "\n".join(lines)
     
+    def register_effects(self):
+        """Register all available effects with the effect registry"""
+        # Existing registrations...
+        
+        # Register AC effect
+        self.effect_registry.register_effect("ac_mod", ACEffect)
+        
+        # Other registrations...
+
 class MovesetManager:
     """
     Central manager for all moveset operations.

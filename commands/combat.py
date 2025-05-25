@@ -31,6 +31,16 @@ def apply_damage(target: Character, damage: int) -> Tuple[int, int, int]:
     old_hp = target.resources.current_hp
     target.resources.current_hp = max(0, old_hp - remaining)
     
+    # Clean up any depleted temp HP effects
+    effects_to_remove = []
+    for effect in target.effects:
+        if isinstance(effect, TempHPEffect) and getattr(effect, 'remaining', 0) <= 0:
+            effects_to_remove.append(effect)
+    
+    # Remove depleted effects
+    for effect in effects_to_remove:
+        target.remove_effect(effect)
+    
     return remaining, absorbed, target.resources.current_hp
 
 class CombatCommands(commands.Cog):
@@ -247,6 +257,23 @@ class CombatCommands(commands.Cog):
         damage_types = [t for _, t, _, _, _ in damage_results]
         primary_type = damage_types[0] if damage_types else "generic"
         
+        # Choose emoji based on damage type
+        type_emoji = {
+            "slashing": "🗡️",
+            "piercing": "🏹",
+            "bludgeoning": "🔨",
+            "fire": "🔥",
+            "cold": "❄️",
+            "lightning": "⚡",
+            "acid": "🧪",
+            "poison": "☠️",
+            "necrotic": "💀",
+            "radiant": "✨",
+            "psychic": "🧠",
+            "force": "💫",
+            "thunder": "🔊"
+        }.get(primary_type, "💥")
+        
         # Start with appropriate prefix based on whether there's an attacker
         if attacker and attacker_char:
             # Attack from character to character
@@ -255,57 +282,90 @@ class CombatCommands(commands.Cog):
             
             # Construct main message with backticks
             if crit:
-                main_part = f"{attacker} critically {verb} {target.name} for {total_damage} damage"
-                prefix = "⚔️ `"
+                main_part = f"{attacker} **CRITICALLY** {verb} {target.name} for `{total_damage}` damage"
+                prefix = f"{type_emoji} "
             else:
-                main_part = f"{attacker} {verb} {target.name} for {total_damage} damage"
-                prefix = "⚔️ `"
+                main_part = f"{attacker} {verb} {target.name} for `{total_damage}` damage"
+                prefix = f"{type_emoji} "
         else:
             # No attacker specified
             if crit:
-                main_part = f"CRITICAL HIT! {target.name} takes {total_damage} damage"
-                prefix = "💥 `"
+                main_part = f"**CRITICAL HIT!** {target.name} takes `{total_damage}` damage"
+                prefix = f"{type_emoji} "
             else:
-                main_part = f"{target.name} takes {total_damage} damage"
-                prefix = "💥 `"
+                main_part = f"{target.name} takes `{total_damage}` damage"
+                prefix = f"{type_emoji} "
         
         # Add damage type breakdown if there are multiple types
         if len(damage_results) > 1:
-            # Multiple damage types, list them
-            types_list = [f"{final} {type}" for _, type, final, _, _ in damage_results]
-            main_part += f" ({', '.join(types_list)})"
+            # Multiple damage types, list them with their own emojis
+            types_parts = []
+            for _, type_name, final, _, _ in damage_results:
+                type_emoji = {
+                    "slashing": "🗡️",
+                    "piercing": "🏹",
+                    "bludgeoning": "🔨",
+                    "fire": "🔥",
+                    "cold": "❄️",
+                    "lightning": "⚡",
+                    "acid": "🧪",
+                    "poison": "☠️",
+                    "necrotic": "💀",
+                    "radiant": "✨",
+                    "psychic": "🧠",
+                    "force": "💫",
+                    "thunder": "🔊"
+                }.get(type_name, "💥")
+                types_parts.append(f"{type_emoji}`{final}` {type_name}")
+            main_part += f" ({', '.join(types_parts)})"
         elif len(damage_results) == 1:
             # Single damage type, just add the type
             main_part += f" ({damage_results[0][1]})"
         
         # Add resistance/vulnerability info if applicable
-        for orig, type, final, _, vuln in damage_results:
+        modifiers = []
+        for orig, type_name, final, _, vuln in damage_results:
             if orig != final and final < orig:
                 # Add resistance info
                 resist_pct = round((1 - final/orig) * 100)
                 if resist_pct > 0:
-                    main_part += f", resisted {resist_pct}%"
-                    break  # Only show first resistance
+                    modifiers.append(f"🛡️ Resisted {resist_pct}%")
             elif vuln > 0:
                 # Add vulnerability info
-                main_part += f", vulnerable +{vuln}%"
-                break  # Only show first vulnerability
+                modifiers.append(f"⚠️ Vulnerable +{vuln}%")
         
+        if modifiers:
+            main_part += f" | {' | '.join(modifiers)}"
+            
         # Add temp HP absorption if any
         if absorbed > 0:
-            main_part += f", {absorbed} absorbed by shield"
-            
-        # Close backticks
-        main_part += "`"
+            main_part += f" | 💟 `{absorbed}` absorbed by shield"
         
-        # Construct full message with HP status
-        message = f"{prefix}{main_part}. HP: {final_hp}/{target.resources.max_hp}"
+        # Add HP status with visual indicator
+        hp_change = old_hp - final_hp
+        hp_percent = int((final_hp / target.resources.max_hp) * 100)
+        
+        if hp_percent > 75:
+            hp_emoji = "💚"  # Healthy
+        elif hp_percent > 50:
+            hp_emoji = "💛"  # Injured
+        elif hp_percent > 25:
+            hp_emoji = "🧡"  # Badly hurt
+        else:
+            hp_emoji = "❤️"  # Critical
+            
+        hp_status = f"{hp_emoji} `{final_hp}`/`{target.resources.max_hp}` HP"
+        if hp_change > 0:
+            hp_status += f" (-`{hp_change}`)"
         
         # Add reason if provided
         if reason:
-            message += f" ({reason})"
+            reason_part = f" | 📝 {reason}"
+        else:
+            reason_part = ""
         
-        return message
+        # Construct the full message
+        return f"{prefix}{main_part} | {hp_status}{reason_part}"
 
     @app_commands.command(name="temp_hp")
     @app_commands.describe(
@@ -356,8 +416,17 @@ class CombatCommands(commands.Cog):
             # Create and apply temp HP effect
             effect = TempHPEffect(hp_amount, duration)
             old_temp = char.resources.current_temp_hp
-            char.add_effect(effect)
-            new_temp = char.resources.current_temp_hp
+            
+            # First run on_apply to ensure it's properly initialized
+            effect._initialize_timing(char, self.bot.initiative_tracker.round_number if hasattr(self.bot, 'initiative_tracker') else 1)
+            effect.on_apply(char, self.bot.initiative_tracker.round_number if hasattr(self.bot, 'initiative_tracker') else 1)
+            
+            # Add the effect to the character
+            char.effects.append(effect)
+            
+            # Update the temp HP
+            new_temp = char.resources.current_temp_hp = hp_amount
+            char.resources.max_temp_hp = hp_amount
 
             # Show roll details privately
             await interaction.followup.send(
@@ -369,21 +438,21 @@ class CombatCommands(commands.Cog):
             print(f"Command: /temp_hp {name} {amount}{' --duration '+str(duration) if duration else ''}{' --reason \"'+reason+'\"' if reason else ''}")
             
             # Create main message part
-            main_part = f"{char.name} gains {hp_amount} temporary HP"
+            main_part = f"{char.name} gains `{hp_amount}` temporary HP"
             
             # Add duration if specified
             if duration:
-                main_part += f" for {duration} turns"
+                main_part += f" for `{duration}` turns"
                 
-            # Construct full message with backticks
-            message = f"🛡️ `{main_part}`"
+            # Construct full message
+            message = f"💟 {main_part}"
                 
             # Add reason if provided
             if reason:
-                message += f" ({reason})"
+                message += f" | 📝 {reason}"
                 
-            # Add current shields info
-            message += f". Shield: {new_temp}, HP: {char.resources.current_hp}/{char.resources.max_hp}"
+            # Add current shields and HP info
+            message += f" | Shield: `{new_temp}`, HP: `{char.resources.current_hp}`/`{char.resources.max_hp}`"
             
             # Log if in combat
             if combat_logger:

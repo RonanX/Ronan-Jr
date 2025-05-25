@@ -680,31 +680,22 @@ class MoveEffect(BaseEffect):
 
     @property
     def is_expired(self) -> bool:
-        """Override to use our own expiry logic"""
-        if super().is_expired:
-            return True
-            
-        # Check if truly instant (no phases)
-        is_truly_instant = not self.cast_time and not self.duration and not self.cooldown
-        if is_truly_instant:
-            if hasattr(self, '_internal_cache') and not self._internal_cache:
-                # If it's instant and all operations have executed
-                return True
-                
-        # Check if marked for removal
+        """Check if the effect is expired and should be removed"""
+        # Check if marked for removal or timing handler indicates removal
         if self.marked_for_removal:
             return True
-            
-        # Check timing handler
-        if hasattr(self, 'timing_handler') and self.timing_handler.should_be_removed:
-            return True
-            
-        # For instant effects that have been processed
-        if (hasattr(self, 'timing_handler') and 
-            self.timing_handler.is_instant() and
-            not self.timing_handler.just_applied):
-            return True
-            
+        
+        # Check timing handler state
+        if hasattr(self, 'timing_handler') and self.timing_handler:
+            if hasattr(self.timing_handler, 'should_be_removed') and self.timing_handler.should_be_removed:
+                return True
+            if hasattr(self.timing_handler, 'current_phase') and self.timing_handler.current_phase == MovePhase.INSTANT:
+                return True
+        
+        # Check if state indicates expiry
+        if hasattr(self, 'state') and hasattr(self.state, 'value'):
+            return self.state.value in ['expired', 'removed']
+        
         return False
 
     async def execute_pending_operations(self) -> List[str]:

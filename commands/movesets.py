@@ -148,8 +148,14 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                 
                 async def confirm_callback(btn_interaction):
                     if btn_interaction.user != interaction.user:
+                        await btn_interaction.response.send_message(
+                            "❌ Only the command user can confirm this action.", 
+                            ephemeral=True
+                        )
                         return
                         
+                    await btn_interaction.response.defer()
+                    
                     # Assign moveset (sets reference) - pass both db and bot
                     success = await MoveLoader.assign_global_moveset(
                         self.bot.db,
@@ -169,23 +175,8 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                     # Get updated character
                     char = self.bot.game_state.get_character(character)
                     
-                    # Update response
-                    embed = discord.Embed(
-                        title=f"📥 Moveset Loaded",
-                        description=f"Replaced {character}'s moves with '{name}'",
-                        color=discord.Color.green()
-                    )
-                    
-                    moves_list = char.list_moves()
-                    if moves_list:
-                        move_text = "\n".join(f"• {move}" for move in moves_list[:15])
-                        if len(moves_list) > 15:
-                            move_text += f"\n• ... and {len(moves_list) - 15} more"
-                            
-                        embed.add_field(
-                            name=f"Moves ({len(moves_list)})",
-                            value=move_text
-                        )
+                    # Create success embed
+                    embed = self._create_load_success_embed(character, name, char, replaced=True)
                     
                     await interaction.edit_original_response(
                         content=None,
@@ -195,10 +186,15 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                     
                 async def cancel_callback(btn_interaction):
                     if btn_interaction.user != interaction.user:
+                        await btn_interaction.response.send_message(
+                            "❌ Only the command user can cancel this action.", 
+                            ephemeral=True
+                        )
                         return
                         
+                    await btn_interaction.response.defer()
                     await interaction.edit_original_response(
-                        content="Moveset load cancelled.",
+                        content="❌ Moveset load cancelled.",
                         embed=None,
                         view=None
                     )
@@ -222,7 +218,8 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                     
                     embed.add_field(
                         name=f"Current Moves ({len(current_moves)})",
-                        value=current_text
+                        value=current_text,
+                        inline=True
                     )
                 
                 # Show new moves
@@ -234,7 +231,8 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                     
                     embed.add_field(
                         name=f"New Moves ({len(new_moves)})",
-                        value=new_text
+                        value=new_text,
+                        inline=True
                     )
                 
                 await interaction.followup.send(
@@ -252,6 +250,9 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                             
                     # Save reference
                     char.moveset.reference = name
+                    
+                    # Save character
+                    await self.bot.db.save_character(char)
                 else:
                     # Replace with new moveset
                     result = await MoveLoader.assign_global_moveset(
@@ -265,33 +266,109 @@ class MovesetCommands(commands.GroupCog, name="moveset"):
                         # If failed to load global moveset, just use the local one
                         char.moveset = moveset
                         await self.bot.db.save_character(char)
-                        
-                    # If success, the character is already saved by assign_global_moveset
-                    # No need to save again
-                    return
                 
-                # Create feedback embed
-                embed = discord.Embed(
-                    title=f"📥 Moveset Loaded",
-                    description=f"{'Merged' if merge else 'Loaded'} moveset '{name}' into {character}",
-                    color=discord.Color.green()
-                )
+                # Get updated character for display
+                char = self.bot.game_state.get_character(character)
                 
-                moves_list = char.list_moves()
-                if moves_list:
-                    move_text = "\n".join(f"• {move}" for move in moves_list[:15])
-                    if len(moves_list) > 15:
-                        move_text += f"\n• ... and {len(moves_list) - 15} more"
-                        
-                    embed.add_field(
-                        name=f"Moves ({len(moves_list)})",
-                        value=move_text
-                    )
+                # Create success embed
+                embed = self._create_load_success_embed(character, name, char, merged=merge)
                 
                 await interaction.followup.send(embed=embed)
 
         except Exception as e:
             await handle_error(interaction, e)
+
+    def _create_load_success_embed(self, character_name: str, moveset_name: str, character, merged: bool = False, replaced: bool = False) -> discord.Embed:
+        """Helper method to create success embed for load operations"""
+        
+        if replaced:
+            title = "✅ Moveset Replaced Successfully"
+            description = f"Replaced {character_name}'s moves with moveset **{moveset_name}**"
+        elif merged:
+            title = "✅ Moveset Merged Successfully"
+            description = f"Merged moveset **{moveset_name}** into {character_name}'s existing moves"
+        else:
+            title = "✅ Moveset Loaded Successfully"
+            description = f"Loaded moveset **{moveset_name}** into {character_name}"
+        
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.green()
+        )
+        
+        # Add character's current moves
+        moves_list = character.list_moves() if character else []
+        if moves_list:
+            # Group by category if possible
+            moves_by_category = {}
+            for move_name in moves_list:
+                move = character.get_move(move_name)
+                if move and hasattr(move, 'category'):
+                    category = move.category
+                    if category not in moves_by_category:
+                        moves_by_category[category] = []
+                    moves_by_category[category].append(move)
+                else:
+                    # Fallback category
+                    if 'Other' not in moves_by_category:
+                        moves_by_category['Other'] = []
+                    moves_by_category['Other'].append(move_name)
+            
+            # If we have categories, show them separately
+            if len(moves_by_category) > 1:
+                for category, moves in moves_by_category.items():
+                    if isinstance(moves[0], str):
+                        # Fallback case - just names
+                        move_text = "\n".join(f"• {move}" for move in moves[:12])
+                        if len(moves) > 12:
+                            move_text += f"\n• ... and {len(moves) - 12} more"
+                    else:
+                        # Move objects with cost info
+                        move_lines = []
+                        for move in moves[:12]:
+                            cost_parts = []
+                            if hasattr(move, 'star_cost') and move.star_cost > 0:
+                                cost_parts.append(f"⭐{move.star_cost}")
+                            if hasattr(move, 'mp_cost') and move.mp_cost != 0:
+                                cost_parts.append(f"MP:{abs(move.mp_cost)}")
+                            
+                            cost_text = f" ({', '.join(cost_parts)})" if cost_parts else ""
+                            move_lines.append(f"• {move.name}{cost_text}")
+                        
+                        if len(moves) > 12:
+                            move_lines.append(f"• ... and {len(moves) - 12} more")
+                        
+                        move_text = "\n".join(move_lines)
+                    
+                    embed.add_field(
+                        name=f"{category} ({len(moves)})",
+                        value=move_text,
+                        inline=True
+                    )
+            else:
+                # Single category or no category info - show all together
+                move_text = "\n".join(f"• {move}" for move in moves_list[:15])
+                if len(moves_list) > 15:
+                    move_text += f"\n• ... and {len(moves_list) - 15} more"
+                    
+                embed.add_field(
+                    name=f"All Moves ({len(moves_list)})",
+                    value=move_text,
+                    inline=False
+                )
+        else:
+            embed.add_field(
+                name="Moves",
+                value="No moves found",
+                inline=False
+            )
+        
+        # Add reference info if available
+        if hasattr(character, 'moveset') and hasattr(character.moveset, 'reference') and character.moveset.reference:
+            embed.set_footer(text=f"Moveset reference: {character.moveset.reference}")
+        
+        return embed
 
     @app_commands.command(name="list")
     async def list_movesets(

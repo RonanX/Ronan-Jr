@@ -1,0 +1,11 @@
+Starting Move Effect System Tests
+==================================================
+Output directory: d:\Games\Campaigns\Ronan Jr\tests\move_effect_testing
+Test started: 2025-05-24 19:19:18
+
+Test failed with error: name 'test_during_own_turn_timing' is not defined
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\tests\move_effect_test.py", line 795, in run_all_tests
+    timing_effect = await test_during_own_turn_timing()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'test_during_own_turn_timing' is not defined

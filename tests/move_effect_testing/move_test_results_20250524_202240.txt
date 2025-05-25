@@ -1,0 +1,231 @@
+Starting Move Effect System Tests
+==================================================
+Output directory: d:\Games\Campaigns\Ronan Jr\tests\move_effect_testing
+Test started: 2025-05-24 20:22:40
+
+=== Testing Instant Attack Move ===
+Created move effect: Lightning Strike
+Roll timing: RollTiming.INSTANT
+Attack roll: 20
+Apply message: ✨ `Alice uses Lightning Strike | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [16]+0 → 16 | 🎯 Bob ✅ AC 15 | ⚡ 11 lightning each | 📝 Lightning Strike`
+Pending messages:
+  ✨ `Lightning Strike has expired from Alice` ✨
+Effect expired: True
+Effects on attacker: 0
+
+=== Testing Casting to Active Move ===
+Created move: Fireball
+Cast time: 2
+Duration: 3
+Initial apply: ✨ `Wizard channels arcane energy for Fireball | ⭐ 1 | 🔄 2T Cast | MP: 30/30 | Stars: 2/3` ✨
+
+--- Turn 1 (Round 1) ---
+Start of turn:
+  ✨ `Casting Fireball` ✨
+• `3 turns remaining`
+End of turn:
+  ✨ `Fireball (casting) continues` ✨
+• `2 turns remaining`
+Effect state: MovePhase.CASTING
+Turns remaining: 2
+
+--- Turn 2 (Round 2) ---
+Start of turn:
+  ✨ `Casting Fireball` ✨
+• `2 turns remaining`
+End of turn:
+  ✨ `Fireball (casting) continues` ✨
+• `Final turn of casting`
+Effect state: MovePhase.CASTING
+Turns remaining: 1
+
+--- Turn 3 (Round 3) ---
+Start of turn:
+  ✨ `Casting Fireball` ✨
+• `Casting completes this turn`
+End of turn:
+  ✨ `Fireball activates!` ✨
+• `Active for 3 turns`
+Effect state: MovePhase.ACTIVE
+Turns remaining: 3
+
+--- Turn 4 (Round 4) ---
+Start of turn:
+  ✨ `Fireball active` ✨
+• `3 turns remaining`
+  • `🎲 20: [3]+0 → 3 | 🎯 Enemy ❌ AC 15 | 📝 Fireball`
+End of turn:
+  ✨ `Fireball (active) continues` ✨
+• `2 turns remaining`
+Effect state: MovePhase.ACTIVE
+Turns remaining: 2
+
+--- Turn 5 (Round 5) ---
+Start of turn:
+  ✨ `Fireball active` ✨
+• `2 turns remaining`
+End of turn:
+  ✨ `Fireball (active) continues` ✨
+• `Final active turn`
+Effect state: MovePhase.ACTIVE
+Turns remaining: 1
+
+=== Testing Cooldown Only Move ===
+Created move: Power Strike
+Cooldown: 3
+Apply: ✨ `Fighter uses Power Strike | ⭐ 1 | ⌛ 3T Cooldown | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [8]+0 → 8 | 🎯 Target ❌ AC 15 | 📝 Power Strike`
+
+--- Cooldown Turn 1 (Round 1) ---
+  ✨ `Power Strike (cooldown) continues` ✨
+• `2 turns remaining`
+
+--- Cooldown Turn 2 (Round 2) ---
+  ✨ `Power Strike (cooldown) continues` ✨
+• `Final cooldown turn`
+
+--- Cooldown Turn 3 (Round 3) ---
+  ✨ `Power Strike cooldown has ended` ✨
+  ✨ `Power Strike has expired from Fighter` ✨
+Cooldown complete
+
+=== Testing During Own Turn Timing ===
+Move duration: 2
+Applied during own turn: ✨ `Mage uses Magic Shield | 💙 MP: 5 | ⭐ 1 | MP: 25/30 | Stars: 2/3` ✨
+Timing adjusted: True
+Internal turns: 3
+Display turns: 3
+
+--- Turn 1 (Round 1) ---
+  ✨ `Magic Shield (active) continues` ✨
+• `2 turns remaining`
+Display turns remaining: 2
+
+--- Turn 2 (Round 2) ---
+  ✨ `Magic Shield (active) continues` ✨
+• `Final active turn`
+Display turns remaining: 1
+
+--- Turn 3 (Round 3) ---
+  ✨ `Magic Shield wears off` ✨
+  ✨ `Magic Shield has expired from Mage` ✨
+
+=== Testing Discord Compatibility ===
+Message format checks:
+  Contains emojis: True
+  Contains backticks: True
+  Length under Discord limit: True
+  Message: ✨ `DiscordTest uses Discord Test Move | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [3]+0 → 3 | 🎯 Target ❌ AC 15 | 📝 Discord Test Move`
+  Pending length OK: True - ✨ `Discord Test Move has expired from DiscordTest` ✨
+
+=== Testing Bonus on Hit (Guaranteed Hit) ===
+Initial MP: 30
+Initial Stars: 3
+Apply: ✨ `Rogue uses Precise Strike | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [16]+0 → 16 | 🎯 Victim ✅ AC 15 | ⚔️ 5 damage each | 📝 Precise Strike`
+• ``1 Hit! | 💙 MP: +3 (30/30) | ⭐ +1 (3/3) | Precise hit bonus``
+• `Precise hit bonus`
+  ✨ `Precise Strike has expired from Rogue` ✨
+Final MP: 30
+Final Stars: 3
+
+=== Testing AOE vs Single Target ===
+
+--- Single Target Attack ---
+Single target: ✨ `Mage uses Magic Missile | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [2]+0 → 2 | 🎯 Enemy1 ❌ AC 15 | 📝 Magic Missile`
+  ✨ `Magic Missile has expired from Mage` ✨
+
+--- AOE Attack (Multiple Targets) ---
+AOE attack: ✨ `Mage uses Fireball AOE | ⭐ 1 | MP: 30/30 | Stars: 1/3` ✨
+• `🎲 20: [9]+0 → 9 | 🎯 Enemy1 ❌ AC 15, Enemy2 ❌ AC 15, Enemy3 ❌ AC 15 | 📝 Fireball AOE`
+  ✨ `Fireball AOE has expired from Mage` ✨
+
+=== Testing Multihit Mechanics ===
+Multihit count: 3
+Apply: ✨ `Fighter uses Flurry of Blows | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [20]+0 → 20 | 🎯 Dummy ✅ AC 15 | ⚔️ 6 each each | 📝 Flurry of Blows`
+  ✨ `Flurry of Blows has expired from Fighter` ✨
+
+=== Testing Advantage/Disadvantage ===
+
+--- Attack with Advantage ---
+Advantage: ✨ `Rogue uses Sneak Attack | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 1d20+8 advantage: [12,8]+0 → 12 (advantage) | 🎯 Guard ❌ AC 15 | 📝 Sneak Attack`
+  ✨ `Sneak Attack has expired from Rogue` ✨
+
+--- Attack with Disadvantage ---
+Disadvantage: ✨ `Rogue uses Blinded Strike | ⭐ 1 | MP: 30/30 | Stars: 1/3` ✨
+• `🎲 1d20+8 disadvantage: [6,18]+0 → 6 (disadvantage) | 🎯 Guard ❌ AC 15 | 📝 Blinded Strike`
+  ✨ `Blinded Strike has expired from Rogue` ✨
+
+=== Testing Multihit + Bonus on Hit ===
+Initial MP: 30
+Multihit count: 4
+Apply: ✨ `Monk uses Chi Strike | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [2]+0 → 2 | 🎯 Training Dummy ❌ AC 15 | 📝 Chi Strike`
+  ✨ `Chi Strike has expired from Monk` ✨
+Final MP: 30
+
+=== Testing AOE + Bonus on Hit ===
+Initial HP: 50
+Target count: 3
+Apply: ✨ `Warlock uses Life Drain Burst | ⭐ 1 | MP: 30/30 | Stars: 2/3` ✨
+• `🎲 20: [7]+0 → 7 | 🎯 Goblin1 ❌ AC 15, Goblin2 ❌ AC 15, Goblin3 ❌ AC 15 | 📝 Life Drain Burst`
+  ✨ `Life Drain Burst has expired from Warlock` ✨
+Final HP: 50
+
+=== Testing Duration Mechanics ===
+
+--- 1-Turn Duration Effect ---
+1-turn effect applied: ✨ `Cleric uses Shield of Faith | 💙 MP: 3 | ⭐ 1 | MP: 27/30 | Stars: 2/3` ✨
+Display turns: 2
+
+--- Turn 1 ---
+  ✨ `Shield of Faith (active) continues` ✨
+• `Final active turn`
+Remaining: 1
+
+--- Turn 2 ---
+  ✨ `Shield of Faith wears off` ✨
+  ✨ `Shield of Faith has expired from Cleric` ✨
+1-turn effect expired
+
+--- 2-Turn Duration Effect ---
+2-turn effect applied: ✨ `Cleric uses Bless | 💙 MP: 5 | ⭐ 1 | MP: 22/30 | Stars: 1/3` ✨
+Display turns: 3
+
+--- Turn 1 ---
+  ✨ `Bless (active) continues` ✨
+• `2 turns remaining`
+Remaining: 2
+
+--- Turn 2 ---
+  ✨ `Bless (active) continues` ✨
+• `Final active turn`
+Remaining: 1
+
+--- Turn 3 ---
+  ✨ `Bless wears off` ✨
+  ✨ `Bless has expired from Cleric` ✨
+2-turn effect expired
+
+==================================================
+All tests completed successfully!
+Test finished: 2025-05-24 20:22:40
+
+Test Summary:
+✅ Instant attacks with guaranteed hits
+✅ Casting to active phase transitions
+✅ Cooldown mechanics
+✅ During own turn timing adjustments
+✅ Bonus on hit with guaranteed hits
+✅ AOE vs single target mechanics
+✅ Multihit attack mechanics
+✅ Advantage/disadvantage mechanics
+✅ Multihit + bonus on hit
+✅ AOE + bonus on hit
+✅ 1-turn vs 2-turn duration testing
+✅ Discord compatibility

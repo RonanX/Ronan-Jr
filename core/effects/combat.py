@@ -1164,10 +1164,11 @@ class TempHPEffect(BaseEffect):
     """Provides temporary hit points that absorb damage"""
     def __init__(self, amount: int, duration: Optional[int] = None):
         super().__init__(
-            f"Temporary HP Shield",
+            name=f"Temporary HP Shield",
             duration=duration,
             permanent=duration is None,  # Make permanent if no duration specified
-            category=EffectCategory.RESOURCE
+            category=EffectCategory.RESOURCE,
+            emoji="💟"
         )
         self.amount = amount
         self.remaining = amount
@@ -1175,7 +1176,8 @@ class TempHPEffect(BaseEffect):
 
     def on_apply(self, character, round_number: int) -> str:
         """Apply temp HP to character's resources"""
-        self.initialize_timing(round_number, character.name)
+        # Call parent implementation first to handle timing and state
+        result = super().on_apply(character, round_number)
         
         if not self.applied:
             character.resources.current_temp_hp = self.amount
@@ -1193,7 +1195,7 @@ class TempHPEffect(BaseEffect):
                 details,
                 emoji="💟"
             )
-        return ""
+        return result
     
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
         """Show shield status at turn start"""
@@ -1210,21 +1212,19 @@ class TempHPEffect(BaseEffect):
         # Format details
         details = [f"Shield integrity: {self.remaining}/{self.amount} ({percentage}%)"]
         
-        # Add duration info if applicable
-        if not self.permanent and self.duration:
-            turns_remaining, _ = self.process_duration(round_number, turn_name)
-            if turns_remaining is not None and turns_remaining > 0:
-                details.append(f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining")
-                
-        return [self.format_effect_message(
-            f"Temporary HP Shield active",
-            details,
-            emoji="💟"
-        )]
+        # Use standard_turn_start helper for duration tracking
+        messages = self.standard_turn_start(
+            character, 
+            round_number, 
+            turn_name,
+            # Custom logic can be added here if needed
+        )
+        
+        return messages
     
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """Handle duration tracking"""
-        if character.name != turn_name or self.permanent:
+        if character.name != turn_name:
             return []
             
         # Skip if shield is depleted
@@ -1235,34 +1235,14 @@ class TempHPEffect(BaseEffect):
                 emoji="💟"
             )]
             
-        # Calculate remaining turns
-        turns_remaining, should_expire = self.process_duration(round_number, turn_name)
-        messages = []
-        
-        # Create expiry warning if needed
-        if should_expire:
-            self._marked_for_expiry = True
-            messages.append(self.format_effect_message(
-                f"Temporary HP shield will wear off from {character.name}",
-                [f"Remaining shield: {self.remaining}/{self.amount}"],
-                emoji="💟"
-            ))
-        elif turns_remaining is not None and turns_remaining > 0:
-            # Format with duration and status
-            percentage = round((self.remaining / self.amount) * 100)
-            messages.append(self.format_effect_message(
-                f"Shield continues",
-                [
-                    f"Integrity: {self.remaining}/{self.amount} ({percentage}%)",
-                    f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"
-                ],
-                emoji="💟"
-            ))
-            
-        return messages
+        # Use standard_turn_end helper for duration tracking
+        return self.standard_turn_end(character, round_number, turn_name)
 
     def on_expire(self, character) -> str:
         """Clean up temp HP when effect expires"""
+        # Call parent implementation to handle state transition
+        super().on_expire(character)
+        
         if self.applied:
             character.resources.current_temp_hp = 0
             character.resources.max_temp_hp = 0
@@ -1284,6 +1264,10 @@ class TempHPEffect(BaseEffect):
         # Update character's current temp HP
         if hasattr(self, '_character'):
             self._character.resources.current_temp_hp = self.remaining
+        
+        # Mark for expiry if fully depleted
+        if self.remaining <= 0:
+            self._marked_for_expiry = True
             
         return absorbed, damage - absorbed
 
@@ -1330,16 +1314,22 @@ class TempHPEffect(BaseEffect):
         effect.remaining = data.get('remaining', effect.amount)
         effect.applied = data.get('applied', False)
         
-        # Restore timing if it exists
-        if timing_data := data.get('timing'):
-            effect.timing = EffectProcessTiming(**timing_data)
+        # Load timing data if it exists
+        if 'timing_info' in data and data['timing_info']:
+            from core.effects.base import EffectProcessTimingInfo
+            effect.timing = EffectProcessTimingInfo(**data['timing_info'])
+            
+        # Restore state if it exists
+        if 'state' in data:
+            from core.effects.base import EffectState
+            effect.state = EffectState(data['state'])
             
         # Restore marked for expiry flag
         if '_marked_for_expiry' in data:
             effect._marked_for_expiry = data['_marked_for_expiry']
             
         return effect
-    
+
 class ShockEffect(BaseEffect):
     """
     Applies a chance-based shock effect that can damage and stun.

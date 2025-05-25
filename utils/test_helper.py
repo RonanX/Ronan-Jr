@@ -13,6 +13,7 @@ from typing import List, Dict, Optional, Tuple, Any
 import logging
 import asyncio
 import inspect
+import os
 
 # Function for quickly deleting and recreating test-test4
 async def recreate_test_characters(bot) -> List[str]:
@@ -1135,5 +1136,85 @@ async def test_cleanup(bot, interaction):
                 print(f"    • {effect.name}")
     
     print("Cleanup test complete")
+
+async def create_debug_moveset(bot):
+    """Load comprehensive debug moveset from JSON file"""
+    print("\n=== Loading Debug Moveset ===")
+    
+    import json
+    from modules.moves.data import Moveset, MoveData
+    
+    try:
+        # Load the JSON file
+        json_path = os.path.join(os.path.dirname(__file__), '..', 'moveset jsons', 'debug_comprehensive.json')
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            moveset_data = json.load(f)
+        
+        # Create moveset from data
+        debug_moveset = Moveset.from_dict(moveset_data)
+        
+        # Get test character
+        test_char = bot.game_state.get_character("test")
+        if not test_char:
+            print("ERROR: Character 'test' not found! Run /debugroll first.")
+            return False
+        
+        # Apply moveset to character
+        test_char.moveset = debug_moveset
+        await bot.db.save_character(test_char)
+        
+        print(f"Loaded {len(debug_moveset.moves)} debug moves to character 'test'")
+        
+        # Print summary by category
+        categories = {}
+        for move in debug_moveset.moves.values():
+            cat = move.category
+            if cat not in categories:
+                categories[cat] = []
+            categories[cat].append(move)
+        
+        print("\nMoves by category:")
+        for category, moves in categories.items():
+            print(f"\n{category}:")
+            for move in moves:
+                features = []
+                if move.attack_roll and "multihit" in move.attack_roll:
+                    features.append("MULTIHIT")
+                if move.aoe_mode == "single":
+                    features.append("AOE-SINGLE")
+                elif move.aoe_mode == "multi":
+                    features.append("AOE-MULTI")
+                if move.bonus_on_hit:
+                    features.append("BONUS-ON-HIT")
+                if "advantage" in (move.attack_roll or ""):
+                    features.append("ADVANTAGE")
+                if "disadvantage" in (move.attack_roll or ""):
+                    features.append("DISADVANTAGE")
+                if move.cast_time:
+                    features.append("CAST-TIME")
+                if move.duration:
+                    features.append("DURATION")
+                if move.cooldown:
+                    features.append("COOLDOWN")
+                if move.crit_range < 20:
+                    features.append("ENHANCED-CRIT")
+                if move.roll_timing == "per_turn":
+                    features.append("PER-TURN")
+                
+                feature_str = f" [{', '.join(features)}]" if features else ""
+                print(f"  • {move.name}{feature_str}")
+        
+        print("\n=== Debug Moveset Loaded Successfully ===")
+        return True
+        
+    except FileNotFoundError:
+        print(f"ERROR: Debug moveset file not found at {json_path}")
+        return False
+    except Exception as e:
+        print(f"ERROR: Failed to load debug moveset: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 ### End of helpers for move debugging ###

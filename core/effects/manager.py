@@ -28,6 +28,9 @@ from .base import BaseEffect, EffectState, EffectCategory, EffectRegistry
 # Import specific effects needed for registration
 from .burn_effect import BurnEffect # Keep for now
 from .debug_effect import DebugEffect # Import the DebugEffect
+from .ac import ACEffect # Import the ACEffect
+from .stat import StatEffect # Import the new StatEffect
+
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +51,13 @@ def register_effects():
     # Register the DebugEffect
     EffectRegistry.register_effect("debug", DebugEffect)
 
-    # Register existing effects (will need updates later)
-    EffectRegistry.register_effect("burn", BurnEffect) # Keep for now
+    # Register existing effects
+    EffectRegistry.register_effect("burn", BurnEffect)
+    
+    # Register the new StatEffect
+    EffectRegistry.register_effect("stat", StatEffect)
+
+    EffectRegistry.register_effect("ac", ACEffect)
 
     # Add other effect registrations here as they are updated/created
     # e.g., EffectRegistry.register_effect("stun", StunEffect)

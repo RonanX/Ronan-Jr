@@ -183,14 +183,33 @@ class GameBot(commands.Bot):
         """Called when the bot is starting up"""
         # Register all effect types  
         register_effects()  
+        
+        # Apply AC extension for consolidated messages
+        try:
+            from core.effects.ac_extension import apply_ac_extension
+            apply_ac_extension()
+            print("✓ AC effect consolidation extension applied")
+        except Exception as e:
+            logger.error(f"Failed to apply AC extension: {e}", exc_info=True)
+            print(f"WARNING: AC effects will not be consolidated. Error: {e}")
          
+        # Apply stat effects extension for proper stacking
+        try:
+            from core.effects.stat import apply_stat_extension
+            apply_stat_extension()
+            print("✓ Stat effect stacking extension applied")
+        except Exception as e:
+            logger.error(f"Failed to apply stat extension: {e}", exc_info=True)
+            print(f"WARNING: Stat effects may not stack correctly. Error: {e}")
+        
         # Load data from database with better error handling
         try:
             await self.db.initialize()  
             await self.game_state.load(self.db)
             print("Database initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize database: {e}", exc_info=True)
+            logger.error(f"Failed to initialize database: {e}",
+            exc_info=True)
             print(f"WARNING: Database initialization failed. Error: {e}")
             print("Bot will continue without database functionality.")
         

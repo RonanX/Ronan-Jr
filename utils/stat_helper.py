@@ -15,7 +15,7 @@ class StatHelper:
     @staticmethod
     def get_stat_value(character: 'Character', stat_type: StatType, use_modified: bool = True) -> int:
         """
-        Get a stat value from a character, handling both dict and object formats.
+        Get the value of a stat, either base or modified.
         
         Args:
             character: Character object
@@ -23,21 +23,36 @@ class StatHelper:
             use_modified: Whether to use modified or base stats
         
         Returns:
-            Stat value (defaults to 10 if not found)
+            The stat value
         """
-        try:
-            stats = character.stats.modified if use_modified else character.stats.base
-            
-            if isinstance(stats, dict):
-                # Dictionary format from database
-                return stats.get(stat_type.value, 10)
-            else:
-                # Object format
-                return getattr(stats, stat_type.value, 10)
-                
-        except Exception as e:
-            logger.error(f"Error getting stat value for {stat_type}: {e}")
-            return 10
+        # Convert string stat_type to enum if needed
+        if isinstance(stat_type, str):
+            try:
+                stat_type = StatType(stat_type.lower())
+            except ValueError:
+                # Log warning about invalid stat type
+                import logging
+                logging.warning(f"Invalid stat type: {stat_type}, defaulting to STRENGTH")
+                stat_type = StatType.STRENGTH
+        
+        # Ensure we're using the correct stat dictionary
+        if use_modified and hasattr(character, 'stats') and hasattr(character.stats, 'modified'):
+            # First try modified stats
+            if stat_type in character.stats.modified:
+                return character.stats.modified[stat_type]
+            # Log a warning if the stat isn't in the modified dictionary
+            import logging
+            logging.debug(f"Stat {stat_type} not found in modified stats, falling back to base")
+        
+        # Fall back to base stats if not using modified or if the stat wasn't found in modified
+        if hasattr(character, 'stats') and hasattr(character.stats, 'base'):
+            if stat_type in character.stats.base:
+                return character.stats.base[stat_type]
+        
+        # Final fallback
+        import logging
+        logging.warning(f"Stat {stat_type} not found in character stats, using default value 10")
+        return 10
 
     @staticmethod
     def get_stat_modifier(character: 'Character', stat_type: StatType, use_modified: bool = True) -> int:

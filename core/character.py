@@ -179,7 +179,7 @@ class Character:
     Main character class that holds all information about a character  
      
     Version History:  
-    1: Base character data without movesets  
+    1: Base character data without moveset  
     2: Added moveset support  
     3: Added custom parameters field  
     4: Added effect feedback system
@@ -278,7 +278,7 @@ class Character:
         Returns new total AC.  
         """  
         # Import here to avoid circular import  
-        from core.effects.status import ACManager  
+        from core.effects.ac import ACManager  
         if not hasattr(self, 'ac_manager'):  
             self.ac_manager = ACManager(self.defense.base_ac)  
              

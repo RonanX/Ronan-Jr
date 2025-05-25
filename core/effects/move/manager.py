@@ -3,7 +3,21 @@ Move-specific effect management system.
 """
 
 import logging
-from typing import Optional, List, Dict, Any, Tuple
+from typing import Optional, List, Dict, Any, Tuple, Set
+
+# Import CombatEventType from the correct location
+try:
+    from core.state import CombatEventType
+except ImportError:
+    try:
+        from modules.combat.logger import CombatEventType
+    except ImportError:
+        # Define a minimal enum if neither import works
+        from enum import Enum
+        class CombatEventType(Enum):
+            EFFECT_APPLIED = "effect_applied"
+            EFFECT_REMOVED = "effect_removed"
+            STATUS_UPDATE = "status_update"
 
 from .base import MovePhase
 
@@ -75,17 +89,17 @@ async def apply_move_effect(
         
         # Log in combat logger if available
         if combat_logger:
-            from core.combat_logger import CombatEventType
             combat_logger.add_event(
                 CombatEventType.EFFECT_APPLIED,
                 message=message,
                 character=character.name,
                 details={
                     "effect": effect.name,
-                    "during_own_turn": is_during_own_turn
+                    "during_own_turn": is_during_own_turn,
+                    "timing": effect.timing_handler.__dict__ if hasattr(effect, 'timing_handler') else {}
                 }
             )
-            
+        
         return message
         
     except Exception as e:

@@ -24,7 +24,7 @@ Example JSON import:
       "attack_roll": "1d20+dex",
       "damage": "1d6+dex slashing",
       "category": "Offense",
-      "version": 8
+      "version": 10
     },
     "power_blast": {
       "name": "Power Blast",
@@ -39,7 +39,7 @@ Example JSON import:
         "bonus_on_hit": {"mp": 2, "note": "Power Surge"},
         "aoe_mode": "single"
       },
-      "version": 8
+      "version": 10
     },
     "healing_light": {
       "name": "Healing Light",
@@ -49,7 +49,7 @@ Example JSON import:
       "star_cost": 2,
       "duration": 1,
       "category": "Defense",
-      "version": 8
+      "version": 10
     },
     "ethereal_dash": {
       "name": "Ethereal Dash",
@@ -58,7 +58,7 @@ Example JSON import:
       "star_cost": 1,
       "cooldown": 0,
       "category": "Utility", 
-      "version": 8
+      "version": 10
     }
   }
 }
@@ -85,6 +85,8 @@ class MoveData:
     6: Added move category support
     7: Deprecated save parameters and heat tracking
     8: Added bonus_on_hit, removed deprecated parameters
+    9: Added roll_modifier support
+    10: Added roll_modifier target selection (caster/target/both)
     
     Moveset Creation Guidelines:
     ----------------------------
@@ -121,7 +123,7 @@ class MoveData:
       - Defense: Healing, shields, protective effects, buffs
       - Utility: Movement, positioning, resource management, non-combat effects
     """
-    CURRENT_VERSION = 9
+    CURRENT_VERSION = 10
 
     # Version 1 parameters (base)
     name: str
@@ -147,7 +149,6 @@ class MoveData:
     attack_roll: Optional[str] = None  # e.g., "1d20+dex", "1d20+str advantage", "3d20 multihit 2"
     damage: Optional[str] = None  # e.g., "2d6+str fire, 1d4 poison"
     crit_range: int = 20  # Natural roll needed for crit
-    targets: Optional[int] = None  # Number of targets (for multi-target)
     
     # Version 4+ parameters (combat)
     conditions: List[str] = field(default_factory=list)  # Applied conditions
@@ -161,7 +162,7 @@ class MoveData:
     aoe_mode: Optional[str] = None  # How AoE is handled: "single" or "multi"
     custom_parameters: Dict[str, Any] = field(default_factory=dict)  # For extensibility
 
-    # Version 9 parameters
+    # Version 9/10 parameters
     roll_modifier: Optional[Dict[str, Any]] = None  # Roll modifier effect to apply
 
     def to_dict(self) -> dict:
@@ -187,7 +188,6 @@ class MoveData:
             "attack_roll": self.attack_roll,
             "damage": self.damage,
             "crit_range": self.crit_range,
-            "targets": self.targets,
             
             # Version 4+
             "conditions": self.conditions,
@@ -200,7 +200,7 @@ class MoveData:
             "bonus_on_hit": self.bonus_on_hit,
             "aoe_mode": self.aoe_mode,
 
-            # Version 9+
+            # Version 9/10+
             "roll_modifier": self.roll_modifier,
             
             "custom_parameters": self.custom_parameters
@@ -244,7 +244,6 @@ class MoveData:
             move.attack_roll = data.get("attack_roll")
             move.damage = data.get("damage")
             move.crit_range = data.get("crit_range", 20)
-            move.targets = data.get("targets")
             
         # Version 4+ parameters
         if version >= 4:
@@ -296,7 +295,7 @@ class MoveData:
                 move.bonus_on_hit = data.get("bonus_on_hit")
             move.aoe_mode = data.get("aoe_mode", "single")
         
-        # Version 9+ parameters
+        # Version 9/10+ parameters
         if version >= 9:
             move.roll_modifier = data.get("roll_modifier")
 
@@ -320,11 +319,11 @@ class MoveData:
             "version", "name", "description", "mp_cost", "hp_cost", "star_cost",
             "cast_time", "duration", "cast_description", "uses", "uses_remaining",
             "cooldown", "last_used_round", "attack_roll", "damage", "crit_range",
-            "targets", "conditions", "roll_timing", "category", 
+            "conditions", "roll_timing", "category", 
             "bonus_on_hit", "aoe_mode", "custom_parameters", "advanced_json", "roll_modifier",
             # Include deprecated keys to prevent them from going to custom_parameters
             "save_type", "save_dc", "half_on_save", "enable_heat_tracking", 
-            "target_selection", "enable_hit_bonus"
+            "target_selection", "enable_hit_bonus", "targets"  # Added targets as deprecated
         }
         
         # Store any unrecognized keys in custom_parameters
@@ -375,6 +374,10 @@ class MoveData:
                 return False, "Roll modifier must include 'type' field"
             if self.roll_modifier["type"] not in ["bonus", "advantage", "disadvantage"]:
                 return False, "Roll modifier type must be 'bonus', 'advantage', or 'disadvantage'"
+            # Validate target field if present
+            if "target" in self.roll_modifier:
+                if self.roll_modifier["target"] not in ["caster", "target", "both"]:
+                    return False, "Roll modifier target must be 'caster', 'target', or 'both'"
         
         return True, None
 
