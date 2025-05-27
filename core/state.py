@@ -342,28 +342,38 @@ class GameState:
         self.db = None  # Will be set during load
         self.logger = CombatLogger()  # Initialize the logger
 
-    async def load(self, database) -> None:  
-        """Load all characters from database into memory"""  
-        self.db = database  
-        try:  
-            # Load character list from database  
-            char_data = self.db._refs['characters'].get()  
-             
-            if char_data and isinstance(char_data, dict):  
-                # Create Character objects from data  
-                for name, data in char_data.items():  
-                    if name != 'movesets':  # Skip movesets collection  
-                        try:  
-                            self.characters[name] = Character.from_dict(data)  
-                        except Exception as e:  
-                            print(f"Error loading character {name}: {e}")  
-                            continue  
-                             
-            print(f"Loaded {len(self.characters)} characters into game state")  
-             
-        except Exception as e:  
-            print(f"Error loading game state: {e}")  
-            # Don't raise the error - allow the bot to start without data  
+    async def load(self, database) -> None:
+        """Load all characters from database into memory"""
+        self.db = database
+        try:
+            # Load character list from database
+            char_data = self.db._refs['characters'].get()
+            
+            if char_data and isinstance(char_data, dict):
+                # Create Character objects from data
+                for name, data in char_data.items():
+                    if name != 'movesets':  # Skip movesets collection
+                        try:
+                            # Character.from_dict already handles child_names and parent_name
+                            character = Character.from_dict(data)
+                            if character:
+                                self.characters[name] = character
+                        except Exception as e:
+                            print(f"Error loading character {name}: {e}")
+                            continue
+                            
+            print(f"Loaded {len(self.characters)} characters into game state")
+            
+            # Log linking information for debugging
+            for character in self.characters.values():
+                if hasattr(character, 'child_names') and character.child_names:
+                    print(f"  {character.name} has children: {character.child_names}")
+                if hasattr(character, 'parent_name') and character.parent_name:
+                    print(f"  {character.name} has parent: {character.parent_name}")
+            
+        except Exception as e:
+            print(f"Error loading game state: {e}")
+            # Don't raise the error - allow the bot to start without data
             pass
 
     def add_character(self, character: Character) -> None:  

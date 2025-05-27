@@ -1,13 +1,14 @@
 """
-Initiative tracking system for combat. Handles turn order, effect processing,
-and combat state management with improved message formatting.
+Initiative tracking system for combat with character linking support. Handles turn order, 
+effect processing, and combat state management with improved message formatting.
 
 Key Features:
 - Turn-based combat management
-- Effect processing and timing
+- Effect processing and timing with character linking
 - Progress bar visualization
 - Formatted message output
 - Effect feedback message handling
+- Linked character effect processing during parent turns
 
 IMPLEMENTATION MANDATES:
 - Use CombatLogger for ALL combat events
@@ -16,6 +17,7 @@ IMPLEMENTATION MANDATES:
 - Use MessageFormatter for ALL output
 - Track both temporary and permanent effect states
 - Handle effect cleanup properly on combat end
+- Process linked children effects during parent character turns
 """
 
 from typing import List, Dict, Optional, Tuple
@@ -28,7 +30,8 @@ from enum import Enum
 
 from core.character import Character, StatType
 from core.state import CombatLogger, CombatEventType
-from core.effects.manager import process_effects  # Import the async function
+from core.effects.manager import process_effects_with_linking  # Use the enhanced function
+from core.effects.move.manager import process_move_effects_with_linking  # Use enhanced move processing
 from core.effects.status import FrostbiteEffect, SkipEffect
 from utils.dice import DiceRoller
 from utils.error_handler import handle_error
@@ -81,15 +84,16 @@ class CombatLog:
 
 class InitiativeTracker:
     """
-    Handles combat initiative tracking and turn management.
+    Handles combat initiative tracking and turn management with character linking support.
     
     Responsible for:
     - Managing combat state
-    - Processing turns and effects
+    - Processing turns and effects (including linked character effects)
     - Handling combat messages and formatting
     - Managing skipped turns
     - Save/load functionality
     - Processing effect feedback
+    - Coordinating parent/child character effect processing
     """
     def __init__(self, bot):
         self.bot = bot
@@ -258,7 +262,7 @@ class InitiativeTracker:
         end_effect_messages = []
         expiry_messages = []
         
-        # Process end-of-turn effects for skipped character
+        # Process end-of-turn effects for skipped character (including linked children)
         if current_char:
             # FIXED: Check for pending effect feedback first
             pending_feedback = current_char.get_pending_feedback()
@@ -270,13 +274,28 @@ class InitiativeTracker:
                 # Mark feedback as displayed
                 current_char.mark_feedback_displayed()
             
-            # Process effects - properly await the call
-            was_skipped, start_msgs, end_msgs = await process_effects(
+            # Process effects with linking support - properly await the call
+            was_skipped, start_msgs, end_msgs = await process_effects_with_linking(
                 current_char,
                 self.round_number,
                 current_char.name,
-                self.logger
+                self.logger,
+                self.bot.game_state
             )
+            
+            # Process move effects with linking support
+            move_end_msgs = await process_move_effects_with_linking(
+                current_char,
+                self.round_number,
+                current_char.name,
+                "end",
+                self.logger,
+                self.bot.game_state
+            )
+            
+            # Combine move messages with regular effect messages
+            if move_end_msgs:
+                end_msgs.extend(move_end_msgs)
             
             # FIXED: Improved expiry message detection
             for msg in end_msgs:
@@ -331,13 +350,28 @@ class InitiativeTracker:
                 # Mark feedback as displayed
                 new_char.mark_feedback_displayed()
             
-            # Process new turn - properly await the call
-            was_skipped, start_msgs, _ = await process_effects(
+            # Process new turn with linking support - properly await the call
+            was_skipped, start_msgs, _ = await process_effects_with_linking(
                 new_char,
                 self.round_number,
                 new_char.name,
-                self.logger
+                self.logger,
+                self.bot.game_state
             )
+            
+            # Process move effects with linking support
+            move_start_msgs = await process_move_effects_with_linking(
+                new_char,
+                self.round_number,
+                new_char.name,
+                "start",
+                self.logger,
+                self.bot.game_state
+            )
+            
+            # Combine move messages with regular effect messages
+            if move_start_msgs:
+                start_msgs.extend(move_start_msgs)
                 
             # Update skip status
             self.current_turn.skipped = was_skipped
@@ -361,7 +395,7 @@ class InitiativeTracker:
         return True, "", []
 
     async def process_turn_effects(self, character: Character) -> Tuple[bool, List[str]]:
-        """Process effects and format messages."""
+        """Process effects and format messages with linking support."""
         was_skipped = False
         skip_reason = None
         messages = []
@@ -373,13 +407,28 @@ class InitiativeTracker:
         if self.logger:
             self.logger.snapshot_character_state(character)
         
-        # Process effects - properly await the call
-        was_skipped, start_messages, end_messages = await process_effects(
+        # Process effects with linking support - properly await the call
+        was_skipped, start_messages, end_messages = await process_effects_with_linking(
             character, 
             self.round_number, 
             character.name,
-            self.logger
+            self.logger,
+            self.bot.game_state
         )
+        
+        # Process move effects with linking support
+        move_messages = await process_move_effects_with_linking(
+            character,
+            self.round_number,
+            character.name,
+            "start",
+            self.logger,
+            self.bot.game_state
+        )
+        
+        # Combine move messages with regular effect messages
+        if move_messages:
+            start_messages.extend(move_messages)
         
         # Update skip reason if we were skipped
         if was_skipped:
@@ -688,9 +737,9 @@ class InitiativeTracker:
 
     async def next_turn(self, interaction: discord.Interaction) -> Tuple[bool, str, List[str]]:
         """
-        Advance to next turn and process effects with improved message handling.
+        Advance to next turn and process effects with improved message handling and character linking.
         
-        Enhanced to properly display effect expiry messages using feedback system.
+        Enhanced to properly display effect expiry messages using feedback system and handle linked characters.
         """
         try:
             await interaction.response.defer()
@@ -702,16 +751,32 @@ class InitiativeTracker:
                 if self.round_number < 1:
                     self.round_number = 1
                     
-                # Process first turn
+                # Process first turn with linking support
                 current_char = self.bot.game_state.get_character(self.current_turn.character_name)
                 if current_char:
-                    # Process effects - properly await the call
-                    was_skipped, start_msgs, _ = await process_effects(
+                    # Process effects with linking support - properly await the call
+                    was_skipped, start_msgs, _ = await process_effects_with_linking(
                         current_char,
                         self.round_number,
                         current_char.name,
-                        self.logger
+                        self.logger,
+                        self.bot.game_state
                     )
+                    
+                    # Process move effects with linking support
+                    move_start_msgs = await process_move_effects_with_linking(
+                        current_char,
+                        self.round_number,
+                        current_char.name,
+                        "start",
+                        self.logger,
+                        self.bot.game_state
+                    )
+                    
+                    # Combine move messages with regular effect messages
+                    if move_start_msgs:
+                        start_msgs.extend(move_start_msgs)
+                    
                     self.current_turn.skipped = was_skipped
                     await self.bot.db.save_character(current_char)
 
@@ -733,18 +798,33 @@ class InitiativeTracker:
             current_char_name = self.current_turn.character_name
             current_char = self.bot.game_state.get_character(current_char_name)
             
-            # Process current character's turn end
+            # Process current character's turn end (including linked children)
             end_effect_messages = []
             expiry_messages = []  # Specifically track expiry messages
             if current_char:
-                # Get end of turn effects
-                # Process effects - properly await the call
-                was_skipped, start_msgs, end_msgs = await process_effects(
+                # Get end of turn effects with linking support
+                # Process effects with linking support - properly await the call
+                was_skipped, start_msgs, end_msgs = await process_effects_with_linking(
                     current_char,
                     self.round_number,
                     current_char.name,
-                    self.logger
+                    self.logger,
+                    self.bot.game_state
                 )
+                
+                # Process move effects with linking support
+                move_end_msgs = await process_move_effects_with_linking(
+                    current_char,
+                    self.round_number,
+                    current_char.name,
+                    "end",
+                    self.logger,
+                    self.bot.game_state
+                )
+                
+                # Combine move messages with regular effect messages
+                if move_end_msgs:
+                    end_msgs.extend(move_end_msgs)
                 
                 self.debug_print(f"\n=== Processing turn end for {current_char.name} ===")
                 self.debug_print(f"Received {len(end_msgs)} end messages")
@@ -816,7 +896,7 @@ class InitiativeTracker:
             else:
                 self.current_index += 1
 
-            # Process next character's turn
+            # Process next character's turn (including linked children)
             new_char = self.bot.game_state.get_character(self.current_turn.character_name)
             if new_char:
                 # Check for pending effect feedback first
@@ -826,13 +906,28 @@ class InitiativeTracker:
                         if feedback.expiry_message and not feedback.displayed:
                             start_effect_messages.append(feedback.expiry_message)
                 
-                # Process new turn - properly await the call
-                was_skipped, start_msgs, _ = await process_effects(
+                # Process new turn with linking support - properly await the call
+                was_skipped, start_msgs, _ = await process_effects_with_linking(
                     new_char,
                     self.round_number,
                     new_char.name,
-                    self.logger
+                    self.logger,
+                    self.bot.game_state
                 )
+                
+                # Process move effects with linking support
+                move_start_msgs = await process_move_effects_with_linking(
+                    new_char,
+                    self.round_number,
+                    new_char.name,
+                    "start",
+                    self.logger,
+                    self.bot.game_state
+                )
+                
+                # Combine move messages with regular effect messages
+                if move_start_msgs:
+                    start_msgs.extend(move_start_msgs)
                 
                 # Update skip status
                 self.current_turn.skipped = was_skipped

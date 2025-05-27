@@ -440,8 +440,8 @@ async def check(interaction: discord.Interaction, name: str, ephemeral: bool = T
             )
             return
 
-        # Initialize and show the character viewer
-        viewer = CharacterViewer(character)
+        # Initialize and show the character viewer with bot instance
+        viewer = CharacterViewer(character, bot)
         await viewer.show(interaction, ephemeral=ephemeral)
 
     except Exception as e:
@@ -485,14 +485,47 @@ async def list_characters(interaction: discord.Interaction):
            
         embed = discord.Embed(title="Character List", color=discord.Color.blue())
        
+        # Group characters by family (parent-child relationships)
+        processed = set()
+        
         for character in sorted(characters, key=lambda c: c.name):
+            if character.name in processed:
+                continue
+                
+            # Check if this is a parent character
+            is_parent = hasattr(character, 'child_names') and character.child_names
+            is_child = hasattr(character, 'parent_name') and character.parent_name
+            
+            if is_child:
+                # Skip children, they'll be processed with their parent
+                continue
+            
+            # Display parent character
             status = (
                 f"HP: {character.resources.current_hp}/{character.resources.max_hp} | "
                 f"MP: {character.resources.current_mp}/{character.resources.max_mp} | "
                 f"AC: {character.defense.current_ac}"
             )
+            
+            if is_parent:
+                status += f" | Children: {len(character.child_names)}"
+            
             embed.add_field(name=character.name, value=status, inline=False)
-           
+            processed.add(character.name)
+            
+            # Display children with indentation
+            if is_parent:
+                for child_name in character.child_names:
+                    child = bot.game_state.get_character(child_name)
+                    if child:
+                        child_status = (
+                            f"├─ HP: {child.resources.current_hp}/{child.resources.max_hp} | "
+                            f"MP: {child.resources.current_mp}/{child.resources.max_mp} | "
+                            f"AC: {child.defense.current_ac}"
+                        )
+                        embed.add_field(name=f"└─ {child.name}", value=child_status, inline=False)
+                        processed.add(child.name)
+
         await interaction.followup.send(embed=embed)
        
     except Exception as e:
@@ -509,6 +542,139 @@ async def stop(ctx):
     """Stops the bot and closes the process."""
     await ctx.send("Shutting down...")
     await bot.close()
+
+
+@bot.tree.command(name="link", description="Link one or more characters as children to a parent character")
+@app_commands.describe(
+    parent="The parent character name",
+    children="Comma-separated list of child character names"
+)
+async def link_characters(interaction: discord.Interaction, parent: str, children: str):
+    """Links characters together in a parent-child relationship"""
+    await interaction.response.defer()
+    
+    try:
+        # Get parent character
+        parent_char = bot.game_state.get_character(parent) or bot.game_state.get_character(parent.capitalize())
+        if not parent_char:
+            await interaction.followup.send(f"Parent character '{parent}' not found.", ephemeral=True)
+            return
+        
+        # Parse child names
+        child_names = [name.strip() for name in children.split(',')]
+        linked_children = []
+        errors = []
+        
+        for child_name in child_names:
+            # Get child character
+            child_char = bot.game_state.get_character(child_name) or bot.game_state.get_character(child_name.capitalize())
+            if not child_char:
+                errors.append(f"Character '{child_name}' not found")
+                continue
+            
+            # Check if child is already linked to someone else
+            if hasattr(child_char, 'parent_name') and child_char.parent_name:
+                errors.append(f"'{child_char.name}' is already linked to '{child_char.parent_name}'")
+                continue
+            
+            # Check if child has their own children (not allowed)
+            if hasattr(child_char, 'child_names') and child_char.child_names:
+                errors.append(f"'{child_char.name}' cannot be a child because they have their own children")
+                continue
+            
+            # Link the child
+            if not hasattr(parent_char, 'child_names'):
+                parent_char.child_names = []
+            if not hasattr(child_char, 'parent_name'):
+                child_char.parent_name = None
+                
+            parent_char.child_names.append(child_char.name)
+            child_char.parent_name = parent_char.name
+            linked_children.append(child_char.name)
+        
+        # Save changes to database
+        try:
+            await bot.db.save_character(parent_char)
+            for child_name in linked_children:
+                child_char = bot.game_state.get_character(child_name)
+                await bot.db.save_character(child_char)
+        except Exception as e:
+            logger.error(f"Error saving linked characters: {e}", exc_info=True)
+        
+        # Create response
+        if linked_children:
+            success_msg = f"Successfully linked {', '.join(linked_children)} to {parent_char.name}"
+        else:
+            success_msg = "No characters were linked"
+        
+        if errors:
+            error_msg = "\n".join(errors)
+            await interaction.followup.send(f"{success_msg}\n\n**Errors:**\n{error_msg}")
+        else:
+            await interaction.followup.send(success_msg)
+            
+    except Exception as e:
+        logger.error(f"Error in link command: {e}", exc_info=True)
+        await interaction.followup.send("An error occurred while linking characters.", ephemeral=True)
+
+
+@bot.tree.command(name="unlink", description="Remove parent-child links between characters")
+@app_commands.describe(
+    character="The character to unlink (removes all their links)"
+)
+async def unlink_characters(interaction: discord.Interaction, character: str):
+    """Removes all parent-child links for a character"""
+    await interaction.response.defer()
+    
+    try:
+        # Get character
+        char = bot.game_state.get_character(character) or bot.game_state.get_character(character.capitalize())
+        if not char:
+            await interaction.followup.send(f"Character '{character}' not found.", ephemeral=True)
+            return
+        
+        unlinked = []
+        
+        # If this character is a parent, unlink all children
+        if hasattr(char, 'child_names') and char.child_names:
+            for child_name in char.child_names.copy():
+                child_char = bot.game_state.get_character(child_name)
+                if child_char and hasattr(child_char, 'parent_name'):
+                    child_char.parent_name = None
+                    unlinked.append(f"{child_name} (was child)")
+                    try:
+                        await bot.db.save_character(child_char)
+                    except Exception as e:
+                        logger.error(f"Error saving unlinked child {child_name}: {e}")
+            char.child_names = []
+        
+        # If this character is a child, unlink from parent
+        if hasattr(char, 'parent_name') and char.parent_name:
+            parent_char = bot.game_state.get_character(char.parent_name)
+            if parent_char and hasattr(parent_char, 'child_names'):
+                if char.name in parent_char.child_names:
+                    parent_char.child_names.remove(char.name)
+                    unlinked.append(f"{char.parent_name} (was parent)")
+                    try:
+                        await bot.db.save_character(parent_char)
+                    except Exception as e:
+                        logger.error(f"Error saving unlinked parent {char.parent_name}: {e}")
+            char.parent_name = None
+        
+        # Save the main character
+        try:
+            await bot.db.save_character(char)
+        except Exception as e:
+            logger.error(f"Error saving unlinked character {char.name}: {e}")
+        
+        if unlinked:
+            await interaction.followup.send(f"Unlinked {char.name} from: {', '.join(unlinked)}")
+        else:
+            await interaction.followup.send(f"{char.name} had no links to remove.")
+            
+    except Exception as e:
+        logger.error(f"Error in unlink command: {e}", exc_info=True)
+        await interaction.followup.send("An error occurred while unlinking characters.", ephemeral=True)
 
 
 if __name__ == "__main__":
@@ -557,10 +723,4 @@ State Conditions:
 
 
 Usage:
-/effect condition <target> <comma-separated conditions> [duration]
-Example: /effect condition Gandalf prone,blinded 3
-
-
-Note: Duration is optional. Without duration, conditions are toggles.
-Effects show in turn order and character sheets with mechanical effects.
 """

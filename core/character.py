@@ -192,7 +192,7 @@ class Character:
         name: str,  
         stats: Stats,  
         resources: Resources,  
-        defense: DefenseStats,  
+        defense: DefenseStats,
         base_proficiency: int = 2,  
         version: int = CURRENT_VERSION  
     ):  
@@ -208,6 +208,10 @@ class Character:
         self.action_stars = ActionStars()  
         self.style = None  # Will be set during character creation  
         self.custom_parameters: Dict[str, Any] = {}  # For future extensions  
+        
+        # Character linking system
+        self.child_names = []  # List of child character names
+        self.parent_name = None  # Name of parent character (if any)
          
         # Initialize derived stats  
         self._update_derived_stats()
@@ -593,7 +597,9 @@ class Character:
             "action_stars": self.action_stars.to_dict(),  
             "moveset": self.moveset.to_dict(),  # Add moveset to storage  
             "custom_parameters": self.custom_parameters,  # Store custom parameters
-            "effect_feedback": [feedback.to_dict() for feedback in self.effect_feedback]  # Add effect feedback
+            "effect_feedback": [feedback.to_dict() for feedback in self.effect_feedback],  # Add effect feedback
+            "child_names": getattr(self, 'child_names', []),
+            "parent_name": getattr(self, 'parent_name', None)
         }  
         # Remove None values to save space  
         return {k: v for k, v in data.items() if v is not None}
@@ -705,7 +711,37 @@ class Character:
             # Update all derived stats  
             character._update_derived_stats()  
              
-            return character  
+            # Load linking data
+            character.child_names = data.get('child_names', [])
+            character.parent_name = data.get('parent_name', None)
+
+            # Version 4+: Load effect feedback  
+            if version >= 4:  
+                character.effect_feedback = []  
+                for feedback_data in data.get('effect_feedback', []):  
+                    character.effect_feedback.append(EffectFeedback.from_dict(feedback_data))
+
+            # Store unknown parameters for future versions    
+            known_keys = {    
+                'version', 'name', 'stats', 'resources', 'defense',    
+                'base_proficiency', 'proficiencies', 'effects',    
+                'action_stars', 'moveset', 'custom_parameters',    
+                'spell_save_dc', 'style', 'effect_feedback',
+                'child_names', 'parent_name'  # Add these to known keys
+            }
+
+            unknown_params = {    
+                k: v for k, v in data.items()    
+                if k not in known_keys    
+            }
+
+            if unknown_params:    
+                character.custom_parameters.update(unknown_params)    
+            
+            # Update all derived stats    
+            character._update_derived_stats()    
+            
+            return character
              
         except Exception as e:  
             logger.error(f"Error reconstructing character: {str(e)}")  

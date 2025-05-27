@@ -15,12 +15,12 @@ from modules.menu.defense_handler import DefenseHandler
 
 class CharacterViewer:
     """Main class to handle character information display and interaction."""
-    def __init__(self, character: Any):
+    def __init__(self, character: Any, bot=None):
         self.character = character
+        self.bot = bot
         self.current_view: Optional[View] = None
         self.current_page = "overview"
         self.action_handler = None
-        self.bot = None
         self.debug_mode = False  # Set to True to enable debug output
 
     def _get_attr(self, attr: str, default: Any = None) -> Any:
@@ -264,7 +264,130 @@ class CharacterViewer:
                     inline=False
                 )
         
+        # Add linked characters section after existing fields
+        has_children = hasattr(self.character, 'child_names') and self.character.child_names
+        has_parent = hasattr(self.character, 'parent_name') and self.character.parent_name
+
+        if has_children or has_parent:
+            links_text = ""
+            
+            if has_parent and self.bot:
+                parent_char = self.bot.game_state.get_character(self.character.parent_name)
+                if parent_char:
+                    # Get temp HP with correct attribute name
+                    temp_hp = getattr(parent_char.resources, 'current_temp_hp', 0)
+                    
+                    # Create health bar
+                    health_bar = self._create_linked_health_bar(
+                        current_hp=parent_char.resources.current_hp,
+                        max_hp=parent_char.resources.max_hp,
+                        temp_hp=temp_hp
+                    )
+                    
+                    # Get AC display with proper calculation
+                    base_ac = getattr(parent_char.defense, 'base_ac', parent_char.defense.current_ac)
+                    ac_modifier = parent_char.defense.current_ac - base_ac
+                    if ac_modifier == 0:
+                        ac_display = f"`{base_ac}`"
+                    else:
+                        ac_display = f"`{base_ac}` ({ac_modifier:+d})"
+                    
+                    links_text += f"👤 **{parent_char.name}** (Parent)\n"
+                    links_text += f"**HP:** {health_bar} `{parent_char.resources.current_hp}/{parent_char.resources.max_hp}`"
+                    if temp_hp > 0:
+                        links_text += f" (+`{temp_hp}`)"
+                    links_text += f" **MP:** `{parent_char.resources.current_mp}/{parent_char.resources.max_mp}` "
+                    links_text += f"**AC:** {ac_display}"
+                    
+                    # Add action stars if they exist
+                    if hasattr(parent_char, 'action_stars'):
+                        current_stars = getattr(parent_char.action_stars, 'current_stars', 0)
+                        max_stars = getattr(parent_char.action_stars, 'max_stars', 5)
+                        links_text += f" **Stars:** `{current_stars}/{max_stars}`"
+                    links_text += "\n\n"
+            
+            if has_children and self.bot:
+                for i, child_name in enumerate(self.character.child_names):
+                    child_char = self.bot.game_state.get_character(child_name)
+                    if child_char:
+                        # Get temp HP with correct attribute name
+                        temp_hp = getattr(child_char.resources, 'current_temp_hp', 0)
+                        
+                        # Create health bar
+                        health_bar = self._create_linked_health_bar(
+                            current_hp=child_char.resources.current_hp,
+                            max_hp=child_char.resources.max_hp,
+                            temp_hp=temp_hp
+                        )
+                        
+                        # Get AC display with proper calculation
+                        base_ac = getattr(child_char.defense, 'base_ac', child_char.defense.current_ac)
+                        ac_modifier = child_char.defense.current_ac - base_ac
+                        if ac_modifier == 0:
+                            ac_display = f"`{base_ac}`"
+                        else:
+                            ac_display = f"`{base_ac}` ({ac_modifier:+d})"
+                        
+                        links_text += f"👥 **{child_char.name}**\n"
+                        links_text += f"**HP:** {health_bar} `{child_char.resources.current_hp}/{child_char.resources.max_hp}`"
+                        if temp_hp > 0:
+                            links_text += f" (+`{temp_hp}` temp)"
+                        links_text += f" **MP:** `{child_char.resources.current_mp}/{child_char.resources.max_mp}` "
+                        links_text += f"**AC:** {ac_display}"
+                        
+                        # Add action stars if they exist
+                        if hasattr(child_char, 'action_stars'):
+                            current_stars = getattr(child_char.action_stars, 'current_stars', 0)
+                            max_stars = getattr(child_char.action_stars, 'max_stars', 5)
+                            links_text += f" **Stars:** `{current_stars}/{max_stars}`"
+                        
+                        # Add spacing between children, but not after the last one
+                        if i < len(self.character.child_names) - 1:
+                            links_text += "\n\n"
+            
+            if links_text.strip():
+                embed.add_field(name="🔗 Linked Characters", value=links_text.strip(), inline=False)
+        
         return embed
+
+    def _create_linked_health_bar(self, current_hp: int, max_hp: int, temp_hp: int = 0, length: int = 6) -> str:
+        """Create a visual health bar for linked characters with proper temp HP handling"""
+        if max_hp <= 0:
+            return "⬛" * length  # All black if invalid max_hp
+            
+        # Calculate the base health ratio
+        hp_ratio = current_hp / max_hp
+        filled = int(hp_ratio * length)
+        empty = length - filled
+        
+        # Use different colors based on health percentage
+        if hp_ratio > 0.6:
+            fill_char = "🟩"  # Green for healthy
+        elif hp_ratio > 0.3:
+            fill_char = "🟨"  # Yellow for injured
+        else:
+            fill_char = "🟥"  # Red for critical
+        
+        # Build the base health bar (with black for missing health)
+        health_bar = fill_char * filled + "⬛" * empty
+        
+        # Handle temp HP exactly like in the main health bar
+        if temp_hp > 0:
+            # First fill any missing health with white squares
+            if empty > 0:
+                # Calculate how many black squares to replace
+                temp_hp_squares = min(empty, int((temp_hp / max_hp) * length) + (1 if temp_hp > 0 else 0))
+                if temp_hp_squares > 0:
+                    # Replace that many black squares with white
+                    health_bar = fill_char * filled + "⬜" * temp_hp_squares + "⬛" * (empty - temp_hp_squares)
+            
+            # If all hp squares are filled and there's still excess temp hp, show overflow
+            elif filled == length:
+                # Add up to 3 overflow squares
+                overflow = min(3, max(1, int((temp_hp / max_hp) * length)))
+                health_bar += "⬜" * overflow
+        
+        return health_bar
 
     async def _create_stats_embed(self) -> Embed:
         """
@@ -773,7 +896,7 @@ class NavButton(Button):
             viewer.current_page = self.page_id
             for item in self.view.children:
                 if isinstance(item, NavButton):
-                    item.style = ButtonStyle.primary if item.page_id == self.page_id else ButtonStyle.secondary
+                    item.style = ButtonStyle.primary if item.page_id == viewer.current_page else ButtonStyle.secondary
             
             # Add the action selection menu to the current view
             current_view = CharacterViewerUI(viewer)

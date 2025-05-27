@@ -1,10 +1,10 @@
 """
-Effect system management functions for applying and processing effects.
+Effect system management functions for applying and processing effects with character linking support.
 
 Handles:
 - Effect registration
 - Effect application/removal
-- Effect processing
+- Effect processing with linked character support
 - Combat logging integration
 - Resource change tracking
 - Effect feedback system
@@ -15,6 +15,7 @@ IMPLEMENTATION MANDATES:
 - Maintain consistent return types (strings, never coroutines)
 - Ensure compatibility with both sync and async methods
 - Document async requirements clearly for future developers
+- Handle linked character effect processing during parent turns
 """
 
 from typing import List, Tuple, Optional, Dict, Any
@@ -355,6 +356,80 @@ async def remove_effect(
     except Exception as e:
         logger.error(f"Error removing effect: {str(e)}", exc_info=True)
         return f"Error removing {effect_name}: {str(e)}"
+
+async def process_effects_with_linking(
+    character,
+    round_number: int,
+    turn_name: str,
+    combat_logger=None,
+    game_state=None
+) -> Tuple[bool, List[str], List[str]]:
+    """
+    Enhanced effect processing that handles character linking.
+    
+    When processing a parent character's turn, also processes effects for all linked children.
+    Child character effects are processed and their messages included in the parent's turn.
+    
+    Args:
+        character: The character whose turn it is (parent character)
+        round_number: Current combat round
+        turn_name: Name of character whose turn it is
+        combat_logger: Optional combat logger
+        game_state: Game state object to get linked characters
+        
+    Returns:
+        Tuple[bool, List[str], List[str]]: (was_skipped, start_messages, end_messages)
+    """
+    # Process the main character's effects first
+    was_skipped, start_messages, end_messages = await process_effects(
+        character, round_number, turn_name, combat_logger
+    )
+    
+    # Check if this character has linked children and we have game_state
+    if game_state and hasattr(character, 'child_names') and character.child_names:
+        logger.info(f"Processing effects for {len(character.child_names)} linked children of {character.name}")
+        
+        for child_name in character.child_names:
+            try:
+                # Get the child character
+                child_char = game_state.get_character(child_name)
+                if not child_char:
+                    logger.warning(f"Linked child character '{child_name}' not found in game state")
+                    continue
+                
+                logger.info(f"Processing linked child effects: {child_name}")
+                
+                # Process child's effects using the parent's turn name
+                # This ensures the child's effects are processed as if it's their turn
+                child_skipped, child_start_msgs, child_end_msgs = await process_effects(
+                    child_char, round_number, child_name, combat_logger
+                )
+                
+                # Add child messages to the parent's message lists with prefixes
+                if child_start_msgs:
+                    for msg in child_start_msgs:
+                        if msg:
+                            # Add prefix to indicate this is from a linked character
+                            prefixed_msg = f"🔗 {child_name}: {msg}" if not msg.startswith(f"{child_name}") else f"🔗 {msg}"
+                            start_messages.append(prefixed_msg)
+                
+                if child_end_msgs:
+                    for msg in child_end_msgs:
+                        if msg:
+                            # Add prefix to indicate this is from a linked character
+                            prefixed_msg = f"🔗 {child_name}: {msg}" if not msg.startswith(f"{child_name}") else f"🔗 {msg}"
+                            end_messages.append(prefixed_msg)
+                
+                # If any child is skipped, we don't skip the parent's turn
+                # The child skip status is just informational at this point
+                if child_skipped:
+                    logger.info(f"Linked child {child_name} would be skipped, but parent turn continues")
+                
+            except Exception as e:
+                logger.error(f"Error processing linked child {child_name}: {e}", exc_info=True)
+                end_messages.append(f"🔗 Error processing {child_name}: {str(e)}")
+    
+    return was_skipped, start_messages, end_messages
 
 async def process_effects(
     character,
