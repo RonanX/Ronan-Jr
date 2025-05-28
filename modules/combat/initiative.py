@@ -2,13 +2,17 @@
 Initiative tracking system for combat with character linking support. Handles turn order, 
 effect processing, and combat state management with improved message formatting.
 
+FIXED: Removed duplicate move effect processing that was causing effects to appear twice.
+Move effects inherit from BaseEffect and are already processed by the regular effect system.
+
 Key Features:
 - Turn-based combat management
-- Effect processing and timing with character linking
+- Effect processing and timing with character linking (NO DUPLICATE PROCESSING)
 - Progress bar visualization
 - Formatted message output
 - Effect feedback message handling
 - Linked character effect processing during parent turns
+- Safeguards to prevent child characters in initiative
 
 IMPLEMENTATION MANDATES:
 - Use CombatLogger for ALL combat events
@@ -18,6 +22,7 @@ IMPLEMENTATION MANDATES:
 - Track both temporary and permanent effect states
 - Handle effect cleanup properly on combat end
 - Process linked children effects during parent character turns
+- ONLY USE ONE EFFECT PROCESSING SYSTEM (no duplicates)
 """
 
 from typing import List, Dict, Optional, Tuple
@@ -30,8 +35,8 @@ from enum import Enum
 
 from core.character import Character, StatType
 from core.state import CombatLogger, CombatEventType
-from core.effects.manager import process_effects_with_linking  # Use the enhanced function
-from core.effects.move.manager import process_move_effects_with_linking  # Use enhanced move processing
+from core.effects.manager import process_effects_with_linking  # Use ONLY this enhanced function
+# REMOVED: move effect processing import to prevent duplicate processing
 from core.effects.status import FrostbiteEffect, SkipEffect
 from utils.dice import DiceRoller
 from utils.error_handler import handle_error
@@ -86,6 +91,8 @@ class InitiativeTracker:
     """
     Handles combat initiative tracking and turn management with character linking support.
     
+    FIXED: No longer processes move effects separately - they're handled by the regular effect system.
+    
     Responsible for:
     - Managing combat state
     - Processing turns and effects (including linked character effects)
@@ -94,6 +101,7 @@ class InitiativeTracker:
     - Save/load functionality
     - Processing effect feedback
     - Coordinating parent/child character effect processing
+    - Preventing child characters from entering initiative
     """
     def __init__(self, bot):
         self.bot = bot
@@ -118,6 +126,36 @@ class InitiativeTracker:
         """Print only if not in quiet mode"""
         if not self.quiet_mode:
             print(*args, **kwargs)
+
+    def _check_for_child_characters(self, characters: List[Character]) -> List[str]:
+        """
+        Check if any characters are child characters (have parent_name set).
+        
+        Args:
+            characters: List of characters to check
+            
+        Returns:
+            List of child character names that should not be in initiative
+        """
+        child_characters = []
+        for char in characters:
+            if hasattr(char, 'parent_name') and char.parent_name:
+                child_characters.append(char.name)
+        return child_characters
+
+    def _check_character_is_child(self, character: Character) -> Tuple[bool, str]:
+        """
+        Check if a single character is a child character.
+        
+        Args:
+            character: Character to check
+            
+        Returns:
+            Tuple of (is_child, parent_name)
+        """
+        if hasattr(character, 'parent_name') and character.parent_name:
+            return True, character.parent_name
+        return False, ""
 
     @property
     def current_turn(self) -> Optional[TurnData]:
@@ -274,7 +312,7 @@ class InitiativeTracker:
                 # Mark feedback as displayed
                 current_char.mark_feedback_displayed()
             
-            # Process effects with linking support - properly await the call
+            # FIXED: Use ONLY the regular effect system (no separate move processing)
             was_skipped, start_msgs, end_msgs = await process_effects_with_linking(
                 current_char,
                 self.round_number,
@@ -282,20 +320,6 @@ class InitiativeTracker:
                 self.logger,
                 self.bot.game_state
             )
-            
-            # Process move effects with linking support
-            move_end_msgs = await process_move_effects_with_linking(
-                current_char,
-                self.round_number,
-                current_char.name,
-                "end",
-                self.logger,
-                self.bot.game_state
-            )
-            
-            # Combine move messages with regular effect messages
-            if move_end_msgs:
-                end_msgs.extend(move_end_msgs)
             
             # FIXED: Improved expiry message detection
             for msg in end_msgs:
@@ -350,7 +374,7 @@ class InitiativeTracker:
                 # Mark feedback as displayed
                 new_char.mark_feedback_displayed()
             
-            # Process new turn with linking support - properly await the call
+            # FIXED: Use ONLY the regular effect system (no separate move processing)
             was_skipped, start_msgs, _ = await process_effects_with_linking(
                 new_char,
                 self.round_number,
@@ -359,20 +383,6 @@ class InitiativeTracker:
                 self.bot.game_state
             )
             
-            # Process move effects with linking support
-            move_start_msgs = await process_move_effects_with_linking(
-                new_char,
-                self.round_number,
-                new_char.name,
-                "start",
-                self.logger,
-                self.bot.game_state
-            )
-            
-            # Combine move messages with regular effect messages
-            if move_start_msgs:
-                start_msgs.extend(move_start_msgs)
-                
             # Update skip status
             self.current_turn.skipped = was_skipped
             
@@ -407,7 +417,7 @@ class InitiativeTracker:
         if self.logger:
             self.logger.snapshot_character_state(character)
         
-        # Process effects with linking support - properly await the call
+        # FIXED: Use ONLY the regular effect system (includes move effects automatically)
         was_skipped, start_messages, end_messages = await process_effects_with_linking(
             character, 
             self.round_number, 
@@ -415,20 +425,6 @@ class InitiativeTracker:
             self.logger,
             self.bot.game_state
         )
-        
-        # Process move effects with linking support
-        move_messages = await process_move_effects_with_linking(
-            character,
-            self.round_number,
-            character.name,
-            "start",
-            self.logger,
-            self.bot.game_state
-        )
-        
-        # Combine move messages with regular effect messages
-        if move_messages:
-            start_messages.extend(move_messages)
         
         # Update skip reason if we were skipped
         if was_skipped:
@@ -457,126 +453,145 @@ class InitiativeTracker:
         return was_skipped, start_messages
 
     async def start_combat(self, characters: List[Character], interaction: discord.Interaction) -> Tuple[bool, str]:
-            """Start combat with initiative contest"""
-            try:
-                if self.state != CombatState.INACTIVE:
-                    return False, "Combat is already in progress"
+        """Start combat with initiative contest and child character safeguards"""
+        try:
+            if self.state != CombatState.INACTIVE:
+                return False, "Combat is already in progress"
 
-                # Initialize logger
-                self.logger.channel_id = interaction.channel_id
-                self.logger.start_combat(characters)
+            # SAFEGUARD: Check for child characters
+            child_chars = self._check_for_child_characters(characters)
+            if child_chars:
+                child_list = ', '.join(child_chars)
+                parent_suggestions = []
+                
+                for char_name in child_chars:
+                    char = self.bot.game_state.get_character(char_name)
+                    if char and hasattr(char, 'parent_name') and char.parent_name:
+                        parent_suggestions.append(f"{char_name} → {char.parent_name}")
+                
+                suggestion_text = '\n'.join(parent_suggestions) if parent_suggestions else ""
+                
+                return False, (
+                    f"❌ **Child characters cannot enter initiative directly:** {child_list}\n\n"
+                    f"**Use their parent characters instead:**\n{suggestion_text}\n\n"
+                    f"*Child character effects will automatically be processed during their parent's turn.*"
+                )
 
-                # Clear temporary effects and handle stars
-                cleanup_messages = []
-                for char in characters:
-                    # Clear temp effects
-                    msgs = await self.clear_combat_effects(char)
-                    if msgs:
-                        if isinstance(msgs, list):
-                            cleanup_messages.extend(msgs)
-                        elif isinstance(msgs, str):
-                            cleanup_messages.append(msgs)
-                            
-                    # Reset action stars
-                    char.refresh_stars()
-                    
-                    # Reset move uses for all moves
-                    if hasattr(char, 'moveset') and hasattr(char.moveset, 'moves'):
-                        for move_name, move in char.moveset.moves.items():
-                            if hasattr(move, 'uses') and move.uses is not None:
-                                move.uses_remaining = move.uses
-                    
-                    # Clear move cooldowns
-                    if hasattr(char, 'moveset'):
-                        for move_name in char.list_moves():
-                            move = char.get_move(move_name)
-                            if move:
-                                move.last_used_round = None
-                    
-                    await self.bot.db.save_character(char)
-                    
-                    # Log state changes
-                    if self.logger:
-                        self.logger.snapshot_character_state(char)
+            # Initialize logger
+            self.logger.channel_id = interaction.channel_id
+            self.logger.start_combat(characters)
 
-                # Show cleanup messages if any
-                if cleanup_messages:
-                    formatted_messages = []
-                    for msg in cleanup_messages:
-                        if msg and isinstance(msg, str):
-                            if not (msg.startswith('`') and msg.endswith('`')):
-                                msg = f"`{msg}`"
-                            formatted_messages.append(msg)
-                            
-                    if formatted_messages:
-                        await interaction.followup.send(
-                            "\n".join(formatted_messages),
-                            ephemeral=True
-                        )
+            # Clear temporary effects and handle stars
+            cleanup_messages = []
+            for char in characters:
+                # Clear temp effects
+                msgs = await self.clear_combat_effects(char)
+                if msgs:
+                    if isinstance(msgs, list):
+                        cleanup_messages.extend(msgs)
+                    elif isinstance(msgs, str):
+                        cleanup_messages.append(msgs)
+                        
+                # Reset action stars
+                char.refresh_stars()
+                
+                # Reset move uses for all moves
+                if hasattr(char, 'moveset') and hasattr(char.moveset, 'moves'):
+                    for move_name, move in char.moveset.moves.items():
+                        if hasattr(move, 'uses') and move.uses is not None:
+                            move.uses_remaining = move.uses
+                
+                # Clear move cooldowns
+                if hasattr(char, 'moveset'):
+                    for move_name in char.list_moves():
+                        move = char.get_move(move_name)
+                        if move:
+                            move.last_used_round = None
+                
+                await self.bot.db.save_character(char)
+                
+                # Log state changes
+                if self.logger:
+                    self.logger.snapshot_character_state(char)
 
-                # Process initiative rolls
-                initiatives: List[Tuple[int, Character]] = []
-                for char in characters:
-                    roll_result, explanation = DiceRoller.roll_dice("1d20+dex", char)
-                    initiatives.append((roll_result, char))
-                    # Log initiative roll
-                    self.logger.add_event(
-                        CombatEventType.SYSTEM_MESSAGE,
-                        message=f"{char.name} rolls {roll_result} for initiative ({explanation})",
-                        character=char.name
+            # Show cleanup messages if any
+            if cleanup_messages:
+                formatted_messages = []
+                for msg in cleanup_messages:
+                    if msg and isinstance(msg, str):
+                        if not (msg.startswith('`') and msg.endswith('`')):
+                            msg = f"`{msg}`"
+                        formatted_messages.append(msg)
+                        
+                if formatted_messages:
+                    await interaction.followup.send(
+                        "\n".join(formatted_messages),
+                        ephemeral=True
                     )
 
-                # Sort by initiative (high to low)
-                initiatives.sort(reverse=True, key=lambda x: x[0])
-
-                # Create turn order
-                self.turn_order = [
-                    TurnData(
-                        character_name=char.name,
-                        round_number=1,
-                        initiative_roll=roll
-                    ) for roll, char in initiatives
-                ]
-
-                # Set to waiting state - combat will start on first /next
-                self.state = CombatState.WAITING
-                self.round_number = 0  # Will increment to 1 on first /next
-                self.current_index = 0
-
-                # Create initiative announcement embed
-                embed = discord.Embed(title="Battle Begins!", color=discord.Color.blue())
-                
-                # Add initiative order
-                order_text = []
-                for roll, char in initiatives:
-                    order_text.append(f"{char.name} ({roll})")
-                    
-                embed.add_field(
-                    name="Initiative Order",
-                    value=f"```\n{'\n'.join(order_text)}\n```",
-                    inline=False
+            # Process initiative rolls
+            initiatives: List[Tuple[int, Character]] = []
+            for char in characters:
+                roll_result, explanation = DiceRoller.roll_dice("1d20+dex", char)
+                initiatives.append((roll_result, char))
+                # Log initiative roll
+                self.logger.add_event(
+                    CombatEventType.SYSTEM_MESSAGE,
+                    message=f"{char.name} rolls {roll_result} for initiative ({explanation})",
+                    character=char.name
                 )
-                
-                # Add roll details
-                details = []
-                for roll, char in initiatives:
-                    details.append(f"{char.name} - {roll} (DEX: {char.stats.get_modifier(StatType.DEXTERITY):+})")
-                
-                embed.add_field(
-                    name="Roll Details",
-                    value=f"```\n" + "\n".join(details) + "\n```",
-                    inline=False
-                )
-                
-                embed.set_footer(text="Type /next to begin the battle!")
-                
-                await interaction.followup.send(embed=embed)
-                
-                return True, "Combat initialized"
 
-            except Exception as e:
-                logger.error(f"Error starting combat: {e}", exc_info=True)
-                return False, f"Error starting combat: {str(e)}"
+            # Sort by initiative (high to low)
+            initiatives.sort(reverse=True, key=lambda x: x[0])
+
+            # Create turn order
+            self.turn_order = [
+                TurnData(
+                    character_name=char.name,
+                    round_number=1,
+                    initiative_roll=roll
+                ) for roll, char in initiatives
+            ]
+
+            # Set to waiting state - combat will start on first /next
+            self.state = CombatState.WAITING
+            self.round_number = 0  # Will increment to 1 on first /next
+            self.current_index = 0
+
+            # Create initiative announcement embed
+            embed = discord.Embed(title="Battle Begins!", color=discord.Color.blue())
+            
+            # Add initiative order
+            order_text = []
+            for roll, char in initiatives:
+                order_text.append(f"{char.name} ({roll})")
+                
+            embed.add_field(
+                name="Initiative Order",
+                value=f"```\n{'\n'.join(order_text)}\n```",
+                inline=False
+            )
+            
+            # Add roll details
+            details = []
+            for roll, char in initiatives:
+                details.append(f"{char.name} - {roll} (DEX: {char.stats.get_modifier(StatType.DEXTERITY):+})")
+            
+            embed.add_field(
+                name="Roll Details",
+                value=f"```\n" + "\n".join(details) + "\n```",
+                inline=False
+            )
+            
+            embed.set_footer(text="Type /next to begin the battle!")
+            
+            await interaction.followup.send(embed=embed)
+            
+            return True, "Combat initialized"
+
+        except Exception as e:
+            logger.error(f"Error starting combat: {e}", exc_info=True)
+            return False, f"Error starting combat: {str(e)}"
         
     async def clear_combat_effects(self, character: Character) -> List[str]:
         """
@@ -667,10 +682,32 @@ class InitiativeTracker:
                 round_number: int = 1,
                 current_turn: int = 0
             ) -> Tuple[bool, str]:
-                """Start combat with manual turn order without modifying any character data"""
+                """Start combat with manual turn order with child character safeguards"""
                 try:
                     if self.state != CombatState.INACTIVE:
                         return False, "Combat is already in progress"
+
+                    # SAFEGUARD: Check for child characters
+                    child_chars = []
+                    parent_suggestions = []
+                    
+                    for name in character_names:
+                        char = self.bot.game_state.get_character(name)
+                        if char:
+                            is_child, parent_name = self._check_character_is_child(char)
+                            if is_child:
+                                child_chars.append(name)
+                                parent_suggestions.append(f"{name} → {parent_name}")
+                    
+                    if child_chars:
+                        child_list = ', '.join(child_chars)
+                        suggestion_text = '\n'.join(parent_suggestions)
+                        
+                        return False, (
+                            f"❌ **Child characters cannot enter initiative directly:** {child_list}\n\n"
+                            f"**Use their parent characters instead:**\n{suggestion_text}\n\n"
+                            f"*Child character effects will automatically be processed during their parent's turn.*"
+                        )
 
                     # Important: Set round number before state change
                     self.round_number = round_number
@@ -739,7 +776,7 @@ class InitiativeTracker:
         """
         Advance to next turn and process effects with improved message handling and character linking.
         
-        Enhanced to properly display effect expiry messages using feedback system and handle linked characters.
+        FIXED: No longer processes move effects separately - they're handled by the regular effect system.
         """
         try:
             await interaction.response.defer()
@@ -754,7 +791,7 @@ class InitiativeTracker:
                 # Process first turn with linking support
                 current_char = self.bot.game_state.get_character(self.current_turn.character_name)
                 if current_char:
-                    # Process effects with linking support - properly await the call
+                    # FIXED: Use ONLY the regular effect system (includes move effects)
                     was_skipped, start_msgs, _ = await process_effects_with_linking(
                         current_char,
                         self.round_number,
@@ -762,20 +799,6 @@ class InitiativeTracker:
                         self.logger,
                         self.bot.game_state
                     )
-                    
-                    # Process move effects with linking support
-                    move_start_msgs = await process_move_effects_with_linking(
-                        current_char,
-                        self.round_number,
-                        current_char.name,
-                        "start",
-                        self.logger,
-                        self.bot.game_state
-                    )
-                    
-                    # Combine move messages with regular effect messages
-                    if move_start_msgs:
-                        start_msgs.extend(move_start_msgs)
                     
                     self.current_turn.skipped = was_skipped
                     await self.bot.db.save_character(current_char)
@@ -802,8 +825,7 @@ class InitiativeTracker:
             end_effect_messages = []
             expiry_messages = []  # Specifically track expiry messages
             if current_char:
-                # Get end of turn effects with linking support
-                # Process effects with linking support - properly await the call
+                # FIXED: Use ONLY the regular effect system (includes move effects automatically)
                 was_skipped, start_msgs, end_msgs = await process_effects_with_linking(
                     current_char,
                     self.round_number,
@@ -811,20 +833,6 @@ class InitiativeTracker:
                     self.logger,
                     self.bot.game_state
                 )
-                
-                # Process move effects with linking support
-                move_end_msgs = await process_move_effects_with_linking(
-                    current_char,
-                    self.round_number,
-                    current_char.name,
-                    "end",
-                    self.logger,
-                    self.bot.game_state
-                )
-                
-                # Combine move messages with regular effect messages
-                if move_end_msgs:
-                    end_msgs.extend(move_end_msgs)
                 
                 self.debug_print(f"\n=== Processing turn end for {current_char.name} ===")
                 self.debug_print(f"Received {len(end_msgs)} end messages")
@@ -906,7 +914,7 @@ class InitiativeTracker:
                         if feedback.expiry_message and not feedback.displayed:
                             start_effect_messages.append(feedback.expiry_message)
                 
-                # Process new turn with linking support - properly await the call
+                # FIXED: Use ONLY the regular effect system (includes move effects automatically)
                 was_skipped, start_msgs, _ = await process_effects_with_linking(
                     new_char,
                     self.round_number,
@@ -914,20 +922,6 @@ class InitiativeTracker:
                     self.logger,
                     self.bot.game_state
                 )
-                
-                # Process move effects with linking support
-                move_start_msgs = await process_move_effects_with_linking(
-                    new_char,
-                    self.round_number,
-                    new_char.name,
-                    "start",
-                    self.logger,
-                    self.bot.game_state
-                )
-                
-                # Combine move messages with regular effect messages
-                if move_start_msgs:
-                    start_msgs.extend(move_start_msgs)
                 
                 # Update skip status
                 self.current_turn.skipped = was_skipped
@@ -1023,7 +1017,7 @@ class InitiativeTracker:
         position: Optional[int] = None
     ) -> Tuple[bool, str]:
         """
-        Add a character to an ongoing combat session.
+        Add a character to an ongoing combat session with child character safeguards.
         
         Args:
             character: The character to add
@@ -1038,6 +1032,15 @@ class InitiativeTracker:
             # Check if combat is active
             if self.state == CombatState.INACTIVE:
                 return False, "No active combat session"
+                
+            # SAFEGUARD: Check if character is a child character
+            is_child, parent_name = self._check_character_is_child(character)
+            if is_child:
+                return False, (
+                    f"❌ **Child character '{character.name}' cannot enter initiative directly.**\n\n"
+                    f"**Use their parent character '{parent_name}' instead.**\n\n"
+                    f"*Child character effects will automatically be processed during their parent's turn.*"
+                )
                 
             # Check if character already in combat
             if any(turn.character_name == character.name for turn in self.turn_order):

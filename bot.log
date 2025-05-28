@@ -22555,3 +22555,680 @@ ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' 
 2025-05-27 13:06:47,653 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
 2025-05-27 13:06:47,902 - discord.gateway - INFO - Shard ID None session has been invalidated.
 2025-05-27 13:06:53,201 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 9bc2ae01b44892362297be2fd37598d7).
+2025-05-27 14:28:39,682 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-27 14:28:39,685 - discord.client - INFO - logging in using static token
+2025-05-27 14:28:40,147 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-27 14:28:40,147 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-27 14:28:40,147 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-27 14:28:40,147 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-27 14:28:40,148 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-27 14:28:40,149 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-27 14:28:40,830 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,832 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,832 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,833 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,834 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,834 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,834 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,839 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 14:28:40,904 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-27 14:28:40,905 - core.effects.move.effect - INFO - [SimpleTiming-2752] Created with phase=instant, turns=0
+2025-05-27 14:28:40,944 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-27 14:28:40,944 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-27 14:28:40,944 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-27 14:28:40,944 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-27 14:28:40,948 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-27 14:28:40,948 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-27 14:28:40,948 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-27 14:28:40,949 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-27 14:28:40,949 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-27 14:28:41,361 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: d6c8a68337243dcaf5abcdd91450fe86).
+2025-05-27 14:29:24,673 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:29:24,674 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:29:30,507 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test4 name: domain expansion (should be 3 turns left in round 2 start, then start decrementing from there) description: . duration: 3 target: test2 attack_roll: d20+10 damage: 2d6+dex force roll_timing: per_turn force_during: True bonus_note: power stack
+2025-05-27 14:29:30,764 - core.effects.move.effect - INFO - [SimpleTiming-8352] Created with phase=active, turns=3
+2025-05-27 14:29:30,765 - core.effects.manager - INFO - EFFECT TIMING: Character=test4, CurrentTurn=test4, During=True
+2025-05-27 14:29:35,747 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:29:35,747 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:29:35,748 - core.effects.move.effect - INFO - [SimpleTiming-8352] BEFORE decrement: phase=active, turns=3
+2025-05-27 14:29:35,748 - core.effects.move.effect - INFO - [SimpleTiming-8352] AFTER decrement: turns=2
+2025-05-27 14:29:39,997 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:29:39,997 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:29:39,997 - core.effects.move.effect - INFO - [SimpleTiming-8352] BEFORE decrement: phase=active, turns=2
+2025-05-27 14:29:39,997 - core.effects.move.effect - INFO - [SimpleTiming-8352] AFTER decrement: turns=1
+2025-05-27 14:37:07,343 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:37:07,343 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:37:07,344 - core.effects.move.effect - INFO - [SimpleTiming-8352] Already processed turn start R2, Ttest4
+2025-05-27 14:37:11,422 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:37:11,422 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:37:11,423 - core.effects.move.effect - INFO - [SimpleTiming-8352] BEFORE decrement: phase=active, turns=1
+2025-05-27 14:37:11,423 - core.effects.move.effect - INFO - [SimpleTiming-8352] AFTER decrement: turns=0
+2025-05-27 14:37:11,423 - core.effects.move.effect - INFO - [SimpleTiming-8352] Transitioned: active -> REMOVED
+2025-05-27 14:37:18,207 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:37:18,208 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:37:21,255 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:37:21,256 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:38:29,016 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:38:29,017 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:39:14,079 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test4 name: domain expansion (should be 3 turns left in round 2 start, then start decrementing from there) description: . duration: 3 target: test2 attack_roll: d20+10 damage: 2d6+dex force roll_timing: per_turn force_during: False bonus_note: power stack
+2025-05-27 14:39:14,264 - core.effects.move.effect - INFO - [SimpleTiming-6352] Created with phase=active, turns=3
+2025-05-27 14:39:14,265 - core.effects.manager - INFO - EFFECT TIMING: Character=test4, CurrentTurn=test4, During=True
+2025-05-27 14:39:33,336 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:39:33,337 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:39:33,337 - core.effects.move.effect - INFO - [SimpleTiming-6352] BEFORE decrement: phase=active, turns=3
+2025-05-27 14:39:33,337 - core.effects.move.effect - INFO - [SimpleTiming-6352] AFTER decrement: turns=2
+2025-05-27 14:39:39,010 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:39:39,011 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:39:39,011 - core.effects.move.effect - INFO - [SimpleTiming-6352] BEFORE decrement: phase=active, turns=2
+2025-05-27 14:39:39,011 - core.effects.move.effect - INFO - [SimpleTiming-6352] AFTER decrement: turns=1
+2025-05-27 14:39:50,015 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:39:50,016 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:39:50,016 - core.effects.move.effect - INFO - [SimpleTiming-6352] Already processed turn start R2, Ttest4
+2025-05-27 14:39:52,946 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:39:52,947 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:39:52,947 - core.effects.move.effect - INFO - [SimpleTiming-6352] BEFORE decrement: phase=active, turns=1
+2025-05-27 14:39:52,947 - core.effects.move.effect - INFO - [SimpleTiming-6352] AFTER decrement: turns=0
+2025-05-27 14:39:52,947 - core.effects.move.effect - INFO - [SimpleTiming-6352] Transitioned: active -> REMOVED
+2025-05-27 14:39:55,669 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:39:55,670 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 14:39:59,458 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 14:39:59,458 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:02:40,744 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-27 15:02:40,748 - discord.client - INFO - logging in using static token
+2025-05-27 15:02:41,352 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-27 15:02:41,352 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-27 15:02:41,352 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-27 15:02:41,352 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-27 15:02:41,353 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-27 15:02:41,353 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-27 15:02:41,986 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,987 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,987 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,989 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,989 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,989 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,989 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,994 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:41,994 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-27 15:02:42,040 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-27 15:02:42,041 - core.effects.move.effect - INFO - [ProperTiming-7088] Created with phase=instant, turns=0
+2025-05-27 15:02:42,051 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-27 15:02:42,052 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-27 15:02:42,052 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-27 15:02:42,052 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-27 15:02:42,057 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-27 15:02:42,057 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-27 15:02:42,057 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-27 15:02:42,057 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-27 15:02:42,058 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-27 15:02:42,571 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 461baa5af21d4e7d4a0fb780c3d3d169).
+2025-05-27 15:03:38,683 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:03:38,684 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:03:42,330 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test4 name: domain expansion (should be 3 turns left in round 2 start, then start decrementing from there) description: . duration: 3 target: test2 attack_roll: d20+10 damage: 2d6+dex force roll_timing: per_turn bonus_note: power stack
+2025-05-27 15:03:42,674 - core.effects.move.effect - INFO - [ProperTiming-7248] Created with phase=active, turns=3
+2025-05-27 15:03:42,675 - core.effects.manager - INFO - EFFECT TIMING: Character=test4, CurrentTurn=test4, During=True
+2025-05-27 15:04:30,389 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:04:30,389 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:04:30,390 - core.effects.move.effect - INFO - [ProperTiming-7248] Auto-detected timing: applied_during_own_turn=True (char=test4, turn=test4)
+2025-05-27 15:04:30,390 - core.effects.move.effect - INFO - [ProperTiming-7248] BEFORE decrement: phase=active, turns=3
+2025-05-27 15:04:30,390 - core.effects.move.effect - INFO - [ProperTiming-7248] AFTER decrement: turns=2
+2025-05-27 15:04:56,939 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test4 name: domain expansion (should be 3 turns left in round 2 start, then start decrementing from there) description: . duration: 3 target: test2 attack_roll: d20+10 damage: 2d6+dex force roll_timing: per_turn bonus_note: power stack
+2025-05-27 15:04:57,286 - core.effects.move.effect - INFO - [ProperTiming-768] Created with phase=active, turns=3
+2025-05-27 15:04:57,286 - core.effects.manager - INFO - EFFECT TIMING: Character=test4, CurrentTurn=test4, During=True
+2025-05-27 15:05:11,846 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:11,846 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:11,847 - core.effects.move.effect - INFO - [ProperTiming-7248] Already processed turn start R1, Ttest4
+2025-05-27 15:05:11,852 - core.effects.move.effect - INFO - [ProperTiming-768] Auto-detected timing: applied_during_own_turn=True (char=test4, turn=test4)
+2025-05-27 15:05:11,852 - core.effects.move.effect - INFO - [ProperTiming-768] BEFORE decrement: phase=active, turns=3
+2025-05-27 15:05:11,852 - core.effects.move.effect - INFO - [ProperTiming-768] AFTER decrement: turns=2
+2025-05-27 15:05:15,361 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:15,362 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:15,362 - core.effects.move.effect - INFO - [ProperTiming-7248] BEFORE decrement: phase=active, turns=2
+2025-05-27 15:05:15,363 - core.effects.move.effect - INFO - [ProperTiming-7248] AFTER decrement: turns=1
+2025-05-27 15:05:15,365 - core.effects.move.effect - INFO - [ProperTiming-768] BEFORE decrement: phase=active, turns=2
+2025-05-27 15:05:15,366 - core.effects.move.effect - INFO - [ProperTiming-768] AFTER decrement: turns=1
+2025-05-27 15:05:29,188 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:29,189 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:29,189 - core.effects.move.effect - INFO - [ProperTiming-7248] Already processed turn start R2, Ttest4
+2025-05-27 15:05:29,192 - core.effects.move.effect - INFO - [ProperTiming-768] Already processed turn start R2, Ttest4
+2025-05-27 15:05:32,784 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:32,785 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:32,785 - core.effects.move.effect - INFO - [ProperTiming-7248] BEFORE decrement: phase=active, turns=1
+2025-05-27 15:05:32,786 - core.effects.move.effect - INFO - [ProperTiming-7248] AFTER decrement: turns=0
+2025-05-27 15:05:32,786 - core.effects.move.effect - INFO - [ProperTiming-7248] Active phase complete - marked for expiry
+2025-05-27 15:05:32,788 - core.effects.move.effect - INFO - [ProperTiming-768] BEFORE decrement: phase=active, turns=1
+2025-05-27 15:05:32,788 - core.effects.move.effect - INFO - [ProperTiming-768] AFTER decrement: turns=0
+2025-05-27 15:05:32,788 - core.effects.move.effect - INFO - [ProperTiming-768] Active phase complete - marked for expiry
+2025-05-27 15:05:32,790 - core.effects.move.effect - INFO - [ProperTiming-7248] Turn end - removing effect marked for expiry (was active)
+2025-05-27 15:05:32,791 - core.effects.move.effect - INFO - [ProperTiming-768] Turn end - removing effect marked for expiry (was active)
+2025-05-27 15:05:36,015 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:36,016 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:38,560 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:38,561 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:44,558 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test4 name: domain expansion (should be 3 turns left in round 2 start, then start decrementing from there) description: . duration: 3 target: test2 attack_roll: d20+10 damage: 2d6+dex force roll_timing: per_turn bonus_note: power stack
+2025-05-27 15:05:44,932 - core.effects.move.effect - INFO - [ProperTiming-1072] Created with phase=active, turns=3
+2025-05-27 15:05:44,933 - core.effects.manager - INFO - EFFECT TIMING: Character=test4, CurrentTurn=test4, During=True
+2025-05-27 15:05:46,706 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:46,706 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:46,706 - core.effects.move.effect - INFO - [ProperTiming-1072] Auto-detected timing: applied_during_own_turn=True (char=test4, turn=test4)
+2025-05-27 15:05:46,706 - core.effects.move.effect - INFO - [ProperTiming-1072] BEFORE decrement: phase=active, turns=3
+2025-05-27 15:05:46,707 - core.effects.move.effect - INFO - [ProperTiming-1072] AFTER decrement: turns=2
+2025-05-27 15:05:51,712 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:05:51,712 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:05:51,713 - core.effects.move.effect - INFO - [ProperTiming-1072] BEFORE decrement: phase=active, turns=2
+2025-05-27 15:05:51,714 - core.effects.move.effect - INFO - [ProperTiming-1072] AFTER decrement: turns=1
+2025-05-27 15:06:01,127 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:06:01,127 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:06:01,127 - core.effects.move.effect - INFO - [ProperTiming-1072] Already processed turn start R5, Ttest4
+2025-05-27 15:06:03,826 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:06:03,827 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:06:03,827 - core.effects.move.effect - INFO - [ProperTiming-1072] BEFORE decrement: phase=active, turns=1
+2025-05-27 15:06:03,827 - core.effects.move.effect - INFO - [ProperTiming-1072] AFTER decrement: turns=0
+2025-05-27 15:06:03,827 - core.effects.move.effect - INFO - [ProperTiming-1072] Active phase complete - marked for expiry
+2025-05-27 15:06:03,830 - core.effects.move.effect - INFO - [ProperTiming-1072] Turn end - removing effect marked for expiry (was active)
+2025-05-27 15:06:06,509 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:06:06,509 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:06:08,967 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-27 15:06:08,967 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-27 15:38:40,220 - discord.client - ERROR - Attempting a reconnect in 0.59s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-27 15:38:41,499 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 461baa5af21d4e7d4a0fb780c3d3d169.
+2025-05-27 15:59:10,894 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 461baa5af21d4e7d4a0fb780c3d3d169.
+2025-05-27 16:30:30,055 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 461baa5af21d4e7d4a0fb780c3d3d169.
+2025-05-27 16:44:11,751 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 461baa5af21d4e7d4a0fb780c3d3d169.
+2025-05-27 17:23:32,818 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 461baa5af21d4e7d4a0fb780c3d3d169.
+2025-05-27 17:59:13,067 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 461baa5af21d4e7d4a0fb780c3d3d169.
+2025-05-27 18:34:32,600 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 461baa5af21d4e7d4a0fb780c3d3d169.
+2025-05-27 20:38:25,780 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-05-27 20:38:26,024 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-05-27 20:38:31,465 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: eed060792df0b321d89bf1bc94acef07).
+2025-05-27 20:51:22,542 - discord.client - ERROR - Attempting a reconnect in 1.09s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-27 20:51:24,119 - discord.gateway - INFO - Shard ID None has successfully RESUMED session eed060792df0b321d89bf1bc94acef07.
+2025-05-27 21:14:35,739 - discord.client - ERROR - Attempting a reconnect in 0.70s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-27 21:14:36,823 - discord.gateway - INFO - Shard ID None has successfully RESUMED session eed060792df0b321d89bf1bc94acef07.
+2025-05-27 23:12:01,316 - discord.gateway - INFO - Shard ID None has successfully RESUMED session eed060792df0b321d89bf1bc94acef07.
+2025-05-28 10:01:30,831 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-05-28 10:01:31,091 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-05-28 10:01:36,475 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2b7ac32287af0d1b7f534984578d244b).
+2025-05-28 10:07:49,589 - discord.client - ERROR - Attempting a reconnect in 0.70s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-28 10:07:50,504 - discord.client - ERROR - Attempting a reconnect in 2.01s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-28 10:07:52,543 - discord.client - ERROR - Attempting a reconnect in 2.43s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-d.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-28 10:07:55,251 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 2b7ac32287af0d1b7f534984578d244b.
+2025-05-28 10:39:57,705 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-28 10:39:57,709 - discord.client - INFO - logging in using static token
+2025-05-28 10:39:58,346 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-28 10:39:58,347 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-28 10:39:58,347 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-28 10:39:58,347 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-28 10:39:58,348 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-28 10:39:58,348 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-28 10:39:59,145 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,147 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,148 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,150 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,150 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,150 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,150 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,160 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:39:59,180 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-28 10:39:59,181 - core.effects.move.effect - INFO - [ProperTiming-6128] Created with phase=instant, turns=0
+2025-05-28 10:39:59,196 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-28 10:39:59,197 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-28 10:39:59,197 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-28 10:39:59,197 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-28 10:39:59,205 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-28 10:39:59,206 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-28 10:39:59,206 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-28 10:39:59,206 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-28 10:39:59,207 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-28 10:39:59,612 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 07c4df966200fb440f3bb82ef5b5f604).
+2025-05-28 10:41:15,017 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-28 10:41:15,020 - discord.client - INFO - logging in using static token
+2025-05-28 10:41:15,459 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-28 10:41:15,460 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-28 10:41:15,460 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-28 10:41:15,460 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-28 10:41:15,462 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-28 10:41:15,462 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-28 10:41:16,117 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,118 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,118 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,119 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,119 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,120 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,120 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,125 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-28 10:41:16,194 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-28 10:41:16,195 - core.effects.move.effect - INFO - [ProperTiming-256] Created with phase=instant, turns=0
+2025-05-28 10:41:16,218 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-28 10:41:16,220 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-28 10:41:16,220 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-28 10:41:16,220 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-28 10:41:16,230 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-28 10:41:16,232 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-28 10:41:16,237 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-28 10:41:16,242 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-28 10:41:16,254 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-28 10:41:16,709 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3c307cfe609ea1c32bc716fa750fe297).
+2025-05-28 10:42:47,167 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: during test description: . duration: 1 cooldown: 1
+2025-05-28 10:42:47,684 - core.effects.move.effect - INFO - [ProperTiming-5936] Created with phase=active, turns=1
+2025-05-28 10:42:47,685 - core.effects.manager - INFO - EFFECT TIMING: Character=test2, CurrentTurn=test2, During=True
+2025-05-28 10:43:27,807 - core.effects.move.effect - INFO - [ProperTiming-5936] Auto-detected timing: applied_during_own_turn=True (char=test2, turn=test2)
+2025-05-28 10:43:27,807 - core.effects.move.effect - INFO - [ProperTiming-5936] SPECIAL: Duration 1 during own turn - skipping decrement on first turn
+2025-05-28 10:43:28,646 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-28 10:43:28,647 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-28 10:43:30,948 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-28 10:43:30,948 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-28 10:43:31,296 - core.effects.move.effect - INFO - [ProperTiming-5936] BEFORE decrement: phase=active, turns=1
+2025-05-28 10:43:31,296 - core.effects.move.effect - INFO - [ProperTiming-5936] AFTER decrement: turns=0
+2025-05-28 10:43:31,296 - core.effects.move.effect - INFO - [ProperTiming-5936] Duration 1 effect marked for expiry (will be removed at turn end)
+2025-05-28 10:43:31,297 - core.effects.move.effect - INFO - [ProperTiming-5936] Turn end - removing effect marked for expiry (was active)
+2025-05-28 10:43:35,519 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-28 10:43:35,519 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-28 10:43:38,548 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-28 10:43:38,548 - core.effects.manager - INFO - Processing linked child effects: test4
