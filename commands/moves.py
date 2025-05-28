@@ -7,6 +7,9 @@ Features:
 - Attack roll processing
 - Turn phase handling
 - Roll modifier effect handling
+- Parent resource support for linked characters
+
+ADDED: use_parent_resources parameter for child characters to use parent's resources
 """
 
 import discord
@@ -84,6 +87,86 @@ class MoveCommands(commands.GroupCog, name="move"):
                 cooldown += 1
                 
         return cast_time, duration, cooldown
+    
+    def _handle_parent_resources(self, character: Character, star_cost: int, mp_cost: int, hp_cost: int, use_parent_resources: bool) -> Tuple[bool, str, List[str]]:
+        """
+        Handle resource costs using parent resources if requested and character is linked.
+        
+        Args:
+            character: The character using the move
+            star_cost: Star cost of the move
+            mp_cost: MP cost of the move  
+            hp_cost: HP cost of the move
+            use_parent_resources: Whether to use parent's resources
+            
+        Returns:
+            Tuple of (success, error_message, resource_messages)
+        """
+        resource_messages = []
+        
+        # Check if character is linked and parent resources are requested  
+        if use_parent_resources and hasattr(character, 'parent_name') and character.parent_name:
+            # Get parent character
+            parent_char = self.bot.game_state.get_character(character.parent_name)
+            if not parent_char:
+                return False, f"Parent character '{character.parent_name}' not found", []
+            
+            # Check and apply parent's resources
+            # Check MP cost
+            if mp_cost > 0:
+                if hasattr(parent_char, 'resources') and hasattr(parent_char.resources, 'current_mp'):
+                    if parent_char.resources.current_mp < mp_cost:
+                        return False, f"Parent {parent_char.name} doesn't have enough MP ({parent_char.resources.current_mp}/{mp_cost})", []
+                    # Deduct MP from parent
+                    parent_char.resources.current_mp -= mp_cost
+                    resource_messages.append(f"🔗 {parent_char.name} MP: -{mp_cost} ({parent_char.resources.current_mp}/{parent_char.resources.max_mp})")
+            
+            # Check HP cost
+            if hp_cost > 0:
+                if hasattr(parent_char, 'resources') and hasattr(parent_char.resources, 'current_hp'):
+                    if parent_char.resources.current_hp <= hp_cost:
+                        return False, f"Parent {parent_char.name} doesn't have enough HP ({parent_char.resources.current_hp}/{hp_cost})", []
+                    # Deduct HP from parent
+                    parent_char.resources.current_hp = max(0, parent_char.resources.current_hp - hp_cost)
+                    resource_messages.append(f"🔗 {parent_char.name} HP: -{hp_cost} ({parent_char.resources.current_hp}/{parent_char.resources.max_hp})")
+            
+            # Check star cost
+            if star_cost > 0:
+                if hasattr(parent_char, 'action_stars'):
+                    can_use, reason = parent_char.can_use_move(star_cost, f"{character.name}'s move")
+                    if not can_use:
+                        return False, f"Parent {parent_char.name}: {reason}", []
+                    # Deduct stars from parent
+                    parent_char.use_move_stars(star_cost, f"{character.name}'s move")
+                    current_stars = parent_char.action_stars.current_stars
+                    max_stars = parent_char.action_stars.max_stars
+                    resource_messages.append(f"🔗 {parent_char.name} Stars: -{star_cost} ({current_stars}/{max_stars})")
+            
+            return True, "", resource_messages
+            
+        elif use_parent_resources:
+            # Character requested parent resources but isn't linked
+            if not hasattr(character, 'parent_name') or not character.parent_name:
+                return False, f"{character.name} is not a linked child character. Cannot use parent resources.", []
+        
+        # Use character's own resources (normal behavior)
+        # Check MP cost
+        if mp_cost > 0 and hasattr(character, 'resources') and hasattr(character.resources, 'current_mp'):
+            if character.resources.current_mp < mp_cost:
+                return False, f"Not enough MP ({character.resources.current_mp}/{mp_cost})", []
+                
+        # Check HP cost (only if it would reduce to 0 or below)
+        if hp_cost > 0 and hasattr(character, 'resources') and hasattr(character.resources, 'current_hp'):
+            if character.resources.current_hp <= hp_cost:
+                return False, f"Not enough HP ({character.resources.current_hp}/{hp_cost})", []
+        
+        # Check star cost
+        if star_cost > 0 and hasattr(character, 'action_stars'):
+            can_use, reason = character.can_use_move(star_cost, "move")
+            if not can_use:
+                return False, reason, []
+        
+        return True, "", []
 
     async def move_name_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         """Autocomplete for move names based on selected character"""
@@ -150,7 +233,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         target="Target character(s) (comma-separated)",
         roll_timing="When to process attack roll: instant, active, or per_turn",
         aoe_mode="How to handle multiple targets: single (one roll) or multi (roll per target)",
-        force_during="Force the effect to be treated as during/not during own turn"
+        use_parent_resources="Use parent character's resources instead of child's (for linked characters)"
     )
     @app_commands.autocomplete(character=character_autocomplete, name=move_name_autocomplete)
     async def use_move(
@@ -161,7 +244,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         target: Optional[str] = None,
         roll_timing: Optional[str] = None,
         aoe_mode: Optional[str] = "single",
-        force_during: Optional[bool] = None
+        use_parent_resources: bool = False
     ):
         """
         Use a stored move from a character's moveset.
@@ -172,6 +255,7 @@ class MoveCommands(commands.GroupCog, name="move"):
         - Applies the effect to the character
         - Handles resource costs, cooldowns, and usage tracking
         - Tracks database state changes
+        - NEW: Can use parent character's resources if character is linked
         
         The stored move remains in the character's moveset for future use.
         """
@@ -225,13 +309,15 @@ class MoveCommands(commands.GroupCog, name="move"):
             except AttributeError:
                 # Fallback if can_use method doesn't exist or is incompatible
                 pass
-                
-            # Check action star cost
-            if hasattr(char, 'can_use_move') and move.star_cost > 0:
-                can_use, reason = char.can_use_move(move.star_cost, move.name)
-                if not can_use:
-                    await interaction.followup.send(f"Cannot use {name}: {reason}")
-                    return
+            
+            # Handle resource costs (potentially using parent resources)
+            success, error_msg, resource_messages = self._handle_parent_resources(
+                char, move.star_cost, move.mp_cost, move.hp_cost, use_parent_resources
+            )
+            
+            if not success:
+                await interaction.followup.send(f"Cannot use {name}: {error_msg}", ephemeral=True)
+                return
 
             # Adjust all timing parameters
             adjusted_cast_time, adjusted_duration, adjusted_cooldown = self._adjust_timing_parameters(
@@ -258,8 +344,7 @@ class MoveCommands(commands.GroupCog, name="move"):
                 targets=targets,
                 bonus_on_hit=move.bonus_on_hit if hasattr(move, 'bonus_on_hit') else None,
                 aoe_mode=aoe_mode or getattr(move, 'aoe_mode', 'single'),
-                roll_modifier=move.roll_modifier if hasattr(move, 'roll_modifier') else None,
-                force_during=force_during  # Add force_during parameter
+                roll_modifier=move.roll_modifier if hasattr(move, 'roll_modifier') else None
             )
             
             # Apply effect and get feedback message
@@ -280,9 +365,12 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Mark move as used
             move.use(current_round)
             
-            # Use action stars if required
-            if hasattr(char, 'use_move_stars') and move.star_cost > 0:
-                char.use_move_stars(move.star_cost, move.name)
+            # Resource costs were already handled above, so we don't need to apply them again
+            # But we need to save the parent character if parent resources were used
+            if use_parent_resources and hasattr(char, 'parent_name') and char.parent_name:
+                parent_char = self.bot.game_state.get_character(char.parent_name)
+                if parent_char:
+                    await self.bot.db.save_character(parent_char)
             
             # Save character state
             await self.bot.db.save_character(char)
@@ -290,6 +378,11 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Save any targets that were modified
             for target_char in targets:
                 await self.bot.db.save_character(target_char)
+                
+            # Add resource usage info to result if parent resources were used
+            if resource_messages:
+                resource_info = "\n".join(resource_messages)
+                result += f"\n\n**Resource Usage:**\n{resource_info}"
                 
             # Display result
             await interaction.followup.send(result)
@@ -313,12 +406,12 @@ class MoveCommands(commands.GroupCog, name="move"):
         damage="Damage formula (e.g. '2d6+str fire')",
         crit_range="Critical hit range (default: 20)",
         roll_timing="When to roll attacks (instant, active, per_turn)",
-        force_during="Force effect to be treated as during own turn",
         aoe_mode="AOE mode (single, multi)",
         hp_bonus="Health points to gain per hit",
         mp_bonus="Mana points to gain per hit",
         star_bonus="Action stars to gain per hit",
-        bonus_note="Custom note to display with hit bonuses"
+        bonus_note="Custom note to display with hit bonuses",
+        use_parent_resources="Use parent character's resources instead of child's (for linked characters)"
     )
     async def temp_move(
         self,
@@ -336,12 +429,12 @@ class MoveCommands(commands.GroupCog, name="move"):
         damage: Optional[str] = None,
         crit_range: Optional[int] = 20,
         roll_timing: Optional[str] = "active",
-        force_during: Optional[bool] = False,
         aoe_mode: Optional[str] = "single",
         hp_bonus: Optional[int] = 0,
         mp_bonus: Optional[int] = 0,
         star_bonus: Optional[int] = 0,
-        bonus_note: Optional[str] = None
+        bonus_note: Optional[str] = None,
+        use_parent_resources: bool = False
     ):
         """Create a temporary move for testing"""
         try:
@@ -357,12 +450,12 @@ class MoveCommands(commands.GroupCog, name="move"):
             if damage: cmd_params += f" damage: {damage}"
             if crit_range != 20: cmd_params += f" crit_range: {crit_range}"
             if roll_timing != "active": cmd_params += f" roll_timing: {roll_timing}"
-            if force_during is not None: cmd_params += f" force_during: {force_during}"
             if aoe_mode != "single": cmd_params += f" aoe_mode: {aoe_mode}"
             if hp_bonus: cmd_params += f" hp_bonus: {hp_bonus}"
             if mp_bonus: cmd_params += f" mp_bonus: {mp_bonus}"
             if star_bonus: cmd_params += f" star_bonus: {star_bonus}"
             if bonus_note: cmd_params += f" bonus_note: {bonus_note}"
+            if use_parent_resources: cmd_params += f" use_parent_resources: {use_parent_resources}"
             
             print(f"COMMAND EXECUTED: {cmd_params}")
             logger.info(f"COMMAND EXECUTED: {cmd_params}")
@@ -375,25 +468,14 @@ class MoveCommands(commands.GroupCog, name="move"):
                 await interaction.followup.send(f"Character '{character}' not found.")
                 return
             
-            # Resource validation - CHECK BEFORE CREATING MOVE
-            # Check MP cost
-            if mp_cost > 0 and hasattr(source, 'resources') and hasattr(source.resources, 'current_mp'):
-                if source.resources.current_mp < mp_cost:
-                    await interaction.followup.send(
-                        f"Not enough MP to use {name}. Required: {mp_cost}, Available: {source.resources.current_mp}",
-                        ephemeral=True
-                    )
-                    return
+            # Handle resource costs (potentially using parent resources)
+            success, error_msg, resource_messages = self._handle_parent_resources(
+                source, star_cost, mp_cost, 0, use_parent_resources  # HP cost validation happens in MoveEffect
+            )
             
-            # Check star cost
-            if star_cost > 0 and hasattr(source, 'action_stars'):
-                can_use, reason = source.can_use_move(star_cost, name)
-                if not can_use:
-                    await interaction.followup.send(
-                        f"Cannot use {name}: {reason}",
-                        ephemeral=True
-                    )
-                    return
+            if not success:
+                await interaction.followup.send(f"Cannot use {name}: {error_msg}", ephemeral=True)
+                return
                 
             # Get target character if specified
             target_char = None
@@ -447,7 +529,6 @@ class MoveCommands(commands.GroupCog, name="move"):
                 crit_range=crit_range,
                 targets=targets,
                 roll_timing=roll_timing,
-                force_during=force_during,
                 aoe_mode=aoe_mode,
                 bonus_on_hit=bonus_on_hit
             )
@@ -463,7 +544,6 @@ class MoveCommands(commands.GroupCog, name="move"):
                     
             # Make sure we're properly awaiting apply_effect
             result = await apply_effect(source, move, current_round)
-            await interaction.followup.send(result)
             
             # Execute pending operations like attack rolls
             if hasattr(move, 'execute_pending_operations'):
@@ -477,6 +557,13 @@ class MoveCommands(commands.GroupCog, name="move"):
                             await interaction.followup.send(messages)
                 except Exception as e:
                     logger.error(f"Error executing pending operations: {e}")
+            
+            # Resource costs were already handled above, so we don't need to apply them again
+            # But we need to save the parent character if parent resources were used
+            if use_parent_resources and hasattr(source, 'parent_name') and source.parent_name:
+                parent_char = interaction.client.game_state.get_character(source.parent_name)
+                if parent_char:
+                    await interaction.client.db.save_character(parent_char)
                     
             # Save the character
             await interaction.client.db.save_character(source)
@@ -484,6 +571,13 @@ class MoveCommands(commands.GroupCog, name="move"):
             # Also save target characters if modified
             for target_char in targets:
                 await interaction.client.db.save_character(target_char)
+            
+            # Add resource usage info to result if parent resources were used
+            if resource_messages:
+                resource_info = "\n".join(resource_messages)
+                result += f"\n\n**Resource Usage:**\n{resource_info}"
+                
+            await interaction.followup.send(result)
             
         except Exception as e:
             from utils.error_handler import handle_error
