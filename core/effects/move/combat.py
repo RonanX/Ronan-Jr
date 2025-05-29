@@ -1,5 +1,6 @@
 """
 Combat processing system for handling attacks, damage, and bonuses.
+FIXED: Bonus on hit messages now display correctly after successful attacks.
 """
 
 import random
@@ -55,6 +56,11 @@ class BonusOnHit:
             str: Formatted message describing applied bonuses
         """
         if self.hit_count <= 0:
+            self.debug("No hits registered, no bonuses to apply")
+            return None
+            
+        if not self.has_any_bonuses():
+            self.debug("No bonuses configured")
             return None
             
         bonus_parts = []
@@ -69,7 +75,9 @@ class BonusOnHit:
                     character.resources.max_mp,
                     old_mp + total_mp
                 )
-                bonus_parts.append(f"💙 MP: +{total_mp} ({character.resources.current_mp}/{character.resources.max_mp})")
+                actual_gain = character.resources.current_mp - old_mp
+                if actual_gain > 0:
+                    bonus_parts.append(f"💙 MP +{actual_gain}")
             else:
                 # Reduce MP
                 old_mp = character.resources.current_mp
@@ -77,60 +85,61 @@ class BonusOnHit:
                     0,
                     old_mp + total_mp  # total_mp is negative
                 )
-                bonus_parts.append(f"💙 MP: {total_mp} ({character.resources.current_mp}/{character.resources.max_mp})")
+                actual_loss = old_mp - character.resources.current_mp
+                if actual_loss > 0:
+                    bonus_parts.append(f"💙 MP -{actual_loss}")
         
         # Apply HP bonus (multiplied by hit count)
         if self.hp_bonus != 0:
             total_hp = self.hp_bonus * self.hit_count
-            if self.hp_bonus > 0:
+            if self.hp_bonus < 0:  # Negative value means heal
                 # Heal HP
+                heal_amount = abs(total_hp)
                 old_hp = character.resources.current_hp
                 character.resources.current_hp = min(
                     character.resources.max_hp,
-                    old_hp + total_hp
+                    old_hp + heal_amount
                 )
-                bonus_parts.append(f"❤️ HP: +{total_hp} ({character.resources.current_hp}/{character.resources.max_hp})")
+                actual_heal = character.resources.current_hp - old_hp
+                if actual_heal > 0:
+                    bonus_parts.append(f"❤️ HP +{actual_heal}")
             else:
-                # Damage HP
+                # Damage HP (positive hp_bonus means damage)
                 old_hp = character.resources.current_hp
                 character.resources.current_hp = max(
                     0,
-                    old_hp + total_hp  # total_hp is negative
+                    old_hp - total_hp
                 )
-                bonus_parts.append(f"❤️ HP: {total_hp} ({character.resources.current_hp}/{character.resources.max_hp})")
+                actual_damage = old_hp - character.resources.current_hp
+                if actual_damage > 0:
+                    bonus_parts.append(f"❤️ HP -{actual_damage}")
         
         # Apply star bonus (multiplied by hit count)
         if self.star_bonus > 0:
             total_stars = self.star_bonus * self.hit_count
             if hasattr(character, 'action_stars'):
+                old_stars = character.action_stars.current_stars
                 if hasattr(character.action_stars, 'add_stars'):
                     character.action_stars.add_stars(total_stars)
-                    # Get current/max after adding
-                    current_stars = character.action_stars.current_stars
-                    max_stars = character.action_stars.max_stars
                 else:
                     # Fallback
-                    old_stars = character.action_stars.current_stars
                     character.action_stars.current_stars = min(
                         character.action_stars.max_stars,
                         old_stars + total_stars
                     )
-                    current_stars = character.action_stars.current_stars
-                    max_stars = character.action_stars.max_stars
                 
-                bonus_parts.append(f"⭐ +{total_stars} ({current_stars}/{max_stars})")
+                actual_gain = character.action_stars.current_stars - old_stars
+                if actual_gain > 0:
+                    bonus_parts.append(f"⭐ +{actual_gain}")
         
-        # Add custom note with hit count multiplier
+        # Add custom note
         if self.custom_note:
-            if self.hit_count > 1:
-                # Format with multiplier for multiple hits
-                bonus_parts.append(f"{self.custom_note} x{self.hit_count}")
-            else:
-                bonus_parts.append(f"{self.custom_note}")
+            bonus_parts.append(self.custom_note)
             
-        # Format the bonus message with backticks for consistency
+        # Format the bonus message
         if bonus_parts:
-            return f"`{self.hit_count} {'Hits' if self.hit_count > 1 else 'Hit'}! | {' | '.join(bonus_parts)}`"
+            hit_text = f"{self.hit_count} {'Hits' if self.hit_count > 1 else 'Hit'}"
+            return f"{hit_text} Bonus! {' | '.join(bonus_parts)}"
         
         return None
         
@@ -174,6 +183,7 @@ class BonusOnHit:
 class CombatProcessor:
     """
     Handles attack rolls and damage application.
+    FIXED: Bonus messages now appear as separate line items after attack results.
     """
     def __init__(self, debug_mode=False):
         """Initialize the combat processor"""
@@ -186,28 +196,16 @@ class CombatProcessor:
             print(f"[CombatProcessor] {message}")
     
     def perform_sync_attack(self,
-                           source,
-                           targets,
-                           attack_roll: str,
-                           damage: Optional[str] = None,
-                           crit_range: int = 20,
-                           reason: str = "Attack",
-                           bonus_on_hit: Optional[BonusOnHit] = None) -> List[str]:
+                        source,
+                        targets,
+                        attack_roll: str,
+                        damage: Optional[str] = None,
+                        crit_range: int = 20,
+                        reason: str = "Attack",
+                        bonus_on_hit: Optional[BonusOnHit] = None) -> List[str]:
         """
         Process attack rolls and damage against targets synchronously.
-        This version returns formatted messages immediately for inclusion in effect messages.
-        
-        Args:
-            source: Character making the attack
-            targets: List of target characters
-            attack_roll: Dice formula for attack roll
-            damage: Dice formula for damage
-            crit_range: Natural roll for critical hit
-            reason: Reason for the attack (move name)
-            bonus_on_hit: Bonus tracker for hits
-            
-        Returns:
-            List[str]: Messages describing results
+        FIXED: Now supports static values like "20" for guaranteed rolls.
         """
         messages = []
         
@@ -221,10 +219,26 @@ class CombatProcessor:
         if bonus_on_hit is None:
             bonus_on_hit = BonusOnHit()
             
-        self.debug(f"Using hit bonus tracker: {bonus_on_hit.__dict__}")
+        self.debug(f"Using hit bonus tracker: has_bonuses={bonus_on_hit.has_any_bonuses()}")
         
         # Reset bonus counter for new attack
         bonus_on_hit.reset()
+        
+        # Check if this is a static value (like "20")
+        is_static_roll = False
+        static_value = None
+        try:
+            # Remove 'd' prefix if present (e.g., "d20" -> "20")
+            test_roll = attack_roll.strip()
+            if test_roll.lower().startswith('d'):
+                test_roll = test_roll[1:]
+            
+            static_value = int(test_roll)
+            is_static_roll = True
+            self.debug(f"Detected static roll value: {static_value}")
+        except ValueError:
+            # Not a static value, continue with normal processing
+            pass
         
         # Format attack results message based on roll type
         is_multihit = 'multihit' in attack_roll.lower()
@@ -249,7 +263,15 @@ class CombatProcessor:
         
         # Generate attack roll(s)
         attack_rolls = []
-        if is_multihit:
+        
+        if is_static_roll:
+            # Static roll - use the provided value
+            for i in range(min(3, len(targets)) if is_multihit else 1):
+                final_roll = static_value + stat_mod
+                if is_multihit:
+                    final_roll += multihit_count
+                attack_rolls.append((static_value, None, final_roll, False, False))
+        elif is_multihit:
             # Roll multiple times for multihit
             for i in range(min(3, len(targets))):
                 if has_advantage:
@@ -269,7 +291,10 @@ class CombatProcessor:
         else:
             # Single roll or one roll per target in multi mode
             if self.aoe_mode == 'single' or len(targets) == 1:
-                if has_advantage:
+                if is_static_roll:
+                    final_roll = static_value + stat_mod
+                    attack_rolls.append((static_value, None, final_roll, False, False))
+                elif has_advantage:
                     roll1, roll2 = random.randint(1, 20), random.randint(1, 20)
                     roll_value = max(roll1, roll2)
                     final_roll = roll_value + stat_mod
@@ -286,7 +311,10 @@ class CombatProcessor:
             else:
                 # Multi mode - one roll per target
                 for target in targets:
-                    if has_advantage:
+                    if is_static_roll:
+                        final_roll = static_value + stat_mod
+                        attack_rolls.append((static_value, None, final_roll, False, False))
+                    elif has_advantage:
                         roll1, roll2 = random.randint(1, 20), random.randint(1, 20)
                         roll_value = max(roll1, roll2)
                         final_roll = roll_value + stat_mod
@@ -309,18 +337,16 @@ class CombatProcessor:
                 if main_roll >= target.defense.current_ac:
                     hit_targets.append(target)
                     bonus_on_hit.register_hit()
-                    self.debug(f"Target hit: {target.name}")
+                    self.debug(f"Target hit: {target.name} (AC {target.defense.current_ac})")
         else:
             # Multi mode - separate roll for each target
             for i, target in enumerate(targets):
                 if i < len(attack_rolls) and attack_rolls[i][2] >= target.defense.current_ac:
                     hit_targets.append(target)
                     bonus_on_hit.register_hit()
-                    self.debug(f"Target hit: {target.name}")
+                    self.debug(f"Target hit: {target.name} (AC {target.defense.current_ac})")
         
-        # Format the message based on roll type and AOE mode - IMPROVED FORMATTING
-        # This is the key change - match advanced_roll formatting
-        
+        # Format the message based on roll type and AOE mode
         DAMAGE_TYPE_EMOJIS = {
             'slashing': '🗡️',
             'piercing': '🏹',
@@ -525,17 +551,14 @@ class CombatProcessor:
             else:
                 messages.append(f"📝 {reason}")
         
-        # Apply bonuses and add bonus message
+        # FIXED: Apply bonuses and add bonus message as separate line
         if hit_targets and bonus_on_hit.has_any_bonuses():
-            self.debug(f"Applying bonuses for {len(hit_targets)} hits")
+            self.debug(f"Applying bonuses for {bonus_on_hit.get_hit_count()} hits")
             bonus_message = bonus_on_hit.apply_bonuses(source)
             if bonus_message:
                 self.debug(f"Bonus message: {bonus_message}")
-                messages.append(f"{bonus_message}")
-                
-                # Add custom note if present
-                if bonus_on_hit.custom_note:
-                    messages.append(f"{bonus_on_hit.custom_note}")
+                # Add as its own message, not embedded in attack result
+                messages.append(bonus_message)
         
         return messages
 
@@ -585,6 +608,17 @@ class CombatProcessor:
         """Extract the correct stat modifier from character for an attack roll"""
         # Default modifier
         stat_mod = 0
+        
+        # First check if it's just a static number (like "20" or "15")
+        try:
+            # Try to parse the entire attack_roll as a number
+            static_value = int(attack_roll.strip())
+            # If successful, this is a static roll - return 0 modifier
+            # The static value will be used as the base roll
+            return 0
+        except ValueError:
+            # Not a pure number, continue with normal parsing
+            pass
         
         # Extract the modifier from the attack roll string if present
         if "+" in attack_roll:

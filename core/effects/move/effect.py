@@ -1,12 +1,12 @@
 """
-Core implementation of the MoveEffect class with PROPER timing logic per user specification.
+Core implementation of the MoveEffect class with FIXED timing logic.
 
-YOUR EXACT LOGIC IMPLEMENTED:
-1. Turn START: Decrements duration, shows status, handles attacks
-2. Turn END: Only removes expired effects and shows cleanup messages
-3. Duration 1 during own turn: Won't decrement until NEXT turn start, then marks for expiry
-4. Applied not during turn: Decrements normally next time around
-5. NO MORE force_during parameter needed - timing is built-in and consistent
+FIXES:
+1. Phase now in parentheses: "(casting) 1 turn remaining"
+2. Attack rolls ONLY happen at turn start, never turn end
+3. Duration now shows in apply message
+4. Transitions happen at turn end but no attacks
+5. Turn start decrements, turn end shows status
 """
 
 import logging
@@ -24,15 +24,13 @@ from .saves import SavingThrowProcessor
 
 logger = logging.getLogger(__name__)
 
-class ProperMoveEffectTiming:
+class SimplifiedMoveEffectTiming:
     """
-    PROPER timing system implementing user's exact specification:
+    SIMPLIFIED timing system:
     
-    - Turn START: Decrements and processes
-    - Turn END: Only cleanup and removal
-    - Duration 1 during own turn: Waits one turn, then marks for expiry at next start
-    - Applied not during: Normal decrement next time around
-    - Built-in logic eliminates need for force_during
+    - Turn START: Decrements and marks for changes
+    - Turn END: Shows status and executes changes
+    - Consistent behavior regardless of when applied
     """
     
     def __init__(self, 
@@ -40,9 +38,9 @@ class ProperMoveEffectTiming:
                  duration: Optional[int] = None, 
                  cooldown: Optional[int] = None,
                  debug_mode: bool = True):
-        """Initialize proper timing"""
+        """Initialize simplified timing"""
         self.debug_mode = debug_mode
-        self.debug_id = f"ProperTiming-{id(self) % 10000}"
+        self.debug_id = f"SimpleTiming-{id(self) % 10000}"
         
         # Store base durations
         self.cast_time = cast_time
@@ -65,14 +63,9 @@ class ProperMoveEffectTiming:
             
         # Tracking
         self.should_be_removed = False
-        self.marked_for_expiry = False  # NEW: Separate from removal
+        self.pending_transition = None  # What transition to execute at turn end
         self.last_processed_round = None
         self.last_processed_turn = None
-        self.just_transitioned = False
-        
-        # Applied during own turn tracking (automatic detection)
-        self.applied_during_own_turn = None  # Will be set on first processing
-        self.first_turn_processed = False
         
         self.debug(f"Created with phase={self.current_phase.value}, turns={self.turns_remaining}")
     
@@ -89,173 +82,109 @@ class ProperMoveEffectTiming:
         """Get remaining turns in current phase"""
         return max(0, self.turns_remaining)
     
-    def is_final_turn(self) -> bool:
-        """Check if this is the final turn of the current phase"""
-        return self.turns_remaining == 1
-    
-    def detect_timing_context(self, character_name: str, turn_name: str) -> bool:
+    def process_turn_start(self, round_number, turn_name, character_name) -> None:
         """
-        Auto-detect if effect was applied during character's own turn.
-        Only needs to be done once on first processing.
-        """
-        if self.applied_during_own_turn is not None:
-            return self.applied_during_own_turn  # Already detected
-            
-        # Detect based on current context
-        is_during = (character_name == turn_name)
-        self.applied_during_own_turn = is_during
-        
-        self.debug(f"Auto-detected timing: applied_during_own_turn={is_during} (char={character_name}, turn={turn_name})")
-        return is_during
-    
-    def process_turn_start(self, round_number, turn_name, character_name) -> Tuple[bool, Optional[str]]:
-        """
-        Process turn START - This is where ALL duration logic happens.
-        
-        YOUR LOGIC:
-        - Duration decrements here 
-        - Duration 1 during own turn: Won't decrement until NEXT turn start
-        - Then marks for expiry (not removal yet)
-        
-        Returns:
-            (did_transition, transition_message)
+        Process turn START - Only decrements and marks for changes.
+        No messages, no transitions - just bookkeeping.
         """
         # Skip if not this character's turn
         if character_name != turn_name:
-            return False, None
+            return
             
         # Skip if already processed this turn
         if (self.last_processed_round == round_number and 
             self.last_processed_turn == turn_name):
             self.debug(f"Already processed turn start R{round_number}, T{turn_name}")
-            return False, None
+            return
             
         # Mark as processed
         self.last_processed_round = round_number
         self.last_processed_turn = turn_name
         
-        # Auto-detect timing context on first processing
-        is_during = self.detect_timing_context(character_name, turn_name)
-        
-        # Reset transition flag
-        self.just_transitioned = False
-        
         # Handle INSTANT phase
         if self.current_phase == MovePhase.INSTANT:
             self.should_be_removed = True
             self.debug("Instant effect marked for removal")
-            return True, "completes"
+            return
         
-        # SPECIAL CASE: Duration 1 during own turn on first processing
-        if (not self.first_turn_processed and 
-            is_during and 
-            self.current_phase == MovePhase.ACTIVE and 
-            self.duration == 1):
-            
-            self.debug("SPECIAL: Duration 1 during own turn - skipping decrement on first turn")
-            self.first_turn_processed = True
-            return False, None  # No decrement, no transition
-        
-        # Normal processing - decrement at turn start
+        # Decrement turns
         self.debug(f"BEFORE decrement: phase={self.current_phase.value}, turns={self.turns_remaining}")
         
         if self.turns_remaining > 0:
             self.turns_remaining -= 1
             self.debug(f"AFTER decrement: turns={self.turns_remaining}")
             
-            # Check for marking for expiry (not removal yet)
+            # Mark for transition if turns hit 0
             if self.turns_remaining <= 0:
-                if self.current_phase == MovePhase.ACTIVE and self.duration == 1:
-                    # Special case: Duration 1 effect marks for expiry but doesn't remove yet
-                    self.marked_for_expiry = True
-                    self.debug("Duration 1 effect marked for expiry (will be removed at turn end)")
-                    return False, None  # No transition message yet
-                else:
-                    # Normal transition
-                    return self._handle_phase_transition()
-        
-        self.first_turn_processed = True
-        return False, None
+                self._mark_for_transition()
     
-    def process_turn_end(self, round_number, turn_name, character_name) -> Tuple[bool, Optional[str]]:
+    def _mark_for_transition(self):
+        """Mark what transition should happen at turn end"""
+        if self.current_phase == MovePhase.CASTING:
+            if self.duration and self.duration > 0:
+                self.pending_transition = ('active', self.duration)
+                self.debug("Marked for transition: casting -> active")
+            elif self.cooldown and self.cooldown > 0:
+                self.pending_transition = ('cooldown', self.cooldown)
+                self.debug("Marked for transition: casting -> cooldown")
+            else:
+                self.should_be_removed = True
+                self.debug("Marked for removal after casting")
+                
+        elif self.current_phase == MovePhase.ACTIVE:
+            if self.cooldown and self.cooldown > 0:
+                self.pending_transition = ('cooldown', self.cooldown)
+                self.debug("Marked for transition: active -> cooldown")
+            else:
+                self.should_be_removed = True
+                self.debug("Marked for removal after active")
+                
+        elif self.current_phase == MovePhase.COOLDOWN:
+            self.should_be_removed = True
+            self.debug("Marked for removal after cooldown")
+    
+    def process_turn_end(self, round_number, turn_name, character_name) -> Tuple[Optional[str], bool]:
         """
-        Process turn END - Only handles cleanup and removal messages.
-        
-        YOUR LOGIC:
-        - No duration changes here
-        - Only removes effects marked for expiry
-        - Shows "worn off" messages
+        Process turn END - Show status and execute marked transitions.
         
         Returns:
-            (should_remove, cleanup_message)
+            (status_message, should_remove)
         """
         # Skip if not this character's turn
         if character_name != turn_name:
-            return False, None
+            return None, False
             
-        # Check if marked for expiry
-        if self.marked_for_expiry:
-            self.should_be_removed = True
-            phase_name = self.current_phase.value
-            self.debug(f"Turn end - removing effect marked for expiry (was {phase_name})")
-            return True, f"{self.current_phase.value} effect has worn off"
-        
-        # Check if should be removed from other reasons
-        if self.should_be_removed:
-            self.debug("Turn end - effect already marked for removal")
-            return True, f"{self.current_phase.value} effect expired"
-        
-        return False, None
-    
-    def _handle_phase_transition(self) -> Tuple[bool, Optional[str]]:
-        """Handle transition between phases"""
-        old_phase = self.current_phase
-        
-        if self.current_phase == MovePhase.CASTING:
-            # Casting complete, move to active
-            if self.duration and self.duration > 0:
+        # Execute pending transition if any
+        transition_msg = None
+        if self.pending_transition:
+            new_phase, new_turns = self.pending_transition
+            old_phase = self.current_phase
+            
+            if new_phase == 'active':
                 self.current_phase = MovePhase.ACTIVE
-                self.turns_remaining = self.duration
-                message = "activates!"
-                self.debug(f"Transitioned: {old_phase.value} -> ACTIVE ({self.turns_remaining} turns)")
-            elif self.cooldown and self.cooldown > 0:
-                # No active phase, go straight to cooldown
+                self.turns_remaining = new_turns
+                transition_msg = f"activates"
+            elif new_phase == 'cooldown':
                 self.current_phase = MovePhase.COOLDOWN
-                self.turns_remaining = self.cooldown
-                message = "enters cooldown"
-                self.debug(f"Transitioned: {old_phase.value} -> COOLDOWN ({self.turns_remaining} turns)")
-            else:
-                # No further phases
-                self.should_be_removed = True
-                message = "completes"
-                self.debug(f"Transitioned: {old_phase.value} -> REMOVED")
+                self.turns_remaining = new_turns
+                transition_msg = f"enters cooldown"
                 
-        elif self.current_phase == MovePhase.ACTIVE:
-            # Active complete, move to cooldown
-            if self.cooldown and self.cooldown > 0:
-                self.current_phase = MovePhase.COOLDOWN
-                self.turns_remaining = self.cooldown
-                message = "enters cooldown"
-                self.debug(f"Transitioned: {old_phase.value} -> COOLDOWN ({self.turns_remaining} turns)")
-            else:
-                # No cooldown phase - mark for expiry
-                self.marked_for_expiry = True
-                message = None  # No message yet, will show at turn end
-                self.debug(f"Active phase complete - marked for expiry")
-                return False, None  # No immediate transition message
-                
-        elif self.current_phase == MovePhase.COOLDOWN:
-            # Cooldown complete
-            self.should_be_removed = True
-            message = "cooldown ends"
-            self.debug(f"Transitioned: {old_phase.value} -> REMOVED")
-        else:
-            message = "completes"
-            self.should_be_removed = True
-            self.debug(f"Unknown phase transition: {old_phase.value}")
+            self.pending_transition = None
+            self.debug(f"Executed transition: {old_phase.value} -> {new_phase}")
+            
+            # Return transition message
+            return transition_msg, False
         
-        self.just_transitioned = True
-        return True, message
+        # If marked for removal, effect has worn off
+        if self.should_be_removed:
+            return "has worn off", True
+        
+        # Otherwise, show current status with phase in parentheses
+        if self.turns_remaining > 0:
+            status = f"({self.current_phase.value}) {self.turns_remaining} turn{'s' if self.turns_remaining != 1 else ''} remaining"
+            return status, False
+        
+        return None, False
     
     def to_dict(self) -> dict:
         """Convert to dictionary for storage"""
@@ -266,9 +195,7 @@ class ProperMoveEffectTiming:
             "duration": self.duration,
             "cooldown": self.cooldown,
             "should_be_removed": self.should_be_removed,
-            "marked_for_expiry": self.marked_for_expiry,
-            "applied_during_own_turn": self.applied_during_own_turn,
-            "first_turn_processed": self.first_turn_processed,
+            "pending_transition": self.pending_transition,
             "last_processed_round": self.last_processed_round,
             "last_processed_turn": self.last_processed_turn
         }
@@ -290,9 +217,7 @@ class ProperMoveEffectTiming:
             
         instance.turns_remaining = data.get("turns_remaining", 0)
         instance.should_be_removed = data.get("should_be_removed", False)
-        instance.marked_for_expiry = data.get("marked_for_expiry", False)
-        instance.applied_during_own_turn = data.get("applied_during_own_turn")
-        instance.first_turn_processed = data.get("first_turn_processed", False)
+        instance.pending_transition = data.get("pending_transition")
         instance.last_processed_round = data.get("last_processed_round")
         instance.last_processed_turn = data.get("last_processed_turn")
         
@@ -300,14 +225,13 @@ class ProperMoveEffectTiming:
 
 class MoveEffect(BaseEffect):
     """
-    Move effect with PROPER timing system per user specification.
+    Move effect with FIXED timing system.
     
-    YOUR EXACT REQUIREMENTS:
-    - Turn START: Decrements duration, shows status, handles attacks  
-    - Turn END: Only removes expired effects and shows cleanup
-    - Duration 1 during own turn: Waits one turn, then marks for expiry
-    - Applied not during: Normal decrement behavior
-    - NO force_during needed - timing is built-in
+    REQUIREMENTS:
+    - Turn START: Decrements duration, processes attacks, marks for changes
+    - Turn END: Shows status, executes transitions (NO ATTACKS)
+    - Phase shown in parentheses
+    - Duration shown in apply message
     """
     def __init__(
         self, 
@@ -335,9 +259,8 @@ class MoveEffect(BaseEffect):
         save_type: Optional[str] = None,
         save_dc: Optional[str] = None,
         half_on_save: bool = False
-        # NOTE: force_during parameter REMOVED per user request
     ):
-        """Initialize a move effect with proper timing per user specification"""
+        """Initialize a move effect with fixed timing"""
         # Use actual duration for BaseEffect 
         actual_duration = 0 if duration is None else duration
         
@@ -361,8 +284,8 @@ class MoveEffect(BaseEffect):
         self._move_duration = duration
         self._move_cooldown = cooldown
         
-        # Use proper timing handler
-        self.timing_handler = ProperMoveEffectTiming(
+        # Use simplified timing handler
+        self.timing_handler = SimplifiedMoveEffectTiming(
             cast_time=cast_time,
             duration=duration,
             cooldown=cooldown,
@@ -440,9 +363,9 @@ class MoveEffect(BaseEffect):
         self.marked_for_removal = False
         self._internal_cache = {}
         self.last_roll_round = None
+        self.pending_attack = False  # Track if we need to process attack after transition
         
-        print(f"[Move-{name}] Created with PROPER timing: cast={cast_time}, duration={duration}, cooldown={cooldown}")
-        print(f"[Move-{name}] NO force_during parameter - timing is built-in per user specification")
+        print(f"[Move-{name}] Created with FIXED timing: cast={cast_time}, duration={duration}, cooldown={cooldown}")
 
     @property
     def cast_time(self):
@@ -458,6 +381,40 @@ class MoveEffect(BaseEffect):
     def cooldown(self):
         """Get the cooldown time for this move"""
         return self._move_cooldown
+
+    def _init_roll_modifier(self, roll_modifier: Dict[str, Any], move_name: str, duration: Optional[int]):
+        """Initialize roll modifier effect if configured"""
+        if not roll_modifier:
+            return
+            
+        # Extract modifier parameters
+        mod_type = roll_modifier.get('type', 'bonus')
+        mod_value = roll_modifier.get('value', 0)
+        mod_duration = roll_modifier.get('duration', duration or 1)
+        
+        # Create the appropriate effect based on type
+        if mod_type == 'bonus':
+            self.roll_modifier_effect = RollModifierEffect(
+                name=f"{move_name} Bonus",
+                modifier_type=RollModifierType.BONUS,
+                modifier_value=mod_value,
+                duration=mod_duration,
+                source=move_name
+            )
+        elif mod_type == 'advantage':
+            self.roll_modifier_effect = RollModifierEffect(
+                name=f"{move_name} Advantage",
+                modifier_type=RollModifierType.ADVANTAGE,
+                duration=mod_duration,
+                source=move_name
+            )
+        elif mod_type == 'disadvantage':
+            self.roll_modifier_effect = RollModifierEffect(
+                name=f"{move_name} Disadvantage",
+                modifier_type=RollModifierType.DISADVANTAGE,
+                duration=mod_duration,
+                source=move_name
+            )
 
     def apply_costs(self, character) -> List[str]:
         """Apply resource costs (MP, HP, Stars) to the character"""
@@ -542,7 +499,7 @@ class MoveEffect(BaseEffect):
         return True, "Ability ready to use"
 
     def on_apply(self, character, round_number: int) -> str:
-        """Apply the effect to a character with proper timing"""
+        """Apply the effect to a character with fixed timing"""
         print(f"[Move-{self.name}] Applying to {character.name} on round {round_number}")
         
         # Call parent method for basic initialization
@@ -578,9 +535,11 @@ class MoveEffect(BaseEffect):
         if self.star_cost > 0:
             info_parts.append(f"⭐ {self.star_cost}")
         
-        # Add timing info
+        # Add ALL timing info (cast, duration, cooldown)
         if self.cast_time and self.cast_time > 0:
             info_parts.append(f"🔄 {self.cast_time}T Cast")
+        if self.duration and self.duration > 0:
+            info_parts.append(f"⏱️ {self.duration}T Duration")
         if self.cooldown and self.cooldown > 0:
             info_parts.append(f"⌛ {self.cooldown}T Cooldown")
         
@@ -643,12 +602,12 @@ class MoveEffect(BaseEffect):
             
         formatted_message = self.format_effect_message(main_message, [])
         
-        # Add attack results as bulleted items
+        # Add attack results as bulleted items (including bonus messages)
         if attack_messages:
             for result in attack_messages:
                 formatted_message += f"\n• `{result}`"
         
-        print(f"[Move-{self.name}] Apply complete with PROPER timing logic")
+        print(f"[Move-{self.name}] Apply complete with FIXED timing logic")
         return formatted_message
 
     def get_phase_name(self) -> str:
@@ -668,7 +627,7 @@ class MoveEffect(BaseEffect):
     
     def on_turn_start(self, character, round_number: int, turn_name: str) -> List[str]:
         """
-        PROPER LOGIC: Process effects at turn START - duration decrements here.
+        FIXED: Process effects at turn START - decrement, process attacks, mark for changes.
         """
         # Only process for effect owner
         if character.name != turn_name:
@@ -677,57 +636,28 @@ class MoveEffect(BaseEffect):
         print(f"[Move-{self.name}] Turn start for {character.name} on round {round_number}")
         messages = []
         
-        # Process timing at turn START (where decrements happen)
-        did_transition, transition_msg = self.timing_handler.process_turn_start(round_number, turn_name, character.name)
+        # Process timing at turn START (only decrements, no messages)
+        self.timing_handler.process_turn_start(round_number, turn_name, character.name)
         
-        # Get current state
+        # Check if we're transitioning to active phase
+        will_transition_to_active = (
+            self.timing_handler.pending_transition and 
+            self.timing_handler.pending_transition[0] == 'active'
+        )
+        
+        # Process attacks ONLY during active phase and not when transitioning
         current_phase = self.timing_handler.current_phase
-        turns_remaining = self.timing_handler.get_remaining_turns()
-        phase_name = self.get_phase_name()
-        is_final_turn = self.timing_handler.is_final_turn()
-        is_marked_for_expiry = self.timing_handler.marked_for_expiry
-        
-        # Handle based on current phase and transitions
-        if current_phase == MovePhase.CASTING:
-            if did_transition and transition_msg:
-                # Transition happened (casting -> active)
-                msg = self.format_effect_message(f"{self.name} {transition_msg}", [])
-                messages.append(msg)
-            else:
-                # Still casting
-                turn_display = "Final turn of casting" if is_final_turn else f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"
-                cast_msg = self.format_effect_message(f"Casting {self.name}", [turn_display])
-                messages.append(cast_msg)
-                
-        elif current_phase == MovePhase.ACTIVE:
-            # Handle attack rolls at turn start for active effects
-            is_per_turn = getattr(self, 'roll_timing', None) == RollTiming.PER_TURN
-            is_active_roll = getattr(self, 'roll_timing', None) == RollTiming.ACTIVE
-            just_became_active = did_transition and self.timing_handler.just_transitioned
+        if (current_phase == MovePhase.ACTIVE and 
+            not self.timing_handler.pending_transition):
             
-            should_attack = (is_per_turn or (is_active_roll and just_became_active))
-            
-            if self.attack_roll and should_attack:
-                print(f"[Move-{self.name}] Processing attack roll at turn start")
+            # Process ACTIVE timing attack on first turn of active phase
+            if self.roll_timing == RollTiming.ACTIVE and not self.last_roll_round:
+                print(f"[Move-{self.name}] Processing ACTIVE attack roll (first turn)")
                 self.last_roll_round = round_number
                 
                 if hasattr(self, 'bonus_on_hit'):
                     self.bonus_on_hit.reset()
                 
-                # Show status message first
-                if did_transition and transition_msg:
-                    active_msg = self.format_effect_message(f"{self.name} {transition_msg}", [])
-                    messages.append(active_msg)
-                elif is_marked_for_expiry:
-                    # Special case: Duration 1 effect marked for expiry
-                    active_msg = self.format_effect_message(f"{self.name} {phase_name}", ["Final turn"])
-                    messages.append(active_msg)
-                else:
-                    turn_display = "Final turn" if is_final_turn else f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"
-                    active_msg = self.format_effect_message(f"{self.name} {phase_name}", [turn_display])
-                    messages.append(active_msg)
-                
-                # Execute attack
                 attack_results = self.combat.perform_sync_attack(
                     source=character,
                     targets=self.targets,
@@ -741,28 +671,33 @@ class MoveEffect(BaseEffect):
                 if attack_results:
                     for result in attack_results:
                         messages.append(f"• `{result}`")
-            else:
-                # No attack, just show status
-                if did_transition and transition_msg:
-                    active_msg = self.format_effect_message(f"{self.name} {transition_msg}", [])
-                    messages.append(active_msg)
-                elif is_marked_for_expiry:
-                    # Special case: Duration 1 effect marked for expiry
-                    active_msg = self.format_effect_message(f"{self.name} {phase_name}", ["Final turn"])
-                    messages.append(active_msg)
-                else:
-                    turn_display = "Final turn" if is_final_turn else f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"
-                    active_msg = self.format_effect_message(f"{self.name} {phase_name}", [turn_display])
-                    messages.append(active_msg)
             
-        elif current_phase == MovePhase.COOLDOWN:
-            if did_transition and transition_msg:
-                cooldown_msg = self.format_effect_message(f"{self.name} {transition_msg}", [])
-                messages.append(cooldown_msg)
-            else:
-                turn_display = "Final turn" if is_final_turn else f"{turns_remaining} turn{'s' if turns_remaining != 1 else ''} remaining"
-                cooldown_msg = self.format_effect_message(f"{self.name} {phase_name}", [turn_display])
-                messages.append(cooldown_msg)
+            # Process PER_TURN attacks every turn
+            elif self.roll_timing == RollTiming.PER_TURN and self.attack_roll:
+                print(f"[Move-{self.name}] Processing PER_TURN attack roll")
+                self.last_roll_round = round_number
+                
+                if hasattr(self, 'bonus_on_hit'):
+                    self.bonus_on_hit.reset()
+                
+                attack_results = self.combat.perform_sync_attack(
+                    source=character,
+                    targets=self.targets,
+                    attack_roll=self.attack_roll,
+                    damage=self.damage,
+                    crit_range=self.crit_range,
+                    reason=self.name,
+                    bonus_on_hit=self.bonus_on_hit
+                )
+                
+                if attack_results:
+                    for result in attack_results:
+                        messages.append(f"• `{result}`")
+        
+        # Mark pending attack if we're about to transition to active
+        if will_transition_to_active and self.roll_timing == RollTiming.ACTIVE:
+            self.pending_attack = True
+            print(f"[Move-{self.name}] Marked pending attack for after transition")
         
         # Check if marked for removal after processing
         if self.timing_handler.should_be_removed:
@@ -770,11 +705,12 @@ class MoveEffect(BaseEffect):
             self.state = EffectState.EXPIRED
             print(f"[Move-{self.name}] Marked for removal after turn start processing")
         
+        # Turn start returns attack messages only
         return messages
 
     def on_turn_end(self, character, round_number: int, turn_name: str) -> List[str]:
         """
-        PROPER LOGIC: Process effects at turn END - only cleanup, no duration changes.
+        FIXED: Process effects at turn END - show status and execute transitions (NO ATTACKS).
         """
         # Only process for effect owner
         if character.name != turn_name:
@@ -787,22 +723,50 @@ class MoveEffect(BaseEffect):
         if hasattr(self, '_ignore_base_duration') and self._ignore_base_duration:
             self._duration_remaining = 999  # Prevent BaseEffect from removing it
         
-        # Check if already marked for removal
-        if self.marked_for_removal or self.timing_handler.should_be_removed:
-            print(f"[Move-{self.name}] Already marked for removal")
-            return []
+        # Get status and check for removal
+        status_msg, should_remove = self.timing_handler.process_turn_end(round_number, turn_name, character.name)
         
-        # Process turn end (only cleanup and removal)
-        should_remove, cleanup_msg = self.timing_handler.process_turn_end(round_number, turn_name, character.name)
-        
-        if should_remove:
+        # If we have a transition message, show it
+        if status_msg and "activates" in status_msg:
+            # This is an activation message
+            messages.append(self.format_effect_message(f"{self.name} {status_msg}", []))
+            
+            # Process pending attack if needed
+            if self.pending_attack and self.roll_timing == RollTiming.ACTIVE and self.attack_roll:
+                print(f"[Move-{self.name}] Processing pending ACTIVE attack after transition")
+                self.last_roll_round = round_number
+                
+                if hasattr(self, 'bonus_on_hit'):
+                    self.bonus_on_hit.reset()
+                
+                attack_results = self.combat.perform_sync_attack(
+                    source=character,
+                    targets=self.targets,
+                    attack_roll=self.attack_roll,
+                    damage=self.damage,
+                    crit_range=self.crit_range,
+                    reason=self.name,
+                    bonus_on_hit=self.bonus_on_hit
+                )
+                
+                if attack_results:
+                    for result in attack_results:
+                        messages.append(f"• `{result}`")
+                        
+                self.pending_attack = False
+                
+        elif status_msg and "enters cooldown" in status_msg:
+            # Cooldown transition
+            messages.append(self.format_effect_message(f"{self.name} {status_msg}", []))
+            
+        elif status_msg and "has worn off" in status_msg:
+            # Effect expiring
             self.marked_for_removal = True
             self.state = EffectState.EXPIRED
-            print(f"[Move-{self.name}] Marked for removal at turn end: {cleanup_msg}")
             
-            # Add expiry message to feedback for display in turn end embed
+            # Add expiry message to feedback
             if hasattr(character, 'add_effect_feedback'):
-                expiry_msg = self.format_effect_message(f"{self.name} has worn off")
+                expiry_msg = self.format_effect_message(f"{self.name} {status_msg}")
                 character.add_effect_feedback(
                     effect_name=self.name,
                     expiry_message=expiry_msg,
@@ -810,6 +774,16 @@ class MoveEffect(BaseEffect):
                     turn_expired=character.name
                 )
                 print(f"[Move-{self.name}] Added expiry feedback for turn end embed")
+                
+        elif status_msg:
+            # Regular status update with phase in parentheses
+            messages.append(self.format_effect_message(f"{self.name} {status_msg}", []))
+        
+        # Mark for removal if needed
+        if should_remove:
+            self.marked_for_removal = True
+            self.state = EffectState.EXPIRED
+            print(f"[Move-{self.name}] Marked for removal at turn end")
         
         return messages
 
@@ -823,10 +797,8 @@ class MoveEffect(BaseEffect):
         # Clear targets
         self.targets = []
         
-        # Format expiry message
-        message = self.format_effect_message(f"{self.name} has expired from {character.name}")
-        
-        return message
+        # Don't return a message here - it's handled by feedback system
+        return ""
 
     @property
     def is_expired(self) -> bool:
@@ -847,5 +819,61 @@ class MoveEffect(BaseEffect):
 
     async def execute_pending_operations(self) -> List[str]:
         """Execute any pending async operations"""
-        # In proper system, everything is handled synchronously at correct timing
+        # In fixed system, everything is handled synchronously at correct timing
         return []
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for storage"""
+        data = super().to_dict()
+        
+        # Add move-specific data
+        data.update({
+            "star_cost": self.star_cost,
+            "mp_cost": self.mp_cost,
+            "hp_cost": self.hp_cost,
+            "cast_time": self._move_cast_time,
+            "duration": self._move_duration,
+            "cooldown": self._move_cooldown,
+            "timing_handler": self.timing_handler.to_dict() if self.timing_handler else None,
+            "attack_roll": self.attack_roll,
+            "damage": self.damage,
+            "crit_range": self.crit_range,
+            "roll_timing": self.roll_timing.value if self.roll_timing else "active",
+            "targets": [t.name for t in self.targets] if self.targets else [],
+            "bonus_on_hit": self.bonus_on_hit.to_dict() if self.bonus_on_hit else None,
+            "marked_for_removal": self.marked_for_removal,
+            "pending_attack": self.pending_attack
+        })
+        
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'MoveEffect':
+        """Create from dictionary data"""
+        # Extract parameters
+        instance = cls(
+            name=data.get("name", "Unknown Move"),
+            description=data.get("description", ""),
+            star_cost=data.get("star_cost", 0),
+            mp_cost=data.get("mp_cost", 0),
+            hp_cost=data.get("hp_cost", 0),
+            cast_time=data.get("cast_time"),
+            duration=data.get("duration"),
+            cooldown=data.get("cooldown"),
+            attack_roll=data.get("attack_roll"),
+            damage=data.get("damage"),
+            crit_range=data.get("crit_range", 20),
+            roll_timing=data.get("roll_timing", "active")
+        )
+        
+        # Restore timing handler state
+        if data.get("timing_handler"):
+            instance.timing_handler = SimplifiedMoveEffectTiming.from_dict(data["timing_handler"])
+        
+        # Restore other state
+        instance.marked_for_removal = data.get("marked_for_removal", False)
+        instance.pending_attack = data.get("pending_attack", False)
+        
+        # Note: targets would need to be restored from character names
+        
+        return instance
