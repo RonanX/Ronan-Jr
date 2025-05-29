@@ -1,3 +1,4 @@
+
 """
 Move-specific base effect implementation with advanced phase-based timing.
 

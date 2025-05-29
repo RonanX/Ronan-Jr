@@ -165,7 +165,14 @@ class InitiativeTracker:
         return self.turn_order[self.current_index]
 
     async def announce_turn(self, interaction: discord.Interaction, effect_messages: List[str] = None):
-        """Announce turn with effect messages"""
+        """
+        Announce turn with FIXED effect message formatting.
+        
+        Properly handles move effect messages which come in formatted blocks:
+        - **Move Name** 
+        - • `Description`
+        - • `Attack results`
+        """
         current_char = self.bot.game_state.get_character(self.current_turn.character_name)
         
         # Create announcement embed
@@ -184,21 +191,34 @@ class InitiativeTracker:
             embed.description = f"🎯 **{self.current_turn.character_name}'s Turn**"
             fields["Turn"] = f"{self.current_turn.character_name}'s Turn"
 
-        # Add effect messages
+        # Process effect messages with improved formatting
         if effect_messages:
-            # Don't add more backticks if message already has them
-            formatted_messages = [
-                msg if '`' in msg else f"`{msg}`" 
-                for msg in effect_messages if msg
-            ]
+            # Filter out empty messages
+            valid_messages = [msg for msg in effect_messages if msg and isinstance(msg, str)]
             
-            if formatted_messages:
+            if valid_messages:
+                # Join messages with proper spacing for move effect blocks
+                formatted_content = ""
+                
+                for i, msg in enumerate(valid_messages):
+                    # Add the message
+                    formatted_content += msg
+                    
+                    # Add spacing between different move effect blocks
+                    # (detected by messages starting with **)
+                    if (i < len(valid_messages) - 1 and 
+                        msg.startswith('**') and 
+                        valid_messages[i + 1].startswith('**')):
+                        formatted_content += "\n\n"
+                    elif i < len(valid_messages) - 1:
+                        formatted_content += "\n"
+                
                 embed.add_field(
                     name="Effects",
-                    value="\n".join(formatted_messages),
+                    value=formatted_content,
                     inline=False
                 )
-                fields["Effects"] = "\n".join(formatted_messages)
+                fields["Effects"] = formatted_content
 
         # Send turn announcement
         await interaction.followup.send(embed=embed)
@@ -209,43 +229,56 @@ class InitiativeTracker:
                 f"{self.current_turn.character_name}'s Turn",
                 fields
             )
-
     async def send_effect_update(self, interaction: discord.Interaction, effect_msgs: List[str], expiry_msgs: List[str] = None):
-        """Send effect update embed via followup with SIMPLIFIED formatting"""
-        # Initialize message lists
-        status_msgs = []  # For "(phase) X turns remaining" messages
-        transition_msgs = []  # For "activates", "enters cooldown", etc
+        """
+        Send effect update embed with IMPROVED message categorization.
+        
+        Now properly handles the cleaned up message format from the fixed move effects.
+        """
+        # Initialize message categories
+        status_msgs = []      # "(phase) X turns remaining" messages
+        transition_msgs = []  # "activates", "enters cooldown" messages  
+        attack_msgs = []      # Attack results and combat messages
         expiry_msgs = expiry_msgs or []
         
-        # Process each message and categorize
+        # Process each message and categorize more precisely
         for msg in effect_msgs:
             if not msg:
                 continue
                 
-            # Check what type of message this is
             msg_lower = msg.lower()
             
-            # Expiry messages
+            # Expiry messages (shouldn't be in effect_msgs but check anyway)
             if any(pattern in msg_lower for pattern in 
                 ["worn off", "expired", "has ended", "wears off", "has worn off"]):
                 if msg not in expiry_msgs:
                     expiry_msgs.append(msg)
                 continue
-                
-            # Transition messages (activates, enters cooldown)
-            if any(pattern in msg_lower for pattern in ["activates", "enters cooldown"]):
+            
+            # Transition messages
+            if any(pattern in msg_lower for pattern in 
+                ["activates", "enters cooldown", "transitions to"]):
                 transition_msgs.append(msg)
                 continue
-                
-            # Status messages (X turns remaining)
-            if "turns remaining" in msg_lower or "turn remaining" in msg_lower:
+            
+            # Status messages (duration remaining)
+            if "remaining" in msg_lower and ("turn" in msg_lower or "round" in msg_lower):
                 status_msgs.append(msg)
+                continue
+            
+            # Attack/combat messages (contain dice rolls, damage, hits, etc.)
+            if any(pattern in msg_lower for pattern in 
+                ["🎲", "hits:", "damage:", "→", "ac ", "miss", "crit"]):
+                attack_msgs.append(msg)
                 continue
             
             # Default to status
             status_msgs.append(msg)
         
-        # Create embed for all effect updates
+        # Create embed only if we have content
+        if not (transition_msgs or status_msgs or attack_msgs or expiry_msgs):
+            return
+        
         embed = discord.Embed(title="Effects Update", color=discord.Color.gold())
         
         # Add fields in order of importance
@@ -253,6 +286,13 @@ class InitiativeTracker:
             embed.add_field(
                 name="Phase Transitions",
                 value="\n".join(transition_msgs),
+                inline=False
+            )
+        
+        if attack_msgs:
+            embed.add_field(
+                name="Combat Results",
+                value="\n".join(attack_msgs),
                 inline=False
             )
         
@@ -270,24 +310,23 @@ class InitiativeTracker:
                 inline=False
             )
         
-        # Only send if there's content
-        if len(embed.fields) > 0:
-            await interaction.followup.send(embed=embed)
-            
-            # Log to CombatLogger
-            if self.logger:
-                fields = {}
-                for field in embed.fields:
-                    fields[field.name] = field.value
-                self.logger.log_embed("Effects Update", fields)
-            
-            # Clear displayed feedback from all characters
-            for turn in self.turn_order:
-                char = self.bot.game_state.get_character(turn.character_name)
-                if char and hasattr(char, 'effect_feedback'):
-                    char.mark_feedback_displayed()
-                    if hasattr(char, 'clear_old_feedback'):
-                        char.clear_old_feedback()
+        # Send the update
+        await interaction.followup.send(embed=embed)
+        
+        # Log to CombatLogger
+        if self.logger:
+            fields = {}
+            for field in embed.fields:
+                fields[field.name] = field.value
+            self.logger.log_embed("Effects Update", fields)
+        
+        # Clear displayed feedback from all characters
+        for turn in self.turn_order:
+            char = self.bot.game_state.get_character(turn.character_name)
+            if char and hasattr(char, 'effect_feedback'):
+                char.mark_feedback_displayed()
+                if hasattr(char, 'clear_old_feedback'):
+                    char.clear_old_feedback()
 
     async def process_skipped_turn(self, interaction: discord.Interaction) -> Tuple[bool, str, List[str]]:
         """Process a skipped turn without recursive next_turn call"""
@@ -773,13 +812,13 @@ class InitiativeTracker:
 
     async def next_turn(self, interaction: discord.Interaction) -> Tuple[bool, str, List[str]]:
         """
-        Advance to next turn with PROPER turn end effect display.
+        Advance to next turn with FIXED effect processing and message formatting.
         
-        Key changes:
-        - Process turn end effects properly
-        - Get messages from on_turn_end
-        - Include pending feedback
-        - Show effect updates before advancing
+        Key fixes:
+        - Proper turn end effect processing with message separation
+        - Clean turn start effect processing
+        - No duplicate processing of move effects
+        - Better message formatting for turn announcements
         """
         try:
             await interaction.response.defer()
@@ -791,10 +830,10 @@ class InitiativeTracker:
                 if self.round_number < 1:
                     self.round_number = 1
                     
-                # Process first turn with linking support
+                # Process first turn
                 current_char = self.bot.game_state.get_character(self.current_turn.character_name)
                 if current_char:
-                    # Process effects (only turn start for first turn)
+                    # Only process turn start for first turn
                     was_skipped, start_msgs, _ = await process_effects_with_linking(
                         current_char,
                         self.round_number,
@@ -813,7 +852,7 @@ class InitiativeTracker:
                         description="Action stars refreshed for all characters!"
                     ))
                     
-                    # First turn with effects
+                    # Announce first turn
                     await self.announce_turn(interaction, start_msgs)
                     return True, "", start_msgs
 
@@ -824,24 +863,23 @@ class InitiativeTracker:
             current_char_name = self.current_turn.character_name
             current_char = self.bot.game_state.get_character(current_char_name)
             
-            # IMPROVED: Process turn end effects AND get the messages
-            end_effect_messages = []
+            # Process turn END effects for current character
+            turn_end_messages = []
             expiry_messages = []
             
             if current_char:
                 self.debug_print(f"\n=== Processing turn end for {current_char.name} ===")
                 
-                # Get turn end messages from effects
-                for effect in current_char.effects:
-                    if hasattr(effect, 'on_turn_end'):
-                        end_msgs = effect.on_turn_end(current_char, self.round_number, current_char.name)
-                        if end_msgs:
-                            if isinstance(end_msgs, list):
-                                end_effect_messages.extend(end_msgs)
-                            else:
-                                end_effect_messages.append(end_msgs)
+                # Process all effects for turn end (includes move effects)
+                was_skipped, _, end_msgs = await process_effects_with_linking(
+                    current_char,
+                    self.round_number,
+                    current_char.name,
+                    self.logger,
+                    self.bot.game_state
+                )
                 
-                # Check for pending effect feedback
+                # Check for pending effect feedback (expiry messages)
                 pending_feedback = current_char.get_pending_feedback()
                 if pending_feedback:
                     self.debug_print(f"Found {len(pending_feedback)} pending feedback entries")
@@ -850,42 +888,34 @@ class InitiativeTracker:
                             self.debug_print(f"Adding feedback expiry message: {feedback.expiry_message}")
                             expiry_messages.append(feedback.expiry_message)
                 
-                # Process effects to handle cleanup
-                was_skipped, start_msgs, end_msgs = await process_effects_with_linking(
-                    current_char,
-                    self.round_number,
-                    current_char.name,
-                    self.logger,
-                    self.bot.game_state
-                )
-                
-                # Add any additional messages from processing
+                # Categorize end messages
                 for msg in end_msgs:
                     if not msg:
                         continue
-                        
+                    
                     # Check if it's an expiry message
-                    if any(phrase in msg.lower() for phrase in ["worn off", "ended", "expired", "wears off"]):
+                    msg_lower = msg.lower()
+                    if any(pattern in msg_lower for pattern in 
+                        ["worn off", "expired", "has ended", "wears off", "has worn off"]):
                         if msg not in expiry_messages:
                             expiry_messages.append(msg)
                     else:
-                        if msg not in end_effect_messages:
-                            end_effect_messages.append(msg)
+                        turn_end_messages.append(msg)
                 
-                # Save the character after processing effects
+                # Save character after processing
                 await self.bot.db.save_character(current_char)
                 
-                self.debug_print(f"Sending effect update with:")
-                self.debug_print(f"- Status messages: {len(end_effect_messages)}")
-                self.debug_print(f"- Expiry messages: {len(expiry_messages)}")
-                
-                # Show the end-of-turn effect updates
-                if end_effect_messages or expiry_messages:
-                    await self.send_effect_update(interaction, end_effect_messages, expiry_messages)
+                # Show turn end effect updates if any
+                if turn_end_messages or expiry_messages:
+                    self.debug_print(f"Sending turn end effect update:")
+                    self.debug_print(f"- Status messages: {len(turn_end_messages)}")
+                    self.debug_print(f"- Expiry messages: {len(expiry_messages)}")
+                    await self.send_effect_update(interaction, turn_end_messages, expiry_messages)
 
-            # Handle round transition
-            start_effect_messages = []
-            if self.current_index == len(self.turn_order) - 1:
+            # Advance turn
+            is_new_round = self.current_index == len(self.turn_order) - 1
+            
+            if is_new_round:
                 self.debug_print(f"\n=== Round {self.round_number} Complete ===")
                 self.round_number += 1
                 self.current_index = 0
@@ -899,7 +929,7 @@ class InitiativeTracker:
                     description="Action stars refreshed for all characters!"
                 ))
                 
-                # Refresh stars
+                # Refresh stars for all characters
                 for turn in self.turn_order:
                     char = self.bot.game_state.get_character(turn.character_name)
                     if char:
@@ -907,21 +937,25 @@ class InitiativeTracker:
             else:
                 self.current_index += 1
 
-            # Process next character's turn start
-            new_char = self.bot.game_state.get_character(self.current_turn.character_name)
-            if new_char:
-                # Check for pending effect feedback first
-                pending_feedback = new_char.get_pending_feedback()
+            # Process turn START for next character
+            next_char = self.bot.game_state.get_character(self.current_turn.character_name)
+            turn_start_messages = []
+            
+            if next_char:
+                self.debug_print(f"\n=== Processing turn start for {next_char.name} ===")
+                
+                # Check for any pending feedback first
+                pending_feedback = next_char.get_pending_feedback()
                 if pending_feedback:
                     for feedback in pending_feedback:
                         if feedback.expiry_message and not feedback.displayed:
-                            start_effect_messages.append(feedback.expiry_message)
+                            turn_start_messages.append(feedback.expiry_message)
                 
-                # Process turn start effects
+                # Process effects for turn start (includes move effects)
                 was_skipped, start_msgs, _ = await process_effects_with_linking(
-                    new_char,
+                    next_char,
                     self.round_number,
-                    new_char.name,
+                    next_char.name,
                     self.logger,
                     self.bot.game_state
                 )
@@ -929,36 +963,37 @@ class InitiativeTracker:
                 # Update skip status
                 self.current_turn.skipped = was_skipped
                 
-                # Handle effect messages
+                # Add start messages (these include formatted move descriptions and attacks)
                 if start_msgs:
-                    start_effect_messages.extend(start_msgs)
-                    
+                    turn_start_messages.extend(start_msgs)
+                
                 # Save character state
-                await self.bot.db.save_character(new_char)
+                await self.bot.db.save_character(next_char)
                 
                 # Handle skipped turns
                 if was_skipped:
                     if self.logger:
                         self.logger.add_event(
                             CombatEventType.STATUS_UPDATE,
-                            message=f"{new_char.name}'s turn skipped",
-                            character=new_char.name,
+                            message=f"{next_char.name}'s turn skipped",
+                            character=next_char.name,
                             details={"reason": self.current_turn.skip_reason},
                             round_number=self.round_number
                         )
                     
-                    await self.announce_turn(interaction, start_effect_messages)
+                    await self.announce_turn(interaction, turn_start_messages)
                     await asyncio.sleep(1)
                     return await self.process_skipped_turn(interaction)
-                        
-                # Announce next turn
-                await self.announce_turn(interaction, start_effect_messages)
-                return True, "", start_effect_messages
+                
+                # Announce next turn with properly formatted messages
+                await self.announce_turn(interaction, turn_start_messages)
+                return True, "", turn_start_messages
 
             return True, "", []
 
         except Exception as e:
             self.debug_print(f"Error in next_turn: {str(e)}")
+            logger.error(f"Error in next_turn: {str(e)}", exc_info=True)
             return False, f"Error processing turn: {str(e)}", []
         
     async def end_combat(self, interaction: discord.Interaction = None) -> Tuple[bool, str]:

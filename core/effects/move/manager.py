@@ -25,7 +25,7 @@ except ImportError:
             EFFECT_REMOVED = "effect_removed"
             STATUS_UPDATE = "status_update"
 
-from .base import MovePhase
+from .timing import MovePhase
 
 logger = logging.getLogger(__name__)
 

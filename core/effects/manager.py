@@ -439,7 +439,7 @@ async def process_effects(
 ) -> Tuple[bool, List[str], List[str]]:
     """
     Process all active effects for a character at the start and end of their turn.
-    Uses the BaseEffect lifecycle methods and state model.
+    Handles both BaseEffect and MoveEffect types with their different timing systems.
 
     Args:
         character: The character whose effects are being processed.
@@ -468,13 +468,17 @@ async def process_effects(
     character.in_combat = True # Mark as in combat for timing logic
 
     try:
-        # IMPROVED: First, check and fix any effects with duration issues
+        # IMPROVED: First, check and fix any effects with duration issues (ONLY for BaseEffect, not MoveEffect)
         for effect in character.effects[:]:
+            # Skip MoveEffect - they handle their own timing
+            if hasattr(effect, '__class__') and effect.__class__.__name__ == 'MoveEffect':
+                continue
+                
             if not hasattr(effect, 'timing') or not hasattr(effect, '_internal_duration') or effect.permanent:
                 continue
                 
             # Fix for NOT DURING effects to ensure internal and display durations match
-            if not effect.timing.applied_during_own_turn:
+            if hasattr(effect.timing, 'applied_during_own_turn') and not effect.timing.applied_during_own_turn:
                 if hasattr(effect, '_display_duration') and effect._display_duration is not None:
                     # For NOT DURING, make sure internal and display are the same
                     safe_duration = max(1, effect._display_duration)
@@ -484,7 +488,10 @@ async def process_effects(
                         effect.debug(f"FIXED: NOT DURING effect had mismatched durations. Set both to {safe_duration}")
             
             # Fix for duration=1 "during" effects with insufficient internal duration
-            elif effect.timing.applied_during_own_turn and effect._display_duration == 1:
+            elif (hasattr(effect.timing, 'applied_during_own_turn') and 
+                  effect.timing.applied_during_own_turn and 
+                  hasattr(effect, '_display_duration') and 
+                  effect._display_duration == 1):
                 if effect._internal_duration < 2:
                     effect._internal_duration = 2
                     effect.debug(f"FIXED: Duration=1 during own turn effect had internal duration < 2")
@@ -503,17 +510,27 @@ async def process_effects(
         # --- Turn Start Phase ---
         character.effect_processing_phase = 'start' # Mark phase for effects
         for effect in character.effects[:]: # Iterate over a copy
-            # Skip effects not in ACTIVE state or not meant for start processing
-            if effect.state != EffectState.ACTIVE or effect.process_timing not in ["start", "both"]:
-                continue
             try:
-                # Call on_turn_start (synchronous in new BaseEffect)
-                start_result = effect.on_turn_start(character, round_number, turn_name)
-                if start_result:
-                    # Ensure result is a list and filter out empty messages
-                    start_messages.extend(msg for msg in start_result if msg)
+                # Handle MoveEffect differently from BaseEffect
+                if hasattr(effect, '__class__') and effect.__class__.__name__ == 'MoveEffect':
+                    # Use MoveEffect's own timing system
+                    start_result = effect.on_turn_start(character, round_number, turn_name)
+                    if start_result:
+                        # MoveEffect returns a list
+                        start_messages.extend(msg for msg in start_result if msg)
+                else:
+                    # Handle regular BaseEffect
+                    # Skip effects not in ACTIVE state or not meant for start processing
+                    if effect.state != EffectState.ACTIVE or effect.process_timing not in ["start", "both"]:
+                        continue
+                    
+                    # Call on_turn_start (synchronous in new BaseEffect)
+                    start_result = effect.on_turn_start(character, round_number, turn_name)
+                    if start_result:
+                        # Ensure result is a list and filter out empty messages
+                        start_messages.extend(msg for msg in start_result if msg)
 
-                # Check for skip condition
+                # Check for skip condition (both effect types)
                 if hasattr(effect, 'causes_skip') and effect.causes_skip:
                     was_skipped = True
                     effect.debug("Causes turn skip.")
@@ -544,23 +561,39 @@ async def process_effects(
         character.effect_processing_phase = 'end' # Mark phase for effects
         if not was_skipped:
             for effect in character.effects[:]: # Iterate over a copy again
-                 # Skip effects not in ACTIVE/EXPIRING or not meant for end processing
-                if effect.state not in [EffectState.ACTIVE, EffectState.EXPIRING] or \
-                   effect.process_timing not in ["end", "both"]:
-                    continue
                 try:
-                    # Call on_turn_end (synchronous in new BaseEffect)
-                    # This method now handles duration checks and state transitions
-                    end_result = effect.on_turn_end(character, round_number, turn_name)
-                    if end_result:
-                        # Ensure result is a list and filter out empty messages
-                        end_messages.extend(msg for msg in end_result if msg)
+                    # Handle MoveEffect differently from BaseEffect
+                    if hasattr(effect, '__class__') and effect.__class__.__name__ == 'MoveEffect':
+                        # Use MoveEffect's own timing system
+                        end_result = effect.on_turn_end(character, round_number, turn_name)
+                        if end_result:
+                            # MoveEffect returns a list
+                            end_messages.extend(msg for msg in end_result if msg)
+                        
+                        # Check if MoveEffect is expired
+                        if hasattr(effect, 'is_expired') and effect.is_expired:
+                            if effect not in effects_to_remove:
+                                effects_to_remove.append(effect)
+                                effect.debug("MoveEffect marked for removal after end phase processing.")
+                    else:
+                        # Handle regular BaseEffect
+                        # Skip effects not in ACTIVE/EXPIRING or not meant for end processing
+                        if effect.state not in [EffectState.ACTIVE, EffectState.EXPIRING] or \
+                           effect.process_timing not in ["end", "both"]:
+                            continue
+                        
+                        # Call on_turn_end (synchronous in new BaseEffect)
+                        # This method now handles duration checks and state transitions
+                        end_result = effect.on_turn_end(character, round_number, turn_name)
+                        if end_result:
+                            # Ensure result is a list and filter out empty messages
+                            end_messages.extend(msg for msg in end_result if msg)
 
-                    # Check if the effect reached EXPIRED state during on_turn_end
-                    if effect.state == EffectState.EXPIRED:
-                        if effect not in effects_to_remove:
-                            effects_to_remove.append(effect)
-                            effect.debug("Marked for removal after end phase processing.")
+                        # Check if the effect reached EXPIRED state during on_turn_end
+                        if effect.state == EffectState.EXPIRED:
+                            if effect not in effects_to_remove:
+                                effects_to_remove.append(effect)
+                                effect.debug("BaseEffect marked for removal after end phase processing.")
 
                 except Exception as e:
                     logger.error(f"Error processing on_turn_end for {effect.name}: {e}", exc_info=True)

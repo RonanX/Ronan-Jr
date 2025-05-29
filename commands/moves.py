@@ -21,8 +21,10 @@ import re
 import asyncio
 from typing import Optional, List, Dict, Any, Tuple
 
+
 from core.character import Character, StatType
-from core.effects.move import MoveEffect, MoveState, RollTiming
+from core.effects.move.effect import MoveEffect
+from core.effects.move.timing import RollTiming, MovePhase
 from core.effects.rollmod import RollModifierType, RollModifierEffect
 from core.effects.manager import apply_effect  # Import apply_effect directly
 from modules.moves.data import MoveData, Moveset
