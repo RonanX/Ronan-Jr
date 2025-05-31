@@ -24496,3 +24496,696 @@ ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' 
 2025-05-29 11:04:09,866 - core.effects.manager - INFO - Processing linked child effects: test4
 2025-05-29 11:04:12,587 - core.effects.manager - INFO - Processing effects for 1 linked children of test
 2025-05-29 11:04:12,587 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 12:14:59,034 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-29 12:14:59,037 - discord.client - INFO - logging in using static token
+2025-05-29 12:14:59,673 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-29 12:14:59,673 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-29 12:14:59,673 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-29 12:14:59,673 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-29 12:14:59,674 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-29 12:14:59,675 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-29 12:15:00,379 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-29 12:15:00,380 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 12:15:00,380 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 12:15:00,382 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 12:15:00,382 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 12:15:00,382 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 12:15:00,382 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 12:15:00,421 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-29 12:15:00,422 - core.effects.move.timing - INFO - [MoveTiming-5776] Created with phase=instant, turns=0
+2025-05-29 12:15:00,430 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-29 12:15:00,430 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-29 12:15:00,430 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-29 12:15:00,430 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-29 12:15:00,433 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-29 12:15:00,434 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-29 12:15:00,434 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-29 12:15:00,434 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-29 12:15:00,434 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-29 12:15:00,910 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2763a4d95cb5ac4c809b5e052de1ce7e).
+2025-05-29 12:15:16,342 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 12:15:16,343 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 12:15:28,708 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 12:15:28,708 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 12:15:32,533 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: attacks once per turn cast_time: 1 duration: 2 cooldown: 1 target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning roll_timing: per_turn aoe_mode: multi bonus_note: owie point
+2025-05-29 12:15:32,727 - core.effects.move.timing - INFO - [MoveTiming-6736] Created with phase=casting, turns=1
+2025-05-29 12:15:32,727 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=None, During=False
+2025-05-29 12:15:36,302 - core.effects.move.timing - INFO - [MoveTiming-6736] BEFORE decrement: phase=casting, turns=1
+2025-05-29 12:15:36,302 - core.effects.move.timing - INFO - [MoveTiming-6736] AFTER decrement: turns=0
+2025-05-29 12:15:36,303 - core.effects.move.timing - INFO - [MoveTiming-6736] Marked for transition: casting -> active
+2025-05-29 12:15:36,303 - core.effects.move.timing - INFO - [MoveTiming-6736] Executed transition: casting -> active
+2025-05-29 12:15:37,770 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 12:15:37,770 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 12:15:40,993 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 12:15:40,994 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 12:15:41,125 - core.effects.move.timing - INFO - [MoveTiming-6736] BEFORE decrement: phase=active, turns=2
+2025-05-29 12:15:41,125 - core.effects.move.timing - INFO - [MoveTiming-6736] AFTER decrement: turns=1
+2025-05-29 12:15:45,267 - core.effects.move.timing - INFO - [MoveTiming-6736] Turn start already processed for R2, Ttest2
+2025-05-29 12:15:45,268 - core.effects.move.timing - INFO - [MoveTiming-6736] Turn end already processed for R2, Ttest2
+2025-05-29 12:15:45,674 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 12:15:45,674 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 12:15:48,084 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 12:15:48,084 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 12:15:48,182 - core.effects.move.timing - INFO - [MoveTiming-6736] BEFORE decrement: phase=active, turns=1
+2025-05-29 12:15:48,182 - core.effects.move.timing - INFO - [MoveTiming-6736] AFTER decrement: turns=0
+2025-05-29 12:15:48,182 - core.effects.move.timing - INFO - [MoveTiming-6736] Marked for transition: active -> cooldown
+2025-05-29 12:15:48,187 - core.effects.move.timing - INFO - [MoveTiming-6736] Executed transition: active -> cooldown
+2025-05-29 12:19:01,207 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: attacks once target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning bonus_note: owie point
+2025-05-29 12:19:01,611 - core.effects.move.timing - INFO - [MoveTiming-1536] Created with phase=instant, turns=0
+2025-05-29 12:19:01,611 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=None, During=False
+2025-05-29 12:19:10,197 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: attacks once target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning aoe_mode: multi bonus_note: owie point
+2025-05-29 12:19:10,439 - core.effects.move.timing - INFO - [MoveTiming-6368] Created with phase=instant, turns=0
+2025-05-29 12:19:10,440 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=None, During=False
+2025-05-29 12:33:26,622 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 2763a4d95cb5ac4c809b5e052de1ce7e.
+2025-05-29 13:13:41,064 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 2763a4d95cb5ac4c809b5e052de1ce7e.
+2025-05-29 13:23:43,186 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 2763a4d95cb5ac4c809b5e052de1ce7e.
+2025-05-29 16:38:31,341 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-05-29 16:38:31,641 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-05-29 16:38:36,970 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ee83a002fcc645045e2f50f91863f1d2).
+2025-05-29 16:59:36,472 - discord.client - ERROR - Attempting a reconnect in 1.55s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-29 16:59:38,979 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ee83a002fcc645045e2f50f91863f1d2.
+2025-05-29 17:24:11,809 - discord.client - ERROR - Attempting a reconnect in 1.73s
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1365, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 995, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1026, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\resolver.py", line 39, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 939, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        None, getaddr_func, host, port, family, type, proto, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\client.py", line 701, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\gateway.py", line 375, in from_client
+    socket = await client.http.ws_connect(str(url))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\http.py", line 554, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 1004, in _ws_connect
+    resp = await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\client.py", line 703, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 548, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1056, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\user\AppData\Local\Programs\Python\Python313\Lib\site-packages\aiohttp\connector.py", line 1371, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host gateway-us-east1-c.discord.gg:443 ssl:default [getaddrinfo failed]
+2025-05-29 17:24:14,010 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ee83a002fcc645045e2f50f91863f1d2.
+2025-05-29 18:18:12,280 - discord.gateway - INFO - Shard ID None has successfully RESUMED session ee83a002fcc645045e2f50f91863f1d2.
+2025-05-29 19:40:36,179 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-05-29 19:40:41,592 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e83339aba23073a704f47fd9f1b4a95f).
+2025-05-29 20:07:44,137 - discord.gateway - INFO - Shard ID None has successfully RESUMED session e83339aba23073a704f47fd9f1b4a95f.
+2025-05-29 20:24:27,126 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-29 20:24:27,130 - discord.client - INFO - logging in using static token
+2025-05-29 20:24:27,598 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-29 20:24:27,598 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-29 20:24:27,598 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-29 20:24:27,598 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-29 20:24:27,599 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-29 20:24:27,599 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-29 20:24:28,259 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-29 20:24:28,261 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 20:24:28,261 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 20:24:28,262 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 20:24:28,262 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 20:24:28,263 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 20:24:28,263 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-29 20:24:28,265 - core.effects.base - ERROR - Effect data missing 'type' field.
+2025-05-29 20:24:28,265 - core.effects.base - ERROR - Effect data missing 'type' field.
+2025-05-29 20:24:28,265 - core.effects.base - ERROR - Effect data missing 'type' field.
+2025-05-29 20:24:28,358 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-29 20:24:28,358 - core.effects.move.timing - INFO - [MoveTiming-848] Created with phase=instant, turns=0
+2025-05-29 20:24:28,366 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-29 20:24:28,366 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-29 20:24:28,366 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-29 20:24:28,367 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-29 20:24:28,370 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-29 20:24:28,370 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-29 20:24:28,370 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-29 20:24:28,370 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-29 20:24:28,371 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-29 20:24:28,956 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4036a2011444c16e7817509a67c0491b).
+2025-05-29 20:24:49,983 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:24:49,983 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:24:53,248 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:24:53,249 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:26:23,432 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: expected: should wait till round 2 turn start to lower duration to 0, flagging it for transition cast_time: 1 duration: 2 cooldown: 1 target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning aoe_mode: multi bonus_note: owie point
+2025-05-29 20:26:23,710 - core.effects.move.timing - INFO - [MoveTiming-3584] Created with phase=casting, turns=1
+2025-05-29 20:26:23,711 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=None, During=False
+2025-05-29 20:26:29,566 - core.effects.move.timing - INFO - [MoveTiming-3584] BEFORE decrement: phase=casting, turns=1
+2025-05-29 20:26:29,566 - core.effects.move.timing - INFO - [MoveTiming-3584] AFTER decrement: turns=0
+2025-05-29 20:26:29,566 - core.effects.move.timing - INFO - [MoveTiming-3584] Marked for transition: casting -> active
+2025-05-29 20:26:29,567 - core.effects.move.timing - INFO - [MoveTiming-3584] Executed transition: casting -> active
+2025-05-29 20:26:30,357 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:26:30,357 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:27:22,644 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:27:22,645 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:27:22,736 - core.effects.move.timing - INFO - [MoveTiming-3584] BEFORE decrement: phase=active, turns=2
+2025-05-29 20:27:22,737 - core.effects.move.timing - INFO - [MoveTiming-3584] AFTER decrement: turns=1
+2025-05-29 20:30:24,851 - core.effects.move.timing - INFO - [MoveTiming-3584] Turn start already processed for R2, Ttest2
+2025-05-29 20:30:24,851 - core.effects.move.timing - INFO - [MoveTiming-3584] Turn end already processed for R2, Ttest2
+2025-05-29 20:30:25,362 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:30:25,362 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:30:28,096 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:30:28,096 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:30:28,173 - core.effects.move.timing - INFO - [MoveTiming-3584] BEFORE decrement: phase=active, turns=1
+2025-05-29 20:30:28,174 - core.effects.move.timing - INFO - [MoveTiming-3584] AFTER decrement: turns=0
+2025-05-29 20:30:28,174 - core.effects.move.timing - INFO - [MoveTiming-3584] Marked for transition: active -> cooldown
+2025-05-29 20:30:28,176 - core.effects.move.timing - INFO - [MoveTiming-3584] Executed transition: active -> cooldown
+2025-05-29 20:30:31,764 - core.effects.move.timing - INFO - [MoveTiming-3584] Turn start already processed for R3, Ttest2
+2025-05-29 20:30:31,765 - core.effects.move.timing - INFO - [MoveTiming-3584] Turn end already processed for R3, Ttest2
+2025-05-29 20:30:32,033 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:30:32,033 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:31:22,315 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:31:22,315 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 20:31:22,441 - core.effects.move.timing - INFO - [MoveTiming-3584] BEFORE decrement: phase=cooldown, turns=1
+2025-05-29 20:31:22,441 - core.effects.move.timing - INFO - [MoveTiming-3584] AFTER decrement: turns=0
+2025-05-29 20:31:22,441 - core.effects.move.timing - INFO - [MoveTiming-3584] Marked for removal after cooldown
+2025-05-29 20:31:26,114 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-29 20:31:26,115 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-29 23:00:41,218 - discord.gateway - WARNING - Shard ID None has stopped responding to the gateway. Closing and restarting.
+2025-05-29 23:00:41,496 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-05-29 23:00:47,029 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7c4fc35c42a4794862bc9f12067fd6e2).
+2025-05-31 11:34:51,516 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-31 11:34:51,518 - discord.client - INFO - logging in using static token
+2025-05-31 11:34:51,888 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:34:51,888 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:34:51,888 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:34:51,889 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:34:51,915 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-31 11:34:51,915 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-31 11:34:52,407 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-31 11:34:52,408 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:34:52,409 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:34:52,410 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:34:52,410 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:34:52,410 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:34:52,410 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:34:52,572 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-31 11:34:52,572 - core.effects.move.timing - INFO - [MoveTiming-3888] Created with phase=instant, turns=0
+2025-05-31 11:34:52,650 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:34:52,650 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:34:52,650 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:34:52,650 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:34:52,653 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:34:52,653 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:34:52,654 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:34:52,654 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:34:52,654 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-31 11:34:53,401 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b090eaa80a197e215ed007c54421d1d8).
+2025-05-31 11:45:46,204 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-31 11:45:46,207 - discord.client - INFO - logging in using static token
+2025-05-31 11:45:46,637 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:45:46,637 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:45:46,637 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:45:46,638 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:45:46,639 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-31 11:45:46,639 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-31 11:45:47,097 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-31 11:45:47,099 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:45:47,099 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:45:47,100 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:45:47,100 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:45:47,100 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:45:47,100 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:45:47,114 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-31 11:45:47,115 - core.effects.move.timing - INFO - [MoveTiming-6480] Created with phase=instant, turns=0
+2025-05-31 11:45:47,150 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:45:47,151 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:45:47,151 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:45:47,151 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:45:47,154 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:45:47,154 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:45:47,154 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:45:47,155 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:45:47,155 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-31 11:45:47,448 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 738ece5b91d8ddf69515913255ec038d).
+2025-05-31 11:46:11,141 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 11:46:11,142 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 11:46:11,142 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 11:46:11,142 - core.effects.move.manager - INFO - Processing linked child move effects: test4
+2025-05-31 11:46:14,727 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 11:46:14,728 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 11:46:14,728 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 11:46:14,728 - core.effects.move.manager - INFO - Processing linked child move effects: test4
+2025-05-31 11:46:57,448 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: expected: should wait till round 2 turn start to lower duration to 0, flagging it for transition cast_time: 1 duration: 2 cooldown: 1 target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning aoe_mode: multi bonus_note: owie point
+2025-05-31 11:46:57,649 - core.effects.move.timing - INFO - [MoveTiming-6768] Created with phase=casting, turns=1
+2025-05-31 11:46:57,650 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=unknown, During=False
+2025-05-31 11:47:01,879 - core.effects.manager - ERROR - Error processing on_turn_start for domain expansion: 'MoveEffectTiming' object has no attribute 'duration_turns'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 517, in process_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 297, in on_turn_start
+    should_process_attacks, just_activated = self.timing.process_turn_start(
+                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        round_number, turn_name, character.name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\timing.py", line 110, in process_turn_start
+    self.pending_transition = ('active', self.duration_turns)
+                                         ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MoveEffectTiming' object has no attribute 'duration_turns'
+2025-05-31 11:47:01,882 - core.effects.manager - ERROR - Error processing on_turn_end for domain expansion: 'MoveEffectTiming' object has no attribute 'effect'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 568, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 391, in on_turn_end
+    status_msg, should_remove = self.timing.process_turn_end(
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        round_number, turn_name, character.name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\timing.py", line 153, in process_turn_end
+    return f"**{self.effect.name}** ({self.current_phase.value}) - {self.turns_remaining} turns remaining"
+                ^^^^^^^^^^^
+AttributeError: 'MoveEffectTiming' object has no attribute 'effect'
+2025-05-31 11:47:01,883 - core.effects.move.manager - INFO - Processing 1 move effects for test2
+2025-05-31 11:47:01,883 - core.effects.move.manager - ERROR - Error processing move effect domain expansion (start): 'MoveEffectTiming' object has no attribute 'duration_turns'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\manager.py", line 306, in process_move_effects
+    start_result = effect.on_turn_start(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 297, in on_turn_start
+    should_process_attacks, just_activated = self.timing.process_turn_start(
+                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        round_number, turn_name, character.name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\timing.py", line 110, in process_turn_start
+    self.pending_transition = ('active', self.duration_turns)
+                                         ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MoveEffectTiming' object has no attribute 'duration_turns'
+2025-05-31 11:47:01,885 - core.effects.move.manager - ERROR - Error processing move effect domain expansion (end): 'MoveEffectTiming' object has no attribute 'effect'
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\manager.py", line 324, in process_move_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 391, in on_turn_end
+    status_msg, should_remove = self.timing.process_turn_end(
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        round_number, turn_name, character.name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\timing.py", line 153, in process_turn_end
+    return f"**{self.effect.name}** ({self.current_phase.value}) - {self.turns_remaining} turns remaining"
+                ^^^^^^^^^^^
+AttributeError: 'MoveEffectTiming' object has no attribute 'effect'
+2025-05-31 11:47:02,282 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 11:47:02,283 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 11:47:02,283 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 11:47:02,283 - core.effects.move.manager - INFO - Processing linked child move effects: test4
+2025-05-31 11:59:25,503 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-31 11:59:25,505 - discord.client - INFO - logging in using static token
+2025-05-31 11:59:25,941 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:59:25,941 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:59:25,941 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:59:25,942 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:59:25,943 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-31 11:59:25,943 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-31 11:59:26,384 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-31 11:59:26,385 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:59:26,385 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:59:26,386 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:59:26,386 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:59:26,386 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:59:26,387 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 11:59:26,389 - core.effects.base - ERROR - Effect data missing 'type' field.
+2025-05-31 11:59:26,459 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-31 11:59:26,460 - core.effects.move.timing - INFO - [MoveTiming-3344] Created with phase=instant, turns=0
+2025-05-31 11:59:26,470 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:59:26,470 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:59:26,470 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:59:26,471 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:59:26,474 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 11:59:26,475 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 11:59:26,475 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 11:59:26,475 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 11:59:26,475 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-31 11:59:26,775 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4cd2d4f2a7d5b7a2c8a9351439be8a70).
+2025-05-31 11:59:55,502 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: expected: should wait till round 2 turn start to lower duration to 0, flagging it for transition cast_time: 1 duration: 2 cooldown: 1 target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning aoe_mode: multi bonus_note: owie point
+2025-05-31 11:59:55,726 - core.effects.move.timing - INFO - [MoveTiming-336] Created with phase=casting, turns=1
+2025-05-31 11:59:55,954 - commands.moves - ERROR - Error executing move command: property 'is_expired' of 'MoveEffect' object has no setter
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\commands\moves.py", line 531, in temp_move
+    move = MoveEffect(
+        name=name,
+    ...<12 lines>...
+        bonus_on_hit=bonus_on_hit
+    )
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 142, in __init__
+    self.is_expired = False
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'is_expired' of 'MoveEffect' object has no setter
+2025-05-31 12:01:04,366 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-31 12:01:04,369 - discord.client - INFO - logging in using static token
+2025-05-31 12:01:04,740 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:01:04,741 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:01:04,741 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:01:04,741 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:01:04,742 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-31 12:01:04,742 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-31 12:01:05,120 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-31 12:01:05,121 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:01:05,121 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:01:05,122 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:01:05,122 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:01:05,122 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:01:05,122 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:01:05,161 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-31 12:01:05,161 - core.effects.move.timing - INFO - [MoveTiming-2848] Created with phase=instant, turns=0
+2025-05-31 12:01:05,169 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:01:05,169 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:01:05,170 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:01:05,170 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:01:05,173 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:01:05,173 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:01:05,173 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:01:05,174 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:01:05,174 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-31 12:01:05,429 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6cf62a01c9d15badaed54335072de71f).
+2025-05-31 12:01:14,618 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:01:14,619 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:01:14,619 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:01:17,062 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:01:17,063 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:01:17,063 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:01:29,458 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: expected: should wait till round 2 turn start to lower duration to 0, flagging it for transition cast_time: 1 duration: 2 cooldown: 1 target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning aoe_mode: multi bonus_note: owie point
+2025-05-31 12:01:29,610 - core.effects.move.timing - INFO - [MoveTiming-7584] Created with phase=casting, turns=1
+2025-05-31 12:01:29,611 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=unknown, During=False
+2025-05-31 12:01:35,815 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 1, Turn test2, Character test2
+2025-05-31 12:01:35,815 - core.effects.move.timing - INFO - [MoveTiming-7584] Decremented to 0 turns remaining in casting
+2025-05-31 12:01:35,816 - core.effects.move.timing - INFO - [MoveTiming-7584] Marked for transition: casting -> active
+2025-05-31 12:01:35,816 - core.effects.move.timing - INFO - [MoveTiming-7584] Executed transition: casting -> active (2 turns)
+2025-05-31 12:01:35,817 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 1, Turn test2, Character test2
+2025-05-31 12:01:35,817 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:01:35,817 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:01:36,691 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:01:36,691 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:01:36,691 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:01:47,123 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:01:47,123 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:01:47,123 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:01:47,206 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 2, Turn test2, Character test2
+2025-05-31 12:01:47,206 - core.effects.move.timing - INFO - [MoveTiming-7584] Decremented to 1 turns remaining in active
+2025-05-31 12:01:47,212 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 2, Turn test2, Character test2
+2025-05-31 12:01:47,212 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:01:47,213 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:01:55,536 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 2, Turn test2, Character test2
+2025-05-31 12:01:55,537 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:01:55,538 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:01:55,538 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 2, Turn test2, Character test2
+2025-05-31 12:01:55,538 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:01:55,539 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:01:55,798 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:01:55,799 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:01:55,799 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:01:59,568 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:01:59,568 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:01:59,568 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:01:59,629 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 3, Turn test2, Character test2
+2025-05-31 12:01:59,629 - core.effects.move.timing - INFO - [MoveTiming-7584] Decremented to 0 turns remaining in active
+2025-05-31 12:01:59,629 - core.effects.move.timing - INFO - [MoveTiming-7584] Marked for transition: active -> cooldown
+2025-05-31 12:01:59,633 - core.effects.move.timing - INFO - [MoveTiming-7584] Executed transition: active -> cooldown (1 turns)
+2025-05-31 12:01:59,634 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 3, Turn test2, Character test2
+2025-05-31 12:01:59,634 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:01:59,634 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:02:07,831 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 3, Turn test2, Character test2
+2025-05-31 12:02:07,832 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:02:07,832 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:02:07,833 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 3, Turn test2, Character test2
+2025-05-31 12:02:07,833 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:02:07,833 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:02:08,238 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:02:08,238 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:02:08,238 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:02:12,277 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:02:12,277 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:02:12,277 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:02:12,345 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 4, Turn test2, Character test2
+2025-05-31 12:02:12,345 - core.effects.move.timing - INFO - [MoveTiming-7584] Decremented to 0 turns remaining in cooldown
+2025-05-31 12:02:12,345 - core.effects.move.timing - INFO - [MoveTiming-7584] Marked for removal after cooldown
+2025-05-31 12:02:12,346 - core.effects.manager - ERROR - Error processing on_turn_end for domain expansion: property 'is_expired' of 'MoveEffect' object has no setter
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 568, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 397, in on_turn_end
+    self.is_expired = True
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'is_expired' of 'MoveEffect' object has no setter
+2025-05-31 12:02:12,348 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 4, Turn test2, Character test2
+2025-05-31 12:02:12,348 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:02:12,348 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:02:12,348 - core.effects.move.manager - ERROR - Error processing move effect domain expansion on turn end: property 'is_expired' of 'MoveEffect' object has no setter
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\manager.py", line 384, in process_move_effects_with_linking
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 397, in on_turn_end
+    self.is_expired = True
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'is_expired' of 'MoveEffect' object has no setter
+2025-05-31 12:03:11,728 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 4, Turn test2, Character test2
+2025-05-31 12:03:11,729 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:03:11,729 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:03:11,730 - core.effects.manager - ERROR - Error processing on_turn_end for domain expansion: property 'is_expired' of 'MoveEffect' object has no setter
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\manager.py", line 568, in process_effects
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 397, in on_turn_end
+    self.is_expired = True
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'is_expired' of 'MoveEffect' object has no setter
+2025-05-31 12:03:11,731 - core.effects.move.timing - INFO - [MoveTiming-7584] Turn start: Round 4, Turn test2, Character test2
+2025-05-31 12:03:11,731 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn start
+2025-05-31 12:03:11,731 - core.effects.move.timing - INFO - [MoveTiming-7584] Skipping - already processed this turn end
+2025-05-31 12:03:11,731 - core.effects.move.manager - ERROR - Error processing move effect domain expansion on turn end: property 'is_expired' of 'MoveEffect' object has no setter
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\manager.py", line 384, in process_move_effects_with_linking
+    end_result = effect.on_turn_end(character, round_number, turn_name)
+  File "d:\Games\Campaigns\Ronan Jr\core\effects\move\effect.py", line 397, in on_turn_end
+    self.is_expired = True
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'is_expired' of 'MoveEffect' object has no setter
+2025-05-31 12:03:12,587 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:03:12,588 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:03:12,588 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:21:13,089 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-31 12:21:13,092 - discord.client - INFO - logging in using static token
+2025-05-31 12:21:13,516 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:21:13,516 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:21:13,516 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:21:13,516 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:21:13,517 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-31 12:21:13,518 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-31 12:21:13,948 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-31 12:21:13,950 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:21:13,950 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:21:13,951 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:21:13,951 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:21:13,951 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:21:13,951 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:21:13,953 - core.effects.base - ERROR - Effect data missing 'type' field.
+2025-05-31 12:21:14,011 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-31 12:21:14,011 - core.effects.move.timing - INFO - [MoveTiming-7600] Created with phase=instant, turns=0
+2025-05-31 12:21:14,017 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:21:14,017 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:21:14,017 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:21:14,017 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:21:14,020 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:21:14,020 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:21:14,020 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:21:14,020 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:21:14,020 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-31 12:21:14,280 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c01d8fa166f886584c235b5db66208f1).
+2025-05-31 12:21:51,678 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: expected: should wait till round 2 turn start to lower duration to 0, flagging it for transition cast_time: 1 duration: 2 cooldown: 1 target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning aoe_mode: multi bonus_note: owie point
+2025-05-31 12:21:51,872 - core.effects.move.timing - INFO - [MoveTiming-6096] Created with phase=casting, turns=1
+2025-05-31 12:21:51,873 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=unknown, During=False
+2025-05-31 12:21:54,774 - core.effects.move.timing - INFO - [MoveTiming-6096] Turn start: Round 1, Turn test2, Character test2
+2025-05-31 12:21:54,774 - core.effects.move.timing - INFO - [MoveTiming-6096] Decremented to 0 turns remaining in casting
+2025-05-31 12:21:54,774 - core.effects.move.timing - INFO - [MoveTiming-6096] Marked for transition: casting -> active
+2025-05-31 12:21:54,775 - core.effects.move.timing - INFO - [MoveTiming-6096] Turn start: Round 1, Turn test2, Character test2
+2025-05-31 12:21:54,775 - core.effects.move.timing - INFO - [MoveTiming-6096] Skipping - already processed this turn start
+2025-05-31 12:21:54,999 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:21:54,999 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:21:54,999 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test
+2025-05-31 12:43:38,905 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-05-31 12:43:38,907 - discord.client - INFO - logging in using static token
+2025-05-31 12:43:39,322 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:43:39,323 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:43:39,323 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:43:39,323 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:43:39,324 - core.effects.ac_extension - INFO - AC extension applied successfully: Enhanced process_effects and apply_effect
+2025-05-31 12:43:39,324 - __main__ - ERROR - Failed to apply stat extension: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+Traceback (most recent call last):
+  File "d:\Games\Campaigns\Ronan Jr\main.py", line 198, in setup_hook
+    from core.effects.stat import apply_stat_extension
+ImportError: cannot import name 'apply_stat_extension' from 'core.effects.stat' (d:\Games\Campaigns\Ronan Jr\core\effects\stat.py)
+2025-05-31 12:43:39,763 - core.effects.base - WARNING - Effect class 'ShockEffect' not found in registry during from_dict.
+2025-05-31 12:43:39,764 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:43:39,765 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:43:39,766 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:43:39,766 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:43:39,766 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:43:39,766 - core.effects.base - WARNING - Effect class 'MoveEffect' not found in registry during from_dict.
+2025-05-31 12:43:39,768 - core.effects.base - ERROR - Effect data missing 'type' field.
+2025-05-31 12:43:39,836 - core.effects.move.bridge - INFO - Move effect bridge registered successfully
+2025-05-31 12:43:39,836 - core.effects.move.timing - INFO - [MoveTiming-208] Created with phase=instant, turns=0
+2025-05-31 12:43:39,873 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:43:39,873 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:43:39,873 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:43:39,874 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:43:39,878 - core.effects.base - INFO - Registered effect type: debug -> DebugEffect
+2025-05-31 12:43:39,879 - core.effects.base - INFO - Registered effect type: burn -> BurnEffect
+2025-05-31 12:43:39,879 - core.effects.base - INFO - Registered effect type: stat -> StatEffect
+2025-05-31 12:43:39,879 - core.effects.base - INFO - Registered effect type: ac -> ACEffect
+2025-05-31 12:43:39,880 - commands.effects - INFO - EffectsCommands Cog loaded.
+2025-05-31 12:43:40,279 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 747d046b1c804563a9ee804b3f6d74cd).
+2025-05-31 12:47:23,687 - commands.moves - INFO - COMMAND EXECUTED: /move temp character: test2 name: domain expansion description: expected: should wait till round 2 turn start to lower duration to 0, flagging it for transition cast_time: 1 duration: 2 cooldown: 1 target: test, test3, test4 attack_roll: d20+15 damage: d6 bludgeoning aoe_mode: multi bonus_note: owie point
+2025-05-31 12:47:24,975 - core.effects.move.timing - INFO - [MoveTiming-176] Created with phase=casting, turns=1
+2025-05-31 12:47:24,976 - core.effects.move.manager - INFO - MOVE EFFECT: Character=test2, CurrentTurn=unknown, During=False
+2025-05-31 12:47:35,000 - core.effects.move.timing - INFO - [MoveTiming-176] Turn start: Round 1, Turn test2, Character test2
+2025-05-31 12:47:35,001 - core.effects.move.timing - INFO - [MoveTiming-176] Decremented to 0 turns remaining in casting
+2025-05-31 12:47:35,001 - core.effects.move.timing - INFO - [MoveTiming-176] Marked for transition: casting -> active
+2025-05-31 12:47:35,001 - core.effects.move.timing - INFO - [MoveTiming-176] Turn end: Round 1, Turn test2, Character test2
+2025-05-31 12:47:35,001 - core.effects.move.timing - INFO - [MoveTiming-176] Executed transition: casting -> active (2 turns)
+2025-05-31 12:47:35,002 - core.effects.move.timing - INFO - [MoveTiming-176] Turn start: Round 1, Turn test2, Character test2
+2025-05-31 12:47:35,002 - core.effects.move.timing - INFO - [MoveTiming-176] Skipping - already processed this turn start
+2025-05-31 12:47:35,003 - core.effects.move.timing - INFO - [MoveTiming-176] Turn end: Round 1, Turn test2, Character test2
+2025-05-31 12:47:35,003 - core.effects.move.timing - INFO - [MoveTiming-176] Skipping - already processed this turn end
+2025-05-31 12:47:35,413 - core.effects.manager - INFO - Processing effects for 1 linked children of test
+2025-05-31 12:47:35,413 - core.effects.manager - INFO - Processing linked child effects: test4
+2025-05-31 12:47:35,413 - core.effects.move.manager - INFO - Processing move effects for 1 linked children of test

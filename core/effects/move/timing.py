@@ -94,106 +94,66 @@ class MoveEffectTiming:
         """Get remaining turns in current phase"""
         return max(0, self.turns_remaining)
     
-    def process_turn_start(self, round_number: int, turn_name: str, character_name: str) -> Tuple[bool, bool]:
+    def process_turn_start(self, character, round_number: int, turn_name: str) -> Optional[str]:
         """
-        Process turn START - Decrements and marks for changes.
-        
-        Returns:
-            (should_process_attacks, just_activated)
+        Turn Start: ONLY decrements duration and sets flags.
+        No transitions or effect changes happen here.
         """
-        # Only process for character's own turn
-        if character_name != turn_name:
-            return False, False
-        
-        # Reset turn flags for new turn
-        if (self.last_processed_round != round_number or 
-            self.last_processed_turn != turn_name):
-            self.turn_start_processed = False
-            self.turn_end_processed = False
-            self.last_processed_round = round_number
-            self.last_processed_turn = turn_name
-        
-        # Skip if already processed turn start
-        if self.turn_start_processed:
-            self.debug(f"Turn start already processed for R{round_number}, T{turn_name}")
-            return False, False
-        
-        self.turn_start_processed = True
-        self.just_transitioned = False
-        
-        # Handle INSTANT phase
-        if self.current_phase == MovePhase.INSTANT:
-            self.should_be_removed = True
-            self.debug("Instant effect marked for removal")
-            return False, False
-        
-        # Decrement turns
-        self.debug(f"BEFORE decrement: phase={self.current_phase.value}, turns={self.turns_remaining}")
-        
+        # 🕐 DECREMENT DURATION
         if self.turns_remaining > 0:
             self.turns_remaining -= 1
-            self.debug(f"AFTER decrement: turns={self.turns_remaining}")
-            
-            # Mark for transition if turns hit 0
-            if self.turns_remaining <= 0:
-                self._mark_for_transition()
         
-        # Determine if attacks should be processed
-        should_process_attacks = self._should_process_attacks_at_start()
-        just_activated = self.just_transitioned and self.current_phase == MovePhase.ACTIVE
+        # 🏷️ SET FLAGS for turn end processing
+        if self.turns_remaining <= 0:
+            if self.current_phase == MovePhase.CASTING:
+                # Flag for transition to active
+                self.pending_transition = ('active', self.duration_turns)
+                return f"**{self.effect.name}** casting complete (activating at turn end)"
+                
+            elif self.current_phase == MovePhase.ACTIVE:
+                if self.cooldown_turns > 0:
+                    # Flag for transition to cooldown
+                    self.pending_transition = ('cooldown', self.cooldown_turns)
+                    return f"**{self.effect.name}** duration complete (cooldown at turn end)"
+                else:
+                    # Flag for removal
+                    self.should_be_removed = True
+                    return f"**{self.effect.name}** duration complete (expiring at turn end)"
+                    
+            elif self.current_phase == MovePhase.COOLDOWN:
+                # Flag for removal
+                self.should_be_removed = True
+                return f"**{self.effect.name}** cooldown complete (expiring at turn end)"
         
-        return should_process_attacks, just_activated
+        # Show current status with remaining time
+        return f"**{self.effect.name}** ({self.current_phase.value}) - {self.turns_remaining} turns remaining"
     
-    def process_turn_end(self, round_number: int, turn_name: str, character_name: str) -> Tuple[Optional[str], bool]:
+    def process_turn_end(self, character, round_number: int, turn_name: str) -> Optional[str]:
         """
-        Process turn END - Shows status and executes transitions.
-        
-        Returns:
-            (status_message, should_remove)
+        Turn End: Execute flagged transitions and show final status.
         """
-        # Only process for character's own turn
-        if character_name != turn_name:
-            return None, False
-        
-        # Skip if already processed turn end
-        if self.turn_end_processed:
-            self.debug(f"Turn end already processed for R{round_number}, T{turn_name}")
-            return None, self.should_be_removed
-        
-        self.turn_end_processed = True
-        
-        # Execute pending transition
-        if self.pending_transition:
-            new_phase_name, new_turns = self.pending_transition
-            old_phase = self.current_phase
+        # 🔄 EXECUTE TRANSITIONS flagged during turn start
+        if hasattr(self, 'pending_transition') and self.pending_transition:
+            new_phase_name, new_duration = self.pending_transition
             
             if new_phase_name == 'active':
                 self.current_phase = MovePhase.ACTIVE
-                self.turns_remaining = new_turns
-                message = "activates"
-                self.just_transitioned = True
+                self.turns_remaining = new_duration
+                self.pending_transition = None
+                return f"**{self.effect.name}** activates! ({new_duration} turns)"
+                
             elif new_phase_name == 'cooldown':
                 self.current_phase = MovePhase.COOLDOWN
-                self.turns_remaining = new_turns
-                message = "enters cooldown"
-                self.just_transitioned = True
-            else:
-                message = None
-            
-            self.pending_transition = None
-            self.debug(f"Executed transition: {old_phase.value} -> {self.current_phase.value}")
-            return message, False
+                self.turns_remaining = new_duration
+                self.pending_transition = None
+                return f"**{self.effect.name}** enters cooldown ({new_duration} turns)"
         
-        # Check for removal
-        if self.should_be_removed:
-            return "has worn off", True
+        # 📊 SHOW STATUS if not being removed
+        if not self.should_be_removed:
+            return f"**{self.effect.name}** ({self.current_phase.value}) - {self.turns_remaining} turns remaining"
         
-        # Show current status with phase in parentheses
-        if self.turns_remaining > 0:
-            status = f"({self.current_phase.value}) {self.turns_remaining} turn{'s' if self.turns_remaining != 1 else ''} remaining"
-            return status, False
-        
-        return None, False
+        # Being removed - no status message needed (expiry message handled elsewhere)
+        return None
     
     def _mark_for_transition(self):
         """Mark what transition should happen at turn end"""

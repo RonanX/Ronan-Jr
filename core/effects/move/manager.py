@@ -6,6 +6,7 @@ Handles:
 - Effect processing for linked characters during parent turns
 - Resource cost handling (use parent or child resources)
 - Combat logging integration
+- Separate processing from BaseEffect system
 """
 
 import logging
@@ -26,6 +27,7 @@ except ImportError:
             STATUS_UPDATE = "status_update"
 
 from .timing import MovePhase
+from .effect import MoveEffect
 
 logger = logging.getLogger(__name__)
 
@@ -196,21 +198,19 @@ async def apply_move_effect_with_linking(
 
 async def apply_move_effect(
     character,
-    effect,
+    effect: MoveEffect,
     round_number: int = 1,
     combat_logger=None,
-    is_combat_active: bool = False,
     initiative_tracker=None
 ) -> str:
     """
-    Apply a move effect with enhanced timing handling.
+    Apply a move effect with proper timing handling.
     
     Args:
         character: Character receiving the effect
         effect: MoveEffect to apply
         round_number: Current round number
         combat_logger: Optional combat logger
-        is_combat_active: Whether combat is active
         initiative_tracker: Initiative tracker instance
         
     Returns:
@@ -219,55 +219,47 @@ async def apply_move_effect(
     try:
         # Determine if this is the character's turn
         is_during_own_turn = False
-        current_turn_name = None
+        current_turn_name = "unknown"
         
         if initiative_tracker is not None:
-            # Check if in combat with an active turn
             if hasattr(initiative_tracker, 'current_turn') and initiative_tracker.current_turn:
                 if hasattr(initiative_tracker.current_turn, 'character_name'):
                     current_turn_name = initiative_tracker.current_turn.character_name
                     is_during_own_turn = (current_turn_name == character.name)
+                    print(f"[MoveManager] Initiative detected: current_turn={current_turn_name}, character={character.name}, during_own_turn={is_during_own_turn}")
+                else:
+                    print(f"[MoveManager] Initiative tracker has no character_name")
+            else:
+                print(f"[MoveManager] Initiative tracker has no current_turn")
+        else:
+            print(f"[MoveManager] No initiative tracker provided")
         
         logger.info(f"MOVE EFFECT: Character={character.name}, CurrentTurn={current_turn_name}, During={is_during_own_turn}")
         
-        # Store timing info in the effect
-        if hasattr(effect, 'timing_handler'):
-            # If force_during is set, use that value
-            if hasattr(effect, 'is_during_own_turn') and effect.is_during_own_turn is not None:
-                effect.timing_handler.adjust_timing(effect.is_during_own_turn)
-                logger.info(f"Using forced timing: {effect.is_during_own_turn}")
-            else:
-                # Otherwise use detected timing
-                effect.timing_handler.adjust_timing(is_during_own_turn)
-                logger.info(f"Using detected timing: {is_during_own_turn}")
+        # Store timing context on the effect
+        effect.is_during_own_turn = is_during_own_turn
+        effect.current_turn_name = current_turn_name
+        effect.created_round = round_number  # Track when effect was created
+        
+        print(f"[MoveManager] Effect created in round {round_number}, during_own_turn={is_during_own_turn}")
         
         # Add to character
         character.effects.append(effect)
         
-        # Apply and get message - changed from await to regular call since it's not async anymore
+        # Apply and get message
         message = effect.on_apply(character, round_number)
-        
-        # Process any pending async operations for instant effects
-        if hasattr(effect, 'execute_pending_operations'):
-            pending_messages = await effect.execute_pending_operations()
-            if pending_messages:
-                # Add to message
-                if isinstance(pending_messages, list):
-                    for msg in pending_messages:
-                        message += f"\n{msg}"
-                else:
-                    message += f"\n{pending_messages}"
         
         # Log in combat logger if available
         if combat_logger:
             combat_logger.add_event(
-                CombatEventType.EFFECT_APPLIED,
+                "effect_applied",
                 message=message,
                 character=character.name,
                 details={
                     "effect": effect.name,
                     "during_own_turn": is_during_own_turn,
-                    "timing": effect.timing_handler.__dict__ if hasattr(effect, 'timing_handler') else {}
+                    "phase": effect.timing.current_phase.value,
+                    "timing": effect.timing.to_dict()
                 }
             )
         
@@ -277,35 +269,122 @@ async def apply_move_effect(
         logger.error(f"Error applying move effect: {str(e)}", exc_info=True)
         return f"Error applying {effect.name}: {str(e)}"
 
+async def process_move_effects(
+    character, 
+    round_number: int, 
+    turn_name: str,
+    combat_logger=None
+) -> Tuple[bool, List[str], List[str]]:
+    """
+    Process move effects with start-decrement, end-transition-remove pattern.
+    
+    Turn Start: Decrements durations and flags for transitions/removal
+    Turn End: Executes transitions, shows status, removes flagged effects
+    """
+    start_messages = []
+    end_messages = []
+    was_skipped = False
+    
+    # Find move effects only
+    move_effects = [
+        e for e in character.effects 
+        if hasattr(e, '__class__') and e.__class__.__name__ == 'MoveEffect'
+    ]
+    
+    if not move_effects:
+        return False, [], []
+    
+    logger.info(f"Processing {len(move_effects)} move effects for {character.name}")
+    
+    try:
+        # --- Turn Start Phase: Decrement & Flag Only ---
+        character.move_effect_processing_phase = 'start'
+        
+        for effect in move_effects:
+            try:
+                # 🕐 TIMING ONLY: Decrement durations and set flags
+                start_result = effect.on_turn_start(character, round_number, turn_name)
+                if start_result:
+                    if isinstance(start_result, list):
+                        start_messages.extend(msg for msg in start_result if msg)
+                    else:
+                        start_messages.append(start_result)
+                        
+            except Exception as e:
+                logger.error(f"Error processing move effect {effect.name} (start): {e}", exc_info=True)
+                start_messages.append(f"Error in {effect.name} (start): {e}")
+        
+        # --- Turn End Phase: Execute Transitions & Removals ---
+        character.move_effect_processing_phase = 'end'
+        
+        effects_to_remove = []
+        for effect in move_effects:
+            try:
+                # 🔄 TRANSITIONS & STATUS: Execute flagged transitions and show status
+                end_result = effect.on_turn_end(character, round_number, turn_name)
+                if end_result:
+                    if isinstance(end_result, list):
+                        end_messages.extend(msg for msg in end_result if msg)
+                    else:
+                        end_messages.append(end_result)
+                
+                # 🏷️ CHECK REMOVAL FLAGS: Collect effects flagged for removal
+                if effect.is_expired:
+                    effects_to_remove.append(effect)
+                    
+            except Exception as e:
+                logger.error(f"Error processing move effect {effect.name} (end): {e}", exc_info=True)
+                end_messages.append(f"Error in {effect.name} (end): {e}")
+        
+        # --- Process Removals: Clean up flagged effects ---
+        if effects_to_remove:
+            character.move_effect_processing_phase = 'expire'
+            
+            for effect in effects_to_remove:
+                if effect in character.effects:
+                    try:
+                        # Call on_expire for cleanup
+                        expire_msg = effect.on_expire(character)
+                        if expire_msg:
+                            # Add expiry message to end messages
+                            end_messages.append(expire_msg)
+                        
+                        # Remove from character's effects
+                        character.effects.remove(effect)
+                        effect.debug(f"Removed from character list")
+                        
+                    except Exception as e:
+                        logger.error(f"Error expiring move effect {effect.name}: {e}", exc_info=True)
+                        end_messages.append(f"Error expiring {effect.name}: {e}")
+    
+    except Exception as e:
+        logger.error(f"Error processing move effects: {e}", exc_info=True)
+        end_messages.append(f"Error processing move effects: {e}")
+    finally:
+        # Clean up temporary attributes
+        if hasattr(character, 'move_effect_processing_phase'):
+            delattr(character, 'move_effect_processing_phase')
+    
+    return was_skipped, start_messages, end_messages
+
 async def process_move_effects_with_linking(
     character,
     round_number: int,
     turn_name: str,
-    which: str = "both",
     combat_logger=None,
     game_state=None
-) -> List[str]:
+) -> Tuple[bool, List[str], List[str]]:
     """
     Process move effects with character linking support.
     
     When processing a parent character's turn, also processes move effects for all linked children.
-    Child character move effects are processed and their messages included in the parent's turn.
-    
-    Args:
-        character: Character whose turn it is (parent character)
-        round_number: Current round number
-        turn_name: Current turn character name
-        which: Which processing to perform ("start", "end", or "both")
-        combat_logger: Optional combat logger
-        game_state: Game state object to get linked characters
-        
-    Returns:
-        List[str]: Messages from effect processing
     """
     # Process the main character's move effects first
-    main_messages = await process_move_effects(character, round_number, turn_name, which)
+    was_skipped, start_messages, end_messages = await process_move_effects(
+        character, round_number, turn_name, combat_logger
+    )
     
-    # Check if this character has linked children and we have game_state
+    # Check if this character has linked children
     if game_state and hasattr(character, 'child_names') and character.child_names:
         logger.info(f"Processing move effects for {len(character.child_names)} linked children of {character.name}")
         
@@ -319,105 +398,31 @@ async def process_move_effects_with_linking(
                 
                 logger.info(f"Processing linked child move effects: {child_name}")
                 
-                # Process child's move effects using the child's turn name for their effects
-                # but they'll be displayed during the parent's turn
-                child_messages = await process_move_effects(child_char, round_number, child_name, which)
+                # Process child's move effects using the child's name as turn name
+                child_skipped, child_start_msgs, child_end_msgs = await process_move_effects(
+                    child_char, round_number, child_name, combat_logger
+                )
                 
-                # Add child messages to the main message list with prefixes
-                for msg in child_messages:
+                # Add child messages with prefixes
+                for msg in child_start_msgs:
                     if msg:
-                        # Add prefix to indicate this is from a linked character
                         prefixed_msg = f"🔗 {child_name}: {msg}" if not msg.startswith(f"{child_name}") else f"🔗 {msg}"
-                        main_messages.append(prefixed_msg)
+                        start_messages.append(prefixed_msg)
+                
+                for msg in child_end_msgs:
+                    if msg:
+                        prefixed_msg = f"🔗 {child_name}: {msg}" if not msg.startswith(f"{child_name}") else f"🔗 {msg}"
+                        end_messages.append(prefixed_msg)
+                
+                # Child skip status is informational only
+                if child_skipped:
+                    logger.info(f"Linked child {child_name} would be skipped, but parent turn continues")
                 
             except Exception as e:
                 logger.error(f"Error processing linked child move effects {child_name}: {e}", exc_info=True)
-                main_messages.append(f"🔗 Error processing {child_name} move effects: {str(e)}")
+                end_messages.append(f"🔗 Error processing {child_name} move effects: {str(e)}")
     
-    return main_messages
-
-async def process_move_effects(character, round_number: int, turn_name: str, which: str = "both") -> List[str]:
-    """
-    Process move effects with proper phase handling.
-    
-    Args:
-        character: Character to process effects for
-        round_number: Current round number
-        turn_name: Current turn character name
-        which: Which processing to perform ("start", "end", or "both")
-        
-    Returns:
-        List[str]: Messages from effect processing
-    """
-    messages = []
-    effects_to_remove = []
-    
-    # Find move effects
-    move_effects = [e for e in character.effects if hasattr(e, 'timing_handler')]
-    logger.info(f"Processing {len(move_effects)} move effects for {character.name}, {which} of turn")
-    
-    try:
-        # Process start of turn effects
-        if which in ["start", "both"]:
-            for effect in move_effects:
-                try:
-                    start_result = effect.on_turn_start(character, round_number, turn_name)
-                    if start_result:
-                        if isinstance(start_result, list):
-                            messages.extend(start_result)
-                        else:
-                            messages.append(start_result)
-                            
-                    # Process any pending async operations (like attack rolls)
-                    if hasattr(effect, 'execute_pending_operations'):
-                        async_results = await effect.execute_pending_operations()
-                        if async_results:
-                            if isinstance(async_results, list):
-                                messages.extend(async_results)
-                            else:
-                                messages.append(async_results)
-                            
-                except Exception as e:
-                    error_msg = f"Error in {effect.name} (start): {str(e)}"
-                    logger.error(error_msg, exc_info=True)
-                    messages.append(error_msg)
-        
-        # Process end of turn effects
-        if which in ["end", "both"]:
-            for effect in move_effects:
-                try:
-                    end_result = effect.on_turn_end(character, round_number, turn_name)
-                    if end_result:
-                        if isinstance(end_result, list):
-                            messages.extend(end_result)
-                        else:
-                            messages.append(end_result)
-                    
-                    # Check if effect should be removed
-                    if effect.is_expired:
-                        effects_to_remove.append(effect)
-                        
-                except Exception as e:
-                    error_msg = f"Error in {effect.name} (end): {str(e)}"
-                    logger.error(error_msg, exc_info=True)
-                    messages.append(error_msg)
-        
-        # Remove expired effects
-        for effect in effects_to_remove:
-            if effect in character.effects:
-                try:
-                    expire_msg = effect.on_expire(character)
-                    if expire_msg:
-                        messages.append(expire_msg)
-                    character.effects.remove(effect)
-                except Exception as e:
-                    logger.error(f"Error removing effect {effect.name}: {str(e)}", exc_info=True)
-    
-    except Exception as e:
-        logger.error(f"Error processing move effects: {str(e)}", exc_info=True)
-        messages.append(f"Error processing effects: {str(e)}")
-    
-    return messages
+    return was_skipped, start_messages, end_messages
 
 def create_resource_options_for_child(use_parent_resources: bool = False, **kwargs) -> ResourceOptions:
     """

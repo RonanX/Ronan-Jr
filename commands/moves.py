@@ -512,6 +512,16 @@ class MoveCommands(commands.GroupCog, name="move"):
                     custom_note=bonus_note
                 )
                 
+            # FIXED: Adjust timing parameters with correct character name
+            adjusted_cast_time, adjusted_duration, adjusted_cooldown = self._adjust_timing_parameters(
+                source.name,  # Pass the character name, not the character object
+                cast_time, 
+                duration, 
+                cooldown
+            )
+            
+            print(f"[Move-{name}] Timing adjusted: cast={cast_time}→{adjusted_cast_time}, duration={duration}→{adjusted_duration}, cooldown={cooldown}→{adjusted_cooldown}")
+                
             # Create the move effect
             from core.effects.move import MoveEffect
             
@@ -523,9 +533,9 @@ class MoveCommands(commands.GroupCog, name="move"):
                 description=description,
                 star_cost=star_cost,
                 mp_cost=mp_cost,
-                cast_time=cast_time,
-                duration=duration,
-                cooldown=cooldown,
+                cast_time=adjusted_cast_time,  # Use adjusted timing
+                duration=adjusted_duration,    # Use adjusted timing
+                cooldown=adjusted_cooldown,    # Use adjusted timing
                 attack_roll=attack_roll,
                 damage=damage,
                 crit_range=crit_range,
@@ -535,30 +545,26 @@ class MoveCommands(commands.GroupCog, name="move"):
                 bonus_on_hit=bonus_on_hit
             )
             
-            # Apply the effect
-            from core.effects.manager import apply_effect
+            # Apply the effect using the new move effect manager
+            from core.effects.move.manager import apply_move_effect
             
             current_round = 1
+            initiative_tracker = None
             if hasattr(interaction.client, 'initiative_tracker'):
                 tracker = interaction.client.initiative_tracker
+                initiative_tracker = tracker
                 if hasattr(tracker, 'round_number'):
                     current_round = tracker.round_number
+                    print(f"[MoveCommand] Initiative tracker detected: round={current_round}, state={tracker.state}")
+                    if hasattr(tracker, 'current_turn') and tracker.current_turn:
+                        print(f"[MoveCommand] Current turn: {tracker.current_turn.character_name}")
+                else:
+                    print(f"[MoveCommand] Initiative tracker has no round_number")
+            else:
+                print(f"[MoveCommand] No initiative tracker found")
                     
-            # Make sure we're properly awaiting apply_effect
-            result = await apply_effect(source, move, current_round)
-            
-            # Execute pending operations like attack rolls
-            if hasattr(move, 'execute_pending_operations'):
-                try:
-                    messages = await move.execute_pending_operations()
-                    if messages:
-                        if isinstance(messages, list):
-                            # Send as a single message for cleaner output
-                            await interaction.followup.send('\n'.join(messages))
-                        else:
-                            await interaction.followup.send(messages)
-                except Exception as e:
-                    logger.error(f"Error executing pending operations: {e}")
+            # Make sure we're properly awaiting apply_move_effect
+            result = await apply_move_effect(source, move, current_round, None, initiative_tracker)
             
             # Resource costs were already handled above, so we don't need to apply them again
             # But we need to save the parent character if parent resources were used
